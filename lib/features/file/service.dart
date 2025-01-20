@@ -34,6 +34,8 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/file/browser.dart';
+import 'package:healthpod/utils/extract_and_decrypt_content.dart';
+import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
@@ -170,9 +172,12 @@ class _FileServiceState extends State<FileService> {
     }
   }
 
-  /// Handles file download by reading encrypted file from POD and saving it locally.
+  /// Handles the download and decryption of files from the POD.
   ///
-  /// Uses corrected path handling for nested directories.
+  /// Originally, we expected readPod to automatically handle decryption, but we discovered
+  /// that in some cases files remained encrypted and users would see raw TTL content when
+  /// downloading. This method now explicitly handles decryption using helper functions to
+  /// ensure files are always properly decrypted before saving.
 
   Future<void> handleDownload() async {
     if (downloadFile == null || remoteFileName == null) return;
@@ -183,24 +188,41 @@ class _FileServiceState extends State<FileService> {
         downloadDone = false;
       });
 
-      // Similar to delete operation, we use currentPath directly.
-      // This ensures correct path resolution in both root and nested directories.
+      // Construct the relative path, being careful to handle nested directories correctly.
+      // We use baseDir as the root directory for all file operations.
 
-      final filePath = currentPath == null
-          ? remoteFileName!
-          : '$currentPath/$remoteFileName';
+      final baseDir = 'healthpod/data';
+      final relativePath = currentPath == null
+          ? '$baseDir/$remoteFileName'
+          : '$baseDir/${currentPath!.replaceFirst("$baseDir/", "")}/$remoteFileName';
+
+      debugPrint('Attempting to download from path: $relativePath');
 
       if (!mounted) return;
 
+      // Security key is required for decryption. This ensures it's available
+      // before we attempt to read the file.
+
+      await getKeyFromUserIfRequired(
+        context,
+        const Text('Please enter your security key to download the file'),
+      );
+
+      if (!mounted) return;
+
+      // Read the encrypted file content from the POD.
+      // Note: At this stage, the content is still in TTL format containing
+      // encrypted data, even though readPod may have attempted decryption.
+
       final fileContent = await readPod(
-        filePath,
+        relativePath,
         context,
         const Text('Downloading'),
       );
 
       if (!mounted) return;
 
-      // Check for errors in downloading the file.
+      // Handle common error cases from readPod.
 
       if (fileContent == SolidFunctionCallStatus.fail ||
           fileContent == SolidFunctionCallStatus.notLoggedIn) {
@@ -208,37 +230,43 @@ class _FileServiceState extends State<FileService> {
             'Download failed - please check your connection and permissions');
       }
 
+      // Extract and decrypt the content from the TTL file.
+      // This is necessary because the file content may still be encrypted
+      // even after readPod, appearing as a TTL file with encrypted data.
+
+      final decryptedContent =
+          await extractAndDecryptContent(fileContent.toString());
+
+      // Save the decrypted content to the user's chosen location.
+      // We remove the .enc.ttl extension as it's no longer encrypted.
+
       final saveFileName = downloadFile!.replaceAll(RegExp(r'\.enc\.ttl$'), '');
-      final file = File(saveFileName);
+      await saveDecryptedContent(decryptedContent, saveFileName);
 
-      try {
-        // If file is text, write it as a string.
-        // If file is binary, decode and write the bytes.
+      if (!mounted) return;
+      setState(() {
+        downloadDone = true;
+      });
 
-        if (isTextFile(
-            remoteFileName!.replaceAll(RegExp(r'\.enc\.ttl$'), ''))) {
-          await file.writeAsString(fileContent.toString());
-        } else {
-          try {
-            final bytes = base64Decode(fileContent.toString());
-            await file.writeAsBytes(bytes);
-          } catch (e) {
-            await file.writeAsString(fileContent.toString());
-          }
-        }
+      // Show a success message to give user feedback.
 
-        if (!mounted) return;
-        setState(() {
-          downloadDone = true;
-        });
-      } catch (e) {
-        throw Exception('Failed to save file: ${e.toString()}');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('File downloaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
       }
     } catch (e) {
+      // Provide user-friendly error messages by removing the 'Exception:' prefix.
+
       if (!mounted) return;
       showAlert(context, e.toString().replaceAll('Exception: ', ''));
       debugPrint('Download error: $e');
     } finally {
+      // Always reset the download status, even if an error occurred.
+
       if (mounted) {
         setState(() {
           downloadInProgress = false;

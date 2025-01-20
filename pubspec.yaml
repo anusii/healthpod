@@ -31,6 +31,7 @@ dependencies:
   url_launcher: ^6.3.1
   editable: ^2.0.0
   http: ^1.2.2
+  encrypt: ^5.0.3
 
 
 dev_dependencies:

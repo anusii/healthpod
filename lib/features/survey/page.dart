@@ -161,9 +161,9 @@ class HealthSurveyPage extends StatelessWidget {
       final timestamp =
           DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
 
-      // Use blood_pressure file prefix for better organisation.
+      // Use blood_pressure file prefix and include both .json and .enc.ttl extensions
 
-      final defaultFileName = 'blood_pressure_$timestamp.enc.ttl';
+      final defaultFileName = 'blood_pressure_$timestamp.json.enc.ttl';
 
       // Save file under `/healthpod/bp/`.
 
@@ -178,7 +178,6 @@ class HealthSurveyPage extends StatelessWidget {
         const Text('Saving survey'),
         encrypted: true,
       );
-
       // Check if the file was saved successfully.
 
       if (result != SolidFunctionCallStatus.success) {
