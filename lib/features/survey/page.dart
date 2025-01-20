@@ -31,6 +31,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:healthpod/constants/survey_constants.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
@@ -350,7 +351,7 @@ class HealthSurveyPage extends StatelessWidget {
         backgroundColor: titleBackgroundColor,
       ),
       body: HealthSurveyForm(
-        questions: questions,
+        questions: HealthSurveyConstants.questions,
         onSubmit: (responses) => _handleSubmit(context, responses),
       ),
     );

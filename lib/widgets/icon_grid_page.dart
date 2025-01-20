@@ -27,6 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:healthpod/features/survey/page.dart';
+import 'package:healthpod/utils/fetch_and_navigate_to_visualisation.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -89,7 +90,7 @@ class IconGridPage extends StatelessWidget {
             );
 
             final gestureDetector = GestureDetector(
-              onTap: () {
+              onTap: () async {
                 // TODO 20250113 gjw MOVE INTO constants/features.dart AND USE map() HERE
                 switch (icon) {
                   case Icons.calendar_today:
@@ -133,6 +134,9 @@ class IconGridPage extends StatelessWidget {
                       MaterialPageRoute(
                           builder: (context) => HealthSurveyPage()),
                     );
+                    break;
+                  case Icons.bar_chart:
+                    await fetchAndNavigateToVisualization(context);
                     break;
                   default:
                     showComingSoon(context); // For other features.
@@ -211,7 +215,7 @@ class IconGridPage extends StatelessWidget {
                   - Analyse patterns in your health data
 
                   - Generate comprehensive health reports
-                  
+
                   - Track progress towards health goals
                   
                   ''',
