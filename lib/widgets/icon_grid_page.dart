@@ -200,6 +200,23 @@ class IconGridPage extends StatelessWidget {
                   ''',
                   child: gestureDetector,
                 ),
+              Icons.bar_chart => MarkdownTooltip(
+                  message: '''
+
+                  **Data Visualisation:** Tap here to access interactive data
+                  visualisation tools. You can:
+
+                  - View health trends over time
+
+                  - Analyse patterns in your health data
+
+                  - Generate comprehensive health reports
+                  
+                  - Track progress towards health goals
+                  
+                  ''',
+                  child: gestureDetector,
+                ),
               _ => gestureDetector,
             };
           }).toList(),
