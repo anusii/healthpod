@@ -75,7 +75,8 @@ class BPRecord {
   factory BPRecord.fromJson(Map<String, dynamic> json) {
     return BPRecord(
       timestamp: DateTime.parse(json['timestamp']),
-      systolic: json['responses'][HealthSurveyConstants.fieldSystolic],
+      systolic: json['responses'][HealthSurveyConstants
+          .fieldSystolic], // Use BP survey field variable instead of full question.
       diastolic: json['responses'][HealthSurveyConstants.fieldDiastolic],
       heartRate: json['responses'][HealthSurveyConstants.fieldHeartRate],
       feeling: json['responses'][HealthSurveyConstants.fieldFeeling] ?? '',
@@ -91,7 +92,8 @@ class BPRecord {
     return {
       'timestamp': timestamp.toIso8601String(),
       'responses': {
-        HealthSurveyConstants.fieldSystolic: systolic,
+        HealthSurveyConstants.fieldSystolic:
+            systolic, // Use BP survey field variable instead of full question.
         HealthSurveyConstants.fieldDiastolic: diastolic,
         HealthSurveyConstants.fieldHeartRate: heartRate,
         HealthSurveyConstants.fieldFeeling: feeling,

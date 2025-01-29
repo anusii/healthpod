@@ -30,6 +30,7 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
+import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/utils/format_timestamp_for_display.dart';
@@ -37,7 +38,6 @@ import 'package:healthpod/utils/is_valid_timestamp.dart';
 import 'package:healthpod/utils/normalise_timestamp.dart';
 import 'package:healthpod/utils/round_timestamp_to_second.dart';
 import 'package:healthpod/utils/show_alert.dart';
-import 'package:solidpod/solidpod.dart';
 
 /// Process BP CSV file import, creating individual JSON files for each row.
 ///
