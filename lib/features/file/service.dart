@@ -29,6 +29,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:healthpod/utils/process_bp_json_to_csv.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
@@ -792,18 +793,14 @@ class _FileServiceState extends State<FileService> {
                   onPressed: (uploadInProgress ||
                           downloadInProgress ||
                           deleteInProgress)
-                      ? null // Disable button during any ongoing operation.
+                      ? null
                       : () async {
-                          // Open file picker and trigger upload if file is selected.
-
                           final result = await FilePicker.platform.pickFiles();
                           if (result != null) {
                             setState(() {
                               uploadFile = result.files.single.path!;
                               uploadDone = false;
                             });
-                            // Immediately trigger upload after file selection.
-
                             await handleUpload();
                           }
                         },
@@ -822,16 +819,16 @@ class _FileServiceState extends State<FileService> {
                 ),
               ),
 
-              // Show CSV import button only when in blood pressure directory.
+              // Show CSV import and export buttons only when in blood pressure directory.
 
               if (isInBpDirectory) ...[
                 const SizedBox(width: 8),
+                // Import CSV Button.
+
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       try {
-                        // Open file picker configured for CSV files only.
-
                         final result = await FilePicker.platform.pickFiles(
                           type: FileType.custom,
                           allowedExtensions: ['csv'],
@@ -840,8 +837,6 @@ class _FileServiceState extends State<FileService> {
                         if (result != null && result.files.isNotEmpty) {
                           final file = result.files.first;
                           if (file.path != null) {
-                            // Process and import CSV data.
-
                             handleCsvImport(
                                 file.path!, currentPath ?? 'healthpod/data');
                           }
@@ -858,6 +853,61 @@ class _FileServiceState extends State<FileService> {
                           Theme.of(context).colorScheme.secondaryContainer,
                       foregroundColor:
                           Theme.of(context).colorScheme.onSecondaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Export CSV Button.
+
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      try {
+                        final String? outputFile =
+                            await FilePicker.platform.saveFile(
+                          dialogTitle: 'Save BP data as CSV:',
+                          fileName: 'bp_data.csv',
+                        );
+
+                        if (outputFile != null) {
+                          if (!mounted) return;
+
+                          final success = await processBpJsonToCsv(
+                            outputFile,
+                            currentPath ?? 'healthpod/data',
+                            context,
+                          );
+
+                          if (!mounted) return;
+
+                          if (success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('BP data exported successfully'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else {
+                            showAlert(context, 'Failed to export BP data');
+                          }
+                        }
+                      } catch (e) {
+                        if (!mounted) return;
+                        showAlert(context, 'Export error: ${e.toString()}');
+                        debugPrint('Export error: $e');
+                      }
+                    },
+                    icon: const Icon(Icons.download),
+                    label: const Text('Export CSV'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.tertiaryContainer,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onTertiaryContainer,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
