@@ -70,15 +70,19 @@ class _BPVisualisationState extends State<BPVisualisation> {
       final data = widget.surveyData[i]['responses'];
       double value = 0;
 
+      // Ensure we use the field or variable name for BP survey instead of full questions.
+
       switch (metric) {
         case 'systolic':
-          value = _parseNumericValue(data[HealthSurveyConstants.systolicBP]);
+          value = _parseNumericValue(data[HealthSurveyConstants.fieldSystolic]);
           break;
         case 'diastolic':
-          value = _parseNumericValue(data[HealthSurveyConstants.diastolicBP]);
+          value =
+              _parseNumericValue(data[HealthSurveyConstants.fieldDiastolic]);
           break;
         case 'heartRate':
-          value = _parseNumericValue(data[HealthSurveyConstants.heartRate]);
+          value =
+              _parseNumericValue(data[HealthSurveyConstants.fieldHeartRate]);
           break;
       }
 
