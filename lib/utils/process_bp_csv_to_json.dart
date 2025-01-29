@@ -116,6 +116,7 @@ Future<bool> processBpCsvToJson(
         if (row.length != headers.length) continue;
 
         // Initialise response structure.
+        // Use field constants instead of full questions for resulting JSON key.
 
         final Map<String, dynamic> responses = {
           HealthSurveyConstants.fieldSystolic: 0,
