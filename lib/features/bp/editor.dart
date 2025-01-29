@@ -256,6 +256,7 @@ class _BPEditorState extends State<BPEditor> {
     return DataRow(
       cells: [
         // Timestamp, systolic, diastolic, heart rate, feeling, and notes.
+
         DataCell(Text(DateFormat('yyyy-MM-dd HH:mm:ss')
             .format(record.timestamp))), // Format timestamp without 'T'.
         DataCell(Text(record.systolic.toString())),
