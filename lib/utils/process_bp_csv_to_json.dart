@@ -45,78 +45,105 @@ import 'package:healthpod/utils/show_alert.dart';
 /// Files are saved in the specified directory with timestamps in filenames.
 
 Future<bool> processBpCsvToJson(
-  String filePath,
-  String dirPath,
-  BuildContext context,
+  String filePath, // Path to the input CSV file.
+  String dirPath, // Directory path where JSON files will be saved.
+  BuildContext context, // Flutter build context for UI interactions.
 ) async {
   try {
-    // Read and parse CSV file.
+    // Start processing and log initial parameters.
 
+    debugPrint('Starting CSV processing');
     final file = File(filePath);
-    final input = file.openRead();
-    final fields = await input
-        .transform(utf8.decoder)
-        .transform(const CsvToListConverter())
-        .toList();
+    final String content = await file.readAsString();
+
+    /// Configure CSV parser with specific settings for handling blood pressure data.
+    ///
+    /// - shouldParseNumbers: false -> Keep all values as strings initially for proper validation.
+    /// - allowInvalid: true -> Don't fail on malformed rows, we'll validate manually.
+    /// - textDelimiter: '"' -> Handle quoted fields (e.g., for notes with commas).
+
+    final fields = const CsvToListConverter(
+      shouldParseNumbers: false,
+      eol: '\n',
+      fieldDelimiter: ',',
+      allowInvalid: true,
+      textDelimiter: '"',
+      textEndDelimiter: '"',
+    ).convert(content);
+
+    // Basic validation - ensure file isn't empty.
 
     if (fields.isEmpty) {
       throw Exception('CSV file is empty');
     }
 
-    // Extract and validate headers.
+    // Extract headers and normalise them (lowercase, trimmed) for consistent comparison.
 
-    final headers = List<String>.from(fields[0]);
+    final headers = List<String>.from(
+        fields[0].map((h) => h.toString().trim().toLowerCase()));
+
+    // Define required columns - these must be present in the CSV.
+    // Optional columns (feeling, notes) don't need to be validated here.
+
     final requiredColumns = [
-      HealthSurveyConstants.fieldTimestamp,
-      HealthSurveyConstants.fieldSystolic,
-      HealthSurveyConstants.fieldDiastolic,
-      HealthSurveyConstants.fieldHeartRate,
+      HealthSurveyConstants.fieldTimestamp.toLowerCase(),
+      HealthSurveyConstants.fieldSystolic.toLowerCase(),
+      HealthSurveyConstants.fieldDiastolic.toLowerCase(),
+      HealthSurveyConstants.fieldHeartRate.toLowerCase(),
     ];
-    final missingColumns = requiredColumns
-        .where((col) => !headers
-            .map((h) => h.trim().toLowerCase())
-            .contains(col.toLowerCase()))
-        .toList();
 
-    // Show error if required columns missing.
+    // Validate that all required columns are present in the CSV.
 
+    final missingColumns =
+        requiredColumns.where((col) => !headers.contains(col)).toList();
     if (missingColumns.isNotEmpty) {
       if (!context.mounted) return false;
-      const requiredColumnMessage = '''
+      // Show detailed error message explaining required and optional columns.
 
-        Your CSV file must contain these required columns:
+      showAlert(context, '''
 
+        Required columns missing: ${missingColumns.join(", ")}
+
+        The following columns are required:
         - ${HealthSurveyConstants.fieldTimestamp}
         - ${HealthSurveyConstants.fieldSystolic}
         - ${HealthSurveyConstants.fieldDiastolic}
         - ${HealthSurveyConstants.fieldHeartRate}
 
-        Optional columns:
-
+        These columns are optional:
         - ${HealthSurveyConstants.fieldFeeling}
         - ${HealthSurveyConstants.fieldNotes}
 
-        ''';
-
-      showAlert(context, requiredColumnMessage);
+        ''');
       return false;
     }
 
-    // Track duplicate timestamps after rounding.
+    // Initialise tracking variables for processing state.
 
-    final Set<String> seenTimestamps = {};
-    final List<String> duplicateTimestamps = [];
-    bool allSuccess = true;
+    final Set<String> seenTimestamps = {}; // Track unique timestamps
+    final List<String> duplicateTimestamps =
+        []; // Track duplicate timestamps for warning
+    bool allSuccess = true; // Track overall success
+    int successfulSaves = 0; // Count successful saves
 
-    // Process each row after headers.
+    // Process each data row (skip header row by starting at index 1).
 
     for (var i = 1; i < fields.length; i++) {
       try {
-        final row = fields[i];
-        if (row.length != headers.length) continue;
+        // Convert row data to strings, replacing null values with empty strings.
 
-        // Initialise response structure.
-        // Use field constants instead of full questions for resulting JSON key.
+        final row =
+            List<String>.from(fields[i].map((f) => f?.toString() ?? ''));
+        if (row.isEmpty) continue; // Skip empty rows.
+
+        // Ensure row has enough columns by padding with empty strings if needed.
+
+        while (row.length < headers.length) {
+          row.add('');
+        }
+
+        // Initialise response map with default values
+        // Required fields default to 0, optional fields to empty string.
 
         final Map<String, dynamic> responses = {
           HealthSurveyConstants.fieldSystolic: 0,
@@ -127,65 +154,128 @@ Future<bool> processBpCsvToJson(
         };
 
         String timestamp = "";
+        bool hasRequiredFields =
+            true; // Track if all required fields are valid.
 
-        // Map CSV values to response fields.
+        // Process each field in the row.
 
         for (var j = 0; j < headers.length; j++) {
-          final header = headers[j].trim().toLowerCase();
-          final value = row[j];
+          final header = headers[j];
+          final value = row[j].toString().trim();
+
+          // Use pattern matching to handle different field types.
 
           switch (header) {
-            case HealthSurveyConstants.fieldTimestamp:
-              timestamp = roundTimestampToSecond(value.toString());
+            // Required field: Timestamp.
 
-              // Parse timestamp and normalise it to include 'T'.
-
-              timestamp = normaliseTimestamp(value.toString());
-
-              // Check if timestamp is valid (i.e. in ISO format with or without 'T').
-
-              if (!isValidTimestamp(timestamp)) {
-                throw FormatException('Invalid timestamp format: $value');
+            case String h
+                when h == HealthSurveyConstants.fieldTimestamp.toLowerCase():
+              if (value.isEmpty) {
+                hasRequiredFields = false;
+                debugPrint('Row $i: Missing required timestamp');
+                break;
               }
+              // Normalise and validate timestamp format.
 
-              // Format duplicate timestamp for later display.
+              timestamp = normaliseTimestamp(roundTimestampToSecond(value));
+              if (!isValidTimestamp(timestamp)) {
+                throw FormatException(
+                    'Row $i: Invalid timestamp format: $value');
+              }
+              // Track duplicate timestamps.
 
               if (!seenTimestamps.add(timestamp)) {
                 duplicateTimestamps.add(formatTimestampForDisplay(timestamp));
               }
-            case HealthSurveyConstants.fieldSystolic:
-              responses[HealthSurveyConstants.fieldSystolic] =
-                  int.parse(value.toString());
-            case HealthSurveyConstants.fieldDiastolic:
-              responses[HealthSurveyConstants.fieldDiastolic] =
-                  int.parse(value.toString());
-            case HealthSurveyConstants.fieldHeartRate:
-              responses[HealthSurveyConstants.fieldHeartRate] =
-                  int.parse(value.toString());
-            case HealthSurveyConstants.fieldFeeling:
-              responses[HealthSurveyConstants.fieldFeeling] = value.toString();
-            case HealthSurveyConstants.fieldNotes:
-              responses[HealthSurveyConstants.fieldNotes] = value.toString();
+
+            // Required field: Systolic blood pressure.
+
+            case String h
+                when h == HealthSurveyConstants.fieldSystolic.toLowerCase():
+              final systolic = int.tryParse(value);
+              if (systolic == null) {
+                hasRequiredFields = false;
+                debugPrint('Row $i: Invalid or missing systolic value: $value');
+              } else {
+                responses[HealthSurveyConstants.fieldSystolic] = systolic;
+              }
+
+            // Required field: Diastolic blood pressure.
+
+            case String h
+                when h == HealthSurveyConstants.fieldDiastolic.toLowerCase():
+              final diastolic = int.tryParse(value);
+              if (diastolic == null) {
+                hasRequiredFields = false;
+                debugPrint(
+                    'Row $i: Invalid or missing diastolic value: $value');
+              } else {
+                responses[HealthSurveyConstants.fieldDiastolic] = diastolic;
+              }
+
+            // Required field: Heart rate.
+
+            case String h
+                when h == HealthSurveyConstants.fieldHeartRate.toLowerCase():
+              final heartRate = int.tryParse(value);
+              if (heartRate == null) {
+                hasRequiredFields = false;
+                debugPrint(
+                    'Row $i: Invalid or missing heart rate value: $value');
+              } else {
+                responses[HealthSurveyConstants.fieldHeartRate] = heartRate;
+              }
+
+            // Optional field: Feeling - can be any value including empty.
+
+            case String h
+                when h == HealthSurveyConstants.fieldFeeling.toLowerCase():
+              responses[HealthSurveyConstants.fieldFeeling] = value;
+
+            // Optional field: Notes - can be any value including empty.
+
+            case String h
+                when h == HealthSurveyConstants.fieldNotes.toLowerCase():
+              responses[HealthSurveyConstants.fieldNotes] = value;
           }
         }
 
-        // Prepare JSON data.
+        // Skip this row if any required field is missing or invalid.
+
+        if (!hasRequiredFields) {
+          debugPrint(
+              'Skipping row $i due to missing or invalid required fields');
+          continue;
+        }
+
+        // Prepare JSON data structure.
 
         final jsonData = {
           HealthSurveyConstants.fieldTimestamp: timestamp,
           'responses': responses,
         };
 
-        // Create filename-safe timestamp and construct save path.
+        // Create safe filename by replacing invalid characters.
 
-        timestamp = timestamp.replaceAll(RegExp(r'[:.]+'), '-');
-        final outputFileName = 'blood_pressure_$timestamp.json.enc.ttl';
-        final savePath =
-            '${dirPath.replaceFirst('healthpod/data/', '')}/$outputFileName';
+        final safeTimestamp = timestamp.replaceAll(RegExp(r'[:.]+'), '-');
+        final outputFileName = 'blood_pressure_$safeTimestamp.json.enc.ttl';
+
+        // Construct proper save path based on directory structure.
+
+        String savePath;
+        if (dirPath.endsWith('/bp')) {
+          savePath = 'bp/$outputFileName';
+        } else {
+          final cleanDirPath =
+              dirPath.replaceFirst(RegExp(r'^healthpod/data/?'), '');
+          savePath = cleanDirPath.isEmpty
+              ? outputFileName
+              : '$cleanDirPath/$outputFileName';
+        }
 
         if (!context.mounted) return false;
 
-        // Save encrypted JSON file.
+        // Save encrypted JSON file to POD.
 
         final result = await writePod(
           savePath,
@@ -195,8 +285,13 @@ Future<bool> processBpCsvToJson(
           encrypted: true,
         );
 
-        if (result != SolidFunctionCallStatus.success) {
+        // Track save success/failure.
+
+        if (result == SolidFunctionCallStatus.success) {
+          successfulSaves++;
+        } else {
           allSuccess = false;
+          debugPrint('Failed to save file for row $i');
         }
       } catch (rowError) {
         debugPrint('Error processing row $i: $rowError');
@@ -204,17 +299,29 @@ Future<bool> processBpCsvToJson(
       }
     }
 
-    // Warn about duplicate timestamps if any found.
+    debugPrint(
+        'Processing complete. Successfully saved $successfulSaves files');
+
+    // Show warning if duplicate timestamps were found.
 
     if (duplicateTimestamps.isNotEmpty) {
       if (!context.mounted) return allSuccess;
-      showAlert(context,
-          'Warning: Multiple entries found for these timestamps:\n${duplicateTimestamps.join("\n")}\n\nOnly the last entry for each timestamp will be saved.');
+      showAlert(
+        context,
+        'Warning: Multiple entries found for these timestamps:\n${duplicateTimestamps.join("\n")}\n\nOnly the last entry for each timestamp will be saved.',
+      );
     }
 
-    return allSuccess;
+    // Return true only if at least one file was successfully saved.
+
+    return allSuccess && successfulSaves > 0;
   } catch (e) {
+    // Handle any unexpected errors.
+
     debugPrint('Import error: $e');
+    if (context.mounted) {
+      showAlert(context, 'Error importing CSV: ${e.toString()}');
+    }
     return false;
   }
 }
