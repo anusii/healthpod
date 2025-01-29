@@ -24,3 +24,5 @@
 /// Authors: <AUTHORS>
 
 library;
+
+// ignore_for_file: unintended_html_in_doc_comment
