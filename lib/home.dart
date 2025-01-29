@@ -31,11 +31,11 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/show_about.dart';
-import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
 import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
+import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
 import 'package:healthpod/widgets/footer.dart';
 
@@ -55,7 +55,6 @@ class HealthPodHome extends StatefulWidget {
 class HealthPodHomeState extends State<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
-  bool _isInitialising = false;
 
   @override
   void initState() {
@@ -64,30 +63,31 @@ class HealthPodHomeState extends State<HealthPodHome> {
     _initialiseData(context);
   }
 
-  /// Initialises all required data including footer data and feature folders
+  /// Initialises all required data including footer data and feature folders.
+
   Future<void> _initialiseData(BuildContext context) async {
-    // First initialize footer data
+    // First initialise footer data.
+
     await _initialiseFooterData(context);
 
-    // Then initialize feature folders if user is logged in
-    if (_webId != null) {
-      setState(() {
-        _isInitialising = true;
-      });
+    // Then initialise feature folders if user is logged in.
 
-      await initialiseFeatureFolders(
-        context: context,
-        onProgress: (inProgress) {
-          if (mounted) {
-            setState(() {
-              _isInitialising = inProgress;
-            });
-          }
-        },
-        onComplete: () {
-          debugPrint('Feature folder initialization complete');
-        },
-      );
+    if (_webId != null) {
+      setState(() {});
+
+      if (context.mounted) {
+        await initialiseFeatureFolders(
+          context: context,
+          onProgress: (inProgress) {
+            if (mounted) {
+              setState(() {});
+            }
+          },
+          onComplete: () {
+            debugPrint('Feature folder initialization complete');
+          },
+        );
+      }
     }
   }
 
