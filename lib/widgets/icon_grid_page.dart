@@ -1,6 +1,6 @@
 /// Icon grid page.
 //
-// Time-stamp: <Monday 2025-01-13 15:13:43 +1100 Graham Williams>
+// Time-stamp: <Monday 2025-01-27 16:22:20 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -26,7 +26,8 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/features/survey/page.dart';
+import 'package:healthpod/features/bp/editor.dart';
+import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/utils/fetch_and_navigate_to_visualisation.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
@@ -44,7 +45,8 @@ class IconGridPage extends StatelessWidget {
     Icons.folder,
     Icons.vaccines,
     Icons.quiz,
-    Icons.bar_chart,
+    Icons.show_chart,
+    Icons.table_chart,
     Icons.approval,
     Icons.lightbulb,
     Icons.local_hospital,
@@ -76,7 +78,8 @@ class IconGridPage extends StatelessWidget {
                   Icons.folder,
                   Icons.vaccines,
                   Icons.quiz,
-                  Icons.bar_chart,
+                  Icons.show_chart,
+                  Icons.table_chart,
                 }.contains(icon)
                     ? Colors.blue
                     : Colors.grey,
@@ -131,12 +134,19 @@ class IconGridPage extends StatelessWidget {
                   case Icons.quiz:
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => HealthSurveyPage()),
+                      MaterialPageRoute(builder: (context) => BPSurvey()),
                     );
                     break;
-                  case Icons.bar_chart:
+                  case Icons.show_chart:
                     await fetchAndNavigateToVisualisation(context);
+                    break;
+                  case Icons.table_chart:
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const BPEditor(),
+                      ),
+                    );
                     break;
                   default:
                     showComingSoon(context); // For other features.
@@ -196,15 +206,15 @@ class IconGridPage extends StatelessWidget {
               Icons.quiz => MarkdownTooltip(
                   message: '''
 
-                  **Health Survey:** Tap here to start the Health Survey. 
-                  This allows you to answer important health-related questions, 
-                  track your responses, and share them securely with your healthcare 
+                  **Health Survey:** Tap here to start the Health Survey.
+                  This allows you to answer important health-related questions,
+                  track your responses, and share them securely with your healthcare
                   provider if needed.
 
                   ''',
                   child: gestureDetector,
                 ),
-              Icons.bar_chart => MarkdownTooltip(
+              Icons.show_chart => MarkdownTooltip(
                   message: '''
 
                   **Data Visualisation:** Tap here to access interactive data
@@ -217,7 +227,23 @@ class IconGridPage extends StatelessWidget {
                   - Generate comprehensive health reports
 
                   - Track progress towards health goals
-                  
+
+                  ''',
+                  child: gestureDetector,
+                ),
+              Icons.table_chart => MarkdownTooltip(
+                  message: '''
+
+                  **Blood Pressure Data Editor:** Edit your blood pressure readings:
+
+                  - View all readings
+
+                  - Add new readings
+
+                  - Edit existing data
+
+                  - Delete records
+
                   ''',
                   child: gestureDetector,
                 ),
