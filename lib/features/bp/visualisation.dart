@@ -1,4 +1,4 @@
-/// Data visualisation widget.
+/// BP visualisation widget.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -43,22 +43,21 @@ import 'package:healthpod/features/visualise/stat_item.dart';
 ///
 /// Displays a line chart and summary statistics for key health metrics.
 
-class HealthDataVisualisation extends StatefulWidget {
+class BPVisualisation extends StatefulWidget {
   final List<Map<String, dynamic>> surveyData;
 
   // Accepts a list of survey data that will be used for charting and analysis.
 
-  const HealthDataVisualisation({
+  const BPVisualisation({
     super.key,
     required this.surveyData,
   });
 
   @override
-  State<HealthDataVisualisation> createState() =>
-      _HealthDataVisualisationState();
+  State<BPVisualisation> createState() => _BPVisualisationState();
 }
 
-class _HealthDataVisualisationState extends State<HealthDataVisualisation> {
+class _BPVisualisationState extends State<BPVisualisation> {
   String _selectedMetric = 'systolic'; // Default selected metric
 
   /// Processes survey data and converts it into chart-friendly FlSpot objects.

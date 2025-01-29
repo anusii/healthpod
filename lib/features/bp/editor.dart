@@ -1,4 +1,4 @@
-/// Data editor widget.
+/// Blood pressure editor widget.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -32,7 +32,7 @@ import 'package:intl/intl.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/features/data/bp/record.dart';
+import 'package:healthpod/features/bp/record.dart';
 
 /// Data Editor Page.
 ///

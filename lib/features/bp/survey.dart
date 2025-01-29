@@ -1,4 +1,4 @@
-/// Health survey page.
+/// BP survey page.
 //
 // Time-stamp: <Monday 2025-01-20 16:54:30 +1100 Graham Williams>
 //
@@ -41,9 +41,9 @@ import 'package:healthpod/utils/upload_json_to_pod.dart';
 import 'package:healthpod/features/survey/form.dart';
 import 'package:healthpod/features/survey/question.dart';
 
-/// A page for collecting health survey data.
+/// A page for collecting blood pressure survey data.
 
-class HealthSurveyPage extends StatelessWidget {
+class BPSurvey extends StatelessWidget {
   final List<HealthSurveyQuestion> questions = [
     HealthSurveyQuestion(
       question: "What's your systolic blood pressure?",
@@ -78,7 +78,7 @@ class HealthSurveyPage extends StatelessWidget {
     ),
   ];
 
-  HealthSurveyPage({super.key});
+  BPSurvey({super.key});
 
   /// Saves the survey responses to a local file.
 

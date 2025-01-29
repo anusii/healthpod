@@ -26,8 +26,8 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/features/data/bp/editor.dart';
-import 'package:healthpod/features/survey/page.dart';
+import 'package:healthpod/features/bp/editor.dart';
+import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/utils/fetch_and_navigate_to_visualisation.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
@@ -134,8 +134,7 @@ class IconGridPage extends StatelessWidget {
                   case Icons.quiz:
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => HealthSurveyPage()),
+                      MaterialPageRoute(builder: (context) => BPSurvey()),
                     );
                     break;
                   case Icons.show_chart:
