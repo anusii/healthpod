@@ -1,7 +1,7 @@
 /// <DESCRIPTION>
-//
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
-//
+///
+// Time-stamp: <Thursday 2025-01-30 08:36:00 +1100 Graham Williams>
+///
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
@@ -24,5 +24,3 @@
 /// Authors: <AUTHORS>
 
 library;
-
-// ignore_for_file: unintended_html_in_doc_comment
