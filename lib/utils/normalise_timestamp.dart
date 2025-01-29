@@ -25,23 +25,38 @@
 
 library;
 
-/// Normalises a timestamp string to ensure it contains the 'T' separator.
+/// Normalises a timestamp string to ensure it contains the 'T' separator
+/// and optionally the 'Z' UTC timezone indicator.
 ///
-/// Accepts timestamps in either format:
+/// Accepts timestamps in various formats:
 /// - With 'T': "2025-01-21T23:05:42"
 /// - Without 'T': "2025-01-21 23:05:42"
+/// - With 'Z': "2025-01-21T23:05:42Z"
 ///
-/// Always returns timestamp with 'T' separator for internal storage.
+/// Parameters:
+/// - timestamp: The timestamp string to normalize
+/// - toIso: If true, ensures both 'T' separator and 'Z' suffix for full ISO format
+///
+/// Returns normalised timestamp string.
 
-String normaliseTimestamp(String timestamp) {
-  // If timestamp already has 'T', return as is.
+String normaliseTimestamp(String timestamp, {bool toIso = false}) {
+  String result = timestamp;
 
-  if (timestamp.contains('T')) {
-    return timestamp;
+  // Add T separator if missing.
+
+  if (!result.contains('T')) {
+    result = result.replaceFirst(RegExp(r' (?=\d{2}:\d{2}:\d{2})'), 'T');
   }
 
-  // Replace space with 'T' between date and time.
-  // This regex matches a space between date and time components.
+  // Add Z suffix if requested and missing.
 
-  return timestamp.replaceFirst(RegExp(r' (?=\d{2}:\d{2}:\d{2})'), 'T');
+  if (toIso && !result.endsWith('Z')) {
+    final dateTime = DateTime.parse(result).toUtc();
+
+    // toIso8601String() already includes the Z, so we don't need to add it again.
+
+    result = dateTime.toIso8601String();
+  }
+
+  return result;
 }
