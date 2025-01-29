@@ -24,7 +24,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/utils/create_feature_folder.dart';
 
 import 'package:solidpod/solidpod.dart';
 
@@ -266,7 +265,6 @@ class FileBrowserState extends State<FileBrowser> {
                       padding: const EdgeInsets.all(8),
                     ),
                   ),
-                  smallGapH,
                 ],
               ),
             ),
