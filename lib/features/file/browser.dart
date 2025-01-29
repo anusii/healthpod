@@ -194,89 +194,6 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
-  /// Creates a Blood Pressure (BP) folder in the user's POD.
-  ///
-  /// Handles creation of a dedicated folder for storing blood pressure related data.
-  /// It manages UI state during creation process and provides feedback to user
-  /// through SnackBar notifications.
-
-  Future<void> createBpFolder() async {
-    try {
-      // Set loading state to show progress indicator.
-
-      setState(() {
-        isLoading = true;
-      });
-
-      // Attempt to create the BP folder using the feature folder creation utility.
-
-      final result = await createFeatureFolder(
-        featureName: 'bp',
-        context: context,
-        // Update loading state based on progress.
-
-        onProgressChange: (inProgress) {
-          setState(() {
-            isLoading = inProgress;
-          });
-        },
-        // Handle successful folder creation.
-
-        onSuccess: () {
-          if (mounted) {
-            // Show success message to user.
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('BP folder created successfully'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            // Refresh the file listing to show the new folder.
-
-            refreshFiles();
-          }
-        },
-      );
-
-      // Check if widget is still mounted before proceeding.
-
-      if (!mounted) return;
-
-      // Handle unsuccessful folder creation.
-
-      if (result != SolidFunctionCallStatus.success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Failed to create BP folder. Please check permissions and try again.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (e) {
-      // Log and display any errors that occur during folder creation.
-
-      debugPrint('Error in createBpFolder: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error creating BP folder: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      // Ensure loading state is reset regardless of success/failure.
-
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    }
-  }
-
   // Build the UI that will be displayed to the user.
 
   @override
@@ -350,19 +267,6 @@ class FileBrowserState extends State<FileBrowser> {
                     ),
                   ),
                   smallGapH,
-                  IconButton(
-                    icon: Icon(
-                      Icons.create_new_folder,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                    onPressed: createBpFolder,
-                    tooltip: 'Create BP Folder',
-                    style: IconButton.styleFrom(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primary.withAlpha(10),
-                      padding: const EdgeInsets.all(8),
-                    ),
-                  ),
                 ],
               ),
             ),
