@@ -34,7 +34,7 @@ import 'package:csv/csv.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/survey.dart';
-import 'package:healthpod/utils/format_timestamp_for_display.dart';
+import 'package:healthpod/utils/normalise_timestamp.dart';
 
 /// Process BP JSON files to CSV export.
 ///
@@ -87,10 +87,12 @@ Future<bool> processBpJsonToCsv(
 
         final jsonData = json.decode(content);
 
-        // Remove 'T' from timestamp to make it easier for user to interpret.
+        // Ensure we use ISO format for timestamp with T and Z.
 
-        final timestamp = formatTimestampForDisplay(
-            jsonData[HealthSurveyConstants.fieldTimestamp]);
+        var timestamp = normaliseTimestamp(
+            jsonData[HealthSurveyConstants.fieldTimestamp],
+            toIso: true);
+
         final responses = jsonData['responses'];
 
         // Add to readings list.
