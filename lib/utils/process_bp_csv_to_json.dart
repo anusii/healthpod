@@ -118,11 +118,11 @@ Future<bool> processBpCsvToJson(
         // Initialise response structure.
 
         final Map<String, dynamic> responses = {
-          HealthSurveyConstants.systolicBP: 0,
-          HealthSurveyConstants.diastolicBP: 0,
-          HealthSurveyConstants.heartRate: 0,
-          HealthSurveyConstants.feeling: "",
-          HealthSurveyConstants.notes: "",
+          HealthSurveyConstants.fieldSystolic: 0,
+          HealthSurveyConstants.fieldDiastolic: 0,
+          HealthSurveyConstants.fieldHeartRate: 0,
+          HealthSurveyConstants.fieldFeeling: "",
+          HealthSurveyConstants.fieldNotes: "",
         };
 
         String timestamp = "";
@@ -153,18 +153,18 @@ Future<bool> processBpCsvToJson(
                 duplicateTimestamps.add(formatTimestampForDisplay(timestamp));
               }
             case HealthSurveyConstants.fieldSystolic:
-              responses[HealthSurveyConstants.systolicBP] =
+              responses[HealthSurveyConstants.fieldSystolic] =
                   int.parse(value.toString());
             case HealthSurveyConstants.fieldDiastolic:
-              responses[HealthSurveyConstants.diastolicBP] =
+              responses[HealthSurveyConstants.fieldDiastolic] =
                   int.parse(value.toString());
             case HealthSurveyConstants.fieldHeartRate:
-              responses[HealthSurveyConstants.heartRate] =
+              responses[HealthSurveyConstants.fieldHeartRate] =
                   int.parse(value.toString());
             case HealthSurveyConstants.fieldFeeling:
-              responses[HealthSurveyConstants.feeling] = value.toString();
+              responses[HealthSurveyConstants.fieldFeeling] = value.toString();
             case HealthSurveyConstants.fieldNotes:
-              responses[HealthSurveyConstants.notes] = value.toString();
+              responses[HealthSurveyConstants.fieldNotes] = value.toString();
           }
         }
 
