@@ -43,6 +43,8 @@ import 'package:healthpod/features/survey/question.dart';
 /// A page for collecting blood pressure survey data.
 
 class BPSurvey extends StatelessWidget {
+  // Define questions using centralised Health Survey constants.
+
   final List<HealthSurveyQuestion> questions = HealthSurveyConstants.questions;
 
   BPSurvey({super.key});
@@ -55,8 +57,8 @@ class BPSurvey extends StatelessWidget {
       // Add timestamp to responses.
 
       final responseData = {
-        HealthSurveyConstants.fieldTimestamp: DateTime.now().toIso8601String(),
-        'responses': responses,
+        HealthSurveyConstants.fieldTimestamp: DateTime.now()
+            .toIso8601String(), // Use fieldTimestamp constant instead of manual definition.
       };
 
       // Convert to JSON string with proper formatting and base64 encode.
