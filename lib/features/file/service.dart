@@ -793,14 +793,18 @@ class _FileServiceState extends State<FileService> {
                   onPressed: (uploadInProgress ||
                           downloadInProgress ||
                           deleteInProgress)
-                      ? null
+                      ? null // Disable button during any ongoing operation.
                       : () async {
+                          // Open file picker and trigger upload if file is selected.
+
                           final result = await FilePicker.platform.pickFiles();
                           if (result != null) {
                             setState(() {
                               uploadFile = result.files.single.path!;
                               uploadDone = false;
                             });
+                            // Immediately trigger upload after file selection.
+
                             await handleUpload();
                           }
                         },
@@ -829,6 +833,8 @@ class _FileServiceState extends State<FileService> {
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       try {
+                        // Open file picker configured for CSV files only.
+
                         final result = await FilePicker.platform.pickFiles(
                           type: FileType.custom,
                           allowedExtensions: ['csv'],
@@ -837,6 +843,8 @@ class _FileServiceState extends State<FileService> {
                         if (result != null && result.files.isNotEmpty) {
                           final file = result.files.first;
                           if (file.path != null) {
+                            // Process and import CSV data.
+
                             handleCsvImport(
                                 file.path!, currentPath ?? 'healthpod/data');
                           }
@@ -874,6 +882,8 @@ class _FileServiceState extends State<FileService> {
 
                         if (outputFile != null) {
                           if (!mounted) return;
+
+                          // Export JSON files in bp/ to a single CSV file.
 
                           final success = await processBpJsonToCsv(
                             outputFile,
