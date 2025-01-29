@@ -42,11 +42,11 @@ import 'package:healthpod/utils/create_feature_folder.dart';
 
 Future<void> initialiseFeatureFolders({
   required BuildContext context,
-  void Function(bool)? onProgress,
-  void Function()? onComplete,
+  required void Function(bool) onProgress,
+  required void Function() onComplete,
 }) async {
   try {
-    onProgress?.call(true);
+    onProgress.call(true);
 
     // List of required feature folders.
 
@@ -69,7 +69,7 @@ Future<void> initialiseFeatureFolders({
           onProgressChange: (inProgress) {
             // Only propagate progress changes if the callback is provided.
 
-            onProgress?.call(inProgress);
+            onProgress.call(inProgress);
           },
           onSuccess: () {
             debugPrint('Successfully created $folder folder');
@@ -83,10 +83,10 @@ Future<void> initialiseFeatureFolders({
       }
     }
 
-    onComplete?.call();
+    onComplete.call();
   } catch (e) {
     debugPrint('Error initializing feature folders: $e');
   } finally {
-    onProgress?.call(false);
+    onProgress.call(false);
   }
 }
