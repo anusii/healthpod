@@ -70,14 +70,14 @@ class _FileServiceState extends State<FileService> {
   /// without relying on accessing the FileBrowser's state.
 
   String? currentPath =
-      'healthpod/data'; // Initialise with the default root path
+      'healthpod/data'; // Initialise with the default root path.
 
   // Boolean flags to track status of various file operations.
 
   bool uploadInProgress = false;
   bool downloadInProgress = false;
   bool deleteInProgress = false;
-  bool importInProgress = false; // CSV import state tracking
+  bool importInProgress = false; // CSV import state tracking.
   bool uploadDone = false;
   bool downloadDone = false;
   bool deleteDone = false;
@@ -89,7 +89,7 @@ class _FileServiceState extends State<FileService> {
   final smallGapV = const SizedBox(height: 10);
   final largeGapV = const SizedBox(height: 50);
 
-  // Helper method to check if we're in the bp/ directory
+  // Helper method to check if we're in the bp/ directory.
 
   bool get isInBpDirectory {
     return currentPath!.endsWith('/bp') ||
