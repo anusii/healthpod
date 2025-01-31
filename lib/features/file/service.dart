@@ -29,14 +29,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:healthpod/utils/process_bp_json_to_csv.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/file/browser.dart';
+import 'package:healthpod/features/bp/exporter.dart';
+import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/utils/is_text_file.dart';
-import 'package:healthpod/utils/process_bp_csv_to_json.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
@@ -492,8 +492,10 @@ class _FileServiceState extends State<FileService> {
       });
 
       // Process CSV and create individual JSON files for each row.
+      // Use BPImporter to handle blood-pressure specific importing.
 
-      final success = await processBpCsvToJson(filePath, dirPath, context);
+      final success =
+          await BPImporter.importFromCsv(filePath, dirPath, context);
 
       if (!mounted) return;
 
@@ -884,8 +886,9 @@ class _FileServiceState extends State<FileService> {
                           if (!mounted) return;
 
                           // Export JSON files in bp/ to a single CSV file.
+                          // Use BPExporter to handle blood-pressure specific exporting.
 
-                          final success = await processBpJsonToCsv(
+                          final success = await BPExporter.exportToCsv(
                             outputFile,
                             currentPath ?? 'healthpod/data',
                             context,
