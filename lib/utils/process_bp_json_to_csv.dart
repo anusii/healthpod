@@ -151,8 +151,7 @@ Future<bool> processBpJsonToCsv(
     // Save CSV file.
 
     final file = File(savePath);
-    await file.writeAsString(csv);
-
+    await file.writeAsString('$csv\n'); // Add final newline to exported file.
     return true;
   } catch (e) {
     debugPrint('Export error: $e');
