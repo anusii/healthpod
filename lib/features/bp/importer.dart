@@ -199,7 +199,8 @@ class BPImporter {
 
               case String h
                   when h == HealthSurveyConstants.fieldSystolic.toLowerCase():
-                final systolic = int.tryParse(value);
+                final systolic =
+                    double.tryParse(value); // Handle decimal numbers as well.
                 if (systolic == null) {
                   hasRequiredFields = false;
                   debugPrint(
@@ -212,7 +213,7 @@ class BPImporter {
 
               case String h
                   when h == HealthSurveyConstants.fieldDiastolic.toLowerCase():
-                final diastolic = int.tryParse(value);
+                final diastolic = double.tryParse(value);
                 if (diastolic == null) {
                   hasRequiredFields = false;
                   debugPrint(
@@ -225,7 +226,7 @@ class BPImporter {
 
               case String h
                   when h == HealthSurveyConstants.fieldHeartRate.toLowerCase():
-                final heartRate = int.tryParse(value);
+                final heartRate = double.tryParse(value);
                 if (heartRate == null) {
                   hasRequiredFields = false;
                   debugPrint(
