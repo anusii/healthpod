@@ -40,12 +40,12 @@ class BPRecord {
 
   /// Systolic blood pressure in mmHg (upper number).
 
-  final double systolic;
+  final double
+      systolic; // Use double instead of int for potential readings with decimal places.
 
   /// Diastolic blood pressure in mmHg (lower number).
 
-  final double
-      diastolic; // Use double instead of int for potential readings with decimal places.
+  final double diastolic;
 
   /// Heart rate in beats per minute (BPM).
 

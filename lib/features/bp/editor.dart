@@ -411,7 +411,8 @@ class _BPEditorState extends State<BPEditor> {
           keyboardType: TextInputType.number,
           onChanged: (value) {
             records[index] = record.copyWith(
-              systolic: double.tryParse(value) ?? 0,
+              systolic: double.tryParse(value) ??
+                  0, // Use double instead of int for potential readings with decimal places.
             );
           },
         )),
