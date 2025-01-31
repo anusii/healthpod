@@ -50,6 +50,7 @@ Widget createSolidLogin(BuildContext context) {
     required: false,
     title: 'HEALTH POD',
     appDirectory: 'healthpod',
+    webID: 'https://pods.dev.solidcommunity.au', // Set default server to dev.
     image: AssetImage('assets/images/healthpod_image.png'),
     logo: AssetImage('assets/images/healthpod_icon.png'),
     link: 'https://github.com/anusii/healthpod/blob/main/README.md',
