@@ -125,7 +125,8 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
       },
       onFieldSubmitted: (_) => _handleFieldSubmitted(questionIndex),
       onSaved: (value) {
-        _responses[question.question] = value;
+        _responses[question.fieldName] =
+            value; // Ensure we use the health survey field rather than full question as key.
       },
     );
   }
@@ -185,7 +186,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
                   },
                   onFieldSubmitted: (_) => _handleFieldSubmitted(index),
                   onSaved: (value) {
-                    _responses[question.question] = value;
+                    _responses[question.fieldName] = value;
                   },
                 ),
               ],
@@ -340,7 +341,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
       },
       onFieldSubmitted: (_) => _handleFieldSubmitted(questionIndex),
       onSaved: (value) {
-        _responses[question.question] = double.tryParse(value ?? '');
+        _responses[question.fieldName] = double.tryParse(value ?? '');
       },
     );
   }
@@ -383,7 +384,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
                       groupValue: field.value,
                       onChanged: (value) {
                         field.didChange(value);
-                        _responses[question.question] = value;
+                        _responses[question.fieldName] = value;
                         _handleFieldSubmitted(questionIndex);
                       },
                     ),

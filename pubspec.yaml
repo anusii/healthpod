@@ -35,6 +35,7 @@ dependencies:
   fl_chart: ^0.70.2
   path_provider: ^2.1.5
   encrypt: ^5.0.3
+  csv: ^6.0.0
   integration_test:
     sdk: flutter
 

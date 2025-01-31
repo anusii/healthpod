@@ -33,6 +33,23 @@ import 'package:healthpod/features/survey/question.dart';
 /// for collecting health-related data.
 
 class HealthSurveyConstants {
+  // Data field names (for storage/CSV).
+
+  static const String fieldTimestamp = 'timestamp';
+  static const String fieldSystolic = 'systolic';
+  static const String fieldDiastolic = 'diastolic';
+  static const String fieldHeartRate = 'heart_rate';
+  static const String fieldFeeling = 'feeling';
+  static const String fieldNotes = 'notes';
+
+  /// Question texts (for UI only).
+
+  static const String systolicBP = "What's your systolic blood pressure?";
+  static const String diastolicBP = "What's your diastolic measurement?";
+  static const String heartRate = "What's your heart rate?";
+  static const String feeling = "How are you feeling?";
+  static const String notes = "Any additional notes about your health?";
+
   /// The list of questions used in the health survey.
   /// Each question includes type validation, units where applicable,
   /// and value constraints.
@@ -40,6 +57,7 @@ class HealthSurveyConstants {
   static final List<HealthSurveyQuestion> questions = [
     HealthSurveyQuestion(
       question: systolicBP,
+      fieldName: fieldSystolic,
       type: HealthDataType.number,
       unit: "mm Hg",
       min: 70,
@@ -47,6 +65,7 @@ class HealthSurveyConstants {
     ),
     HealthSurveyQuestion(
       question: diastolicBP,
+      fieldName: fieldDiastolic,
       type: HealthDataType.number,
       unit: "mm Hg",
       min: 40,
@@ -54,6 +73,7 @@ class HealthSurveyConstants {
     ),
     HealthSurveyQuestion(
       question: heartRate,
+      fieldName: fieldHeartRate,
       type: HealthDataType.number,
       unit: "bpm",
       min: 40,
@@ -61,21 +81,15 @@ class HealthSurveyConstants {
     ),
     HealthSurveyQuestion(
       question: feeling,
+      fieldName: fieldFeeling,
       type: HealthDataType.categorical,
       options: ["Excellent", "Good", "Fair", "Poor"],
     ),
     HealthSurveyQuestion(
       question: notes,
+      fieldName: fieldNotes,
       type: HealthDataType.text,
       isRequired: false,
     ),
   ];
-
-  /// Question keys for accessing specific responses.
-
-  static const String systolicBP = "What's your systolic blood pressure?";
-  static const String diastolicBP = "What's your diastolic measurement?";
-  static const String heartRate = "What's your heart rate?";
-  static const String feeling = "How are you feeling?";
-  static const String notes = "Any additional notes about your health?";
 }

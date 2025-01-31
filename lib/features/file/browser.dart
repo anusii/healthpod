@@ -44,6 +44,8 @@ class FileBrowser extends StatefulWidget {
   final Function(String, String) onFileDownload;
   final Function(String, String) onFileDelete;
   final Function(String) onDirectoryChanged;
+  final Function(String, String)
+      onImportCsv; // Callback for handling CSV file imports.
   final GlobalKey<FileBrowserState> browserKey;
 
   const FileBrowser({
@@ -52,6 +54,7 @@ class FileBrowser extends StatefulWidget {
     required this.onFileDownload,
     required this.onFileDelete,
     required this.browserKey,
+    required this.onImportCsv,
     required this.onDirectoryChanged,
   });
 
@@ -248,6 +251,7 @@ class FileBrowserState extends State<FileBrowser> {
                   // Add Spacer to push the refresh icon to the far right.
 
                   const Spacer(),
+
                   IconButton(
                     icon: Icon(
                       Icons.refresh,

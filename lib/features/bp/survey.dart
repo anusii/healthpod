@@ -34,7 +34,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
@@ -44,39 +43,9 @@ import 'package:healthpod/features/survey/question.dart';
 /// A page for collecting blood pressure survey data.
 
 class BPSurvey extends StatelessWidget {
-  final List<HealthSurveyQuestion> questions = [
-    HealthSurveyQuestion(
-      question: "What's your systolic blood pressure?",
-      type: HealthDataType.number,
-      unit: "mm Hg",
-      min: 70,
-      max: 200,
-    ),
-    HealthSurveyQuestion(
-      question: "What's your diastolic measurement?",
-      type: HealthDataType.number,
-      unit: "mm Hg",
-      min: 40,
-      max: 220,
-    ),
-    HealthSurveyQuestion(
-      question: "What's your heart rate?",
-      type: HealthDataType.number,
-      unit: "bpm",
-      min: 40,
-      max: 220,
-    ),
-    HealthSurveyQuestion(
-      question: "How are you feeling?",
-      type: HealthDataType.categorical,
-      options: ["Excellent", "Good", "Fair", "Poor"],
-    ),
-    HealthSurveyQuestion(
-      question: "Any additional notes about your health?",
-      type: HealthDataType.text,
-      isRequired: false,
-    ),
-  ];
+  // Define questions using centralised Health Survey constants.
+
+  final List<HealthSurveyQuestion> questions = HealthSurveyConstants.questions;
 
   BPSurvey({super.key});
 
@@ -88,8 +57,8 @@ class BPSurvey extends StatelessWidget {
       // Add timestamp to responses.
 
       final responseData = {
-        'timestamp': DateTime.now().toIso8601String(),
-        'responses': responses,
+        HealthSurveyConstants.fieldTimestamp: DateTime.now()
+            .toIso8601String(), // Use fieldTimestamp constant instead of manual definition.
       };
 
       // Convert to JSON string with proper formatting and base64 encode.
@@ -156,7 +125,7 @@ class BPSurvey extends StatelessWidget {
       // Prepare response data with timestamp.
 
       final responseData = {
-        'timestamp': DateTime.now().toIso8601String(),
+        HealthSurveyConstants.fieldTimestamp: DateTime.now().toIso8601String(),
         'responses': responses,
       };
 
@@ -319,7 +288,7 @@ class BPSurvey extends StatelessWidget {
         backgroundColor: titleBackgroundColor,
       ),
       body: HealthSurveyForm(
-        questions: HealthSurveyConstants.questions,
+        questions: questions,
         onSubmit: (responses) => _handleSubmit(context, responses),
       ),
     );

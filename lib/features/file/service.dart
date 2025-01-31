@@ -29,13 +29,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:healthpod/utils/process_bp_json_to_csv.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/file/browser.dart';
-import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/is_text_file.dart';
+import 'package:healthpod/utils/process_bp_csv_to_json.dart';
+import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
 /// File service.
@@ -67,13 +69,15 @@ class _FileServiceState extends State<FileService> {
   /// This helps us track the current directory context for file operations
   /// without relying on accessing the FileBrowser's state.
 
-  String? currentPath;
+  String? currentPath =
+      'healthpod/data'; // Initialise with the default root path.
 
   // Boolean flags to track status of various file operations.
 
   bool uploadInProgress = false;
   bool downloadInProgress = false;
   bool deleteInProgress = false;
+  bool importInProgress = false; // CSV import state tracking.
   bool uploadDone = false;
   bool downloadDone = false;
   bool deleteDone = false;
@@ -84,6 +88,14 @@ class _FileServiceState extends State<FileService> {
   final smallGapH = const SizedBox(width: 10);
   final smallGapV = const SizedBox(height: 10);
   final largeGapV = const SizedBox(height: 50);
+
+  // Helper method to check if we're in the bp/ directory.
+
+  bool get isInBpDirectory {
+    return currentPath!.endsWith('/bp') ||
+        currentPath!.contains('/bp/') ||
+        currentPath == 'healthpod/data/bp';
+  }
 
   /// Handles file upload by reading its contents and encrypting it for upload.
 
@@ -466,6 +478,48 @@ class _FileServiceState extends State<FileService> {
     }
   }
 
+  /// Handles the import of BP CSV files and conversion to individual JSON files.
+  ///
+  /// Each row of the CSV is processed and stored as a separate encrypted JSON file in the POD.
+  /// Files are named using the timestamp from the data.
+
+  Future<void> handleCsvImport(String filePath, String dirPath) async {
+    if (importInProgress) return;
+
+    try {
+      setState(() {
+        importInProgress = true;
+      });
+
+      // Process CSV and create individual JSON files for each row.
+
+      final success = await processBpCsvToJson(filePath, dirPath, context);
+
+      if (!mounted) return;
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('BP data imported and converted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        // Refresh the file browser to show the new files.
+
+        _browserKey.currentState?.refreshFiles();
+      }
+    } catch (e) {
+      if (!mounted) return;
+      showAlert(context, 'Failed to import BP data: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() {
+          importInProgress = false;
+        });
+      }
+    }
+  }
+
   Widget _buildDesktopLayout() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -580,7 +634,8 @@ class _FileServiceState extends State<FileService> {
               ),
               if (uploadInProgress ||
                   downloadInProgress ||
-                  deleteInProgress) ...[
+                  deleteInProgress ||
+                  importInProgress) ...[
                 const SizedBox(width: 16),
                 const SizedBox(
                   width: 16,
@@ -593,7 +648,9 @@ class _FileServiceState extends State<FileService> {
                       ? 'Uploading...'
                       : downloadInProgress
                           ? 'Downloading...'
-                          : 'Deleting...',
+                          : importInProgress
+                              ? 'Importing...'
+                              : 'Deleting...',
                   style: const TextStyle(
                     color: Colors.blue,
                     fontStyle: FontStyle.italic,
@@ -660,13 +717,18 @@ class _FileServiceState extends State<FileService> {
                 currentPath = newPath;
               });
             },
+            onImportCsv: handleCsvImport,
           ),
         ),
       ],
     );
   }
 
-  /// Builds the upload panel for desktop layout.
+  /// Builds and returns the upload panel widget which contains
+  /// file upload functionality and CSV import options.
+  ///
+  /// This panel appears on the right side in desktop layout
+  /// and as an expandable section in mobile layout.
 
   Widget _buildUploadPanel() {
     return Padding(
@@ -675,8 +737,13 @@ class _FileServiceState extends State<FileService> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Display preview card if a file is selected and preview is enabled.
+
           _buildPreviewCard(),
           const SizedBox(height: 16),
+
+          // Show selected file info container when a file is chosen.
+
           if (uploadFile != null)
             Container(
               padding: const EdgeInsets.all(12),
@@ -695,6 +762,8 @@ class _FileServiceState extends State<FileService> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: 8),
+                  // Display filename with overflow protection.
+
                   Expanded(
                     child: Text(
                       path.basename(uploadFile!),
@@ -705,6 +774,8 @@ class _FileServiceState extends State<FileService> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
+                  // Show success checkmark when upload completes.
+
                   if (uploadDone)
                     const Icon(Icons.check_circle,
                         color: Colors.green, size: 20),
@@ -712,49 +783,154 @@ class _FileServiceState extends State<FileService> {
               ),
             ),
           const SizedBox(height: 16),
-          ElevatedButton.icon(
-            onPressed: () async {
-              final result = await FilePicker.platform.pickFiles();
-              if (result != null) {
-                setState(() {
-                  uploadFile = result.files.single.path!;
-                  uploadDone = false;
-                });
-              }
-            },
-            icon: const Icon(Icons.file_upload),
-            label: const Text('Choose File'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+
+          Row(
+            children: [
+              // Main upload button - handles both file selection and upload.
+
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: (uploadInProgress ||
+                          downloadInProgress ||
+                          deleteInProgress)
+                      ? null // Disable button during any ongoing operation.
+                      : () async {
+                          // Open file picker and trigger upload if file is selected.
+
+                          final result = await FilePicker.platform.pickFiles();
+                          if (result != null) {
+                            setState(() {
+                              uploadFile = result.files.single.path!;
+                              uploadDone = false;
+                            });
+                            // Immediately trigger upload after file selection.
+
+                            await handleUpload();
+                          }
+                        },
+                  icon: const Icon(Icons.file_upload),
+                  label: const Text('Upload'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onPrimaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
               ),
-            ),
+
+              // Show CSV import and export buttons only when in blood pressure directory.
+
+              if (isInBpDirectory) ...[
+                const SizedBox(width: 8),
+                // Import CSV Button.
+
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      try {
+                        // Open file picker configured for CSV files only.
+
+                        final result = await FilePicker.platform.pickFiles(
+                          type: FileType.custom,
+                          allowedExtensions: ['csv'],
+                        );
+
+                        if (result != null && result.files.isNotEmpty) {
+                          final file = result.files.first;
+                          if (file.path != null) {
+                            // Process and import CSV data.
+
+                            handleCsvImport(
+                                file.path!, currentPath ?? 'healthpod/data');
+                          }
+                        }
+                      } catch (e) {
+                        debugPrint('Error picking CSV file: $e');
+                      }
+                    },
+                    icon: const Icon(Icons.table_chart),
+                    label: const Text('Import CSV'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.secondaryContainer,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onSecondaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Export CSV Button.
+
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      try {
+                        final String? outputFile =
+                            await FilePicker.platform.saveFile(
+                          dialogTitle: 'Save BP data as CSV:',
+                          fileName: 'bp_data.csv',
+                        );
+
+                        if (outputFile != null) {
+                          if (!mounted) return;
+
+                          // Export JSON files in bp/ to a single CSV file.
+
+                          final success = await processBpJsonToCsv(
+                            outputFile,
+                            currentPath ?? 'healthpod/data',
+                            context,
+                          );
+
+                          if (!mounted) return;
+
+                          if (success) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('BP data exported successfully'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else {
+                            showAlert(context, 'Failed to export BP data');
+                          }
+                        }
+                      } catch (e) {
+                        if (!mounted) return;
+                        showAlert(context, 'Export error: ${e.toString()}');
+                        debugPrint('Export error: $e');
+                      }
+                    },
+                    icon: const Icon(Icons.download),
+                    label: const Text('Export CSV'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.tertiaryContainer,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onTertiaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
           const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: (uploadFile == null ||
-                    uploadInProgress ||
-                    downloadInProgress ||
-                    deleteInProgress)
-                ? null
-                : handleUpload,
-            icon: Icon(Icons.cloud_upload,
-                color: Theme.of(context).colorScheme.onPrimary),
-            label: const Text('Upload'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              elevation: 2,
-            ),
-          ),
-          const SizedBox(height: 12),
+
+          // Preview button - enabled only when a file is selected and no operation is in progress.
+
           TextButton.icon(
             onPressed: (uploadFile == null ||
                     uploadInProgress ||

@@ -35,6 +35,7 @@ import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
 import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
+import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/widgets/icon_grid_page.dart';
 import 'package:healthpod/widgets/footer.dart';
 
@@ -59,6 +60,35 @@ class HealthPodHomeState extends State<HealthPodHome> {
   void initState() {
     super.initState();
     _initialiseFooterData(context);
+    _initialiseData(context);
+  }
+
+  /// Initialises all required data including footer data and feature folders.
+
+  Future<void> _initialiseData(BuildContext context) async {
+    // First initialise footer data.
+
+    await _initialiseFooterData(context);
+
+    // Then initialise feature folders if user is logged in.
+
+    if (_webId != null) {
+      setState(() {});
+
+      if (context.mounted) {
+        await initialiseFeatureFolders(
+          context: context,
+          onProgress: (inProgress) {
+            if (mounted) {
+              setState(() {});
+            }
+          },
+          onComplete: () {
+            debugPrint('Feature folder initialization complete');
+          },
+        );
+      }
+    }
   }
 
   /// Initialises the footer data by fetching the Web ID and encryption key status.

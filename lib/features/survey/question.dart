@@ -30,7 +30,14 @@ import 'package:healthpod/constants/health_data_type.dart';
 /// Represents a single health survey question.
 
 class HealthSurveyQuestion {
+  // Question text displayed to users in UI.
+
   final String question;
+
+  // Field name used for data storage (e.g. in CSV and JSON).
+
+  final String fieldName;
+
   final HealthDataType type;
   final List<String>? options; // For categorical questions
   final String? unit; // Optional unit for measurements (e.g. "mmHg", "kg")
@@ -40,6 +47,7 @@ class HealthSurveyQuestion {
 
   HealthSurveyQuestion({
     required this.question,
+    required this.fieldName,
     required this.type,
     this.options,
     this.unit,

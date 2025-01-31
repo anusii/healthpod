@@ -25,6 +25,8 @@
 
 library;
 
+import 'package:healthpod/constants/survey.dart';
+
 /// Model class representing a blood pressure record.
 ///
 /// Stores complete blood pressure measurements including systolic/diastolic pressure,
@@ -73,11 +75,12 @@ class BPRecord {
   factory BPRecord.fromJson(Map<String, dynamic> json) {
     return BPRecord(
       timestamp: DateTime.parse(json['timestamp']),
-      systolic: json['responses']["What's your systolic blood pressure?"],
-      diastolic: json['responses']["What's your diastolic measurement?"],
-      heartRate: json['responses']["What's your heart rate?"],
-      feeling: json['responses']["How are you feeling?"] ?? '',
-      notes: json['responses']["Any additional notes about your health?"] ?? '',
+      systolic: json['responses'][HealthSurveyConstants
+          .fieldSystolic], // Use BP survey field variable instead of full question.
+      diastolic: json['responses'][HealthSurveyConstants.fieldDiastolic],
+      heartRate: json['responses'][HealthSurveyConstants.fieldHeartRate],
+      feeling: json['responses'][HealthSurveyConstants.fieldFeeling] ?? '',
+      notes: json['responses'][HealthSurveyConstants.fieldNotes] ?? '',
     );
   }
 
@@ -89,11 +92,12 @@ class BPRecord {
     return {
       'timestamp': timestamp.toIso8601String(),
       'responses': {
-        "What's your systolic blood pressure?": systolic,
-        "What's your diastolic measurement?": diastolic,
-        "What's your heart rate?": heartRate,
-        "How are you feeling?": feeling,
-        "Any additional notes about your health?": notes,
+        HealthSurveyConstants.fieldSystolic:
+            systolic, // Use BP survey field variable instead of full question.
+        HealthSurveyConstants.fieldDiastolic: diastolic,
+        HealthSurveyConstants.fieldHeartRate: heartRate,
+        HealthSurveyConstants.fieldFeeling: feeling,
+        HealthSurveyConstants.fieldNotes: notes,
       },
     };
   }
