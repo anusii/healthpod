@@ -40,15 +40,16 @@ class BPRecord {
 
   /// Systolic blood pressure in mmHg (upper number).
 
-  final int systolic;
+  final double systolic;
 
   /// Diastolic blood pressure in mmHg (lower number).
 
-  final int diastolic;
+  final double
+      diastolic; // Use double instead of int for potential readings with decimal places.
 
   /// Heart rate in beats per minute (BPM).
 
-  final int heartRate;
+  final double heartRate;
 
   /// Subjective feeling (Excellent/Good/Fair/Poor).
 
@@ -108,9 +109,9 @@ class BPRecord {
 
   BPRecord copyWith({
     DateTime? timestamp,
-    int? systolic,
-    int? diastolic,
-    int? heartRate,
+    double? systolic,
+    double? diastolic,
+    double? heartRate,
     String? feeling,
     String? notes,
   }) {
