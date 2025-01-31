@@ -23,7 +23,6 @@
 ///
 /// Authors: Ashley Tang
 
-
 library;
 
 import 'package:flutter/material.dart';
@@ -44,7 +43,7 @@ void main() {
 /// This test verifies the basic POD connection functionality that other features
 /// will depend on. Feature-specific tests (like bp/survey.dart) will build on
 /// this base connection test.
-/// 
+///
 /// Note: Currently, the test will still require manual browser interaction for both
 /// login and logout since it's using external browser authentication.
 /// To make it fully automated, we would need to refactor use WebView instead of
@@ -54,8 +53,8 @@ void connectToPod() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('HealthPod POD Connection:', () {
-    testWidgets('Verify POD connection and authentication flow', 
-      (WidgetTester tester) async {
+    testWidgets('Verify POD connection and authentication flow',
+        (WidgetTester tester) async {
       await tester.runAsync(() async {
         // Launch app.
 
@@ -114,8 +113,9 @@ void connectToPod() {
         // Find and tap OK on the confirmation dialog.
 
         final okButton = find.text('OK');
-        expect(okButton, findsOneWidget, 
-            reason: 'OK button should be present in logout confirmation dialog');
+        expect(okButton, findsOneWidget,
+            reason:
+                'OK button should be present in logout confirmation dialog');
         await tester.tap(okButton);
         await tester.pumpAndSettle();
 
