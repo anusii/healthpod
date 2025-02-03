@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:fl_chart/fl_chart.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/constants/survey.dart';
@@ -173,9 +174,31 @@ class _CombinedBPVisualisationState extends State<BPCombinedVisualisation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Blood Pressure Trends',
-          style: TextStyle(fontWeight: FontWeight.w500),
+        title: Row(
+          children: [
+            const Text(
+              'Blood Pressure Trends',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            // General blood pressure tooltip providing overview of the measurement.
+            // Explains what blood pressure is, how it's measured, and its components.
+
+            MarkdownTooltip(
+              message: '''
+                **Blood Pressure:** A vital measurement of cardiovascular health.
+                It shows how strongly your blood pushes against artery walls.
+                Measured in mmHg, it's recorded as two numbers (systolic/diastolic).
+              ''',
+              child: IconButton(
+                icon: Icon(
+                  Icons.info_outline,
+                  color: Colors.grey[600],
+                  size: 20,
+                ),
+                onPressed: () {},
+              ),
+            ),
+          ],
         ),
         backgroundColor: titleBackgroundColor,
       ),
@@ -399,6 +422,25 @@ class _CombinedBPVisualisationState extends State<BPCombinedVisualisation> {
                           'Systolic',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
+                        const SizedBox(width: 4),
+                        // Systolic pressure tooltip explaining the top number.
+                        // Details what systolic pressure measures and normal range.
+
+                        MarkdownTooltip(
+                          message: '''
+                            **Systolic Blood Pressure:** The top number in your reading.
+                            Measures the pressure when your heart contracts to pump blood.
+                            Normal reading is typically below 120 mmHg.
+                          ''',
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.info_outline,
+                              color: Colors.grey[600],
+                              size: 16,
+                            ),
+                            onPressed: () {},
+                          ),
+                        ),
                         const SizedBox(width: 24),
                         Container(
                           width: 12,
@@ -409,9 +451,23 @@ class _CombinedBPVisualisationState extends State<BPCombinedVisualisation> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          'Diastolic',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                        // Diastolic pressure tooltip explaining the bottom number.
+                        // Details what diastolic pressure measures and normal range.
+
+                        MarkdownTooltip(
+                          message: '''
+                            **Diastolic Blood Pressure:** The bottom number in your reading.
+                            Measures the pressure when your heart relaxes between beats.
+                            Normal reading is typically below 80 mmHg.
+                          ''',
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.info_outline,
+                              color: Colors.grey[600],
+                              size: 16,
+                            ),
+                            onPressed: () {},
+                          ),
                         ),
                       ],
                     ),
