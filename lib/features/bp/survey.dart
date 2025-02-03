@@ -31,6 +31,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
@@ -67,10 +68,9 @@ class BPSurvey extends StatelessWidget {
           const JsonEncoder.withIndent('  ').convert(responseData);
       final base64Content = base64Encode(utf8.encode(jsonString));
 
-      // Generate default filename.
+      // Generate filename using consistent format without milliseconds.
 
-      final timestamp =
-          DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
+      final timestamp = formatTimestampForFilename(DateTime.now());
       final defaultFileName = 'blood_pressure_$timestamp.json';
 
       // Show file picker for save location.

@@ -28,6 +28,7 @@ library;
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:intl/intl.dart';
 import 'package:solidpod/solidpod.dart';
 
@@ -153,17 +154,16 @@ class _BPEditorState extends State<BPEditor> {
 
       if (editingIndex != null) {
         final oldRecord = records[editingIndex!];
-        final oldTimestamp =
-            oldRecord.timestamp.toIso8601String().substring(0, 19);
-        final oldFilename =
-            'blood_pressure_${oldTimestamp.replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
+        final oldTimestamp = formatTimestampForFilename(
+            oldRecord.timestamp); // Ensure no milliseconds in filename.
+        final oldFilename = 'blood_pressure_$oldTimestamp.json.enc.ttl';
         await deleteFile('healthpod/data/bp/$oldFilename');
       }
 
-      // Generate a unique filename using timestamp.
+      // Generate a unique filename using formatted timestamp.
 
       final filename =
-          'blood_pressure_${record.timestamp.toIso8601String().replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
+          'blood_pressure_${formatTimestampForFilename(record.timestamp)}.json.enc.ttl';
 
       // Write record data to file.
 
