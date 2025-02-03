@@ -36,6 +36,7 @@ import 'package:solidpod/solidpod.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
+import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
 import 'package:healthpod/features/survey/form.dart';
 import 'package:healthpod/features/survey/question.dart';
@@ -67,10 +68,9 @@ class BPSurvey extends StatelessWidget {
           const JsonEncoder.withIndent('  ').convert(responseData);
       final base64Content = base64Encode(utf8.encode(jsonString));
 
-      // Generate default filename.
+      // Generate filename using consistent format without milliseconds.
 
-      final timestamp =
-          DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
+      final timestamp = formatTimestampForFilename(DateTime.now());
       final defaultFileName = 'blood_pressure_$timestamp.json';
 
       // Show file picker for save location.

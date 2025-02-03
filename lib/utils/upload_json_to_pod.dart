@@ -29,8 +29,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/utils/upload_file_to_pod.dart';
+
 import 'package:solidpod/solidpod.dart';
+
+import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/upload_file_to_pod.dart';
 
 /// Creates a temporary JSON file and uploads it to POD.
 ///
@@ -50,8 +53,8 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
   try {
     // Create temp file with JSON content.
 
-    final timestamp =
-        DateTime.now().toIso8601String().replaceAll(RegExp(r'[:.]+'), '-');
+    final timestamp = formatTimestampForFilename(
+        DateTime.now()); // Format timestamp for file name.
     final fileName = '${fileNamePrefix}_$timestamp.json';
 
     tempDir = await Directory.systemTemp.createTemp('healthpod_temp');
