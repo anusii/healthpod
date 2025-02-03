@@ -50,6 +50,9 @@ dev_dependencies:
     sdk: flutter
 
   ubuntu_lints: ^0.4.0
+  custom_lint: ^0.6.4
+  custom_lint_package:
+    path: custom_lint_package
 
 dependency_overrides:
   # TODO 20240710 gjw dart-code-metrics DEPENDENCY ON pub_updater PROBLEM
