@@ -29,9 +29,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
+import 'package:solidpod/solidpod.dart';
+
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/upload_file_to_pod.dart';
-import 'package:solidpod/solidpod.dart';
 
 /// Creates a temporary JSON file and uploads it to POD.
 ///
