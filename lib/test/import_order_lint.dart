@@ -37,3 +37,10 @@ library;
 // import 'package:healthpod/features/bp/exporter.dart';  // Project import out of alphabetical order
 // import 'dart:io';  // Dart SDK import
 // import 'package:flutter/services.dart';  // Flutter import
+
+void main () {
+  // This file contains intentionally out-of-order imports to test the lint rule.
+  // The lint rule should flag this file due to incorrect import ordering.
+  // Note: uncomment the imports above to trigger the lint warning.
+  
+}
