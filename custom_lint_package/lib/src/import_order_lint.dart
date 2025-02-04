@@ -59,7 +59,7 @@ import 'import_visitor.dart';
 ///
 /// To use this lint rule, add it to your analysis_options.yaml file:
 /// ```yaml
-/// custom_lint:
+/// linter:
 ///   rules:
 ///     - ordered_imports
 /// ```
