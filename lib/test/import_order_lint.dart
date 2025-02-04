@@ -39,8 +39,8 @@ library;
 // import 'package:flutter/services.dart';  // Flutter import
 
 void main () {
-  // This file contains intentionally out-of-order imports to test the lint rule.
+  // This function is left intentionally empty.
   // The lint rule should flag this file due to incorrect import ordering.
   // Note: uncomment the imports above to trigger the lint warning.
-  
+
 }
