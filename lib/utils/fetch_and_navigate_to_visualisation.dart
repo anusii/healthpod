@@ -26,7 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/features/bp/visualisation.dart';
+import 'package:healthpod/features/bp/combined_visualisation.dart';
 import 'package:healthpod/features/survey/data.dart';
 
 /// Helper function to fetch and handle survey data.
@@ -62,7 +62,7 @@ Future<void> fetchAndNavigateToVisualisation(BuildContext context) async {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BPVisualisation(
+            builder: (context) => BPCombinedVisualisation(
               surveyData: surveyData,
             ),
           ),
