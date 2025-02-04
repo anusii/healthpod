@@ -38,9 +38,8 @@ library;
 // import 'dart:io';  // Dart SDK import
 // import 'package:flutter/services.dart';  // Flutter import
 
-void main () {
+void main() {
   // This function is left intentionally empty.
   // The lint rule should flag this file due to incorrect import ordering.
   // Note: uncomment the imports above to trigger the lint warning.
-
 }
