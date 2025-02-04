@@ -185,9 +185,11 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
             MarkdownTooltip(
               message: '''
+
                 **Blood Pressure:** A vital measurement of cardiovascular health.
                 It shows how strongly your blood pushes against artery walls.
                 Measured in mmHg, it's recorded as two numbers (systolic/diastolic).
+
               ''',
               child: IconButton(
                 icon: Icon(
@@ -428,9 +430,11 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                         MarkdownTooltip(
                           message: '''
+
                             **Systolic Blood Pressure:** The top number in your reading.
                             Measures the pressure when your heart contracts to pump blood.
                             Normal reading is typically below 120 mmHg.
+
                           ''',
                           child: IconButton(
                             icon: Icon(
@@ -456,9 +460,11 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                         MarkdownTooltip(
                           message: '''
+
                             **Diastolic Blood Pressure:** The bottom number in your reading.
                             Measures the pressure when your heart relaxes between beats.
                             Normal reading is typically below 80 mmHg.
+                            
                           ''',
                           child: IconButton(
                             icon: Icon(
