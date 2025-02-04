@@ -307,11 +307,11 @@ class _BPEditorState extends State<BPEditor> {
 
   DataRow _buildEditingRow(BPRecord record, int index) {
     final systolicController =
-        TextEditingController(text: record.systolic.toInt().toString());
+        TextEditingController(text: parseBpNumericInput(record.systolic));
     final diastolicController =
-        TextEditingController(text: record.diastolic.toInt().toString());
+        TextEditingController(text: parseBpNumericInput(record.diastolic));
     final heartRateController =
-        TextEditingController(text: record.heartRate.toInt().toString());
+        TextEditingController(text: parseBpNumericInput(record.heartRate));
     TextEditingController(text: record.heartRate.toString());
     final notesController = TextEditingController(text: record.notes);
 
