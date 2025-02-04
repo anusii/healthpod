@@ -109,10 +109,34 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
 
     List<String> errors = [];
     for (int i = 0; i < importStrings.length; i++) {
-      if (importStrings[i] != sortedImports[i]) {
-        errors.add('❌ Found: "${importStrings[i]}"\n'
-            '   🔼 Should be between "${i > 0 ? sortedImports[i - 1] : "start of imports"}"'
-            ' and "${i < sortedImports.length - 1 ? sortedImports[i + 1] : "end of imports"}".');
+      // Skip if the import is already at the correct position.
+
+      if (sortedImports[i] == importStrings[i]) continue;
+
+      // Determine the correct before/after position for the import.
+
+      String before = i > 0 ? sortedImports[i - 1] : "start of imports";
+      String after = i < sortedImports.length - 1
+          ? sortedImports[i + 1]
+          : "end of imports";
+
+      // If misplaced import is already in the expected "before" position, simplify the message.
+
+      if (importStrings[i] == before) {
+        errors.add('❌ Incorrect import position: "${importStrings[i]}"\n'
+            '   🔼 Expected position: Before "$after".');
+      }
+      // If misplaced import is already in the expected "after" position, simplify the message.
+
+      else if (importStrings[i] == after) {
+        errors.add('❌ Incorrect import position: "${importStrings[i]}"\n'
+            '   🔼 Expected position: After "$before".');
+      }
+      //  Default case: Show full "After X, Before Y" message.
+
+      else {
+        errors.add('❌ Incorrect import position: "${importStrings[i]}"\n'
+            '   🔼 Expected position: After "$before", before "$after".');
       }
     }
 

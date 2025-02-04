@@ -30,13 +30,13 @@ library;
 
 // Note: uncomment the imports below to trigger the lint warning.
 
-// import 'package:flutter/material.dart';  // Flutter import
-// import 'dart:async';  // Dart SDK import should come first
-// import 'package:healthpod/features/file/browser.dart';  // Project import should come last
-// import 'package:path/path.dart';  // External package import
-// import 'package:healthpod/features/bp/exporter.dart';  // Project import out of alphabetical order
-// import 'dart:io';  // Dart SDK import
-// import 'package:flutter/services.dart';  // Flutter import
+// import 'package:flutter/material.dart';  // Flutter import.
+// import 'dart:async';  // Dart SDK import should come first.
+// import 'package:healthpod/features/file/browser.dart';  // Project import should come last.
+// import 'package:path/path.dart';  // External package import.
+// import 'package:healthpod/features/bp/exporter.dart';  // Project import out of alphabetical order.
+// import 'dart:io';  // Dart SDK import.
+// import 'package:flutter/services.dart';  // Flutter import.
 
 void main() {
   // This function is left intentionally empty.
