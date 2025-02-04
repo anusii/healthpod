@@ -35,6 +35,7 @@ import 'package:solidpod/solidpod.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/bp/record.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/parse_bp_numeric_input.dart';
 
 /// Data Editor Page.
 ///
@@ -260,9 +261,12 @@ class _BPEditorState extends State<BPEditor> {
 
         DataCell(Text(DateFormat('yyyy-MM-dd HH:mm:ss')
             .format(record.timestamp))), // Format timestamp without 'T'.
-        DataCell(Text(record.systolic.toString())),
-        DataCell(Text(record.diastolic.toString())),
-        DataCell(Text(record.heartRate.toString())),
+
+        DataCell(Text(parseBpNumericInput(record
+            .systolic))), // Round to nearest int to display according to user expectation.
+        DataCell(Text(parseBpNumericInput(record.diastolic))),
+        DataCell(Text(parseBpNumericInput(record.heartRate))),
+
         DataCell(Text(record.feeling)),
         DataCell(
           Container(
@@ -303,11 +307,12 @@ class _BPEditorState extends State<BPEditor> {
 
   DataRow _buildEditingRow(BPRecord record, int index) {
     final systolicController =
-        TextEditingController(text: record.systolic.toString());
+        TextEditingController(text: record.systolic.toInt().toString());
     final diastolicController =
-        TextEditingController(text: record.diastolic.toString());
+        TextEditingController(text: record.diastolic.toInt().toString());
     final heartRateController =
-        TextEditingController(text: record.heartRate.toString());
+        TextEditingController(text: record.heartRate.toInt().toString());
+    TextEditingController(text: record.heartRate.toString());
     final notesController = TextEditingController(text: record.notes);
 
     return DataRow(
@@ -409,32 +414,38 @@ class _BPEditorState extends State<BPEditor> {
 
         DataCell(TextField(
           controller: systolicController,
-          keyboardType: TextInputType.number,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (value) {
+            final parsedValue =
+                double.tryParse(value) ?? 0.0; // Keep as double.
             records[index] = record.copyWith(
-              systolic: double.tryParse(value) ??
-                  0, // Use double instead of int for potential readings with decimal places.
+              systolic: parsedValue, // Store the double value.
             );
           },
         )),
+
         DataCell(TextField(
           controller: diastolicController,
-          keyboardType: TextInputType.number,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (value) {
+            final parsedValue = double.tryParse(value) ?? 0.0;
             records[index] = record.copyWith(
-              diastolic: double.tryParse(value) ?? 0,
+              diastolic: parsedValue,
             );
           },
         )),
+
         DataCell(TextField(
           controller: heartRateController,
-          keyboardType: TextInputType.number,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (value) {
+            final parsedValue = double.tryParse(value) ?? 0.0;
             records[index] = record.copyWith(
-              heartRate: double.tryParse(value) ?? 0,
+              heartRate: parsedValue,
             );
           },
         )),
+
         DataCell(DropdownButton<String>(
           value: record.feeling.isEmpty ? null : record.feeling,
           items: ['Excellent', 'Good', 'Fair', 'Poor']
