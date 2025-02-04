@@ -28,6 +28,6 @@ library;
 /// Rounds a double value to the nearest integer for display purposes.
 /// If the value is null, it returns '0'.
 
-String parseBpNumericInput(double? value) {
-  return value?.round().toString() ?? '0';
+String parseBpNumericInput(double value) {
+  return value.round().toString();
 }
