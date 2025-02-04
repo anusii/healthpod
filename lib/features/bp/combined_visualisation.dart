@@ -63,10 +63,10 @@ class BPCombinedVisualisation extends StatefulWidget {
 
   @override
   State<BPCombinedVisualisation> createState() =>
-      _CombinedBPVisualisationState();
+      _BPCombinedVisualisationState();
 }
 
-class _CombinedBPVisualisationState extends State<BPCombinedVisualisation> {
+class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
   /// Extracts and converts systolic blood pressure data into chart points.
   ///
   /// Returns a list of [FlSpot] objects where:
