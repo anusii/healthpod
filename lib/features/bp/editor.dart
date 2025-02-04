@@ -33,15 +33,15 @@ import 'package:intl/intl.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/features/bp/record.dart';
+import 'package:healthpod/features/bp/observation.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/parse_bp_numeric_input.dart';
 
 /// Data Editor Page.
 ///
-/// A widget that provides CRUD (Create, Read, Update, Delete) operations for blood pressure records.
-/// Records are stored in encrypted format in the user's POD storage under the 'bp' directory.
-/// Each record contains timestamp, systolic/diastolic pressure, heart rate, feeling, and notes.
+/// A widget that provides CRUD (Create, Read, Update, Delete) operations for blood pressure observations.
+/// Observations are stored in encrypted format in the user's POD storage under the 'bp' directory.
+/// Each observation contains timestamp, systolic/diastolic pressure, heart rate, feeling, and notes.
 
 class BPEditor extends StatefulWidget {
   const BPEditor({super.key});
@@ -51,11 +51,11 @@ class BPEditor extends StatefulWidget {
 }
 
 class _BPEditorState extends State<BPEditor> {
-  // List of blood pressure records loaded from POD.
+  // List of blood pressure observations loaded from POD.
 
-  List<BPRecord> records = [];
+  List<BPObservation> observations = [];
 
-  // Index of record currently being edited, null if no record is being edited.
+  // Index of observation currently being edited, null if no observation is being edited.
 
   int? editingIndex;
 
@@ -73,10 +73,10 @@ class _BPEditorState extends State<BPEditor> {
     loadData();
   }
 
-  /// Loads blood pressure records from POD storage.
+  /// Loads blood pressure observations from POD storage.
   ///
   /// Fetches all .enc.ttl files from the bp directory, decrypts them,
-  /// and parses them into BPRecord objects. Records are sorted by timestamp
+  /// and parses them into BPObservation objects. Observations are sorted by timestamp
   /// in descending order (newest first).
 
   Future<void> loadData() async {
@@ -94,7 +94,7 @@ class _BPEditorState extends State<BPEditor> {
 
       final resources = await getResourcesInContainer(dirUrl);
 
-      final List<BPRecord> loadedRecords = [];
+      final List<BPObservation> loadedObservations = [];
       for (final file in resources.files) {
         // Skip files that don't match expected naming pattern.
 
@@ -118,19 +118,19 @@ class _BPEditorState extends State<BPEditor> {
             content != SolidFunctionCallStatus.notLoggedIn &&
             content != null) {
           try {
-            // Parse JSON content into a `BPRecord`.
+            // Parse JSON content into a `BPObservation`.
             final data = json.decode(content.toString());
-            loadedRecords.add(BPRecord.fromJson(data));
+            loadedObservations.add(BPObservation.fromJson(data));
           } catch (e) {
             debugPrint('Error parsing file $file: $e');
           }
         }
       }
 
-      // Update UI with loaded and sorted records.
+      // Update UI with loaded and sorted observations.
 
       setState(() {
-        records = loadedRecords
+        observations = loadedObservations
           ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
         isLoading = false;
       });
@@ -145,19 +145,19 @@ class _BPEditorState extends State<BPEditor> {
     }
   }
 
-  /// Saves a blood pressure record to POD storage.
+  /// Saves a blood pressure observation to POD storage.
   ///
-  /// Creates or updates an encrypted file in the bp directory with the record data.
-  /// File name is generated from the record's timestamp.
+  /// Creates or updates an encrypted file in the bp directory with the observation data.
+  /// File name is generated from the observation's timestamp.
 
-  Future<void> saveRecord(BPRecord record) async {
+  Future<void> saveObservation(BPObservation observation) async {
     try {
-      // Delete old file if updating existing record.
+      // Delete old file if updating existing observation.
 
       if (editingIndex != null) {
-        final oldRecord = records[editingIndex!];
+        final oldObservation = observations[editingIndex!];
         final oldTimestamp = formatTimestampForFilename(
-            oldRecord.timestamp); // Ensure no milliseconds in filename.
+            oldObservation.timestamp); // Ensure no milliseconds in filename.
         final oldFilename = 'blood_pressure_$oldTimestamp.json.enc.ttl';
         await deleteFile('healthpod/data/bp/$oldFilename');
       }
@@ -165,20 +165,20 @@ class _BPEditorState extends State<BPEditor> {
       // Generate a unique filename using formatted timestamp.
 
       final filename =
-          'blood_pressure_${formatTimestampForFilename(record.timestamp)}.json.enc.ttl';
+          'blood_pressure_${formatTimestampForFilename(observation.timestamp)}.json.enc.ttl';
 
-      // Write record data to file.
+      // Write observation data to file.
 
       if (!mounted) return;
       await writePod(
         'bp/$filename',
-        json.encode(record.toJson()),
+        json.encode(observation.toJson()),
         context,
         const Text('Saving'),
         encrypted: true,
       );
 
-      // Refresh the record list after saving.
+      // Refresh the observation list after saving.
 
       if (!mounted) return; // Check if the widget is still mounted
       setState(() {
@@ -197,15 +197,16 @@ class _BPEditorState extends State<BPEditor> {
     }
   }
 
-  /// Deletes a blood pressure record from POD storage.
+  /// Deletes a blood pressure observation from POD storage.
   ///
-  /// Removes the encrypted file corresponding to the record from the bp directory.
+  /// Removes the encrypted file corresponding to the observation from the bp directory.
 
-  Future<void> deleteRecord(BPRecord record) async {
+  Future<void> deleteObservation(BPObservation observation) async {
     try {
-      // Generate the filename from the record's timestamp.
+      // Generate the filename from the observation's timestamp.
 
-      final timestamp = record.timestamp.toIso8601String().substring(0, 19);
+      final timestamp =
+          observation.timestamp.toIso8601String().substring(0, 19);
 
       final filename =
           'blood_pressure_${timestamp.replaceAll(RegExp(r'[:.]+'), '-')}.json.enc.ttl';
@@ -229,15 +230,15 @@ class _BPEditorState extends State<BPEditor> {
     }
   }
 
-  /// Creates a new blank blood pressure record.
+  /// Creates a new blank blood pressure observation.
   ///
-  /// Inserts a new record at the beginning of the list and enters edit mode.
+  /// Inserts a new observation at the beginning of the list and enters edit mode.
 
-  void addNewRecord() {
+  void addNewObservation() {
     setState(() {
-      records.insert(
+      observations.insert(
           0,
-          BPRecord(
+          BPObservation(
             timestamp: DateTime.now(),
             systolic: 0,
             diastolic: 0,
@@ -245,34 +246,34 @@ class _BPEditorState extends State<BPEditor> {
             feeling: '',
             notes: '',
           ));
-      editingIndex = 0; // Start editing the new record.
+      editingIndex = 0; // Start editing the new observation.
     });
   }
 
-  /// Builds a read-only display row for a blood pressure record.
+  /// Builds a read-only display row for a blood pressure observation.
   ///
   /// Displays formatted timestamp, systolic/diastolic pressure, heart rate,
   /// feeling, and notes as static text. Includes edit and delete action buttons.
 
-  DataRow _buildDisplayRow(BPRecord record, int index) {
+  DataRow _buildDisplayRow(BPObservation observation, int index) {
     return DataRow(
       cells: [
         // Timestamp, systolic, diastolic, heart rate, feeling, and notes.
 
         DataCell(Text(DateFormat('yyyy-MM-dd HH:mm:ss')
-            .format(record.timestamp))), // Format timestamp without 'T'.
+            .format(observation.timestamp))), // Format timestamp without 'T'.
 
-        DataCell(Text(parseBpNumericInput(record
+        DataCell(Text(parseBpNumericInput(observation
             .systolic))), // Round to nearest int to display according to user expectation.
-        DataCell(Text(parseBpNumericInput(record.diastolic))),
-        DataCell(Text(parseBpNumericInput(record.heartRate))),
+        DataCell(Text(parseBpNumericInput(observation.diastolic))),
+        DataCell(Text(parseBpNumericInput(observation.heartRate))),
 
-        DataCell(Text(record.feeling)),
+        DataCell(Text(observation.feeling)),
         DataCell(
           Container(
             constraints: const BoxConstraints(maxWidth: 200),
             child: Text(
-              record.notes,
+              observation.notes,
               overflow: TextOverflow.ellipsis,
               maxLines: 3,
             ),
@@ -291,7 +292,7 @@ class _BPEditorState extends State<BPEditor> {
 
             IconButton(
               icon: const Icon(Icons.delete),
-              onPressed: () => deleteRecord(record),
+              onPressed: () => deleteObservation(observation),
             ),
           ],
         )),
@@ -299,21 +300,21 @@ class _BPEditorState extends State<BPEditor> {
     );
   }
 
-  /// Builds an editable row for a blood pressure record.
+  /// Builds an editable row for a blood pressure observation.
   ///
   /// Creates text fields for timestamp, systolic/diastolic pressure, and heart rate,
   /// a dropdown for feeling selection, and a notes field. Each field has its own
-  /// controller and updates the record on change.
+  /// controller and updates the observation on change.
 
-  DataRow _buildEditingRow(BPRecord record, int index) {
+  DataRow _buildEditingRow(BPObservation observation, int index) {
     final systolicController =
-        TextEditingController(text: record.systolic.toInt().toString());
+        TextEditingController(text: observation.systolic.toInt().toString());
     final diastolicController =
-        TextEditingController(text: record.diastolic.toInt().toString());
+        TextEditingController(text: observation.diastolic.toInt().toString());
     final heartRateController =
-        TextEditingController(text: record.heartRate.toInt().toString());
-    TextEditingController(text: record.heartRate.toString());
-    final notesController = TextEditingController(text: record.notes);
+        TextEditingController(text: observation.heartRate.toInt().toString());
+    TextEditingController(text: observation.heartRate.toString());
+    final notesController = TextEditingController(text: observation.notes);
 
     return DataRow(
       cells: [
@@ -324,7 +325,7 @@ class _BPEditorState extends State<BPEditor> {
             onTap: () async {
               final date = await showDatePicker(
                 context: context,
-                initialDate: record.timestamp,
+                initialDate: observation.timestamp,
                 firstDate: DateTime(2000),
                 lastDate: DateTime.now(),
               );
@@ -332,7 +333,7 @@ class _BPEditorState extends State<BPEditor> {
               if (date != null && mounted) {
                 final time = await showTimePicker(
                   context: context,
-                  initialTime: TimeOfDay.fromDateTime(record.timestamp),
+                  initialTime: TimeOfDay.fromDateTime(observation.timestamp),
                 );
 
                 if (time != null && mounted) {
@@ -377,14 +378,14 @@ class _BPEditorState extends State<BPEditor> {
                     milliseconds ?? 0,
                   );
 
-                  if (records.any((r) =>
+                  if (observations.any((r) =>
                       r.timestamp == newTimestamp &&
-                      records.indexOf(r) != index)) {
+                      observations.indexOf(r) != index)) {
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
-                              'A record with this timestamp already exists'),
+                              'A observation with this timestamp already exists'),
                         ),
                       );
                     }
@@ -392,7 +393,8 @@ class _BPEditorState extends State<BPEditor> {
                   }
 
                   setState(() {
-                    records[index] = record.copyWith(timestamp: newTimestamp);
+                    observations[index] =
+                        observation.copyWith(timestamp: newTimestamp);
                   });
                 }
               }
@@ -400,7 +402,8 @@ class _BPEditorState extends State<BPEditor> {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Text(
-                DateFormat('yyyy-MM-dd HH:mm:ss.SSS').format(record.timestamp),
+                DateFormat('yyyy-MM-dd HH:mm:ss.SSS')
+                    .format(observation.timestamp),
                 style: const TextStyle(
                   decoration: TextDecoration.underline,
                   color: Colors.blue,
@@ -418,7 +421,7 @@ class _BPEditorState extends State<BPEditor> {
           onChanged: (value) {
             final parsedValue =
                 double.tryParse(value) ?? 0.0; // Keep as double.
-            records[index] = record.copyWith(
+            observations[index] = observation.copyWith(
               systolic: parsedValue, // Store the double value.
             );
           },
@@ -429,7 +432,7 @@ class _BPEditorState extends State<BPEditor> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (value) {
             final parsedValue = double.tryParse(value) ?? 0.0;
-            records[index] = record.copyWith(
+            observations[index] = observation.copyWith(
               diastolic: parsedValue,
             );
           },
@@ -440,14 +443,14 @@ class _BPEditorState extends State<BPEditor> {
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           onChanged: (value) {
             final parsedValue = double.tryParse(value) ?? 0.0;
-            records[index] = record.copyWith(
+            observations[index] = observation.copyWith(
               heartRate: parsedValue,
             );
           },
         )),
 
         DataCell(DropdownButton<String>(
-          value: record.feeling.isEmpty ? null : record.feeling,
+          value: observation.feeling.isEmpty ? null : observation.feeling,
           items: ['Excellent', 'Good', 'Fair', 'Poor']
               .map((feeling) => DropdownMenuItem(
                     value: feeling,
@@ -456,7 +459,7 @@ class _BPEditorState extends State<BPEditor> {
               .toList(),
           onChanged: (value) {
             setState(() {
-              records[index] = record.copyWith(feeling: value ?? '');
+              observations[index] = observation.copyWith(feeling: value ?? '');
             });
           },
         )),
@@ -471,7 +474,7 @@ class _BPEditorState extends State<BPEditor> {
                 contentPadding: EdgeInsets.symmetric(vertical: 8.0),
               ),
               onChanged: (value) {
-                records[index] = record.copyWith(notes: value);
+                observations[index] = observation.copyWith(notes: value);
               },
             ),
           ),
@@ -483,7 +486,7 @@ class _BPEditorState extends State<BPEditor> {
 
             IconButton(
               icon: const Icon(Icons.save),
-              onPressed: () => saveRecord(records[index]),
+              onPressed: () => saveObservation(observations[index]),
             ),
             // Cancel button.
 
@@ -501,15 +504,15 @@ class _BPEditorState extends State<BPEditor> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Blood Pressure Records'),
+        title: const Text('Blood Pressure Observations'),
         backgroundColor: titleBackgroundColor,
         actions: [
-          // Add new record button.
+          // Add new observation button.
 
           if (!isLoading)
             IconButton(
               icon: const Icon(Icons.add),
-              onPressed: addNewRecord,
+              onPressed: addNewObservation,
               tooltip: 'Add New Reading',
             ),
         ],
@@ -537,13 +540,13 @@ class _BPEditorState extends State<BPEditor> {
                 DataColumn(label: Text('Actions')),
               ],
               rows: List<DataRow>.generate(
-                records.length,
+                observations.length,
                 (index) {
-                  final record = records[index];
+                  final observation = observations[index];
                   if (editingIndex == index) {
-                    return _buildEditingRow(record, index);
+                    return _buildEditingRow(observation, index);
                   }
-                  return _buildDisplayRow(record, index);
+                  return _buildDisplayRow(observation, index);
                 },
               ),
             ),
