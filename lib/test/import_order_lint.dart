@@ -1,4 +1,4 @@
-/// Plugin widget.
+/// Import order lint test file.
 ///
 // Time-stamp: <Thursday 2025-01-30 08:36:00 +1100 Graham Williams>
 ///
@@ -25,30 +25,15 @@
 
 library;
 
-import 'custom_lint.dart';
+// These imports are intentionally out of order to test the lint rule.
+// The lint rule should flag this file due to incorrect import ordering.
 
-import 'package:custom_lint_builder/custom_lint_builder.dart';
+// Note: uncomment the imports below to trigger the lint warning.
 
-/// Plugin class that registers the custom lint rules.
-///
-/// This class implements [PluginBase] and is responsible for providing
-/// the list of lint rules that should be applied during analysis.
-
-class MyPlugin extends PluginBase {
-  /// Returns the list of lint rules to be applied during analysis.
-  ///
-  /// [configs] Contains configuration options for the lint rules.
-  /// Returns a list containing an instance of [MyCustomLint].
-
-  @override
-  List<LintRule> getLintRules(CustomLintConfigs configs) => [CustomLint()];
-}
-
-/// Factory function that creates an instance of the plugin.
-///
-/// This function is required by the custom_lint package and is used to
-/// instantiate the plugin when the analyzer loads it.
-///
-/// Returns a new instance of [MyPlugin].
-
-PluginBase createPlugin() => MyPlugin();
+// import 'package:flutter/material.dart';  // Flutter import
+// import 'dart:async';  // Dart SDK import should come first
+// import 'package:healthpod/features/file/browser.dart';  // Project import should come last
+// import 'package:path/path.dart';  // External package import
+// import 'package:healthpod/features/bp/exporter.dart';  // Project import out of alphabetical order
+// import 'dart:io';  // Dart SDK import
+// import 'package:flutter/services.dart';  // Flutter import
