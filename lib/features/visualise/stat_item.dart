@@ -42,18 +42,20 @@ class StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      // Align content vertically: label first, value below.
-
+    return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          label,
-          style: Theme.of(context).textTheme.bodySmall,
+          '$label: ',
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Colors.grey[600],
+          ),
         ),
-        const SizedBox(height: 4),
         Text(
           value,
-          style: Theme.of(context).textTheme.titleMedium,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     );

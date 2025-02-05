@@ -179,9 +179,11 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       appBar: AppBar(
         title: Row(
           children: [
-            const Text(
-              'Blood Pressure Trends',
-              style: TextStyle(fontWeight: FontWeight.w500),
+            Flexible(
+              child: const Text(
+                'Blood Pressure Trends',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
             ),
             // General blood pressure tooltip providing overview of the measurement.
             // Explains what blood pressure is, how it's measured, and its components.
@@ -445,115 +447,123 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
             const SizedBox(height: 16),
             // Legend and statistics card.
 
-            Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              color: Colors.grey[100],
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16.0,
-                  horizontal: 24.0,
-                ),
-                child: Column(
-                  children: [
-                    // Color-coded legend for systolic and diastolic lines.
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-
-                        // Systolic pressure tooltip explaining the top number.
-                        // Details what systolic pressure measures and normal range.
-
-                        // Combined tooltip for systolic label and icon so that the tooltip
-                        // is displayed when hovering over either the label or the icon.
-
-                        MarkdownTooltip(
-                          message: '''
-
-                            **Systolic Blood Pressure:** The top number in your reading.
-                            Measures the pressure when your heart contracts to pump blood.
-                            Normal reading is typically below 120 mmHg.
-
-                          ''',
-                          child: Row(
-                            children: [
-                              Text(
-                                'Systolic',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.info_outline,
-                                color: Colors.grey[600],
-                                size: 16,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 24),
-                        Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.secondary,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-
-                        MarkdownTooltip(
-                          message: '''
-
-                            **Diastolic Blood Pressure:** The bottom number in your reading.
-                            Measures the pressure when your heart relaxes between beats.
-                            Normal reading is typically below 80 mmHg.
-
-                          ''',
-                          child: Row(
-                            children: [
-                              Text(
-                                'Diastolic',
-                                style: Theme.of(context).textTheme.bodyMedium,
-                              ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Icons.info_outline,
-                                color: Colors.grey[600],
-                                size: 16,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    // Summary statistics display.
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        ..._buildStatItems(),
-                      ],
-                    ),
-                  ],
+           // Legend and statistics card
+Card(
+  elevation: 4,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+  ),
+  color: Colors.grey[100],
+  child: Padding(
+    padding: const EdgeInsets.symmetric(
+      vertical: 16.0,
+      horizontal: 12.0,
+    ),
+    child: Column(
+      children: [
+        // Legend items
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  shape: BoxShape.circle,
                 ),
               ),
             ),
+            const SizedBox(width: 8),
+            Flexible(child: const Text('Systolic')),
+            const SizedBox(width: 24),
+            Flexible(
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(child: const Text('Diastolic')),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Scrollable stats row
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              StatItem(
+                label: 'Average',
+                value: '120/76 mmHg',
+              ),
+              const SizedBox(width: 16),
+              StatItem(
+                label: 'Min',
+                value: '105/70 mmHg',
+              ),
+              const SizedBox(width: 16),
+              StatItem(
+                label: 'Max',
+                value: '150/90 mmHg',
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  ),
+)
+
           ],
         ),
       ),
     );
   }
+
+  Widget _buildLegendItem(
+  BuildContext context, {
+  required Color color,
+  required String label,
+  required String tooltip,
+}) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Container(
+        width: 12,
+        height: 12,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+        ),
+      ),
+      const SizedBox(width: 8),
+      MarkdownTooltip(
+        message: tooltip,
+        child: Row(
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.info_outline,
+              color: Colors.grey[600],
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
 }
+}
+
