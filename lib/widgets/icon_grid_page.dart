@@ -242,7 +242,7 @@ class IconGridPage extends StatelessWidget {
 
                   - Edit existing data
 
-                  - Delete records
+                  - Delete observations
 
                   ''',
                   child: gestureDetector,

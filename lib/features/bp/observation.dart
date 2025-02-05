@@ -1,4 +1,4 @@
-/// Data record widget.
+/// Data observation widget.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -27,13 +27,17 @@ library;
 
 import 'package:healthpod/constants/survey.dart';
 
-/// Model class representing a blood pressure record.
+/// Model class representing a blood pressure observation.
 ///
 /// Stores complete blood pressure measurements including systolic/diastolic pressure,
 /// heart rate, subjective feeling, and any additional health notes. Provides JSON
 /// serialization and object copying functionality.
+///
+/// Note: previously 'BPRecord' was used as the class name, but 'BPObservation' is
+/// more accurate as it represents a single observation rather than a collection of
+/// records.
 
-class BPRecord {
+class BPObservation {
   /// When the measurement was taken.
 
   final DateTime timestamp;
@@ -59,7 +63,7 @@ class BPRecord {
 
   final String notes;
 
-  BPRecord({
+  BPObservation({
     required this.timestamp,
     required this.systolic,
     required this.diastolic,
@@ -68,13 +72,13 @@ class BPRecord {
     required this.notes,
   });
 
-  /// Creates a BPRecord from JSON data.
+  /// Creates a BPObservation from JSON data.
   ///
   /// Expects specific survey response format with blood pressure measurements,
   /// heart rate, feeling and notes stored under 'responses' key.
 
-  factory BPRecord.fromJson(Map<String, dynamic> json) {
-    return BPRecord(
+  factory BPObservation.fromJson(Map<String, dynamic> json) {
+    return BPObservation(
       timestamp: DateTime.parse(json['timestamp']),
       systolic: json['responses'][HealthSurveyConstants
           .fieldSystolic], // Use BP survey field variable instead of full question.
@@ -85,7 +89,7 @@ class BPRecord {
     );
   }
 
-  /// Converts record to JSON format matching survey response structure.
+  /// Converts observation to JSON format matching survey response structure.
   ///
   /// Creates a map with timestamp and responses containing all measurements.
 
@@ -103,11 +107,11 @@ class BPRecord {
     };
   }
 
-  /// Creates a copy of this record with optionally updated fields.
+  /// Creates a copy of this observation with optionally updated fields.
   ///
   /// Any field not specified retains its original value.
 
-  BPRecord copyWith({
+  BPObservation copyWith({
     DateTime? timestamp,
     double? systolic,
     double? diastolic,
@@ -115,7 +119,7 @@ class BPRecord {
     String? feeling,
     String? notes,
   }) {
-    return BPRecord(
+    return BPObservation(
       timestamp: timestamp ?? this.timestamp,
       systolic: systolic ?? this.systolic,
       diastolic: diastolic ?? this.diastolic,
