@@ -28,11 +28,13 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/features/visualise/stat_item.dart';
+import 'package:healthpod/utils/get_month_abbrev.dart';
 
 /// Combined blood pressure visualisation widget.
 ///
@@ -316,14 +318,30 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                                   value == index.toDouble()) {
                                 final date = DateTime.parse(
                                     widget.surveyData[index]['timestamp']);
+
+                                // Show year if this is first data point or if year changed from previous point.
+
+                                bool showYear = index == 0 ||
+                                    (index > 0 &&
+                                        DateTime.parse(
+                                                    widget.surveyData[index - 1]
+                                                        ['timestamp'])
+                                                .year !=
+                                            date.year);
+
                                 return Padding(
                                   padding: const EdgeInsets.all(4.0),
-                                  child: Text(
-                                    '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}',
-                                    style: TextStyle(
-                                      color: Colors.grey[800],
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
+                                  child: MarkdownTooltip(
+                                    message: '''
+      **Time:** ${DateFormat('HH:mm').format(date)}
+    ''',
+                                    child: Text(
+                                      '${date.day} ${getMonthAbbrev(date.month)}${showYear ? " '${(date.year % 100).toString().padLeft(2, '0')}" : ""}',
+                                      style: TextStyle(
+                                        color: Colors.grey[800],
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                 );
