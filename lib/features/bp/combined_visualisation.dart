@@ -221,8 +221,32 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                   child: LineChart(
                     LineChartData(
                       backgroundColor: Colors.white,
-                      // Configure interactive tooltip behavior.
+                      extraLinesData: ExtraLinesData(
+                        horizontalLines: [
+                          // Upper systolic threshold line (120 mmHg).
 
+                          HorizontalLine(
+                            y: 120,
+                            color: const Color(0xFF9F70FF),
+                            strokeWidth: 1.5,
+                            dashArray: [5, 5],
+                            label: HorizontalLineLabel(
+                              show: false, // Hide by default.
+                            ),
+                          ),
+                          // Upper diastolic threshold line (80 mmHg).
+
+                          HorizontalLine(
+                            y: 80,
+                            color: const Color(0xFF00BD9D),
+                            strokeWidth: 1.5,
+                            dashArray: [5, 5],
+                            label: HorizontalLineLabel(
+                              show: false, // Hide by default.
+                            ),
+                          ),
+                        ],
+                      ),
                       lineTouchData: LineTouchData(
                         touchTooltipData: LineTouchTooltipData(
                           tooltipRoundedRadius: 8,
@@ -230,13 +254,19 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                             color: Colors.white,
                             width: 1,
                           ),
-                          // Custom tooltip showing both systolic and diastolic values.
-
                           getTooltipItems: (List<LineBarSpot> touchedSpots) {
                             return touchedSpots.map((LineBarSpot spot) {
                               final isSystolic = spot.barIndex == 0;
+                              String label = '';
+                              if (isSystolic) {
+                                label =
+                                    'Systolic: ${spot.y.toStringAsFixed(1)} mmHg\nNormal: below 120 mmHg';
+                              } else {
+                                label =
+                                    'Diastolic: ${spot.y.toStringAsFixed(1)} mmHg\nNormal: below 80 mmHg';
+                              }
                               return LineTooltipItem(
-                                '${isSystolic ? "Systolic" : "Diastolic"}: ${spot.y.toStringAsFixed(1)} mmHg',
+                                label,
                                 TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w500,
