@@ -420,14 +420,13 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          'Systolic',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        const SizedBox(width: 4),
+
                         // Systolic pressure tooltip explaining the top number.
                         // Details what systolic pressure measures and normal range.
 
+                        // Combined tooltip for systolic label and icon so that the tooltip
+                        // is displayed when hovering over either the label or the icon.
+                        
                         MarkdownTooltip(
                           message: '''
 
@@ -436,13 +435,19 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                             Normal reading is typically below 120 mmHg.
 
                           ''',
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.info_outline,
-                              color: Colors.grey[600],
-                              size: 16,
-                            ),
-                            onPressed: () {},
+                          child: Row(
+                            children: [
+                              Text(
+                                'Systolic',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.grey[600],
+                                size: 16,
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 24),
@@ -455,8 +460,6 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // Diastolic pressure tooltip explaining the bottom number.
-                        // Details what diastolic pressure measures and normal range.
 
                         MarkdownTooltip(
                           message: '''
@@ -464,15 +467,21 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                             **Diastolic Blood Pressure:** The bottom number in your reading.
                             Measures the pressure when your heart relaxes between beats.
                             Normal reading is typically below 80 mmHg.
-                            
+
                           ''',
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.info_outline,
-                              color: Colors.grey[600],
-                              size: 16,
-                            ),
-                            onPressed: () {},
+                          child: Row(
+                            children: [
+                              Text(
+                                'Diastolic',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.grey[600],
+                                size: 16,
+                              ),
+                            ],
                           ),
                         ),
                       ],
