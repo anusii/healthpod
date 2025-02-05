@@ -1,8 +1,8 @@
-/// POD connection integration test.
+/// Integration tests for Solid POD connection functionality.
 //
-// Time-stamp: <Sunday 2025-01-26 08:55:54 +1100 Graham Williams>
+// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
-/// Copyright (C) 2023-2024, Togaware Pty Ltd
+/// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
@@ -25,29 +25,84 @@
 
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'package:healthpod/main.dart' as app;
 import 'package:healthpod/utils/fetch_web_id.dart';
+import 'package:healthpod/utils/create_solid_login.dart';
 
-// Main entry point for the integration test.
+/// Integration tests for Solid POD connection functionality in HealthPod app.
+///
+/// This file contains integration tests that verify the application's ability to:
+/// - Connect to a Solid POD (Personal Online Datastore)
+/// - Authenticate users through both external browser and WebView
+/// - Handle the login/logout flow
+/// - Manage WebID retrieval and storage
+///
+/// The tests can run in two modes:
+/// 1. External Browser Mode (default): Uses system browser for authentication
+/// 2. WebView Mode: Uses in-app WebView when INTEGRATION_TEST environment variable is set to 'true'
+///
+/// Test Structure:
+/// - Main test runner that checks environment and launches appropriate test mode
+/// - External browser connection test group
+/// - WebView-specific connection test group
+///
+/// Mode Limitations:
+/// External Browser Mode:
+/// - Requires manual user interaction for login/logout
+/// - Cannot be fully automated for CI/CD pipelines
+/// - Tests may be flaky due to browser timing dependencies
+///
+/// WebView Mode:
+/// - Bypasses proper OIDC authentication flow
+/// - SolidPod library cannot detect/store valid session
+/// - getWebId() and similar functions may fail
+/// - Current implementation is a temporary solution for testing
 
 void main() {
-  connectToPod();
+  // Initialise integration test environment.
+
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  // Determine test mode based on environment variable.
+
+  final integrationTestEnv =
+      Platform.environment['INTEGRATION_TEST'] ?? 'false';
+  final isIntegrationTest = integrationTestEnv.toLowerCase() == 'true';
+
+  // Log the test environment configuration.
+
+  debugPrint("🌍 INTEGRATION_TEST: $integrationTestEnv");
+  ("🔍 isIntegrationTest: $isIntegrationTest");
+
+  // Execute appropriate test suite based on mode.
+
+  if (isIntegrationTest) {
+    debugPrint("🌍 Running in WebView mode...");
+    connectToPodWebView();
+  } else {
+    debugPrint("🌍 Running in external browser mode...");
+    connectToPod();
+  }
 }
 
-/// POD connection integration test.
+/// Main test suite for external browser-based POD connection.
 ///
-/// This test verifies the basic POD connection functionality that other features
-/// will depend on. Feature-specific tests (like bp/survey.dart) will build on
-/// this base connection test.
-///
-/// Note: Currently, the test will still require manual browser interaction for both
-/// login and logout since it's using external browser authentication.
-/// To make it fully automated, we would need to refactor use WebView instead of
-/// external browser or use mocking for authentication in test environment.
+/// Tests the complete authentication flow including:
+/// - Initial app launch
+/// - Login button interaction
+/// - Authentication process
+/// - Home screen verification
+/// - WebID retrieval
+/// - Logout process
+/// - Post-logout state verification
 
 void connectToPod() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -56,22 +111,22 @@ void connectToPod() {
     testWidgets('Verify POD connection and authentication flow',
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        // Launch app.
+        // Launch and initialise app.
 
         app.main();
         await tester.pumpAndSettle();
 
-        // Wait for initial animations.
+        // Allow time for initial animations to complete.
 
         await Future.delayed(const Duration(seconds: 1));
         await tester.pumpAndSettle();
 
-        // Verify initial login screen elements.
+        // Verify presence of essential login screen elements.
 
         expect(find.byType(SelectionArea), findsOneWidget);
         expect(find.byType(MaterialApp), findsOneWidget);
 
-        // Find and tap Login button.
+        // Initiate login process.
 
         final loginButton = find.byType(ElevatedButton).first;
         expect(loginButton, findsOneWidget);
@@ -80,12 +135,12 @@ void connectToPod() {
 
         // Note: Browser interaction required from user to add Solid login details.
 
-        // Wait for auth flow to complete.
+        // Allow time for external browser authentication.
 
         await Future.delayed(const Duration(seconds: 5));
         await tester.pumpAndSettle();
 
-        // Keep pumping frames until we find the AppBar or timeout.
+        // Poll for AppBar presence to confirm successful login.
 
         int attempts = 0;
         while (find.byType(AppBar).evaluate().isEmpty && attempts < 10) {
@@ -93,7 +148,7 @@ void connectToPod() {
           attempts++;
         }
 
-        // Verify home screen elements.
+        // Verify successful navigation to home screen.
 
         expect(find.byType(AppBar), findsOneWidget);
         expect(find.text('Your Health - Your Data'), findsOneWidget);
@@ -103,14 +158,14 @@ void connectToPod() {
         final webId = await fetchWebId();
         expect(webId, isNotNull);
 
-        // Find and tap logout button.
+        // Execute logout process.
 
         final logoutButton = find.byIcon(Icons.logout);
         expect(logoutButton, findsOneWidget);
         await tester.tap(logoutButton);
         await tester.pumpAndSettle();
 
-        // Find and tap OK on the confirmation dialog.
+        // Handle logout confirmation.
 
         final okButton = find.text('OK');
         expect(okButton, findsOneWidget,
@@ -121,17 +176,71 @@ void connectToPod() {
 
         // Note: browser interaction required from user to click 'Yes, sign me out'.
 
-        // Add a small delay to allow for async cleanup.
+        // Allow time for logout cleanup.
 
         await Future.delayed(const Duration(seconds: 4));
         await tester.pumpAndSettle();
 
-        // Now verify WebID is cleared.
+        // Verify successful logout.
 
         final webIdAfterLogout = await fetchWebId();
         expect(webIdAfterLogout, isNull,
             reason: 'WebID should be null after logout');
       });
+    });
+  });
+}
+
+/// WebView-specific test suite for POD connection.
+///
+/// Focuses on verifying WebID retrieval in WebView mode, which is designed
+/// for automated testing scenarios. This test:
+/// - Confirms WebView presence
+/// - Attempts WebID extraction multiple times
+/// - Validates successful WebID retrieval
+
+void connectToPodWebView() {
+  group('HealthPod POD Connection:', () {
+    testWidgets('Verify we can retrieve WebID in WebView mode',
+        (WidgetTester tester) async {
+      // Initialise app in WebView mode.
+
+      app.main();
+      await tester.pumpAndSettle();
+
+      // Verify WebView presence.
+
+      expect(find.byType(InAppWebView), findsOneWidget);
+      debugPrint("✅ WebView found, waiting for login to complete...");
+
+      // Attempt WebID extraction with retry logic.
+
+      const maxRetries = 5;
+      int remaining = maxRetries;
+      String? webId;
+
+      while (webId == null && remaining > 0) {
+        debugPrint("🔄 Checking for extracted WebID... "
+            "Attempt ${maxRetries - remaining + 1}/$maxRetries");
+
+        // Allow time for login process and JS injection.
+
+        await Future.delayed(const Duration(seconds: 3));
+        await tester.pumpAndSettle();
+
+        webId = SolidLoginTestHelper.extractedWebId;
+        remaining--;
+      }
+
+      // Validate WebID extraction results.
+
+      if (webId != null && webId.isNotEmpty) {
+        debugPrint("✅ WebID retrieved from page: $webId");
+      } else {
+        debugPrint(
+            "❌ WebID could not be retrieved after $maxRetries attempts!");
+        fail('Unable to fetch WebID from HTML.');
+      }
     });
   });
 }
