@@ -179,38 +179,31 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       appBar: AppBar(
         title: Row(
           children: [
-            // Title text with custom font weight for visual hierarchy.
-
-            Flexible(
-              child: const Text(
-                'Blood Pressure Trends',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ),
-            // General blood pressure tooltip providing overview of the measurement.
-            // Explains what blood pressure is, how it's measured, and its components.
-
             MarkdownTooltip(
               message: '''
-
-                **Blood Pressure:** A vital measurement of cardiovascular health.
-                It shows how strongly your blood pushes against artery walls.
-                Measured in mmHg, it's recorded as two numbers (systolic/diastolic).
-
-              ''',
-              child: IconButton(
-                icon: Icon(
+          **Blood Pressure Trends:** This chart displays your systolic and diastolic 
+          blood pressure measurements over time. It helps you track fluctuations 
+          and understand your cardiovascular health trends.
+        ''',
+              child: Row(children: [
+                Text(
+                  'Blood Pressure Trends',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(width: 8),
+                Icon(
                   Icons.info_outline,
                   color: Colors.grey[600],
                   size: 20,
                 ),
-                onPressed: () {},
-              ),
+              ]),
             ),
+            const SizedBox(width: 8),
           ],
         ),
         backgroundColor: titleBackgroundColor,
       ),
+
       // Main container padding providing consistent spacing around all content.
 
       body: Container(
