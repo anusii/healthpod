@@ -28,13 +28,13 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:fl_chart/fl_chart.dart';
-import 'package:healthpod/utils/parse_bp_numeric_input.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/features/visualise/stat_item.dart';
+import 'package:healthpod/utils/parse_bp_numeric_input.dart';
 import 'package:healthpod/utils/get_month_abbrev.dart';
 
 /// Combined blood pressure visualisation widget.
@@ -148,7 +148,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       StatItem(
         label: 'Average',
         value:
-            '${parseBpNumericInput(systolicAvg)}/${parseBpNumericInput(diastolicAvg)} mmHg',
+            '${parseBpNumericInput(systolicAvg)}/${parseBpNumericInput(diastolicAvg)} mmHg', // ensure int format.
       ),
       Container(
         height: 40,
@@ -181,10 +181,12 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
           children: [
             MarkdownTooltip(
               message: '''
-          **Blood Pressure Trends:** This chart displays your systolic and diastolic 
-          blood pressure measurements over time. It helps you track fluctuations 
-          and understand your cardiovascular health trends.
-        ''',
+
+                **Blood Pressure:** A vital measurement of cardiovascular health.
+                      It shows how strongly your blood pushes against artery walls.
+                      Measured in mmHg, it's recorded as two numbers (systolic/diastolic).
+                      
+              ''',
               child: Row(children: [
                 Text(
                   'Blood Pressure Trends',
@@ -276,7 +278,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                               String label = '';
                               if (isSystolic) {
                                 label =
-                                    'Systolic: ${parseBpNumericInput(spot.y)} mmHg\nNormal: below 120 mmHg';
+                                    'Systolic: ${parseBpNumericInput(spot.y)} mmHg\nNormal: below 120 mmHg'; // Ensure int format.
                               } else {
                                 label =
                                     'Diastolic: ${parseBpNumericInput(spot.y)} mmHg\nNormal: below 80 mmHg';
