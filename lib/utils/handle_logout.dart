@@ -25,11 +25,8 @@
 
 library;
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:solidpod/solidpod.dart' show logoutPopup, getWebId;
 
 import 'package:healthpod/home.dart';
@@ -38,37 +35,7 @@ import 'package:healthpod/utils/create_solid_login.dart';
 /// Handles logout and navigates to the login screen.
 
 Future<void> handleLogout(BuildContext context) async {
-  final bool INTEGRATION_TEST =
-      Platform.environment['INTEGRATION_TEST']?.toLowerCase() == 'true';
-
-  print("🔥 INTEGRATION_TEST: $INTEGRATION_TEST");
-
-  if (INTEGRATION_TEST) {
-    print("✅ Logging out using WebView...");
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Logging Out'),
-        content: SizedBox(
-          height: 400,
-          child: InAppWebView(
-            initialUrlRequest: URLRequest(
-                url: WebUri("https://pods.dev.solidcommunity.au/logout")),
-            initialSettings: InAppWebViewSettings(javaScriptEnabled: true),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  } else {
-    print("❌ Logging out using normal logoutPopup...");
-    await logoutPopup(context, const HealthPodHome());
-  }
+  await logoutPopup(context, const HealthPodHome());
 
   // Check login status using getWebId.
 
