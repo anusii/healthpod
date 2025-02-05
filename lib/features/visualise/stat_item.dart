@@ -27,11 +27,23 @@ library;
 
 import 'package:flutter/material.dart';
 
-/// The `StatItem` widget represents a single statistic, displaying a label
-/// and its corresponding value in a vertical layout.
+/// A widget that displays a statistical value with its label.
+///
+/// This widget is specifically designed for showing statistical information
+/// in a consistent format throughout the application. It arranges a label
+/// and its corresponding value horizontally, with appropriate styling to
+/// distinguish between the label and value.
+///
+/// Typically used in dashboards or summary sections where multiple statistics
+/// need to be displayed in a uniform manner.
 
 class StatItem extends StatelessWidget {
+  /// The label text that describes the statistic (e.g. "Average", "Max", "Min").
+
   final String label;
+
+  /// The value to be displayed for the statistic (e.g. "120/80 mmHg").
+
   final String value;
 
   const StatItem({

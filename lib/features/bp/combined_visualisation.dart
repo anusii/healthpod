@@ -179,6 +179,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       appBar: AppBar(
         title: Row(
           children: [
+            // Title text with custom font weight for visual hierarchy.
+
             Flexible(
               child: const Text(
                 'Blood Pressure Trends',
@@ -209,6 +211,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
         ),
         backgroundColor: titleBackgroundColor,
       ),
+      // Main container padding providing consistent spacing around all content.
+
       body: Container(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -228,7 +232,10 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                       backgroundColor: Colors.white,
                       extraLinesData: ExtraLinesData(
                         horizontalLines: [
-                          // Upper systolic threshold line (120 mmHg).
+                          /// Threshold line indicating normal systolic pressure limit.
+                          ///
+                          /// Uses a dashed purple line matching the systolic data color.
+                          /// Upper systolic threshold line (120 mmHg).
 
                           HorizontalLine(
                             y: 120,
@@ -239,7 +246,11 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                               show: false, // Hide by default.
                             ),
                           ),
-                          // Upper diastolic threshold line (80 mmHg).
+
+                          /// Threshold line indicating normal diastolic pressure limit.
+                          ///
+                          /// Uses a dashed teal line matching the diastolic data color.
+                          /// Upper diastolic threshold line (80 mmHg).
 
                           HorizontalLine(
                             y: 80,
@@ -252,6 +263,9 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                           ),
                         ],
                       ),
+
+                      /// Touch interaction configuration for data point inspection.
+
                       lineTouchData: LineTouchData(
                         touchTooltipData: LineTouchTooltipData(
                           tooltipRoundedRadius: 8,
@@ -259,6 +273,10 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                             color: Colors.white,
                             width: 1,
                           ),
+
+                          /// Custom tooltip content generator showing pressure values
+                          /// and normal ranges for each type.
+
                           getTooltipItems: (List<LineBarSpot> touchedSpots) {
                             return touchedSpots.map((LineBarSpot spot) {
                               final isSystolic = spot.barIndex == 0;
@@ -282,7 +300,9 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                           },
                         ),
                       ),
-                      // Configure chart grid appearance.
+
+                      /// Grid configuration for better data readability.
+                      /// Uses light grey dashed lines for subtle visual guidance.
 
                       gridData: FlGridData(
                         show: true,
@@ -307,7 +327,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                       // Configure axis titles and labels.
 
                       titlesData: FlTitlesData(
-                        // X-axis configuration showing dates.
+                        /// X-axis shows dates with dynamic year display.
 
                         bottomTitles: AxisTitles(
                           sideTitles: SideTitles(
@@ -332,12 +352,16 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                                                 .year !=
                                             date.year);
 
+                                /// Date label with hover tooltip showing time.
+
                                 return Padding(
                                   padding: const EdgeInsets.all(4.0),
                                   child: MarkdownTooltip(
                                     message: '''
-      **Time:** ${DateFormat('HH:mm').format(date)}
-    ''',
+
+                                      **Time:** ${DateFormat('HH:mm').format(date)}
+
+                                    ''',
                                     child: Text(
                                       '${date.day} ${getMonthAbbrev(date.month)}${showYear ? " '${(date.year % 100).toString().padLeft(2, '0')}" : ""}',
                                       style: TextStyle(
@@ -375,6 +399,9 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                             },
                           ),
                         ),
+
+                        /// Hide unnecessary axis titles.
+
                         rightTitles: AxisTitles(
                           sideTitles: SideTitles(showTitles: false),
                         ),
@@ -382,11 +409,15 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                           sideTitles: SideTitles(showTitles: false),
                         ),
                       ),
+
+                      /// Chart border for visual containment.
+
                       borderData: FlBorderData(
                         show: true,
                         border: Border.all(color: Colors.grey[300]!),
                       ),
-                      // Configure chart bounds.
+
+                      /// Chart value range configuration.
 
                       minX: 0,
                       maxX: (widget.surveyData.length - 1).toDouble(),
@@ -447,7 +478,6 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
             const SizedBox(height: 16),
             // Legend and statistics card.
 
-            // Legend and statistics card
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -461,59 +491,138 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                 ),
                 child: Column(
                   children: [
-                    // Legend items
+                    // Legend items.
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
+                        // Systolic pressure legend item.
                         Flexible(
-                          child: Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              shape: BoxShape.circle,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Colour indicator dot.
+
+                              Flexible(
+                                child: Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                        0xFF9F70FF), // Bright purple.
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Systolic blood pressure tooltip explaining the measurement.
+
+                              MarkdownTooltip(
+                                message: '''
+
+                                  **Systolic Blood Pressure:** The top number in your reading.
+                                  Measures the pressure when your heart contracts to pump blood.
+                                  Normal reading is typically below 120 mmHg.
+
+                                ''',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width:
+                                          50, // Adjust based on available space.
+                                      child: Text(
+                                        'Systolic',
+                                        overflow: TextOverflow.ellipsis,
+                                        softWrap:
+                                            false, // Prevents multi-line issues.
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    // Info icon.
+
+                                    Flexible(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Icon(
+                                          Icons.info_outline,
+                                          color: Colors.grey[600],
+                                          size: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Flexible(child: const Text('Systolic')),
                         const SizedBox(width: 24),
+                        // Diastolic pressure legend item.
+
                         Flexible(
-                          child: Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.secondary,
-                              shape: BoxShape.circle,
-                            ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Colour indicator dot.
+
+                              Flexible(
+                                child: Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: const Color(
+                                        0xFF00BD9D), // Turquoise/mint.
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              // Diastolic blood pressure tooltip explaining the measurement.
+
+                              MarkdownTooltip(
+                                message: '''
+
+                                  **Diastolic Blood Pressure:** The bottom number in your reading.
+                                  Measures the pressure when your heart relaxes between beats.
+                                  Normal reading is typically below 80 mmHg.
+
+                                ''',
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Flexible(child: const Text('Diastolic')),
+                                    const SizedBox(width: 4),
+                                    // Info icon.
+
+                                    Flexible(
+                                      child: FittedBox(
+                                        fit: BoxFit
+                                            .scaleDown, // Scales down to fit available space.
+                                        child: Icon(
+                                          Icons.info_outline,
+                                          color: Colors.grey[600],
+                                          size: 16,
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Flexible(child: const Text('Diastolic')),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    // Scrollable stats row
+
+                    // Scrollable stats row.
+
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          StatItem(
-                            label: 'Average',
-                            value: '120/76 mmHg',
-                          ),
-                          const SizedBox(width: 16),
-                          StatItem(
-                            label: 'Min',
-                            value: '105/70 mmHg',
-                          ),
-                          const SizedBox(width: 16),
-                          StatItem(
-                            label: 'Max',
-                            value: '150/90 mmHg',
-                          ),
-                        ],
+                        children: _buildStatItems(),
                       ),
                     ),
                   ],
@@ -523,45 +632,6 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildLegendItem(
-    BuildContext context, {
-    required Color color,
-    required String label,
-    required String tooltip,
-  }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 12,
-          height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
-        ),
-        const SizedBox(width: 8),
-        MarkdownTooltip(
-          message: tooltip,
-          child: Row(
-            children: [
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.info_outline,
-                color: Colors.grey[600],
-                size: 16,
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
