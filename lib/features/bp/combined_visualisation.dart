@@ -28,7 +28,6 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:fl_chart/fl_chart.dart';
-import 'package:healthpod/utils/parse_bp_numeric_input.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -148,7 +147,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       StatItem(
         label: 'Average',
         value:
-            '${parseBpNumericInput(systolicAvg)}/${parseBpNumericInput(diastolicAvg)} mmHg', // Ensure values are rounded to nearest integer.
+            '${systolicAvg.toStringAsFixed(1)}/${diastolicAvg.toStringAsFixed(1)} mmHg',
       ),
       Container(
         height: 40,
@@ -158,7 +157,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       StatItem(
         label: 'Min',
         value:
-            '${parseBpNumericInput(systolicMin)}/${parseBpNumericInput(diastolicMin)} mmHg',
+            '${systolicMin.toStringAsFixed(1)}/${diastolicMin.toStringAsFixed(1)} mmHg',
       ),
       Container(
         height: 40,
@@ -168,7 +167,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       StatItem(
         label: 'Max',
         value:
-            '${parseBpNumericInput(systolicMax)}/${parseBpNumericInput(diastolicMax)} mmHg',
+            '${systolicMax.toStringAsFixed(1)}/${diastolicMax.toStringAsFixed(1)} mmHg',
       ),
     ];
   }
@@ -263,10 +262,10 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                               String label = '';
                               if (isSystolic) {
                                 label =
-                                    'Systolic: ${parseBpNumericInput(spot.y)} mmHg\nNormal: below 120 mmHg';
+                                    'Systolic: ${spot.y.toStringAsFixed(1)} mmHg\nNormal: below 120 mmHg';
                               } else {
                                 label =
-                                    'Diastolic: ${parseBpNumericInput(spot.y)} mmHg\nNormal: below 80 mmHg';
+                                    'Diastolic: ${spot.y.toStringAsFixed(1)} mmHg\nNormal: below 80 mmHg';
                               }
                               return LineTooltipItem(
                                 label,
