@@ -344,10 +344,13 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                       lineBarsData: [
                         // Systolic pressure line configuration.
 
+                        // Bright purple and teal lines for systolic and diastolic pressure.
+                        // From Bang Wong's colourblind-safe palette.
+
                         LineChartBarData(
                           spots: _getSystolicData(),
                           isCurved: true,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: const Color(0xFF9F70FF), // Bright purple.
                           barWidth: 3,
                           dotData: FlDotData(
                             show: true,
@@ -368,7 +371,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                         LineChartBarData(
                           spots: _getDiastolicData(),
                           isCurved: true,
-                          color: Theme.of(context).colorScheme.secondary,
+                          color: const Color(0xFF00BD9D), // Turquoise/mint.
                           barWidth: 3,
                           dotData: FlDotData(
                             show: true,
@@ -426,7 +429,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                         // Combined tooltip for systolic label and icon so that the tooltip
                         // is displayed when hovering over either the label or the icon.
-                        
+
                         MarkdownTooltip(
                           message: '''
 
