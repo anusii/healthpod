@@ -48,14 +48,14 @@ class StatItem extends StatelessWidget {
         Text(
           '$label: ',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey[600],
-          ),
+                color: Colors.grey[600],
+              ),
         ),
         Text(
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
+                fontWeight: FontWeight.w500,
+              ),
         ),
       ],
     );

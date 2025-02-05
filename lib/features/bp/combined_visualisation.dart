@@ -447,80 +447,79 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
             const SizedBox(height: 16),
             // Legend and statistics card.
 
-           // Legend and statistics card
-Card(
-  elevation: 4,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(12),
-  ),
-  color: Colors.grey[100],
-  child: Padding(
-    padding: const EdgeInsets.symmetric(
-      vertical: 16.0,
-      horizontal: 12.0,
-    ),
-    child: Column(
-      children: [
-        // Legend items
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Flexible(
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary,
-                  shape: BoxShape.circle,
+            // Legend and statistics card
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              color: Colors.grey[100],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 16.0,
+                  horizontal: 12.0,
+                ),
+                child: Column(
+                  children: [
+                    // Legend items
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(child: const Text('Systolic')),
+                        const SizedBox(width: 24),
+                        Flexible(
+                          child: Container(
+                            width: 12,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(child: const Text('Diastolic')),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    // Scrollable stats row
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          StatItem(
+                            label: 'Average',
+                            value: '120/76 mmHg',
+                          ),
+                          const SizedBox(width: 16),
+                          StatItem(
+                            label: 'Min',
+                            value: '105/70 mmHg',
+                          ),
+                          const SizedBox(width: 16),
+                          StatItem(
+                            label: 'Max',
+                            value: '150/90 mmHg',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(child: const Text('Systolic')),
-            const SizedBox(width: 24),
-            Flexible(
-              child: Container(
-                width: 12,
-                height: 12,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(child: const Text('Diastolic')),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Scrollable stats row
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              StatItem(
-                label: 'Average',
-                value: '120/76 mmHg',
-              ),
-              const SizedBox(width: 16),
-              StatItem(
-                label: 'Min',
-                value: '105/70 mmHg',
-              ),
-              const SizedBox(width: 16),
-              StatItem(
-                label: 'Max',
-                value: '150/90 mmHg',
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  ),
-)
-
+            )
           ],
         ),
       ),
@@ -528,42 +527,41 @@ Card(
   }
 
   Widget _buildLegendItem(
-  BuildContext context, {
-  required Color color,
-  required String label,
-  required String tooltip,
-}) {
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Container(
-        width: 12,
-        height: 12,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
+    BuildContext context, {
+    required Color color,
+    required String label,
+    required String tooltip,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
         ),
-      ),
-      const SizedBox(width: 8),
-      MarkdownTooltip(
-        message: tooltip,
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.info_outline,
-              color: Colors.grey[600],
-              size: 16,
-            ),
-          ],
+        const SizedBox(width: 8),
+        MarkdownTooltip(
+          message: tooltip,
+          child: Row(
+            children: [
+              Text(
+                label,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.info_outline,
+                color: Colors.grey[600],
+                size: 16,
+              ),
+            ],
+          ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }
-}
-
