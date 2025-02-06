@@ -1,4 +1,4 @@
-/// Parse BP numeric input utility function.
+/// Parse numeric input utility function.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -28,6 +28,6 @@ library;
 /// Rounds a double value to the nearest integer for display purposes.
 /// If the value is null, it returns '0'.
 
-String parseBpNumericInput(double value) {
+String parseNumericInput(double value) {
   return value.round().toString();
 }
