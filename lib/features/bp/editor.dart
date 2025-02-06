@@ -253,7 +253,7 @@ class _BPEditorState extends State<BPEditor> {
 
       final filename =
           'blood_pressure_${formatTimestampForFilename(observationToSave.timestamp)}.json.enc.ttl';
-      
+
       // Write observation data to file.
 
       if (!mounted) return;
