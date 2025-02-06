@@ -35,5 +35,6 @@ analyzer:
 
 linter:
   rules:
-    - my_custom_lint # Ignore warning about undefined lint.
+    - my_custom_lint # Custom template rule for checking print statements in production.
+    - ordered_imports # Import ordering rule.
     # ignore_for_file: undefined_lint
