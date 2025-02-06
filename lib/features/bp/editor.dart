@@ -67,6 +67,65 @@ class _BPEditorState extends State<BPEditor> {
 
   String? error;
 
+  // Add a flag to track new observations.
+
+  bool isNewObservation = false;
+
+  // Keep track of current edits in a separate variable.
+
+  BPObservation? currentEdit;
+
+  // Maintain controllers as state variables.
+
+  TextEditingController? systolicController;
+  TextEditingController? diastolicController;
+  TextEditingController? heartRateController;
+  TextEditingController? notesController;
+
+  /// Initialises text controllers with values from an observation
+  ///
+  /// This method sets up all text controllers with the current values
+  /// from the provided observation. It first disposes of any existing
+  /// controllers to prevent memory leaks.
+  ///
+  /// [observation] The BPObservation whose values should be used to
+  /// initialize the controllers
+
+  void initialiseControllers(BPObservation observation) {
+    // Clean up existing controllers to prevent memory leaks.
+
+    disposeControllers();
+
+    // Initialize controllers with current values, converting 0 to empty string
+    // for better user experience.
+
+    systolicController = TextEditingController(
+        text: observation.systolic == 0
+            ? ''
+            : parseBpNumericInput(observation.systolic));
+    diastolicController = TextEditingController(
+        text: observation.diastolic == 0
+            ? ''
+            : parseBpNumericInput(observation.diastolic));
+    heartRateController = TextEditingController(
+        text: observation.heartRate == 0
+            ? ''
+            : parseBpNumericInput(observation.heartRate));
+    notesController = TextEditingController(text: observation.notes);
+  }
+
+  /// Disposes of all text controllers
+  ///
+  /// This method should be called when the controllers are no longer needed
+  /// to prevent memory leaks.
+
+  void disposeControllers() {
+    systolicController?.dispose();
+    diastolicController?.dispose();
+    heartRateController?.dispose();
+    notesController?.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -145,56 +204,95 @@ class _BPEditorState extends State<BPEditor> {
     }
   }
 
-  /// Saves a blood pressure observation to POD storage.
+  /// Saves a blood pressure observation to POD storage
   ///
-  /// Creates or updates an encrypted file in the bp directory with the observation data.
-  /// File name is generated from the observation's timestamp.
+  /// This method:
+  /// 1. Validates required fields (systolic, diastolic, heart rate)
+  /// 2. Deletes old file if updating an existing observation
+  /// 3. Creates new encrypted file with observation data
+  /// 4. Reloads data to refresh the UI
+  ///
+  /// [observation] The BPObservation to save
+  ///
+  /// Shows error message if save fails or validation fails.
 
   Future<void> saveObservation(BPObservation observation) async {
-    try {
-      // Delete old file if updating existing observation.
+    // Use currentEdit if available, otherwise use passed observation.
 
-      if (editingIndex != null) {
+    final observationToSave = currentEdit ?? observation;
+
+    // Validate required fields.
+
+    if (observationToSave.systolic == 0 ||
+        observationToSave.diastolic == 0 ||
+        observationToSave.heartRate == 0) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'Please enter values for Systolic, Diastolic, and Heart Rate'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    try {
+      // Only delete old file if this is an update to an existing record.
+
+      if (!isNewObservation && editingIndex != null) {
         final oldObservation = observations[editingIndex!];
-        final oldTimestamp = formatTimestampForFilename(
-            oldObservation.timestamp); // Ensure no milliseconds in filename.
+        final oldTimestamp =
+            formatTimestampForFilename(oldObservation.timestamp);
         final oldFilename = 'blood_pressure_$oldTimestamp.json.enc.ttl';
         await deleteFile('healthpod/data/bp/$oldFilename');
       }
 
-      // Generate a unique filename using formatted timestamp.
+      // Generate filename and save encrypted data.
 
       final filename =
-          'blood_pressure_${formatTimestampForFilename(observation.timestamp)}.json.enc.ttl';
-
-      // Write observation data to file.
+          'blood_pressure_${formatTimestampForFilename(observationToSave.timestamp)}.json.enc.ttl';
 
       if (!mounted) return;
       await writePod(
         'bp/$filename',
-        json.encode(observation.toJson()),
+        json.encode(observationToSave.toJson()),
         context,
         const Text('Saving'),
         encrypted: true,
       );
 
-      // Refresh the observation list after saving.
+      // Reset editing state and reload data.
 
-      if (!mounted) return; // Check if the widget is still mounted
+      if (!mounted) return;
       setState(() {
         editingIndex = null;
+        isNewObservation = false;
+        currentEdit = null; // Clear the current edit.
       });
 
       await loadData();
     } catch (e) {
       if (mounted) {
-        // Handle errors during save operation.
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to save: ${e.toString()}')),
         );
       }
     }
+  }
+
+  /// Cancels the current edit operation.
+  ///
+  /// Resets all editing state variables and disposes of controllers.
+
+  void cancelEdit() {
+    setState(() {
+      editingIndex = null;
+      isNewObservation = false;
+      currentEdit = null;
+      disposeControllers(); // Clean up controllers when canceling.
+    });
   }
 
   /// Deletes a blood pressure observation from POD storage.
@@ -235,25 +333,33 @@ class _BPEditorState extends State<BPEditor> {
   /// Inserts a new observation at the beginning of the list and enters edit mode.
 
   void addNewObservation() {
+    final newObservation = BPObservation(
+      timestamp: DateTime.now(),
+      systolic: 0,
+      diastolic: 0,
+      heartRate: 0,
+      feeling: '',
+      notes: '',
+    );
+
     setState(() {
-      observations.insert(
-          0,
-          BPObservation(
-            timestamp: DateTime.now(),
-            systolic: 0,
-            diastolic: 0,
-            heartRate: 0,
-            feeling: '',
-            notes: '',
-          ));
-      editingIndex = 0; // Start editing the new observation.
+      observations.insert(0, newObservation);
+      editingIndex = 0;
+      isNewObservation = true;
+      currentEdit = newObservation;
+      initialiseControllers(newObservation);
     });
   }
 
-  /// Builds a read-only display row for a blood pressure observation.
+  // UI BUILDING METHODS
+
+  /// Builds a read-only display row for a blood pressure observation
   ///
-  /// Displays formatted timestamp, systolic/diastolic pressure, heart rate,
-  /// feeling, and notes as static text. Includes edit and delete action buttons.
+  /// Creates a DataRow with formatted display of all observation fields
+  /// and edit/delete action buttons.
+  ///
+  /// [observation] The BPObservation to display
+  /// [index] The index of this observation in the list
 
   DataRow _buildDisplayRow(BPObservation observation, int index) {
     return DataRow(
@@ -307,14 +413,12 @@ class _BPEditorState extends State<BPEditor> {
   /// controller and updates the observation on change.
 
   DataRow _buildEditingRow(BPObservation observation, int index) {
-    final systolicController =
-        TextEditingController(text: parseBpNumericInput(observation.systolic));
-    final diastolicController =
-        TextEditingController(text: parseBpNumericInput(observation.diastolic));
-    final heartRateController =
-        TextEditingController(text: parseBpNumericInput(observation.heartRate));
-    TextEditingController(text: observation.heartRate.toString());
-    final notesController = TextEditingController(text: observation.notes);
+    // Use currentEdit if available, otherwise use the observation.
+
+    // Initialize controllers if not already set
+    if (systolicController == null) {
+      initialiseControllers(currentEdit ?? observation);
+    }
 
     return DataRow(
       cells: [
@@ -415,42 +519,54 @@ class _BPEditorState extends State<BPEditor> {
 
         // Editable systolic, diastolic, heart rate, feeling, and notes fields.
 
-        DataCell(TextField(
-          controller: systolicController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          onChanged: (value) {
-            final parsedValue =
-                double.tryParse(value) ?? 0.0; // Keep as double.
-            observations[index] = observation.copyWith(
-              systolic: parsedValue, // Store the double value.
-            );
-          },
-        )),
+        DataCell(
+          TextField(
+            controller: systolicController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (value) {
+              setState(() {
+                currentEdit = (currentEdit ?? observation).copyWith(
+                  systolic: value.isEmpty ? 0 : (double.tryParse(value) ?? 0.0),
+                );
+              });
+            },
+          ),
+        ),
 
-        DataCell(TextField(
-          controller: diastolicController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          onChanged: (value) {
-            final parsedValue = double.tryParse(value) ?? 0.0;
-            observations[index] = observation.copyWith(
-              diastolic: parsedValue,
-            );
-          },
-        )),
+        DataCell(
+          TextField(
+            controller: diastolicController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (value) {
+              setState(() {
+                currentEdit = (currentEdit ?? observation).copyWith(
+                  diastolic:
+                      value.isEmpty ? 0 : (double.tryParse(value) ?? 0.0),
+                );
+              });
+            },
+          ),
+        ),
 
-        DataCell(TextField(
-          controller: heartRateController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          onChanged: (value) {
-            final parsedValue = double.tryParse(value) ?? 0.0;
-            observations[index] = observation.copyWith(
-              heartRate: parsedValue,
-            );
-          },
-        )),
+        DataCell(
+          TextField(
+            controller: heartRateController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            onChanged: (value) {
+              setState(() {
+                currentEdit = (currentEdit ?? observation).copyWith(
+                  heartRate:
+                      value.isEmpty ? 0 : (double.tryParse(value) ?? 0.0),
+                );
+              });
+            },
+          ),
+        ),
 
         DataCell(DropdownButton<String>(
-          value: observation.feeling.isEmpty ? null : observation.feeling,
+          value: (currentEdit ?? observation).feeling.isEmpty
+              ? null
+              : (currentEdit ?? observation).feeling,
           items: ['Excellent', 'Good', 'Fair', 'Poor']
               .map((feeling) => DropdownMenuItem(
                     value: feeling,
@@ -459,26 +575,34 @@ class _BPEditorState extends State<BPEditor> {
               .toList(),
           onChanged: (value) {
             setState(() {
-              observations[index] = observation.copyWith(feeling: value ?? '');
+              currentEdit = (currentEdit ?? observation).copyWith(
+                feeling: value ?? '',
+              );
             });
           },
         )),
+
         DataCell(
           Container(
             constraints: const BoxConstraints(maxWidth: 200),
             child: TextField(
-              controller: notesController,
+              controller: notesController, // Use the maintained controller
               maxLines: null,
               decoration: const InputDecoration(
                 isDense: true,
                 contentPadding: EdgeInsets.symmetric(vertical: 8.0),
               ),
               onChanged: (value) {
-                observations[index] = observation.copyWith(notes: value);
+                setState(() {
+                  currentEdit = (currentEdit ?? observation).copyWith(
+                    notes: value,
+                  );
+                });
               },
             ),
           ),
         ),
+
         DataCell(Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -507,13 +631,51 @@ class _BPEditorState extends State<BPEditor> {
         title: const Text('Blood Pressure Observations'),
         backgroundColor: titleBackgroundColor,
         actions: [
-          // Add new observation button.
-
           if (!isLoading)
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: addNewObservation,
-              tooltip: 'Add New Reading',
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Builder(
+                builder: (context) {
+                  final screenWidth = MediaQuery.of(context).size.width;
+                  final isNarrowScreen = screenWidth < 600;
+
+                  return ElevatedButton(
+                    // Changed from ElevatedButton.icon to ElevatedButton
+                    style: ElevatedButton.styleFrom(
+                      padding: isNarrowScreen
+                          ? const EdgeInsets.all(
+                              12) // Equal padding for square-like shape
+                          : const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 16),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.primaryContainer,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onPrimaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(isNarrowScreen
+                            ? 12
+                            : 8), // Increased radius for narrow screen
+                      ),
+                      minimumSize: isNarrowScreen
+                          ? const Size(46, 46)
+                          : null, // Fixed size for narrow screen
+                    ),
+                    onPressed: addNewObservation,
+                    child: isNarrowScreen
+                        ? const Icon(Icons
+                            .add_circle) // Just centered icon for narrow screens
+                        : const Row(
+                            // Manual row layout for wider screens
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.add_circle),
+                              SizedBox(width: 8),
+                              Text('Add New Reading'),
+                            ],
+                          ),
+                  );
+                },
+              ),
             ),
         ],
       ),
