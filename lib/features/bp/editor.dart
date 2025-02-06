@@ -89,14 +89,14 @@ class _BPEditorState extends State<BPEditor> {
   /// controllers to prevent memory leaks.
   ///
   /// [observation] The BPObservation whose values should be used to
-  /// initialize the controllers
+  /// initialise the controllers
 
   void initialiseControllers(BPObservation observation) {
     // Clean up existing controllers to prevent memory leaks.
 
     disposeControllers();
 
-    // Initialize controllers with current values, converting 0 to empty string
+    // Initialise controllers with current values, converting 0 to empty string
     // for better user experience.
 
     systolicController = TextEditingController(
@@ -204,7 +204,7 @@ class _BPEditorState extends State<BPEditor> {
     }
   }
 
-  /// Saves a blood pressure observation to POD storage
+  /// Saves a blood pressure observation to POD storage.
   ///
   /// This method:
   /// 1. Validates required fields (systolic, diastolic, heart rate)
@@ -249,10 +249,12 @@ class _BPEditorState extends State<BPEditor> {
         await deleteFile('healthpod/data/bp/$oldFilename');
       }
 
-      // Generate filename and save encrypted data.
+      // Generate a unique filename using formatted timestamp.
 
       final filename =
           'blood_pressure_${formatTimestampForFilename(observationToSave.timestamp)}.json.enc.ttl';
+      
+      // Write observation data to file.
 
       if (!mounted) return;
       await writePod(
@@ -344,7 +346,7 @@ class _BPEditorState extends State<BPEditor> {
 
     setState(() {
       observations.insert(0, newObservation);
-      editingIndex = 0;
+      editingIndex = 0; // Start editing the new observation.
       isNewObservation = true;
       currentEdit = newObservation;
       initialiseControllers(newObservation);
@@ -353,7 +355,7 @@ class _BPEditorState extends State<BPEditor> {
 
   // UI BUILDING METHODS
 
-  /// Builds a read-only display row for a blood pressure observation
+  /// Builds a read-only display row for a blood pressure observation.
   ///
   /// Creates a DataRow with formatted display of all observation fields
   /// and edit/delete action buttons.
@@ -415,7 +417,8 @@ class _BPEditorState extends State<BPEditor> {
   DataRow _buildEditingRow(BPObservation observation, int index) {
     // Use currentEdit if available, otherwise use the observation.
 
-    // Initialize controllers if not already set
+    // Initialise controllers if not already set.
+
     if (systolicController == null) {
       initialiseControllers(currentEdit ?? observation);
     }
@@ -586,7 +589,7 @@ class _BPEditorState extends State<BPEditor> {
           Container(
             constraints: const BoxConstraints(maxWidth: 200),
             child: TextField(
-              controller: notesController, // Use the maintained controller
+              controller: notesController, // Use the maintained controller.
               maxLines: null,
               decoration: const InputDecoration(
                 isDense: true,
@@ -640,11 +643,10 @@ class _BPEditorState extends State<BPEditor> {
                   final isNarrowScreen = screenWidth < 600;
 
                   return ElevatedButton(
-                    // Changed from ElevatedButton.icon to ElevatedButton
                     style: ElevatedButton.styleFrom(
                       padding: isNarrowScreen
                           ? const EdgeInsets.all(
-                              12) // Equal padding for square-like shape
+                              12) // Equal padding for square-like shape.
                           : const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 16),
                       backgroundColor:
@@ -654,18 +656,19 @@ class _BPEditorState extends State<BPEditor> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(isNarrowScreen
                             ? 12
-                            : 8), // Increased radius for narrow screen
+                            : 8), // Increased radius for narrow screen.
                       ),
                       minimumSize: isNarrowScreen
                           ? const Size(46, 46)
-                          : null, // Fixed size for narrow screen
+                          : null, // Fixed size for narrow screen.
                     ),
                     onPressed: addNewObservation,
                     child: isNarrowScreen
                         ? const Icon(Icons
-                            .add_circle) // Just centered icon for narrow screens
+                            .add_circle) // Just centered icon for narrow screens.
                         : const Row(
-                            // Manual row layout for wider screens
+                            // Manual row layout for wider screens.
+
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.add_circle),
