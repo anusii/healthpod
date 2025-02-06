@@ -28,11 +28,10 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
-
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/create_interactive_text.dart';
+import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/security_key/manager.dart';
 
