@@ -32,7 +32,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_coming_soon.dart';
-import 'package:healthpod/features/bp/editor.dart';
+import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/file/service.dart';
 import 'package:healthpod/utils/fetch_and_navigate_to_visualisation.dart';
@@ -144,7 +144,7 @@ class IconGridPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const BPEditor(),
+                        builder: (context) => const BPEditorPage(),
                       ),
                     );
                     break;
