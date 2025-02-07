@@ -1,4 +1,4 @@
-/// Blood pressure observation widgets.
+/// Editing row for Blood Pressure Observations.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -21,67 +21,22 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Ashley Tang.
+/// Authors: Ashley Tang
 
 library;
 
 import 'package:flutter/material.dart';
-
 import 'package:intl/intl.dart';
 
-import 'package:healthpod/features/bp/editor/state.dart';
 import 'package:healthpod/features/bp/obs/model.dart';
-import 'package:healthpod/utils/parse_numeric_input.dart';
+import 'package:healthpod/features/bp/editor/state.dart';
 
-/// Builds the display (read-only) row for a BP observation.
-
-DataRow buildDisplayRow({
-  required BuildContext context,
-  required BPObservation observation,
-  required int index,
-  required VoidCallback onEdit,
-  required VoidCallback onDelete,
-}) {
-  return DataRow(
-    cells: [
-      DataCell(Text(
-          DateFormat('yyyy-MM-dd HH:mm:ss').format(observation.timestamp))),
-      DataCell(Text(parseNumericInput(observation.systolic))),
-      DataCell(Text(parseNumericInput(observation.diastolic))),
-      DataCell(Text(parseNumericInput(observation.heartRate))),
-      DataCell(Text(observation.feeling)),
-      DataCell(
-        Container(
-          constraints: const BoxConstraints(maxWidth: 200),
-          child: Text(
-            observation.notes,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 3,
-          ),
-        ),
-      ),
-      DataCell(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: onEdit,
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: onDelete,
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
-}
-
-/// Builds the editing row for a BP observation. Pulls [TextEditingController]s
-/// from [editorState], so that typed-in changes are reflected in the state's
-/// [currentEdit].
+/// Builds an editable [DataRow] for modifying a [BPObservation].
+///
+/// This row shows text fields for systolic, diastolic, and heart rate,
+/// a dropdown for the "feeling" field, and a multi-line text field for notes.
+/// It also provides a timestamp cell that allows the user to pick a new date
+/// and time, as well as an optional dialog to set milliseconds precisely.
 
 DataRow buildEditingRow({
   required BuildContext context,
@@ -92,6 +47,8 @@ DataRow buildEditingRow({
   required VoidCallback onCancel,
   required VoidCallback onSave,
 }) {
+  // Current observation values being edited, defaulting to the passed-in observation.
+
   final currentEdit = editorState.currentEdit ?? observation;
 
   // Ensure controllers are initialised.
@@ -102,11 +59,13 @@ DataRow buildEditingRow({
 
   return DataRow(
     cells: [
-      // Timestamp cell with date/time picker.
+      // Timestamp cell with a date/time picker. A separate dialog for milliseconds is optional.
 
       DataCell(
         InkWell(
           onTap: () async {
+            // Show date picker.
+
             final date = await showDatePicker(
               context: context,
               initialDate: currentEdit.timestamp,
@@ -114,15 +73,20 @@ DataRow buildEditingRow({
               lastDate: DateTime.now(),
             );
 
+            // Always check whether the widget is still mounted before using context.
+
             if (!context.mounted) return;
 
             if (date != null) {
+              // Show time picker.
+
               final time = await showTimePicker(
                 context: context,
                 initialTime: TimeOfDay.fromDateTime(currentEdit.timestamp),
               );
+
               if (time != null && context.mounted) {
-                // (Optional) Show a dialog for milliseconds if needed.
+                // (Optional) Show a dialog to set milliseconds precisely.
 
                 final TextEditingController msController =
                     TextEditingController();
@@ -153,6 +117,8 @@ DataRow buildEditingRow({
                   ),
                 );
 
+                // Construct a new timestamp with selected date/time and optional milliseconds.
+
                 final newTimestamp = DateTime(
                   date.year,
                   date.month,
@@ -163,7 +129,7 @@ DataRow buildEditingRow({
                   milliseconds ?? 0,
                 );
 
-                // Prevent duplicate timestamp.
+                // Check if another observation already uses the new timestamp.
 
                 if (editorState.observations.any(
                   (r) =>
@@ -180,7 +146,7 @@ DataRow buildEditingRow({
                   return;
                 }
 
-                // Update state's observation.
+                // If valid, update the observation's timestamp in the state list.
 
                 editorState.observations[index] =
                     observation.copyWith(timestamp: newTimestamp);
@@ -201,7 +167,7 @@ DataRow buildEditingRow({
         ),
       ),
 
-      // Systolic.
+      // Systolic text field.
 
       DataCell(
         TextField(
@@ -215,7 +181,7 @@ DataRow buildEditingRow({
         ),
       ),
 
-      // Diastolic.
+      // Diastolic text field.
 
       DataCell(
         TextField(
@@ -229,7 +195,7 @@ DataRow buildEditingRow({
         ),
       ),
 
-      // Heart Rate.
+      // Heart Rate text field.
 
       DataCell(
         TextField(
@@ -249,15 +215,16 @@ DataRow buildEditingRow({
         DropdownButton<String>(
           value: currentEdit.feeling.isEmpty ? null : currentEdit.feeling,
           items: ['Excellent', 'Good', 'Fair', 'Poor']
-              .map((feeling) => DropdownMenuItem(
-                    value: feeling,
-                    child: Text(feeling),
-                  ))
+              .map(
+                (feeling) => DropdownMenuItem(
+                  value: feeling,
+                  child: Text(feeling),
+                ),
+              )
               .toList(),
           onChanged: (value) {
-            editorState.currentEdit = currentEdit.copyWith(
-              feeling: value ?? '',
-            );
+            editorState.currentEdit =
+                currentEdit.copyWith(feeling: value ?? '');
           },
         ),
       ),
@@ -281,7 +248,7 @@ DataRow buildEditingRow({
         ),
       ),
 
-      // Actions cell.
+      // Action buttons for saving or canceling.
 
       DataCell(
         Row(
