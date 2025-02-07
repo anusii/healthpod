@@ -38,6 +38,7 @@ dependencies:
   csv: ^6.0.0
   integration_test:
     sdk: flutter
+  flutter_inappwebview: ^6.1.5
 
 dev_dependencies:
 
