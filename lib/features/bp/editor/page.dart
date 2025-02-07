@@ -196,6 +196,18 @@ class _BPEditorPageState extends State<BPEditorPage> {
                         );
                         _loadData();
                       },
+                      // Update timestamp display in real time.
+
+                      onTimestampChanged: (DateTime newTimestamp) {
+                        // Wrap the update in setState to rebuild the UI.
+
+                        setState(() {
+                          editorState.currentEdit =
+                              editorState.currentEdit?.copyWith(
+                            timestamp: newTimestamp,
+                          );
+                        });
+                      },
                     );
                   }
 

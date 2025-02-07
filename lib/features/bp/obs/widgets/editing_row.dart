@@ -1,4 +1,4 @@
-/// Editing row for Blood Pressure Observations.
+/// Editing row for a blood pressure observation.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -21,22 +21,28 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Ashley Tang
+/// Authors: Ashley Tang.
 
 library;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/features/bp/editor/state.dart';
+import 'package:healthpod/features/bp/obs/model.dart';
+import 'package:healthpod/features/bp/obs/widgets/editing/action_buttons_cell.dart';
+import 'package:healthpod/features/bp/obs/widgets/editing/feeling_cell.dart';
+import 'package:healthpod/features/bp/obs/widgets/editing/notes_cell.dart';
+import 'package:healthpod/features/bp/obs/widgets/editing/numeric_cell.dart';
 
 /// Builds an editable [DataRow] for modifying a [BPObservation].
 ///
 /// This row shows text fields for systolic, diastolic, and heart rate,
-/// a dropdown for the "feeling" field, and a multi-line text field for notes.
-/// It also provides a timestamp cell that allows the user to pick a new date
-/// and time, as well as an optional dialog to set milliseconds precisely.
+/// a dropdown for the "feeling" field, a multi-line text field for notes,
+/// and a timestamp cell for picking date/time down to the minute.
+///
+/// All changes are reflected in [editorState.currentEdit], so the user sees
+/// them in real time. Actual file operations happen only on "Save."
 
 DataRow buildEditingRow({
   required BuildContext context,
@@ -46,225 +52,136 @@ DataRow buildEditingRow({
   required int index,
   required VoidCallback onCancel,
   required VoidCallback onSave,
+  required ValueChanged<DateTime> onTimestampChanged,
 }) {
-  // Current observation values being edited, defaulting to the passed-in observation.
+  // Get the "currentEdit" model that holds unsaved changes.
 
   final currentEdit = editorState.currentEdit ?? observation;
 
-  // Ensure controllers are initialised.
+  // Make sure we have controllers initialized from "currentEdit."
 
   if (editorState.systolicController == null) {
-    editorState.initialiseControllers(observation);
+    editorState.initialiseControllers(currentEdit);
   }
+
+  // Return a row that displays and updates "currentEdit" fields in real time.
 
   return DataRow(
     cells: [
-      // Timestamp cell with a date/time picker. A separate dialog for milliseconds is optional.
-
-      DataCell(
-        InkWell(
-          onTap: () async {
-            // Show date picker.
-
-            final date = await showDatePicker(
-              context: context,
-              initialDate: currentEdit.timestamp,
-              firstDate: DateTime(2000),
-              lastDate: DateTime.now(),
-            );
-
-            // Always check whether the widget is still mounted before using context.
-
-            if (!context.mounted) return;
-
-            if (date != null) {
-              // Show time picker.
-
-              final time = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay.fromDateTime(currentEdit.timestamp),
-              );
-
-              if (time != null && context.mounted) {
-                // (Optional) Show a dialog to set milliseconds precisely.
-
-                final TextEditingController msController =
-                    TextEditingController();
-                final milliseconds = await showDialog<int>(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('Set Milliseconds'),
-                    content: TextField(
-                      controller: msController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        hintText: 'Enter milliseconds (0-999)',
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(0),
-                        child: const Text('Skip'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          final ms = int.tryParse(msController.text) ?? 0;
-                          Navigator.of(context).pop(ms.clamp(0, 999));
-                        },
-                        child: const Text('Confirm'),
-                      ),
-                    ],
-                  ),
-                );
-
-                // Construct a new timestamp with selected date/time and optional milliseconds.
-
-                final newTimestamp = DateTime(
-                  date.year,
-                  date.month,
-                  date.day,
-                  time.hour,
-                  time.minute,
-                  0,
-                  milliseconds ?? 0,
-                );
-
-                // Check if another observation already uses the new timestamp.
-
-                if (editorState.observations.any(
-                  (r) =>
-                      r.timestamp == newTimestamp &&
-                      editorState.observations.indexOf(r) != index,
-                )) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                          'An observation with this timestamp already exists'),
-                    ),
-                  );
-                  return;
-                }
-
-                // If valid, update the observation's timestamp in the state list.
-
-                editorState.observations[index] =
-                    observation.copyWith(timestamp: newTimestamp);
-              }
-            }
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              DateFormat('yyyy-MM-dd HH:mm:ss.SSS')
-                  .format(observation.timestamp),
-              style: const TextStyle(
-                decoration: TextDecoration.underline,
-                color: Colors.blue,
-              ),
-            ),
-          ),
-        ),
+      buildTimestampCell(
+        context: context,
+        editorState: editorState,
+        observation: observation,
+        currentEdit: currentEdit,
+        onTimestampChanged: onTimestampChanged,
       ),
 
-      // Systolic text field.
+      // Generic numeric cells for systolic, diastolic, heart rate.
 
-      DataCell(
-        TextField(
-          controller: editorState.systolicController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          onChanged: (value) {
-            editorState.currentEdit = currentEdit.copyWith(
-              systolic: value.isEmpty ? 0 : (double.tryParse(value) ?? 0.0),
-            );
-          },
-        ),
+      buildNumericCell(
+        controller: editorState.systolicController,
+        onValueChange: (val) {
+          editorState.currentEdit = currentEdit.copyWith(systolic: val);
+        },
+      ),
+      buildNumericCell(
+        controller: editorState.diastolicController,
+        onValueChange: (val) {
+          editorState.currentEdit = currentEdit.copyWith(diastolic: val);
+        },
+      ),
+      buildNumericCell(
+        controller: editorState.heartRateController,
+        onValueChange: (val) {
+          editorState.currentEdit = currentEdit.copyWith(heartRate: val);
+        },
       ),
 
-      // Diastolic text field.
+      // Feeling dropdown and Notes cell.
 
-      DataCell(
-        TextField(
-          controller: editorState.diastolicController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          onChanged: (value) {
-            editorState.currentEdit = currentEdit.copyWith(
-              diastolic: value.isEmpty ? 0 : (double.tryParse(value) ?? 0.0),
-            );
-          },
-        ),
-      ),
+      buildFeelingCell(editorState, currentEdit),
+      buildNotesCell(editorState, currentEdit),
 
-      // Heart Rate text field.
+      // Action buttons for saving and canceling.
 
-      DataCell(
-        TextField(
-          controller: editorState.heartRateController,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          onChanged: (value) {
-            editorState.currentEdit = currentEdit.copyWith(
-              heartRate: value.isEmpty ? 0 : (double.tryParse(value) ?? 0.0),
-            );
-          },
-        ),
-      ),
-
-      // Feeling dropdown.
-
-      DataCell(
-        DropdownButton<String>(
-          value: currentEdit.feeling.isEmpty ? null : currentEdit.feeling,
-          items: ['Excellent', 'Good', 'Fair', 'Poor']
-              .map(
-                (feeling) => DropdownMenuItem(
-                  value: feeling,
-                  child: Text(feeling),
-                ),
-              )
-              .toList(),
-          onChanged: (value) {
-            editorState.currentEdit =
-                currentEdit.copyWith(feeling: value ?? '');
-          },
-        ),
-      ),
-
-      // Notes cell.
-
-      DataCell(
-        Container(
-          constraints: const BoxConstraints(maxWidth: 200),
-          child: TextField(
-            controller: editorState.notesController,
-            maxLines: null,
-            decoration: const InputDecoration(
-              isDense: true,
-              contentPadding: EdgeInsets.symmetric(vertical: 8.0),
-            ),
-            onChanged: (value) {
-              editorState.currentEdit = currentEdit.copyWith(notes: value);
-            },
-          ),
-        ),
-      ),
-
-      // Action buttons for saving or canceling.
-
-      DataCell(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: onSave,
-            ),
-            IconButton(
-              icon: const Icon(Icons.cancel),
-              onPressed: onCancel,
-            ),
-          ],
-        ),
+      buildActionButtonsCell(
+        onSave: onSave,
+        onCancel: onCancel,
       ),
     ],
+  );
+}
+
+/// Builds a [DataCell] that lets the user pick a date/time, calling [onTimestampChanged]
+/// to update the timestamp in a parent setState, which triggers a rebuild.
+
+DataCell buildTimestampCell({
+  required BuildContext context,
+  required BPEditorState editorState,
+  required BPObservation observation,
+  required BPObservation currentEdit,
+
+  // The callback we just added.
+
+  required ValueChanged<DateTime> onTimestampChanged,
+}) {
+  return DataCell(
+    InkWell(
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: currentEdit.timestamp,
+          firstDate: DateTime(2000),
+          lastDate: DateTime.now(),
+        );
+        if (!context.mounted) return;
+
+        if (date != null) {
+          final time = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.fromDateTime(currentEdit.timestamp),
+          );
+          if (time != null && context.mounted) {
+            final newTimestamp = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              time.hour,
+              time.minute,
+            );
+
+            // Check for duplicates.
+
+            final conflict = editorState.observations.any(
+              (r) => r.timestamp == newTimestamp && r != observation,
+            );
+            if (conflict) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'An observation with this date/time already exists',
+                  ),
+                ),
+              );
+              return;
+            }
+
+            // Instead of updating editorState here, call the parent's callback.
+
+            onTimestampChanged(newTimestamp);
+          }
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Text(
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(currentEdit.timestamp),
+          style: const TextStyle(
+            decoration: TextDecoration.underline,
+            color: Colors.blue,
+          ),
+        ),
+      ),
+    ),
   );
 }
