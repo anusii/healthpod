@@ -34,7 +34,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/features/visualise/stat_item.dart';
-import 'package:healthpod/utils/parse_bp_numeric_input.dart';
+import 'package:healthpod/utils/parse_numeric_input.dart';
 import 'package:healthpod/utils/get_month_abbrev.dart';
 
 /// Combined blood pressure visualisation widget.
@@ -148,7 +148,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       StatItem(
         label: 'Average',
         value:
-            '${parseBpNumericInput(systolicAvg)}/${parseBpNumericInput(diastolicAvg)} mmHg', // ensure int format.
+            '${parseNumericInput(systolicAvg)}/${parseNumericInput(diastolicAvg)} mmHg', // ensure int format.
       ),
       Container(
         height: 40,
@@ -158,7 +158,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       StatItem(
         label: 'Min',
         value:
-            '${parseBpNumericInput(systolicMin)}/${parseBpNumericInput(diastolicMin)} mmHg',
+            '${parseNumericInput(systolicMin)}/${parseNumericInput(diastolicMin)} mmHg',
       ),
       Container(
         height: 40,
@@ -168,7 +168,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       StatItem(
         label: 'Max',
         value:
-            '${parseBpNumericInput(systolicMax)}/${parseBpNumericInput(diastolicMax)} mmHg',
+            '${parseNumericInput(systolicMax)}/${parseNumericInput(diastolicMax)} mmHg',
       ),
     ];
   }
@@ -278,10 +278,10 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                               String label = '';
                               if (isSystolic) {
                                 label =
-                                    'Systolic: ${parseBpNumericInput(spot.y)} mmHg\nNormal: below 120 mmHg'; // Ensure int format.
+                                    'Systolic: ${parseNumericInput(spot.y)} mmHg\nNormal: below 120 mmHg'; // Ensure int format.
                               } else {
                                 label =
-                                    'Diastolic: ${parseBpNumericInput(spot.y)} mmHg\nNormal: below 80 mmHg';
+                                    'Diastolic: ${parseNumericInput(spot.y)} mmHg\nNormal: below 80 mmHg';
                               }
                               return LineTooltipItem(
                                 label,
