@@ -35,7 +35,7 @@ import 'package:solidpod/solidpod.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/bp/observation.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
-import 'package:healthpod/utils/parse_bp_numeric_input.dart';
+import 'package:healthpod/utils/parse_numeric_input.dart';
 
 /// Data Editor Page.
 ///
@@ -263,10 +263,10 @@ class _BPEditorState extends State<BPEditor> {
         DataCell(Text(DateFormat('yyyy-MM-dd HH:mm:ss')
             .format(observation.timestamp))), // Format timestamp without 'T'.
 
-        DataCell(Text(parseBpNumericInput(observation
+        DataCell(Text(parseNumericInput(observation
             .systolic))), // Round to nearest int to display according to user expectation.
-        DataCell(Text(parseBpNumericInput(observation.diastolic))),
-        DataCell(Text(parseBpNumericInput(observation.heartRate))),
+        DataCell(Text(parseNumericInput(observation.diastolic))),
+        DataCell(Text(parseNumericInput(observation.heartRate))),
 
         DataCell(Text(observation.feeling)),
         DataCell(
@@ -308,11 +308,11 @@ class _BPEditorState extends State<BPEditor> {
 
   DataRow _buildEditingRow(BPObservation observation, int index) {
     final systolicController =
-        TextEditingController(text: parseBpNumericInput(observation.systolic));
+        TextEditingController(text: parseNumericInput(observation.systolic));
     final diastolicController =
-        TextEditingController(text: parseBpNumericInput(observation.diastolic));
+        TextEditingController(text: parseNumericInput(observation.diastolic));
     final heartRateController =
-        TextEditingController(text: parseBpNumericInput(observation.heartRate));
+        TextEditingController(text: parseNumericInput(observation.heartRate));
     TextEditingController(text: observation.heartRate.toString());
     final notesController = TextEditingController(text: observation.notes);
 

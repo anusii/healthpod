@@ -36,8 +36,8 @@ import 'package:healthpod/utils/fetch_web_id.dart';
 import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/initialise_feature_folders.dart';
-import 'package:healthpod/widgets/icon_grid_page.dart';
 import 'package:healthpod/widgets/footer.dart';
+import 'package:healthpod/widgets/icon_grid_page.dart';
 
 /// The home screen for the HealthPod app.
 ///
