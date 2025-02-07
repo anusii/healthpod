@@ -25,9 +25,10 @@
 
 library;
 
-import 'package:healthpod/utils/security_key/manager.dart';
 import 'package:solidpod/solidpod.dart'
     show KeyManager, SolidFunctionCallStatus, getEncKeyPath, readPod;
+
+import 'package:healthpod/utils/security_key/manager.dart';
 
 /// This function verifies if an encryption key is available for the user by:
 ///

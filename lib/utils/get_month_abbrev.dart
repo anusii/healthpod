@@ -1,4 +1,4 @@
-/// Parse BP numeric input utility function.
+/// Get month abbreviation.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -25,9 +25,22 @@
 
 library;
 
-/// Rounds a double value to the nearest integer for display purposes.
-/// If the value is null, it returns '0'.
+/// Returns the three-letter abbreviation for the given month number.
 
-String parseBpNumericInput(double value) {
-  return value.round().toString();
+String getMonthAbbrev(int month) {
+  const monthAbbrevs = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
+  ];
+  return monthAbbrevs[month - 1];
 }

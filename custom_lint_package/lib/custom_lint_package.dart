@@ -27,6 +27,7 @@ library;
 
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 import 'package:custom_lint_package/src/custom_lint.dart';
+import 'package:custom_lint_package/src/import_order_lint.dart';
 
 /// Private plugin class that implements the custom lint plugin functionality.
 ///
@@ -51,7 +52,8 @@ class _MyPlugin extends PluginBase {
   @override
   List<LintRule> getLintRules(CustomLintConfigs configs) {
     return [
-      CustomLint(),
+      CustomLint(), // Lint for enforcing print statement usage. Acts as template.
+      ImportOrderLint(), // Lint for enforcing import order.
     ];
   }
 }
