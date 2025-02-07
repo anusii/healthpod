@@ -78,19 +78,19 @@ DataRow buildEditingRow({
 
       // Generic numeric cells for systolic, diastolic, heart rate.
 
-      buildNumericCell(
+      numericCell(
         controller: editorState.systolicController,
         onValueChange: (val) {
           editorState.currentEdit = currentEdit.copyWith(systolic: val);
         },
       ),
-      buildNumericCell(
+      numericCell(
         controller: editorState.diastolicController,
         onValueChange: (val) {
           editorState.currentEdit = currentEdit.copyWith(diastolic: val);
         },
       ),
-      buildNumericCell(
+      numericCell(
         controller: editorState.heartRateController,
         onValueChange: (val) {
           editorState.currentEdit = currentEdit.copyWith(heartRate: val);
@@ -99,12 +99,12 @@ DataRow buildEditingRow({
 
       // Feeling dropdown and Notes cell.
 
-      buildFeelingCell(editorState, currentEdit),
-      buildNotesCell(editorState, currentEdit),
+      feelingCell(editorState, currentEdit),
+      notesCell(editorState, currentEdit),
 
       // Action buttons for saving and canceling.
 
-      buildActionButtonsCell(
+      actionButtonsCell(
         onSave: onSave,
         onCancel: onCancel,
       ),

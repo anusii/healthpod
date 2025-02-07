@@ -34,7 +34,7 @@ import 'package:flutter/material.dart';
 /// it to [onValueChange]. You can further customize the behavior here if
 /// needed (e.g., validation).
 
-DataCell buildNumericCell({
+DataCell numericCell({
   required TextEditingController? controller,
   required ValueChanged<double> onValueChange,
 }) {

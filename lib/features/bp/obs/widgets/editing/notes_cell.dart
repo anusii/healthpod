@@ -31,7 +31,7 @@ import 'package:healthpod/features/bp/editor/state.dart';
 import 'package:healthpod/features/bp/obs/model.dart';
 
 /// Builds a [DataCell] containing a text field for editing notes.
-DataCell buildNotesCell(BPEditorState editorState, BPObservation currentEdit) {
+DataCell notesCell(BPEditorState editorState, BPObservation currentEdit) {
   return DataCell(
     Container(
       constraints: const BoxConstraints(maxWidth: 200),

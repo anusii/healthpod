@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 
 /// Builds a [DataCell] containing action buttons for saving or canceling the edit.
 
-DataCell buildActionButtonsCell({
+DataCell actionButtonsCell({
   required VoidCallback onSave,
   required VoidCallback onCancel,
 }) {

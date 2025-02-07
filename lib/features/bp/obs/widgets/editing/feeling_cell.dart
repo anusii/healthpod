@@ -32,8 +32,7 @@ import 'package:healthpod/features/bp/obs/model.dart';
 
 /// Builds a [DataCell] with a dropdown to edit the "feeling" field.
 
-DataCell buildFeelingCell(
-    BPEditorState editorState, BPObservation currentEdit) {
+DataCell feelingCell(BPEditorState editorState, BPObservation currentEdit) {
   return DataCell(
     DropdownButton<String>(
       value: currentEdit.feeling.isEmpty ? null : currentEdit.feeling,
