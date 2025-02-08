@@ -1,4 +1,4 @@
-/// Data observation widget.
+/// Blood observation model class.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
