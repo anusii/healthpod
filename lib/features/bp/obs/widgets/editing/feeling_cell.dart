@@ -1,4 +1,4 @@
-/// Feeling cell widget.
+/// Feeling cell for the BP observation editor table.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -26,24 +26,51 @@
 library;
 
 import 'package:flutter/material.dart';
-
 import 'package:healthpod/features/bp/editor/state.dart';
 import 'package:healthpod/features/bp/obs/model.dart';
 
-/// Builds a [DataCell] with a dropdown to edit the "feeling" field.
+/// List of available feeling options.
+
+const feelings = ['Excellent', 'Good', 'Okay', 'Bad'];
+
+/// Builds a DataCell with a dropdown for selecting the feeling state.
+///
+/// The [editorState] is used to access the current edit state.
+/// The [currentEdit] is used to access the current observation.
 
 DataCell feelingCell(BPEditorState editorState, BPObservation currentEdit) {
   return DataCell(
-    DropdownButton<String>(
-      value: currentEdit.feeling.isEmpty ? null : currentEdit.feeling,
-      items: ['Excellent', 'Good', 'Fair', 'Poor']
-          .map((feeling) => DropdownMenuItem(
-                value: feeling,
-                child: Text(feeling),
-              ))
-          .toList(),
-      onChanged: (value) {
-        editorState.currentEdit = currentEdit.copyWith(feeling: value ?? '');
+    AnimatedBuilder(
+      animation: editorState,
+      builder: (context, child) {
+        // Get the latest value from currentEdit.
+
+        final currentFeeling = editorState.currentEdit?.feeling ?? '';
+
+        return DropdownButton<String>(
+          value: currentFeeling.isEmpty ? null : currentFeeling,
+          hint: const Text('Select feeling'),
+          items: feelings.map((String feeling) {
+            return DropdownMenuItem<String>(
+              value: feeling,
+              child: Text(feeling),
+            );
+          }).toList(),
+          onChanged: (String? newValue) {
+            if (newValue == null) return;
+
+            // Update the state.
+
+            final updatedObservation = currentEdit.copyWith(
+              feeling: newValue,
+            );
+
+            // Update both the editor state and controller.
+
+            editorState.currentEdit = updatedObservation;
+            editorState.controllers.updateFeeling(newValue);
+          },
+        );
       },
     ),
   );

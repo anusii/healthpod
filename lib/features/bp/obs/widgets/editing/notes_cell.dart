@@ -31,6 +31,10 @@ import 'package:healthpod/features/bp/editor/state.dart';
 import 'package:healthpod/features/bp/obs/model.dart';
 
 /// Builds a [DataCell] containing a text field for editing notes.
+///
+/// The [editorState] is used to access the current notes controller.
+/// The [currentEdit] is used to access the current observation.
+
 DataCell notesCell(BPEditorState editorState, BPObservation currentEdit) {
   return DataCell(
     Container(
@@ -42,9 +46,6 @@ DataCell notesCell(BPEditorState editorState, BPObservation currentEdit) {
           isDense: true,
           contentPadding: EdgeInsets.symmetric(vertical: 8.0),
         ),
-        onChanged: (value) {
-          editorState.currentEdit = currentEdit.copyWith(notes: value);
-        },
       ),
     ),
   );
