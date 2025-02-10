@@ -25,8 +25,6 @@
 
 library;
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -34,8 +32,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'package:healthpod/main.dart' as app;
-import 'package:healthpod/utils/fetch_web_id.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
+import 'package:healthpod/utils/fetch_web_id.dart';
+import 'package:healthpod/utils/platform_helper.dart';
 
 /// Integration tests for Solid POD connection functionality in HealthPod app.
 ///
@@ -71,15 +70,13 @@ void main() {
 
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  // Determine test mode based on environment variable.
+  // Determine test mode based on environment.
 
-  final integrationTestEnv =
-      Platform.environment['INTEGRATION_TEST'] ?? 'false';
-  final isIntegrationTest = integrationTestEnv.toLowerCase() == 'true';
+  final isIntegrationTest = PlatformHelper.isIntegrationTest();
 
   // Log the test environment configuration.
 
-  debugPrint("🌍 INTEGRATION_TEST: $integrationTestEnv");
+  debugPrint("🌍 INTEGRATION_TEST: $isIntegrationTest");
   ("🔍 isIntegrationTest: $isIntegrationTest");
 
   // Execute appropriate test suite based on mode.
