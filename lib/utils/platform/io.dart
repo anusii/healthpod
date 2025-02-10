@@ -1,4 +1,4 @@
-/// Platform helper class to safely check platform and environment variables.
+/// Platform-specific implementation for IO (non-web) platforms.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -25,45 +25,22 @@
 
 library;
 
-import 'dart:io' if (dart.library.html) 'dart:html';
+import 'dart:io' as io;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+/// Wrapper class that provides platform-specific implementations
+/// for environment variables and platform detection.
 
-/// Helper class to safely check platform and environment variables.
-
-class PlatformHelper {
-  /// Safely gets an environment variable across platforms.
+class PlatformWrapper {
+  /// Retrieves an environment variable using the native platform APIs.
 
   static String? getEnvironmentVariable(String name) {
-    if (kIsWeb) {
-      // For now, return null or a default value for web.
-
-      return null;
-    } else {
-      // For non-web platforms, use Platform.environment.
-
-      return Platform.environment[name];
-    }
+    return io.Platform.environment[name];
   }
 
-  /// Checks if running in integration test mode.
+  /// Checks if the application is running in integration test mode.
 
   static bool isIntegrationTest() {
-    if (kIsWeb) {
-      // For web, we might want to:
-      // 1. Always return false for production
-      // 2. Use a compile-time constant
-      // 3. Check URL parameters
-      // 4. Check localStorage
-
-      return false;
-    } else {
-      final testEnv = Platform.environment['INTEGRATION_TEST'] ?? 'false';
-      return testEnv.toLowerCase() == 'true';
-    }
+    final testEnv = io.Platform.environment['INTEGRATION_TEST'] ?? 'false';
+    return testEnv.toLowerCase() == 'true';
   }
-
-  /// Checks if running on web platform.
-
-  static bool get isWeb => kIsWeb;
 }

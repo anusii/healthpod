@@ -31,7 +31,7 @@ import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/home.dart';
-import 'package:healthpod/utils/platform_helper.dart';
+import 'package:healthpod/utils/platform/helper.dart';
 
 /// Solid POD Authentication Widget Creator
 ///

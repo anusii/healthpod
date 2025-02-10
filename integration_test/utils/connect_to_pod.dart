@@ -34,7 +34,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:healthpod/main.dart' as app;
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
-import 'package:healthpod/utils/platform_helper.dart';
+import 'package:healthpod/utils/platform/helper.dart';
 
 /// Integration tests for Solid POD connection functionality in HealthPod app.
 ///
