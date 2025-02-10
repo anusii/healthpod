@@ -165,6 +165,17 @@ class BPEditorState with ChangeNotifier {
       oldObservation: !isNewObservation ? observations[index] : null,
     );
 
+    if (!context.mounted) return;
+
+    // Show success message.
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Blood pressure reading saved successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
     // Reset editing state.
 
     editingIndex = null;
