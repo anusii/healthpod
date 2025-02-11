@@ -229,17 +229,29 @@ class HealthPodHomeState extends State<HealthPodHome> {
       body: Row(
         children: [
           ScrollConfiguration(
+            // Disable scrollbars for a cleaner look.
+
             behavior:
                 ScrollConfiguration.of(context).copyWith(scrollbars: false),
             child: SingleChildScrollView(
+              // Allow scrolling of navigation rail when it overflows.
+
               child: SizedBox(
+                // Set height to match screen height.
+
                 height: MediaQuery.of(context).size.height,
                 child: NavigationRail(
+                  // Default to home tab being selected.
+
                   selectedIndex: 0,
                   onDestinationSelected: (int index) async {
                     final tab = homeTabs[index];
 
-                    if (index == 0) return; // Home tab - no action needed
+                    // Skip navigation for home tab.
+
+                    if (index == 0) return;
+
+                    // Handle different types of navigation based on tab properties.
 
                     if (tab.containsKey('message')) {
                       alert(context, tab['message'], tab['dialogTitle']);
@@ -252,8 +264,12 @@ class HealthPodHomeState extends State<HealthPodHome> {
                       await tab['action'](context);
                     }
                   },
+                  // Show both icons and labels for all destinations.
+
                   labelType: NavigationRailLabelType.all,
                   destinations: homeTabs.map((tab) {
+                    // Create navigation destinations from tab configurations.
+
                     return NavigationRailDestination(
                       icon: Icon(tab['icon'], color: tab['color']),
                       label: Text(
@@ -263,10 +279,14 @@ class HealthPodHomeState extends State<HealthPodHome> {
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                     );
                   }).toList(),
+                  // Style for selected tab label.
+
                   selectedLabelTextStyle: const TextStyle(
                     color: Colors.deepPurple,
                     fontWeight: FontWeight.bold,
                   ),
+                  // Style for unselected tab labels.
+
                   unselectedLabelTextStyle: TextStyle(color: Colors.grey[500]),
                 ),
               ),
