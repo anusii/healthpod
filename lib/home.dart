@@ -30,6 +30,7 @@ import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/file/service.dart';
+import 'package:healthpod/features/vaccination/diary.dart';
 import 'package:healthpod/utils/fetch_and_navigate_to_visualisation.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
@@ -51,7 +52,6 @@ import 'package:healthpod/widgets/icon_grid_page.dart';
 /// information, and options to log out or view information about the app.
 
 // Define the [NavigationRail] tabs for the home page.
-
 final List<Map<String, dynamic>> homeTabs = [
   {
     'title': 'Home',
@@ -82,15 +82,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Vaccinations',
     'icon': Icons.vaccines,
     'color': Colors.blue,
-    'message': '''
-
-    Here you will be able to access and manage your record of
-    vaccinations. You can enter historic information, update
-    when you recieve a vaccination, and download from governemnt
-    records of your vaccinations.
-
-    ''',
-    'dialogTitle': 'Comming Soon - Vaccines',
+    'route': const VaccinationDiary(),
   },
   {
     'title': 'Survey',

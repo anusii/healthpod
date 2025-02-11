@@ -155,6 +155,8 @@ class BPSurvey extends StatelessWidget {
 
   /// Handles the submission of the survey.
 
+  //TODO kevin , use this to save vaccine record to POD/local device
+
   Future<void> _handleSubmit(
       BuildContext context, Map<String, dynamic> responses) async {
     if (!context.mounted) return;
