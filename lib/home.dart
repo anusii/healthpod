@@ -50,6 +50,68 @@ import 'package:healthpod/widgets/icon_grid_page.dart';
 /// providing users with a dashboard of features, a footer with user-specific
 /// information, and options to log out or view information about the app.
 
+// Define the [NavigationRail] tabs for the home page.
+
+final List<Map<String, dynamic>> homeTabs = [
+  {
+    'title': 'Home',
+    'icon': Icons.home,
+    'color': null,
+  },
+  {
+    'title': 'Appointments',
+    'icon': Icons.calendar_today,
+    'color': Colors.blue,
+    'message': '''
+
+    Here you will be able to access and manage your
+    appointments. You can enter historic information, update
+    when you recieve a new appointment, and download
+    appointments from other sources.
+
+    ''',
+    'dialogTitle': 'Comming Soon - Appointment',
+  },
+  {
+    'title': 'Files',
+    'icon': Icons.folder,
+    'color': Colors.blue,
+    'route': const FileService(),
+  },
+  {
+    'title': 'Vaccinations',
+    'icon': Icons.vaccines,
+    'color': Colors.blue,
+    'message': '''
+
+    Here you will be able to access and manage your record of
+    vaccinations. You can enter historic information, update
+    when you recieve a vaccination, and download from governemnt
+    records of your vaccinations.
+
+    ''',
+    'dialogTitle': 'Comming Soon - Vaccines',
+  },
+  {
+    'title': 'Survey',
+    'icon': Icons.quiz,
+    'color': Colors.blue,
+    'route': BPSurvey(),
+  },
+  {
+    'title': 'Visualisation',
+    'icon': Icons.show_chart,
+    'color': Colors.blue,
+    'action': fetchAndNavigateToVisualisation,
+  },
+  {
+    'title': 'BP Editor',
+    'icon': Icons.table_chart,
+    'color': Colors.blue,
+    'route': const BPEditorPage(),
+  },
+];
+
 class HealthPodHome extends StatefulWidget {
   const HealthPodHome({super.key});
 
@@ -175,124 +237,32 @@ class HealthPodHomeState extends State<HealthPodHome> {
                 child: NavigationRail(
                   selectedIndex: 0,
                   onDestinationSelected: (int index) async {
-                    switch (index) {
-                      case 0: // Home
-                        // Already on home page
-                        break;
-                      case 1: // Appointments
-                        alert(
-                          context,
-                          '''
+                    final tab = homeTabs[index];
 
-                          Here you will be able to access and manage your
-                          appointments. You can enter historic information, update
-                          when you recieve a new appointment, and download
-                          appointments from other sources.
+                    if (index == 0) return; // Home tab - no action needed
 
-                          ''',
-                          'Comming Soon - Appointment',
-                        );
-                        break;
-                      case 2: // Files
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const FileService()),
-                        );
-                        break;
-                      case 3: // Vaccinations
-                        alert(
-                          context,
-                          '''
-
-                        Here you will be able to access and manage your record of
-                        vaccinations. You can enter historic information, update
-                        when you recieve a vaccination, and download from governemnt
-                        records of your vaccinations.
-
-                        ''',
-                          'Comming Soon - Vaccines',
-                        );
-                        break;
-                      case 4: // Survey
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => BPSurvey()),
-                        );
-                        break;
-                      case 5: // Visualisation
-                        await fetchAndNavigateToVisualisation(context);
-                        break;
-                      case 6: // BP Editor
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const BPEditorPage(),
-                          ),
-                        );
-                        break;
+                    if (tab.containsKey('message')) {
+                      alert(context, tab['message'], tab['dialogTitle']);
+                    } else if (tab.containsKey('route')) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => tab['route']),
+                      );
+                    } else if (tab.containsKey('action')) {
+                      await tab['action'](context);
                     }
                   },
                   labelType: NavigationRailLabelType.all,
-                  destinations: [
-                    NavigationRailDestination(
-                      icon: const Icon(Icons.home),
-                      label: const Text(
-                        'Home',
-                        style: TextStyle(fontSize: 16),
+                  destinations: homeTabs.map((tab) {
+                    return NavigationRailDestination(
+                      icon: Icon(tab['icon'], color: tab['color']),
+                      label: Text(
+                        tab['title'],
+                        style: const TextStyle(fontSize: 16),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    ),
-                    NavigationRailDestination(
-                      icon:
-                          const Icon(Icons.calendar_today, color: Colors.blue),
-                      label: const Text(
-                        'Appointments',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    ),
-                    NavigationRailDestination(
-                      icon: const Icon(Icons.folder, color: Colors.blue),
-                      label: const Text(
-                        'Files',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    ),
-                    NavigationRailDestination(
-                      icon: const Icon(Icons.vaccines, color: Colors.blue),
-                      label: const Text(
-                        'Vaccinations',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    ),
-                    NavigationRailDestination(
-                      icon: const Icon(Icons.quiz, color: Colors.blue),
-                      label: const Text(
-                        'Survey',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    ),
-                    NavigationRailDestination(
-                      icon: const Icon(Icons.show_chart, color: Colors.blue),
-                      label: const Text(
-                        'Visualisation',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    ),
-                    NavigationRailDestination(
-                      icon: const Icon(Icons.table_chart, color: Colors.blue),
-                      label: const Text(
-                        'BP Editor',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    ),
-                  ],
+                    );
+                  }).toList(),
                   selectedLabelTextStyle: const TextStyle(
                     color: Colors.deepPurple,
                     fontWeight: FontWeight.bold,
