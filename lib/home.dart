@@ -159,7 +159,96 @@ class HealthPodHomeState extends State<HealthPodHome> {
         ],
       ),
       backgroundColor: titleBackgroundColor,
-      body: IconGridPage(),
+      body: Row(
+        children: [
+          ScrollConfiguration(
+            behavior:
+                ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: SingleChildScrollView(
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height,
+                child: NavigationRail(
+                  selectedIndex: 0,
+                  onDestinationSelected: (int index) {
+                    setState(() {
+                      // Handle tab selection
+                    });
+                  },
+                  labelType: NavigationRailLabelType.all,
+                  destinations: [
+                    NavigationRailDestination(
+                      icon: const Icon(Icons.home),
+                      label: const Text(
+                        'Home',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    ),
+                    NavigationRailDestination(
+                      icon:
+                          const Icon(Icons.calendar_today, color: Colors.blue),
+                      label: const Text(
+                        'Appointments',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    ),
+                    NavigationRailDestination(
+                      icon: const Icon(Icons.folder, color: Colors.blue),
+                      label: const Text(
+                        'Files',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    ),
+                    NavigationRailDestination(
+                      icon: const Icon(Icons.vaccines, color: Colors.blue),
+                      label: const Text(
+                        'Vaccinations',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    ),
+                    NavigationRailDestination(
+                      icon: const Icon(Icons.quiz, color: Colors.blue),
+                      label: const Text(
+                        'Survey',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    ),
+                    NavigationRailDestination(
+                      icon: const Icon(Icons.show_chart, color: Colors.blue),
+                      label: const Text(
+                        'Visualisation',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    ),
+                    NavigationRailDestination(
+                      icon: const Icon(Icons.table_chart, color: Colors.blue),
+                      label: const Text(
+                        'BP Editor',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    ),
+                  ],
+                  selectedLabelTextStyle: const TextStyle(
+                    color: Colors.deepPurple,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  unselectedLabelTextStyle: TextStyle(color: Colors.grey[500]),
+                ),
+              ),
+            ),
+          ),
+          const VerticalDivider(),
+          Expanded(
+            child: IconGridPage(),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomAppBar(
         height: getFooterHeight(context),
         color: Colors.grey[200],
