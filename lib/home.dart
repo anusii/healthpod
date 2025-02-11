@@ -26,6 +26,11 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/dialogs/alert.dart';
+import 'package:healthpod/features/bp/editor/page.dart';
+import 'package:healthpod/features/bp/survey.dart';
+import 'package:healthpod/features/file/service.dart';
+import 'package:healthpod/utils/fetch_and_navigate_to_visualisation.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -169,10 +174,64 @@ class HealthPodHomeState extends State<HealthPodHome> {
                 height: MediaQuery.of(context).size.height,
                 child: NavigationRail(
                   selectedIndex: 0,
-                  onDestinationSelected: (int index) {
-                    setState(() {
-                      // Handle tab selection
-                    });
+                  onDestinationSelected: (int index) async {
+                    switch (index) {
+                      case 0: // Home
+                        // Already on home page
+                        break;
+                      case 1: // Appointments
+                        alert(
+                          context,
+                          '''
+
+                          Here you will be able to access and manage your
+                          appointments. You can enter historic information, update
+                          when you recieve a new appointment, and download
+                          appointments from other sources.
+
+                          ''',
+                          'Comming Soon - Appointment',
+                        );
+                        break;
+                      case 2: // Files
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const FileService()),
+                        );
+                        break;
+                      case 3: // Vaccinations
+                        alert(
+                          context,
+                          '''
+
+                        Here you will be able to access and manage your record of
+                        vaccinations. You can enter historic information, update
+                        when you recieve a vaccination, and download from governemnt
+                        records of your vaccinations.
+
+                        ''',
+                          'Comming Soon - Vaccines',
+                        );
+                        break;
+                      case 4: // Survey
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => BPSurvey()),
+                        );
+                        break;
+                      case 5: // Visualisation
+                        await fetchAndNavigateToVisualisation(context);
+                        break;
+                      case 6: // BP Editor
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const BPEditorPage(),
+                          ),
+                        );
+                        break;
+                    }
                   },
                   labelType: NavigationRailLabelType.all,
                   destinations: [
