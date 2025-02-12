@@ -33,35 +33,35 @@ import 'package:integration_test/integration_test.dart';
 import 'package:solidpod/src/widgets/webview_auth.dart';
 
 /// Configuration class for test parameters.
-/// 
-/// Centralises test-specific configuration such as server URL, 
-/// login credentials, and timeout settings for easy management 
+///
+/// Centralises test-specific configuration such as server URL,
+/// login credentials, and timeout settings for easy management
 /// and potential future modifications.
 
 class TestConfig {
   /// The base URL of the Solid Pod server being tested.
-  
+
   static const podServer = 'https://pods.dev.solidcommunity.au';
 
   /// Specific login path for authentication.
-  
+
   static const loginPath = '/.account/login/password/';
 
   /// Test email used for authentication.
-  
+
   static const testEmail = 'test@anu.edu.au';
 
   /// Test password used for authentication.
-  
+
   static const testPassword = 'SuperSecure123';
 
   /// Maximum time allowed for the entire authentication process.
-  
+
   static const timeout = Duration(seconds: 45);
 }
 
 /// A custom WebView widget designed for Solid Pod authentication testing.
-/// 
+///
 /// This widget manages the entire authentication flow including:
 /// 1. Navigating to the login page
 /// 2. Injecting credentials
@@ -70,7 +70,7 @@ class TestConfig {
 
 class TestWebView extends StatefulWidget {
   /// Callback function to handle the extracted WebID.
-  
+
   final void Function(String?) onWebIdExtracted;
 
   const TestWebView({super.key, required this.onWebIdExtracted});
@@ -81,19 +81,19 @@ class TestWebView extends StatefulWidget {
 
 class _TestWebViewState extends State<TestWebView> {
   /// Tracks the current URL being loaded.
-  
+
   String _currentUrl = '';
 
   /// Indicates whether the page is currently loading.
-  
+
   bool _isLoading = true;
 
   /// Prevents multiple credential injection attempts.
-  
+
   bool _hasInjectedCredentials = false;
 
   /// Handles different stages of the authentication process.
-  /// 
+  ///
   /// This method is called on each page load and manages:
   /// - Credential injection on login page
   /// - Consent page handling
@@ -232,7 +232,7 @@ class _TestWebViewState extends State<TestWebView> {
 }
 
 /// Main integration test for Solid Pod authentication.
-/// 
+///
 /// This test verifies the entire authentication flow:
 /// 1. Launches the WebView
 /// 2. Navigates through login and consent pages
@@ -241,7 +241,7 @@ class _TestWebViewState extends State<TestWebView> {
 
 void main() {
   // Initialises the integration test binding.
-  
+
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   group('Pod Connection Tests:', () {
