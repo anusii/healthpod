@@ -31,6 +31,7 @@ import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/file/service.dart';
 import 'package:healthpod/utils/fetch_and_navigate_to_visualisation.dart';
+import 'package:healthpod/widgets/home_page.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -294,7 +295,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
           ),
           const VerticalDivider(),
           Expanded(
-            child: IconGridPage(),
+            child: const HomePage(),
           ),
         ],
       ),
