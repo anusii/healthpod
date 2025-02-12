@@ -56,6 +56,12 @@ dev_dependencies:
     path: custom_lint_package
 
 dependency_overrides:
+  # Override solidpod to use local fork.
+
+  solidpod:
+    path: solidpod
+
+
   # TODO 20240710 gjw dart-code-metrics DEPENDENCY ON pub_updater PROBLEM
   #
   # If Zheyuan can fix his dart-code-metrics fork this can probably be
