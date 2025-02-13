@@ -76,7 +76,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Files',
     'icon': Icons.folder,
     'color': Colors.blue,
-    'route': const FileService(),
+    'content': const FileService(),
   },
   {
     'title': 'Vaccinations',
@@ -96,7 +96,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Survey',
     'icon': Icons.quiz,
     'color': Colors.blue,
-    'route': BPSurvey(),
+    'content': BPSurvey(),
   },
   {
     'title': 'Visualisation',
@@ -108,7 +108,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'BP Editor',
     'icon': Icons.table_chart,
     'color': Colors.blue,
-    'route': const BPEditorPage(),
+    'content': const BPEditorPage(),
   },
 ];
 
@@ -122,6 +122,7 @@ class HealthPodHome extends StatefulWidget {
 class HealthPodHomeState extends State<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -241,25 +242,17 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
                 height: MediaQuery.of(context).size.height,
                 child: NavigationRail(
-                  // Default to home tab being selected.
-
-                  selectedIndex: 0,
+                  selectedIndex: _selectedIndex,
                   onDestinationSelected: (int index) async {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+
                     final tab = homeTabs[index];
 
-                    // Skip navigation for home tab.
-
-                    if (index == 0) return;
-
                     // Handle different types of navigation based on tab properties.
-
                     if (tab.containsKey('message')) {
                       alert(context, tab['message'], tab['dialogTitle']);
-                    } else if (tab.containsKey('route')) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => tab['route']),
-                      );
                     } else if (tab.containsKey('action')) {
                       await tab['action'](context);
                     }
@@ -294,7 +287,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
           ),
           const VerticalDivider(),
           Expanded(
-            child: const HomePage(),
+            child: homeTabs[_selectedIndex]['content'] ?? const HomePage(),
           ),
         ],
       ),

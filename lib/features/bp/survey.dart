@@ -283,10 +283,6 @@ class BPSurvey extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Health Survey'),
-        backgroundColor: titleBackgroundColor,
-      ),
       body: HealthSurveyForm(
         questions: questions,
         onSubmit: (responses) => _handleSubmit(context, responses),

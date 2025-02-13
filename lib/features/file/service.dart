@@ -966,11 +966,6 @@ class _FileServiceState extends State<FileService> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-          tooltip: 'Back to Home',
-        ),
         title: const Text(
           'File Management',
         ),
