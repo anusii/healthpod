@@ -143,6 +143,7 @@ class BPEditorState {
     // Validate required fields.
 
     final obs = currentEdit ?? observations[index];
+
     if (obs.systolic == 0 || obs.diastolic == 0 || obs.heartRate == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
