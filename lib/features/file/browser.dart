@@ -186,6 +186,8 @@ class FileBrowserState extends State<FileBrowser> {
         // This step ensures we only display files that are properly formatted
         // and accessible to the current user.
 
+        if (!mounted) return;
+
         final metadata = await readPod(
           relativePath,
           context,
