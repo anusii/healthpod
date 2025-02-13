@@ -1,6 +1,8 @@
-/// File browser widget.
+/// A file browser widget.
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+// Time-stamp: <Friday 2025-02-14 08:19:53 +1100 Graham Williams>
+///
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -29,23 +31,27 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/file/item.dart';
 
-/// File Browser Widget.
+/// A file browser widget to interact with files and directories in user's POD.
 ///
-/// Interacts with files and directories in user's POD.
-/// Handles displaying files and directories, and allows for navigation and file operations.
-
-/// `FileBrowser` is a StatefulWidget as it needs to change its contents
-/// based on user's actions, such as navigating directories or refreshing the view.
-/// A few key callbacks are provided to allow for interaction outside this widget,
-/// such as selecting a file, downloading a file, and deleting a file.
+/// The browser handles the display of files and directories, and allows for
+/// navigation and file operations.
+///
+/// [FileBrowser] is a [StatefulWidget] as it needs to change its contents based
+/// on the user's actions, such as navigating directories or refreshing the
+/// view.  A few key callbacks are provided to allow for interaction outside
+/// this widget, such as selecting a file, downloading a file, and deleting a
+/// file.
 
 class FileBrowser extends StatefulWidget {
   final Function(String, String) onFileSelected;
   final Function(String, String) onFileDownload;
   final Function(String, String) onFileDelete;
   final Function(String) onDirectoryChanged;
-  final Function(String, String)
-      onImportCsv; // Callback for handling CSV file imports.
+
+  /// Callback to handle CSV file imports.
+
+  final Function(String, String) onImportCsv;
+
   final GlobalKey<FileBrowserState> browserKey;
 
   const FileBrowser({
@@ -62,22 +68,28 @@ class FileBrowser extends StatefulWidget {
   State<FileBrowser> createState() => FileBrowserState();
 }
 
-class FileBrowserState extends State<FileBrowser> {
-  // State variables.
+/// State variables for the [FileBrowser].
 
+class FileBrowserState extends State<FileBrowser> {
   List<FileItem> files = [];
   List<String> directories = [];
-  Map<String, int> directoryCounts =
-      {}; // Stores file counts for each directory.
+
+  /// Store directory file counts.
+
+  Map<String, int> directoryCounts = {};
+
   bool isLoading = true;
   String? selectedFile;
   String currentPath = 'healthpod/data';
   List<String> pathHistory = ['healthpod/data'];
-  int currentDirFileCount = 0; // Total files in current directory.
+
+  /// Total files in current directory.
+
+  int currentDirFileCount = 0;
 
   final smallGapH = const SizedBox(width: 10);
 
-  // As the widget initialises, we fetch the file list.
+  /// As the widget initialises, we fetch the file list.
 
   @override
   void initState() {
@@ -121,6 +133,7 @@ class FileBrowserState extends State<FileBrowser> {
     try {
       final dirUrl = await getDirUrl(dirPath);
       final resources = await getResourcesInContainer(dirUrl);
+
       // Only count files that match our encryption extension pattern.
 
       return resources.files.where((f) => f.endsWith('.enc.ttl')).length;
@@ -130,8 +143,8 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
-  // This is the core of the file browser.
-  // We fetch the list of directories and files, processing each file for metadata.
+  // The function [refreshFiles] is the core of the file browser.  We fetch the
+  // list of directories and files, processing each file for metadata.
 
   Future<void> refreshFiles() async {
     // Set loading state to show progress indicator.
