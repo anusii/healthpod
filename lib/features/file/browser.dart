@@ -1,6 +1,6 @@
 /// A file browser widget.
 ///
-// Time-stamp: <Friday 2025-02-14 08:19:53 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -97,7 +97,7 @@ class FileBrowserState extends State<FileBrowser> {
     refreshFiles();
   }
 
-  // When a user clicks a directory, we navigate deeper into it.
+  /// When a user clicks a directory, we navigate deeper into it.
 
   Future<void> navigateToDirectory(String dirName) async {
     setState(() {
@@ -111,7 +111,7 @@ class FileBrowserState extends State<FileBrowser> {
     widget.onDirectoryChanged.call(currentPath);
   }
 
-  // Users can navigate up by removing the last directory from the path history.
+  /// Navigate up by removing the last directory from the path history.
 
   Future<void> navigateUp() async {
     if (pathHistory.length > 1) {
@@ -127,7 +127,7 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
-  // Get file count for a specific directory.
+  /// Get file count for a specific directory.
 
   Future<int> getDirectoryFileCount(String dirPath) async {
     try {
@@ -143,8 +143,8 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
-  // The function [refreshFiles] is the core of the file browser.  We fetch the
-  // list of directories and files, processing each file for metadata.
+  /// The core of the file browser, fetch the list of directories and files,
+  /// processing each file for metadata.
 
   Future<void> refreshFiles() async {
     // Set loading state to show progress indicator.
@@ -341,7 +341,7 @@ class FileBrowserState extends State<FileBrowser> {
                       ],
                     ),
                   ),
-                   // Action buttons shown only if sufficient width.
+                  // Action buttons shown only if sufficient width.
 
                   if (showButtons) ...[
                     const SizedBox(width: 8),
@@ -365,7 +365,7 @@ class FileBrowserState extends State<FileBrowser> {
                     ),
                     smallGapH,
                     // Delete button.
-                    
+
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       icon: Icon(
@@ -391,8 +391,6 @@ class FileBrowserState extends State<FileBrowser> {
       ),
     );
   }
-
-  // Build the UI that will be displayed to the user.
 
   @override
   Widget build(BuildContext context) {
