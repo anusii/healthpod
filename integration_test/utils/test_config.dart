@@ -23,7 +23,6 @@
 ///
 /// Authors: Ashley Tang
 
-
 library;
 
 /// Configuration class for test parameters.
