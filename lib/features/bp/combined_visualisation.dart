@@ -37,7 +37,6 @@ import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/features/visualise/stat_item.dart';
 import 'package:healthpod/utils/parse_numeric_input.dart';
 import 'package:healthpod/utils/get_month_abbrev.dart';
-import 'package:healthpod/utils/fetch_and_navigate_to_visualisation.dart';
 
 /// Combined blood pressure visualisation widget.
 ///
