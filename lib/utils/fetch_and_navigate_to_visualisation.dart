@@ -30,10 +30,8 @@ import 'package:healthpod/features/bp/combined_visualisation.dart';
 import 'package:healthpod/features/survey/data.dart';
 
 /// Helper function to fetch and handle survey data.
-
 Future<void> fetchAndNavigateToVisualisation(BuildContext context) async {
   // Show loading indicator.
-
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -46,43 +44,24 @@ Future<void> fetchAndNavigateToVisualisation(BuildContext context) async {
 
   try {
     // Fetch survey data.
-
     final surveyData = await SurveyData.fetchAllSurveyData(context);
 
     // Close loading indicator.
-
     if (context.mounted) {
       Navigator.pop(context);
     }
 
-    // Navigate to visualization page if we have data.
-
-    if (surveyData.isNotEmpty) {
-      if (context.mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BPCombinedVisualisation(
-              surveyData: surveyData,
-            ),
-          ),
-        );
-      }
-    } else {
-      // Show message if no data available.
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No survey data available to visualize'),
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
+    // Instead of returning data, navigate to visualization page
+    if (surveyData.isNotEmpty && context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BPCombinedVisualisation(),
+        ),
+      );
     }
   } catch (e) {
     // Close loading indicator and show error.
-
     if (context.mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(

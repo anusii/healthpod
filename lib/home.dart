@@ -27,6 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:healthpod/dialogs/alert.dart';
+import 'package:healthpod/features/bp/combined_visualisation.dart';
 import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/file/service.dart';
@@ -102,7 +103,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Visualisation',
     'icon': Icons.show_chart,
     'color': Colors.blue,
-    'action': fetchAndNavigateToVisualisation,
+    'content': const BPCombinedVisualisation(),
   },
   {
     'title': 'BP Editor',
