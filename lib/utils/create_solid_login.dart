@@ -25,14 +25,13 @@
 
 library;
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/home.dart';
+import 'package:healthpod/utils/platform/helper.dart';
 
 /// Solid POD Authentication Widget Creator
 ///
@@ -81,8 +80,7 @@ class SolidLoginTestHelper {
 Widget createSolidLogin(BuildContext context) {
   // Determine if running in integration test mode.
 
-  final bool isIntegrationTest =
-      Platform.environment['INTEGRATION_TEST']?.toLowerCase() == 'true';
+  final bool isIntegrationTest = PlatformHelper.isIntegrationTest();
 
   debugPrint("🔥 INTEGRATION_TEST: $isIntegrationTest");
 
