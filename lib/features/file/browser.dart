@@ -1,6 +1,8 @@
-/// File browser widget.
+/// A file browser widget.
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+///
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -29,23 +31,27 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/file/item.dart';
 
-/// File Browser Widget.
+/// A file browser widget to interact with files and directories in user's POD.
 ///
-/// Interacts with files and directories in user's POD.
-/// Handles displaying files and directories, and allows for navigation and file operations.
-
-/// `FileBrowser` is a StatefulWidget as it needs to change its contents
-/// based on user's actions, such as navigating directories or refreshing the view.
-/// A few key callbacks are provided to allow for interaction outside this widget,
-/// such as selecting a file, downloading a file, and deleting a file.
+/// The browser handles the display of files and directories, and allows for
+/// navigation and file operations.
+///
+/// [FileBrowser] is a [StatefulWidget] as it needs to change its contents based
+/// on the user's actions, such as navigating directories or refreshing the
+/// view.  A few key callbacks are provided to allow for interaction outside
+/// this widget, such as selecting a file, downloading a file, and deleting a
+/// file.
 
 class FileBrowser extends StatefulWidget {
   final Function(String, String) onFileSelected;
   final Function(String, String) onFileDownload;
   final Function(String, String) onFileDelete;
   final Function(String) onDirectoryChanged;
-  final Function(String, String)
-      onImportCsv; // Callback for handling CSV file imports.
+
+  /// Callback to handle CSV file imports.
+
+  final Function(String, String) onImportCsv;
+
   final GlobalKey<FileBrowserState> browserKey;
 
   const FileBrowser({
@@ -62,22 +68,28 @@ class FileBrowser extends StatefulWidget {
   State<FileBrowser> createState() => FileBrowserState();
 }
 
-class FileBrowserState extends State<FileBrowser> {
-  // State variables.
+/// State variables for the [FileBrowser].
 
+class FileBrowserState extends State<FileBrowser> {
   List<FileItem> files = [];
   List<String> directories = [];
-  Map<String, int> directoryCounts =
-      {}; // Stores file counts for each directory.
+
+  /// Store directory file counts.
+
+  Map<String, int> directoryCounts = {};
+
   bool isLoading = true;
   String? selectedFile;
   String currentPath = 'healthpod/data';
   List<String> pathHistory = ['healthpod/data'];
-  int currentDirFileCount = 0; // Total files in current directory.
+
+  /// Total files in current directory.
+
+  int currentDirFileCount = 0;
 
   final smallGapH = const SizedBox(width: 10);
 
-  // As the widget initialises, we fetch the file list.
+  /// As the widget initialises, we fetch the file list.
 
   @override
   void initState() {
@@ -85,7 +97,7 @@ class FileBrowserState extends State<FileBrowser> {
     refreshFiles();
   }
 
-  // When a user clicks a directory, we navigate deeper into it.
+  /// When a user clicks a directory, we navigate deeper into it.
 
   Future<void> navigateToDirectory(String dirName) async {
     setState(() {
@@ -99,7 +111,7 @@ class FileBrowserState extends State<FileBrowser> {
     widget.onDirectoryChanged.call(currentPath);
   }
 
-  // Users can navigate up by removing the last directory from the path history.
+  /// Navigate up by removing the last directory from the path history.
 
   Future<void> navigateUp() async {
     if (pathHistory.length > 1) {
@@ -115,12 +127,13 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
-  // Get file count for a specific directory.
+  /// Get file count for a specific directory.
 
   Future<int> getDirectoryFileCount(String dirPath) async {
     try {
       final dirUrl = await getDirUrl(dirPath);
       final resources = await getResourcesInContainer(dirUrl);
+
       // Only count files that match our encryption extension pattern.
 
       return resources.files.where((f) => f.endsWith('.enc.ttl')).length;
@@ -130,8 +143,8 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
-  // This is the core of the file browser.
-  // We fetch the list of directories and files, processing each file for metadata.
+  /// The core of the file browser, fetch the list of directories and files,
+  /// processing each file for metadata.
 
   Future<void> refreshFiles() async {
     // Set loading state to show progress indicator.
@@ -226,16 +239,39 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
+  /// Builds a list item widget for displaying a file with its metadata and actions.
+  ///
+  /// This widget adapts its layout based on available width constraints:
+  /// - At < 40px: Shows only the file name
+  /// - At 40-100px: Adds file icon with minimal spacing
+  /// - At 100-150px: Increases icon spacing
+  /// - At > 150px: Shows modification date
+  /// - At > 200px: Shows action buttons (download, delete)
+  ///
+  /// The item supports selection state, showing a highlight when selected.
+  /// Action buttons are conditionally rendered based on available space.
+  ///
+  /// Parameters:
+  /// - [file]: The FileItem containing the file's metadata
+  /// - [context]: The build context for theming
+  ///
+  /// Returns a padded, responsive list item widget with the file's information
+  /// and available actions.
+
   Widget _buildFileListItem(FileItem file, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: LayoutBuilder(
         builder: (context, constraints) {
+          // Define minimum width threshold for showing action buttons.
+
           const minWidthForButtons = 200;
           final showButtons = constraints.maxWidth >= minWidthForButtons;
 
           return InkWell(
             onTap: () {
+              // Update selection state and notify parent.
+
               setState(() {
                 selectedFile = file.name;
               });
@@ -243,6 +279,8 @@ class FileBrowserState extends State<FileBrowser> {
             },
             borderRadius: BorderRadius.circular(8),
             child: Container(
+              // Apply selection highlighting using theme colours.
+
               decoration: BoxDecoration(
                 color: selectedFile == file.name
                     ? Theme.of(context)
@@ -252,6 +290,8 @@ class FileBrowserState extends State<FileBrowser> {
                     : null,
                 borderRadius: BorderRadius.circular(8),
               ),
+              // Adjust horizontal padding based on available width.
+
               padding: EdgeInsets.symmetric(
                 horizontal: constraints.maxWidth < 50 ? 4 : 12,
                 vertical: 8,
@@ -259,24 +299,34 @@ class FileBrowserState extends State<FileBrowser> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Show file icon only if width permits.
+
                   if (constraints.maxWidth > 40)
                     Icon(
                       Icons.insert_drive_file,
                       color: Theme.of(context).colorScheme.secondary,
                       size: 20,
                     ),
+                  // Responsive spacing after icon.
+
                   if (constraints.maxWidth > 40)
                     SizedBox(width: constraints.maxWidth < 100 ? 4 : 12),
+                  // File information column.
+
                   Expanded(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // File name with overflow protection.
+
                         Text(
                           file.name,
                           style: const TextStyle(fontWeight: FontWeight.w500),
                           overflow: TextOverflow.ellipsis,
                         ),
+                        // Show modification date if width permits.
+
                         if (constraints.maxWidth > 150)
                           Text(
                             'Modified: ${file.dateModified.toString().split('.')[0]}',
@@ -291,8 +341,12 @@ class FileBrowserState extends State<FileBrowser> {
                       ],
                     ),
                   ),
+                  // Action buttons shown only if sufficient width.
+
                   if (showButtons) ...[
                     const SizedBox(width: 8),
+                    // Download button.
+
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       icon: Icon(
@@ -310,6 +364,8 @@ class FileBrowserState extends State<FileBrowser> {
                       ),
                     ),
                     smallGapH,
+                    // Delete button.
+
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       icon: Icon(
@@ -335,8 +391,6 @@ class FileBrowserState extends State<FileBrowser> {
       ),
     );
   }
-
-  // Build the UI that will be displayed to the user.
 
   @override
   Widget build(BuildContext context) {

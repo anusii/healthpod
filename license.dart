@@ -1,6 +1,6 @@
-/// <DESCRIPTION>
+/// DESCRIPTION
 ///
-// Time-stamp: <Thursday 2025-01-30 08:36:00 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-02-14 08:06:50 +1100 Graham Williams>
 ///
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -21,10 +21,6 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: <AUTHORS>
-
-//
+/// Authors: AUTHORS
 
 library;
-
-// ignore_for_file: unintended_html_in_doc_comment
