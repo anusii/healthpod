@@ -40,50 +40,6 @@ void main() {
   bpSurvey();
 }
 
-/// Helper function to dump current widgets for debugging.
-///
-/// Prints the entire widget tree to help diagnose widget hierarchy issues
-/// and verify the current state of the UI. Each widget's runtime type is
-/// included in the output.
-///
-/// Parameters:
-///   tester: The WidgetTester instance used for the current test.
-
-void dumpWidgetTree(WidgetTester tester) {
-  debugPrint('\n🔍 Current widget tree:');
-  debugPrint('${tester.allWidgets.map((w) => w.runtimeType).toList()}');
-}
-
-/// Helper function to find widgets with retry logic.
-///
-/// Attempts to find a widget multiple times with delays between attempts.
-///
-/// Parameters:
-///   finder: The Finder to use for locating the widget.
-///   maxAttempts: Maximum number of retry attempts.
-///   delaySeconds: Delay between attempts in seconds.
-///
-/// Returns:
-///   bool: True if widget is found, false otherwise.
-
-Future<bool> findWidgetWithRetry(
-  Finder finder,
-  WidgetTester tester, {
-  int maxAttempts = 5,
-  int delaySeconds = 1,
-}) async {
-  int attempts = 0;
-  while (attempts < maxAttempts) {
-    if (finder.evaluate().isNotEmpty) {
-      return true;
-    }
-    await Future.delayed(Duration(seconds: delaySeconds));
-    await tester.pumpAndSettle();
-    attempts++;
-  }
-  return false;
-}
-
 /// Blood Pressure Survey integration test suite.
 ///
 /// Tests the complete flow of recording blood pressure measurements, including:
