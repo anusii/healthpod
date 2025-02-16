@@ -45,7 +45,7 @@ class BPEditorControllers {
   TextEditingController? heartRateController;
   TextEditingController? notesController;
 
-  /// Store references to our listeners so we can remove them later.
+  // Store references to our listeners so we can remove them later.
 
   VoidCallback? _systolicListener;
   VoidCallback? _diastolicListener;

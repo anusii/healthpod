@@ -72,8 +72,9 @@ DataRow buildEditingRow({
 
       numericCell(
         controller: editorState.systolicController,
-        onValueChange:
-            (val) {}, // Value updates handled by controller listeners
+        // Value updates handled by controller listeners.
+
+        onValueChange: (val) {},
       ),
       numericCell(
         controller: editorState.diastolicController,
