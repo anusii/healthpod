@@ -89,6 +89,9 @@ void bpSurvey() {
 
             debugPrint(
                 '\n⚠️ Please complete browser authentication manually...');
+
+            // Allow time for manual browser authentication.
+
             await Future.delayed(const Duration(seconds: 15));
             await tester.pumpAndSettle();
 
