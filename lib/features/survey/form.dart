@@ -359,18 +359,19 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   /// Builds an input field for a health survey question.
 
   Widget _buildInputField(HealthSurveyQuestion question, int index) {
-    return SizedBox(
-      width: double.infinity,
-      child: Focus(
-        descendantsAreFocusable: true,
-        child: switch (question.type) {
-          HealthDataType.number => _buildNumberInput(question, index),
-          HealthDataType.text => _buildTextInput(question, index),
-          _ => const SizedBox(),
-        },
-      ),
-    );
-  }
+  return SizedBox(
+    width: double.infinity,
+    child: Focus(
+      skipTraversal: true,  // Skip this focus node during tab traversal
+      descendantsAreFocusable: true,
+      child: switch (question.type) {
+        HealthDataType.number => _buildNumberInput(question, index),
+        HealthDataType.text => _buildTextInput(question, index),
+        _ => const SizedBox(),
+      },
+    ),
+  );
+}
 
   /// Builds a text input field for a health survey question.
   ///
