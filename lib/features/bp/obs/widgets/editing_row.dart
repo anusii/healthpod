@@ -58,14 +58,6 @@ DataRow buildEditingRow({
 
   final currentEdit = editorState.currentEdit ?? observation;
 
-  // Make sure we have controllers initialized from "currentEdit."
-
-  if (editorState.systolicController == null) {
-    editorState.initialiseControllers(currentEdit);
-  }
-
-  // Return a row that displays and updates "currentEdit" fields in real time.
-
   return DataRow(
     cells: [
       buildTimestampCell(
@@ -80,21 +72,19 @@ DataRow buildEditingRow({
 
       numericCell(
         controller: editorState.systolicController,
-        onValueChange: (val) {
-          editorState.currentEdit = currentEdit.copyWith(systolic: val);
-        },
+        // Value updates handled by controller listeners.
+
+        onValueChange: (val) {},
       ),
       numericCell(
         controller: editorState.diastolicController,
-        onValueChange: (val) {
-          editorState.currentEdit = currentEdit.copyWith(diastolic: val);
-        },
+        onValueChange:
+            (val) {}, // Value updates handled by controller listeners
       ),
       numericCell(
         controller: editorState.heartRateController,
-        onValueChange: (val) {
-          editorState.currentEdit = currentEdit.copyWith(heartRate: val);
-        },
+        onValueChange:
+            (val) {}, // Value updates handled by controller listeners
       ),
 
       // Feeling dropdown and Notes cell.

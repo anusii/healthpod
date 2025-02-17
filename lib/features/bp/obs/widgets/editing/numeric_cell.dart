@@ -42,11 +42,10 @@ DataCell numericCell({
     TextField(
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      onChanged: (value) {
-        final numericValue =
-            value.isEmpty ? 0.0 : (double.tryParse(value) ?? 0.0);
-        onValueChange(numericValue);
-      },
+      decoration: const InputDecoration(
+        isDense: true,
+        contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+      ),
     ),
   );
 }

@@ -26,13 +26,18 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/features/bp/editor/controllers.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
-import 'package:healthpod/utils/parse_numeric_input.dart';
 
 /// Manages all the state fields needed for the Blood Pressure Editor.
+///
+/// Contains the list of observations, the current observation being edited,
+/// and the state of the text editing controllers.
+///
+/// ChangeNotifier is used to notify listeners of changes to the state.
 
-class BPEditorState {
+class BPEditorState with ChangeNotifier {
   /// The list of loaded observations.
 
   List<BPObservation> observations = [];
@@ -53,55 +58,47 @@ class BPEditorState {
 
   bool isNewObservation = false;
 
+  /// Controller manager for text editing.
+
+  final controllers = BPEditorControllers();
+
+  /// Getter for controllers.
+
+  TextEditingController? get systolicController =>
+      controllers.systolicController;
+  TextEditingController? get diastolicController =>
+      controllers.diastolicController;
+  TextEditingController? get heartRateController =>
+      controllers.heartRateController;
+  TextEditingController? get notesController => controllers.notesController;
+
   /// The observation currently being edited.
 
-  BPObservation? currentEdit;
+  BPObservation? _currentEdit;
 
-  /// Text editing controllers used for editing existing or new observations.
+  /// Getter for currentEdit.
 
-  TextEditingController? systolicController;
-  TextEditingController? diastolicController;
-  TextEditingController? heartRateController;
-  TextEditingController? notesController;
+  BPObservation? get currentEdit => _currentEdit;
 
   /// Prepares text controllers for a given [observation].
 
   void initialiseControllers(BPObservation observation) {
-    disposeControllers();
-    systolicController = TextEditingController(
-      text: observation.systolic == 0
-          ? ''
-          : parseNumericInput(observation.systolic),
+    controllers.initialize(
+      observation,
+      onObservationChanged: (updated) {
+        currentEdit = updated;
+      },
     );
-    diastolicController = TextEditingController(
-      text: observation.diastolic == 0
-          ? ''
-          : parseNumericInput(observation.diastolic),
-    );
-    heartRateController = TextEditingController(
-      text: observation.heartRate == 0
-          ? ''
-          : parseNumericInput(observation.heartRate),
-    );
-    notesController = TextEditingController(text: observation.notes);
-  }
-
-  /// Dispose of text controllers to prevent memory leaks.
-
-  void disposeControllers() {
-    systolicController?.dispose();
-    diastolicController?.dispose();
-    heartRateController?.dispose();
-    notesController?.dispose();
   }
 
   /// Resets editing fields and cancels the current edit.
 
   void cancelEdit() {
+    controllers.dispose();
     editingIndex = null;
     isNewObservation = false;
-    currentEdit = null;
-    disposeControllers();
+    _currentEdit = null;
+    notifyListeners();
   }
 
   /// Enters edit mode for the observation at [index].
@@ -111,6 +108,13 @@ class BPEditorState {
     isNewObservation = false;
     currentEdit = observations[index];
     initialiseControllers(currentEdit!);
+  }
+
+  /// Setter for currentEdit that triggers UI updates.
+
+  set currentEdit(BPObservation? value) {
+    _currentEdit = value;
+    notifyListeners();
   }
 
   /// Add new blank observation at the top of the list and go to edit mode.
@@ -132,8 +136,6 @@ class BPEditorState {
   }
 
   /// Save the observation at [index], using the provided service.
-  ///
-  /// Note: The actual encryption/Pod writing is performed by the [editorService].
 
   Future<void> saveObservation(
     BuildContext context,
@@ -142,9 +144,7 @@ class BPEditorState {
   ) async {
     // Validate required fields.
 
-    final obs = currentEdit ?? observations[index];
-
-    if (obs.systolic == 0 || obs.diastolic == 0 || obs.heartRate == 0) {
+    if (!controllers.hasRequiredValues()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -156,6 +156,8 @@ class BPEditorState {
       return;
     }
 
+    final obs = currentEdit ?? observations[index];
+
     await editorService.saveObservationToPod(
       context: context,
       observation: obs,
@@ -163,11 +165,23 @@ class BPEditorState {
       oldObservation: !isNewObservation ? observations[index] : null,
     );
 
+    if (!context.mounted) return;
+
+    // Show success message.
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Blood pressure reading saved successfully'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
     // Reset editing state.
 
     editingIndex = null;
     isNewObservation = false;
     currentEdit = null;
+    controllers.dispose();
   }
 
   /// Delete an observation from the Pod via the [editorService].

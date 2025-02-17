@@ -96,6 +96,19 @@ class _BPEditorPageState extends State<BPEditorPage> {
     });
   }
 
+  /// Handles canceling the current edit.
+
+  void _handleCancelEdit() {
+    setState(() {
+      if (editorState.isNewObservation) {
+        // Remove the new observation from the list.
+
+        editorState.observations.removeAt(0);
+      }
+      editorState.cancelEdit();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final error = editorState.error;
@@ -183,9 +196,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
                       editorService: editorService,
                       observation: obs,
                       index: index,
-                      onCancel: () => setState(() {
-                        editorState.cancelEdit();
-                      }),
+                      onCancel: _handleCancelEdit,
                       onSave: () async {
                         // Attempt to save observation, then reload data on success.
 
