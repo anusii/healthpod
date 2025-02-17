@@ -115,23 +115,27 @@ class _VaccinationDiaryState extends State<VaccinationDiary> {
 
               // Save Button
               Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // TODO: Implement save functionality
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Saving vaccination record...'),
-                        ),
-                      );
-                    }
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 32.0,
-                      vertical: 16.0,
+                child: SizedBox(
+                  width: 200,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        // TODO: Implement save functionality
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Saving vaccination record...'),
+                          ),
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.send),
+                    label: const Text('Submit'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
-                    child: Text('Save Record'),
                   ),
                 ),
               ),

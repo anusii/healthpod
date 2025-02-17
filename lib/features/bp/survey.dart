@@ -39,6 +39,9 @@ import 'package:healthpod/features/survey/question.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
+import 'package:healthpod/utils/handle_submit.dart';
+import 'package:healthpod/utils/save_response_locally.dart';
+import 'package:healthpod/utils/save_response_pod.dart';
 
 /// A page for collecting blood pressure survey data.
 
@@ -53,230 +56,37 @@ class BPSurvey extends StatelessWidget {
 
   Future<void> _saveResponsesLocally(
       BuildContext context, Map<String, dynamic> responses) async {
-    try {
-      // Add timestamp to responses.
-
-      final responseData = {
-        HealthSurveyConstants.fieldTimestamp: DateTime.now()
-            .toIso8601String(), // Use fieldTimestamp constant instead of manual definition.
-      };
-
-      // Convert to JSON string with proper formatting and base64 encode.
-
-      final jsonString =
-          const JsonEncoder.withIndent('  ').convert(responseData);
-      final base64Content = base64Encode(utf8.encode(jsonString));
-
-      // Generate filename using consistent format without milliseconds.
-
-      final timestamp = formatTimestampForFilename(DateTime.now());
-      final defaultFileName = 'blood_pressure_$timestamp.json';
-
-      // Show file picker for save location.
-
-      String? outputFile = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save Survey Response',
-        fileName: defaultFileName,
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-      );
-
-      if (outputFile == null) {
-        throw Exception('Save cancelled by user');
-      }
-
-      // Ensure .json extension.
-
-      if (!outputFile.toLowerCase().endsWith('.json')) {
-        outputFile = '$outputFile.json';
-      }
-
-      // Save the base64 encoded file.
-
-      final file = File(outputFile);
-      await file.writeAsString(base64Content);
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saving survey: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
+    await saveResponseLocally(
+      context: context,
+      responses: responses,
+      filePrefix: 'blood_pressure',
+      dialogTitle: 'Save Blood Pressure Survey',
+    );
   }
 
   /// Saves the survey responses directly to POD.
-  ///
-  /// Uses uploadJsonToPod utility which:
-  /// 1. Creates a properly formatted JSON file
-  /// 2. Uses uploadFileToPod internally for consistent file handling
-  /// 3. Ensures proper encryption and file naming
-  /// 4. Manages temporary file cleanup
-  ///
-  /// This provides the same file format and handling as manual uploads
-  /// through the file browser.
 
   Future<void> _saveResponsesToPod(
       BuildContext context, Map<String, dynamic> responses) async {
-    try {
-      // Prepare response data with timestamp.
-
-      final responseData = {
-        HealthSurveyConstants.fieldTimestamp: DateTime.now().toIso8601String(),
-        'responses': responses,
-      };
-
-      // Use utility to handle the upload process.
-
-      final result = await uploadJsonToPod(
-        data: responseData, // Our structured survey data
-        targetPath: '/bp', // Store in blood pressure directory
-        fileNamePrefix: 'blood_pressure', // Consistent file naming
-        context: context,
-      );
-
-      if (result != SolidFunctionCallStatus.success) {
-        throw Exception('Failed to save survey responses (Status: $result)');
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error saving survey to POD: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
+    await saveResponseToPod(
+      context: context,
+      responses: responses,
+      podPath: '/bp',
+      filePrefix: 'blood_pressure',
+    );
   }
 
   /// Handles the submission of the survey.
 
-  //TODO kevin , use this to save vaccine record to POD/local device
-
   Future<void> _handleSubmit(
       BuildContext context, Map<String, dynamic> responses) async {
-    if (!context.mounted) return;
-
-    // Check login and security key status first.
-
-    final isKeySaved = await fetchKeySavedStatus(context);
-
-    if (!context.mounted) return;
-
-    // Show save location options dialog.
-
-    final saveChoice = await showDialog<String>(
+    await handleSurveySubmit(
       context: context,
-      barrierDismissible: false, // User must make a choice
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Save Survey Results'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text('Choose how to save your results:'),
-              if (!isKeySaved) ...[
-                const SizedBox(height: 12),
-                const Text(
-                  'Note: POD saving requires setting up your security key first.',
-                  style: TextStyle(
-                    color: Colors.orange,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop('local'),
-              child: const Text('Save Locally'),
-            ),
-            TextButton(
-              onPressed:
-                  isKeySaved ? () => Navigator.of(context).pop('pod') : null,
-              child: Text(
-                'Save to POD',
-                style: TextStyle(
-                  color: isKeySaved ? null : Colors.grey,
-                ),
-              ),
-            ),
-            // Option to save to both places.
-            // Instead of saving to only one place, so that user has a backup.
-
-            TextButton(
-              onPressed:
-                  isKeySaved ? () => Navigator.of(context).pop('both') : null,
-              child: Text(
-                'Save Both Places',
-                style: TextStyle(
-                  color: isKeySaved ? null : Colors.grey,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+      responses: responses,
+      saveLocally: _saveResponsesLocally,
+      saveToPod: _saveResponsesToPod,
+      title: 'Save Blood Pressure Survey',
     );
-
-    if (saveChoice == null) return; // User cancelled
-
-    if (!context.mounted) return;
-
-    try {
-      // Show saving indicator.
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Saving survey results...'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-
-      // Perform the selected save operations.
-
-      if (saveChoice == 'local' || saveChoice == 'both') {
-        await _saveResponsesLocally(context, responses);
-      }
-
-      if (!context.mounted) return;
-
-      if (saveChoice == 'pod' || saveChoice == 'both') {
-        await _saveResponsesToPod(context, responses);
-      }
-
-      if (!context.mounted) return;
-
-      // Show final success message.
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Survey submitted and saved successfully!'),
-          backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
-        ),
-      );
-
-      // Return to previous screen after brief delay.
-
-      await Future.delayed(const Duration(seconds: 1));
-      if (!context.mounted) return;
-      Navigator.of(context).pop();
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error saving survey: ${e.toString()}'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
-        ),
-      );
-    }
   }
 
   /// Builds the health survey page.
