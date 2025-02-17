@@ -15,6 +15,7 @@ Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
 ## 0.1 LATEST UPDATES
 
++ Deploy navigator [0.0.9 20250218 kev]
 + Refine and add import order lint [0.0.8 20250207 atangster]
 + Refine SURVEY and FILES features [0.0.7 20250120 atangster]
 + Add footer information and links [0.0.6 20250114 atangster]

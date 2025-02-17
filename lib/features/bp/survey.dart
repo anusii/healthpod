@@ -33,7 +33,6 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/features/survey/form.dart';
 import 'package:healthpod/features/survey/question.dart';
@@ -285,10 +284,6 @@ class BPSurvey extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Health Survey'),
-        backgroundColor: titleBackgroundColor,
-      ),
       body: HealthSurveyForm(
         questions: questions,
         onSubmit: (responses) => _handleSubmit(context, responses),

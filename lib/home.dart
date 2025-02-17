@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Monday 2025-01-13 14:59:27 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-02-12 15:50:35 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -43,7 +43,12 @@ import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/widgets/footer.dart';
-import 'package:healthpod/widgets/icon_grid_page.dart';
+import 'package:healthpod/dialogs/alert.dart';
+import 'package:healthpod/features/bp/combined_visualisation.dart';
+import 'package:healthpod/features/bp/editor/page.dart';
+import 'package:healthpod/features/bp/survey.dart';
+import 'package:healthpod/features/file/service.dart';
+import 'package:healthpod/widgets/home_page.dart';
 
 /// The home screen for the HealthPod app.
 ///
@@ -76,7 +81,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Files',
     'icon': Icons.folder,
     'color': Colors.blue,
-    'route': const FileService(),
+    'content': const FileService(),
   },
   {
     'title': 'Vaccinations',
@@ -88,19 +93,19 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Survey',
     'icon': Icons.quiz,
     'color': Colors.blue,
-    'route': BPSurvey(),
+    'content': BPSurvey(),
   },
   {
     'title': 'Visualisation',
     'icon': Icons.show_chart,
     'color': Colors.blue,
-    'action': fetchAndNavigateToVisualisation,
+    'content': const BPCombinedVisualisation(),
   },
   {
     'title': 'BP Editor',
     'icon': Icons.table_chart,
     'color': Colors.blue,
-    'route': const BPEditorPage(),
+    'content': const BPEditorPage(),
   },
 ];
 
@@ -114,6 +119,7 @@ class HealthPodHome extends StatefulWidget {
 class HealthPodHomeState extends State<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -177,7 +183,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Health - Your Data'),
+        title: const Text('Your Health Data, Under Your Control'),
         backgroundColor: titleBackgroundColor,
         automaticallyImplyLeading: false,
         actions: [
@@ -233,25 +239,18 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
                 height: MediaQuery.of(context).size.height,
                 child: NavigationRail(
-                  // Default to home tab being selected.
-
-                  selectedIndex: 0,
+                  selectedIndex: _selectedIndex,
                   onDestinationSelected: (int index) async {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+
                     final tab = homeTabs[index];
-
-                    // Skip navigation for home tab.
-
-                    if (index == 0) return;
 
                     // Handle different types of navigation based on tab properties.
 
                     if (tab.containsKey('message')) {
                       alert(context, tab['message'], tab['dialogTitle']);
-                    } else if (tab.containsKey('route')) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => tab['route']),
-                      );
                     } else if (tab.containsKey('action')) {
                       await tab['action'](context);
                     }
@@ -286,7 +285,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
           ),
           const VerticalDivider(),
           Expanded(
-            child: IconGridPage(),
+            child: homeTabs[_selectedIndex]['content'] ?? const HomePage(),
           ),
         ],
       ),
