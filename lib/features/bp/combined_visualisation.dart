@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:fl_chart/fl_chart.dart';
+import 'package:healthpod/features/survey/data.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -52,17 +53,7 @@ import 'package:healthpod/utils/get_month_abbrev.dart';
 /// fields, where responses contain the blood pressure measurements.
 
 class BPCombinedVisualisation extends StatefulWidget {
-  /// Survey data containing blood pressure measurements.
-  ///
-  /// Each entry should be a map with 'timestamp' and 'responses' fields, where
-  /// responses contains the systolic and diastolic blood pressure readings.
-
-  final List<Map<String, dynamic>> surveyData;
-
-  const BPCombinedVisualisation({
-    super.key,
-    required this.surveyData,
-  });
+  const BPCombinedVisualisation({super.key});
 
   @override
   State<BPCombinedVisualisation> createState() =>
@@ -70,6 +61,38 @@ class BPCombinedVisualisation extends StatefulWidget {
 }
 
 class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
+  List<Map<String, dynamic>> _surveyData = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    // Show loading indicator
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final data = await SurveyData.fetchAllSurveyData(context);
+      if (mounted) {
+        setState(() {
+          _surveyData = data;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading data: $e')),
+        );
+      }
+    }
+  }
+
   /// Extracts and converts systolic blood pressure data into chart points.
   ///
   /// Returns a list of [FlSpot] objects where:
@@ -78,8 +101,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
   List<FlSpot> _getSystolicData() {
     List<FlSpot> spots = [];
-    for (var i = 0; i < widget.surveyData.length; i++) {
-      final data = widget.surveyData[i]['responses'];
+    for (var i = 0; i < _surveyData.length; i++) {
+      final data = _surveyData[i]['responses'];
       double value =
           _parseNumericValue(data[HealthSurveyConstants.fieldSystolic]);
       spots.add(FlSpot(i.toDouble(), value));
@@ -95,8 +118,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
   List<FlSpot> _getDiastolicData() {
     List<FlSpot> spots = [];
-    for (var i = 0; i < widget.surveyData.length; i++) {
-      final data = widget.surveyData[i]['responses'];
+    for (var i = 0; i < _surveyData.length; i++) {
+      final data = _surveyData[i]['responses'];
       double value =
           _parseNumericValue(data[HealthSurveyConstants.fieldDiastolic]);
       spots.add(FlSpot(i.toDouble(), value));
@@ -175,457 +198,459 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            MarkdownTooltip(
-              message: '''
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-                **Blood Pressure:** A vital measurement of cardiovascular health.
-                      It shows how strongly your blood pushes against artery walls.
-                      Measured in mmHg, it's recorded as two numbers (systolic/diastolic).
-                      
-              ''',
-              child: Row(children: [
-                Text(
-                  'Blood Pressure Trends',
-                  style: TextStyle(fontWeight: FontWeight.w500),
+    if (_surveyData.isEmpty) {
+      return const Center(child: Text('No data available'));
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          AppBar(
+            title: Row(
+              children: [
+                MarkdownTooltip(
+                  message: '''
+
+                    **Blood Pressure:** A vital measurement of cardiovascular health.
+                    It shows how strongly your blood pushes against artery walls.
+                    Measured in mmHg, it's recorded as two numbers (systolic/diastolic).
+                    
+                  ''',
+                  child: Row(children: [
+                    Text(
+                      'Blood Pressure Trends',
+                      style: TextStyle(fontWeight: FontWeight.w500),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.grey[600],
+                      size: 20,
+                    ),
+                  ]),
                 ),
                 const SizedBox(width: 8),
-                Icon(
-                  Icons.info_outline,
-                  color: Colors.grey[600],
-                  size: 20,
-                ),
-              ]),
+              ],
             ),
-            const SizedBox(width: 8),
-          ],
-        ),
-        backgroundColor: titleBackgroundColor,
-      ),
+            backgroundColor: titleBackgroundColor,
+          ),
+          // Main chart area showing blood pressure trends.
 
-      // Main container padding providing consistent spacing around all content.
-
-      body: Container(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Main chart area showing blood pressure trends.
-
-            Expanded(
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: LineChart(
-                    LineChartData(
-                      backgroundColor: Colors.white,
-                      extraLinesData: ExtraLinesData(
-                        horizontalLines: [
-                          /// Threshold line indicating normal systolic pressure limit.
-                          ///
-                          /// Uses a dashed purple line matching the systolic data color.
-                          /// Upper systolic threshold line (120 mmHg).
-
-                          HorizontalLine(
-                            y: 120,
-                            color: const Color(0xFF9F70FF),
-                            strokeWidth: 1.5,
-                            dashArray: [5, 5],
-                            label: HorizontalLineLabel(
-                              show: false, // Hide by default.
-                            ),
-                          ),
-
-                          /// Threshold line indicating normal diastolic pressure limit.
-                          ///
-                          /// Uses a dashed teal line matching the diastolic data color.
-                          /// Upper diastolic threshold line (80 mmHg).
-
-                          HorizontalLine(
-                            y: 80,
-                            color: const Color(0xFF00BD9D),
-                            strokeWidth: 1.5,
-                            dashArray: [5, 5],
-                            label: HorizontalLineLabel(
-                              show: false, // Hide by default.
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      /// Touch interaction configuration for data point inspection.
-
-                      lineTouchData: LineTouchData(
-                        touchTooltipData: LineTouchTooltipData(
-                          tooltipRoundedRadius: 8,
-                          tooltipBorder: const BorderSide(
-                            color: Colors.white,
-                            width: 1,
-                          ),
-
-                          /// Custom tooltip content generator showing pressure values
-                          /// and normal ranges for each type.
-
-                          getTooltipItems: (List<LineBarSpot> touchedSpots) {
-                            return touchedSpots.map((LineBarSpot spot) {
-                              final isSystolic = spot.barIndex == 0;
-                              String label = '';
-                              if (isSystolic) {
-                                label =
-                                    'Systolic: ${parseNumericInput(spot.y)} mmHg\nNormal: below 120 mmHg'; // Ensure int format.
-                              } else {
-                                label =
-                                    'Diastolic: ${parseNumericInput(spot.y)} mmHg\nNormal: below 80 mmHg';
-                              }
-                              return LineTooltipItem(
-                                label,
-                                TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12,
-                                ),
-                              );
-                            }).toList();
-                          },
-                        ),
-                      ),
-
-                      /// Grid configuration for better data readability.
-                      /// Uses light grey dashed lines for subtle visual guidance.
-
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: true,
-                        horizontalInterval: 20,
-                        verticalInterval: 1,
-                        getDrawingHorizontalLine: (value) {
-                          return FlLine(
-                            color: Colors.grey[300],
-                            strokeWidth: 0.5,
-                            dashArray: [5, 5],
-                          );
-                        },
-                        getDrawingVerticalLine: (value) {
-                          return FlLine(
-                            color: Colors.grey[300],
-                            strokeWidth: 0.5,
-                            dashArray: [5, 5],
-                          );
-                        },
-                      ),
-                      // Configure axis titles and labels.
-
-                      titlesData: FlTitlesData(
-                        /// X-axis shows dates with dynamic year display.
-
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 30,
-                            interval: 1,
-                            getTitlesWidget: (value, meta) {
-                              final index = value.toInt();
-                              if (index >= 0 &&
-                                  index < widget.surveyData.length &&
-                                  value == index.toDouble()) {
-                                final date = DateTime.parse(
-                                    widget.surveyData[index]['timestamp']);
-
-                                // Show year if this is first data point or if year changed from previous point.
-
-                                bool showYear = index == 0 ||
-                                    (index > 0 &&
-                                        DateTime.parse(
-                                                    widget.surveyData[index - 1]
-                                                        ['timestamp'])
-                                                .year !=
-                                            date.year);
-
-                                /// Date label with hover tooltip showing time.
-
-                                return Padding(
-                                  padding: const EdgeInsets.all(4.0),
-                                  child: MarkdownTooltip(
-                                    message: '''
-
-                                      **Time:** ${DateFormat('HH:mm').format(date)}
-
-                                    ''',
-                                    child: Text(
-                                      '${date.day} ${getMonthAbbrev(date.month)}${showYear ? " '${(date.year % 100).toString().padLeft(2, '0')}" : ""}',
-                                      style: TextStyle(
-                                        color: Colors.grey[800],
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }
-                              return const Text('');
-                            },
-                          ),
-                        ),
-                        // Y-axis configuration showing pressure values.
-
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            interval: 20,
-                            reservedSize: 45,
-                            getTitlesWidget: (value, meta) {
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: Text(
-                                  value.toInt().toString(),
-                                  style: TextStyle(
-                                    color: Colors.grey[800],
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-
-                        /// Hide unnecessary axis titles.
-
-                        rightTitles: AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                        topTitles: AxisTitles(
-                          sideTitles: SideTitles(showTitles: false),
-                        ),
-                      ),
-
-                      /// Chart border for visual containment.
-
-                      borderData: FlBorderData(
-                        show: true,
-                        border: Border.all(color: Colors.grey[300]!),
-                      ),
-
-                      /// Chart value range configuration.
-
-                      minX: 0,
-                      maxX: (widget.surveyData.length - 1).toDouble(),
-                      minY: 40, // Minimum expected diastolic pressure.
-                      maxY: 200, // Maximum expected systolic pressure.
-                      lineBarsData: [
-                        // Systolic pressure line configuration.
-
-                        // Bright purple and teal lines for systolic and diastolic pressure.
-                        // From Bang Wong's colourblind-safe palette.
-
-                        LineChartBarData(
-                          spots: _getSystolicData(),
-                          isCurved: true,
-                          color: const Color(0xFF9F70FF), // Bright purple.
-                          barWidth: 3,
-                          dotData: FlDotData(
-                            show: true,
-                            getDotPainter: (spot, percent, barData, index) {
-                              return FlDotCirclePainter(
-                                radius: 6,
-                                color: Colors.white,
-                                strokeWidth: 3,
-                                strokeColor:
-                                    Theme.of(context).colorScheme.primary,
-                              );
-                            },
-                          ),
-                          belowBarData: BarAreaData(show: false),
-                        ),
-                        // Diastolic pressure line configuration.
-
-                        LineChartBarData(
-                          spots: _getDiastolicData(),
-                          isCurved: true,
-                          color: const Color(0xFF00BD9D), // Turquoise/mint.
-                          barWidth: 3,
-                          dotData: FlDotData(
-                            show: true,
-                            getDotPainter: (spot, percent, barData, index) {
-                              return FlDotCirclePainter(
-                                radius: 6,
-                                color: Colors.white,
-                                strokeWidth: 3,
-                                strokeColor:
-                                    Theme.of(context).colorScheme.secondary,
-                              );
-                            },
-                          ),
-                          belowBarData: BarAreaData(show: false),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            // Legend and statistics card.
-
-            Card(
+          Expanded(
+            child: Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              color: Colors.grey[100],
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16.0,
-                  horizontal: 12.0,
-                ),
-                child: Column(
-                  children: [
-                    // Legend items.
+                padding: const EdgeInsets.all(16.0),
+                child: LineChart(
+                  LineChartData(
+                    backgroundColor: Colors.white,
+                    extraLinesData: ExtraLinesData(
+                      horizontalLines: [
+                        /// Threshold line indicating normal systolic pressure limit.
+                        ///
+                        /// Uses a dashed purple line matching the systolic data color.
+                        /// Upper systolic threshold line (120 mmHg).
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Systolic pressure legend item.
-                        Flexible(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Colour indicator dot.
-
-                              Flexible(
-                                child: Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                        0xFF9F70FF), // Bright purple.
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              // Systolic blood pressure tooltip explaining the measurement.
-
-                              MarkdownTooltip(
-                                message: '''
-
-                                  **Systolic Blood Pressure:** The top number in your reading.
-                                  Measures the pressure when your heart contracts to pump blood.
-                                  Normal reading is typically below 120 mmHg.
-
-                                ''',
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      width:
-                                          50, // Adjust based on available space.
-                                      child: Text(
-                                        'Systolic',
-                                        overflow: TextOverflow.ellipsis,
-                                        softWrap:
-                                            false, // Prevents multi-line issues.
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    // Info icon.
-
-                                    Flexible(
-                                      child: FittedBox(
-                                        fit: BoxFit.scaleDown,
-                                        child: Icon(
-                                          Icons.info_outline,
-                                          color: Colors.grey[600],
-                                          size: 16,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
+                        HorizontalLine(
+                          y: 120,
+                          color: const Color(0xFF9F70FF),
+                          strokeWidth: 1.5,
+                          dashArray: [5, 5],
+                          label: HorizontalLineLabel(
+                            show: false, // Hide by default.
                           ),
                         ),
-                        const SizedBox(width: 24),
-                        // Diastolic pressure legend item.
 
-                        Flexible(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Colour indicator dot.
+                        /// Threshold line indicating normal diastolic pressure limit.
+                        ///
+                        /// Uses a dashed teal line matching the diastolic data color.
+                        /// Upper diastolic threshold line (80 mmHg).
 
-                              Flexible(
-                                child: Container(
-                                  width: 12,
-                                  height: 12,
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                        0xFF00BD9D), // Turquoise/mint.
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              // Diastolic blood pressure tooltip explaining the measurement.
-
-                              MarkdownTooltip(
-                                message: '''
-
-                                  **Diastolic Blood Pressure:** The bottom number in your reading.
-                                  Measures the pressure when your heart relaxes between beats.
-                                  Normal reading is typically below 80 mmHg.
-
-                                ''',
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Flexible(child: const Text('Diastolic')),
-                                    const SizedBox(width: 4),
-                                    // Info icon.
-
-                                    Flexible(
-                                      child: FittedBox(
-                                        fit: BoxFit
-                                            .scaleDown, // Scales down to fit available space.
-                                        child: Icon(
-                                          Icons.info_outline,
-                                          color: Colors.grey[600],
-                                          size: 16,
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
+                        HorizontalLine(
+                          y: 80,
+                          color: const Color(0xFF00BD9D),
+                          strokeWidth: 1.5,
+                          dashArray: [5, 5],
+                          label: HorizontalLineLabel(
+                            show: false, // Hide by default.
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
 
-                    // Scrollable stats row.
+                    /// Touch interaction configuration for data point inspection.
 
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: _buildStatItems(),
+                    lineTouchData: LineTouchData(
+                      touchTooltipData: LineTouchTooltipData(
+                        tooltipRoundedRadius: 8,
+                        tooltipBorder: const BorderSide(
+                          color: Colors.white,
+                          width: 1,
+                        ),
+
+                        /// Custom tooltip content generator showing pressure values
+                        /// and normal ranges for each type.
+
+                        getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                          return touchedSpots.map((LineBarSpot spot) {
+                            final isSystolic = spot.barIndex == 0;
+                            String label = '';
+                            if (isSystolic) {
+                              label =
+                                  'Systolic: ${parseNumericInput(spot.y)} mmHg\nNormal: below 120 mmHg'; // Ensure int format.
+                            } else {
+                              label =
+                                  'Diastolic: ${parseNumericInput(spot.y)} mmHg\nNormal: below 80 mmHg';
+                            }
+                            return LineTooltipItem(
+                              label,
+                              TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                              ),
+                            );
+                          }).toList();
+                        },
                       ),
                     ),
-                  ],
+
+                    /// Grid configuration for better data readability.
+                    /// Uses light grey dashed lines for subtle visual guidance.
+
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: true,
+                      horizontalInterval: 20,
+                      verticalInterval: 1,
+                      getDrawingHorizontalLine: (value) {
+                        return FlLine(
+                          color: Colors.grey[300],
+                          strokeWidth: 0.5,
+                          dashArray: [5, 5],
+                        );
+                      },
+                      getDrawingVerticalLine: (value) {
+                        return FlLine(
+                          color: Colors.grey[300],
+                          strokeWidth: 0.5,
+                          dashArray: [5, 5],
+                        );
+                      },
+                    ),
+                    // Configure axis titles and labels.
+
+                    titlesData: FlTitlesData(
+                      /// X-axis shows dates with dynamic year display.
+
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 30,
+                          interval: 1,
+                          getTitlesWidget: (value, meta) {
+                            final index = value.toInt();
+                            if (index >= 0 &&
+                                index < _surveyData.length &&
+                                value == index.toDouble()) {
+                              final date = DateTime.parse(
+                                  _surveyData[index]['timestamp']);
+
+                              // Show year if this is first data point or if year changed from previous point.
+
+                              bool showYear = index == 0 ||
+                                  (index > 0 &&
+                                      DateTime.parse(_surveyData[index - 1]
+                                                  ['timestamp'])
+                                              .year !=
+                                          date.year);
+
+                              /// Date label with hover tooltip showing time.
+
+                              return Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: MarkdownTooltip(
+                                  message: '''
+
+                                    **Time:** ${DateFormat('HH:mm').format(date)}
+
+                                  ''',
+                                  child: Text(
+                                    '${date.day} ${getMonthAbbrev(date.month)}${showYear ? " '${(date.year % 100).toString().padLeft(2, '0')}" : ""}',
+                                    style: TextStyle(
+                                      color: Colors.grey[800],
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                            return const Text('');
+                          },
+                        ),
+                      ),
+                      // Y-axis configuration showing pressure values.
+
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          interval: 20,
+                          reservedSize: 45,
+                          getTitlesWidget: (value, meta) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Text(
+                                value.toInt().toString(),
+                                style: TextStyle(
+                                  color: Colors.grey[800],
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                      /// Hide unnecessary axis titles.
+
+                      rightTitles: AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                      topTitles: AxisTitles(
+                        sideTitles: SideTitles(showTitles: false),
+                      ),
+                    ),
+
+                    /// Chart border for visual containment.
+
+                    borderData: FlBorderData(
+                      show: true,
+                      border: Border.all(color: Colors.grey[300]!),
+                    ),
+
+                    /// Chart value range configuration.
+
+                    minX: 0,
+                    maxX: (_surveyData.length - 1).toDouble(),
+                    minY: 40, // Minimum expected diastolic pressure.
+                    maxY: 200, // Maximum expected systolic pressure.
+                    lineBarsData: [
+                      // Systolic pressure line configuration.
+
+                      // Bright purple and teal lines for systolic and diastolic pressure.
+                      // From Bang Wong's colourblind-safe palette.
+
+                      LineChartBarData(
+                        spots: _getSystolicData(),
+                        isCurved: true,
+                        color: const Color(0xFF9F70FF), // Bright purple.
+                        barWidth: 3,
+                        dotData: FlDotData(
+                          show: true,
+                          getDotPainter: (spot, percent, barData, index) {
+                            return FlDotCirclePainter(
+                              radius: 6,
+                              color: Colors.white,
+                              strokeWidth: 3,
+                              strokeColor:
+                                  Theme.of(context).colorScheme.primary,
+                            );
+                          },
+                        ),
+                        belowBarData: BarAreaData(show: false),
+                      ),
+                      // Diastolic pressure line configuration.
+
+                      LineChartBarData(
+                        spots: _getDiastolicData(),
+                        isCurved: true,
+                        color: const Color(0xFF00BD9D), // Turquoise/mint.
+                        barWidth: 3,
+                        dotData: FlDotData(
+                          show: true,
+                          getDotPainter: (spot, percent, barData, index) {
+                            return FlDotCirclePainter(
+                              radius: 6,
+                              color: Colors.white,
+                              strokeWidth: 3,
+                              strokeColor:
+                                  Theme.of(context).colorScheme.secondary,
+                            );
+                          },
+                        ),
+                        belowBarData: BarAreaData(show: false),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            )
-          ],
-        ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Legend and statistics card.
+
+          Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            color: Colors.grey[100],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 16.0,
+                horizontal: 12.0,
+              ),
+              child: Column(
+                children: [
+                  // Legend items.
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Systolic pressure legend item.
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Colour indicator dot.
+
+                            Flexible(
+                              child: Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color:
+                                      const Color(0xFF9F70FF), // Bright purple.
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // Systolic blood pressure tooltip explaining the measurement.
+
+                            MarkdownTooltip(
+                              message: '''
+
+                                **Systolic Blood Pressure:** The top number in your reading.
+                                Measures the pressure when your heart contracts to pump blood.
+                                Normal reading is typically below 120 mmHg.
+
+                              ''',
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    width:
+                                        50, // Adjust based on available space.
+                                    child: Text(
+                                      'Systolic',
+                                      overflow: TextOverflow.ellipsis,
+                                      softWrap:
+                                          false, // Prevents multi-line issues.
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  // Info icon.
+
+                                  Flexible(
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Icon(
+                                        Icons.info_outline,
+                                        color: Colors.grey[600],
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 24),
+                      // Diastolic pressure legend item.
+
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Colour indicator dot.
+
+                            Flexible(
+                              child: Container(
+                                width: 12,
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                      0xFF00BD9D), // Turquoise/mint.
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            // Diastolic blood pressure tooltip explaining the measurement.
+
+                            MarkdownTooltip(
+                              message: '''
+
+                                **Diastolic Blood Pressure:** The bottom number in your reading.
+                                Measures the pressure when your heart relaxes between beats.
+                                Normal reading is typically below 80 mmHg.
+
+                              ''',
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Flexible(child: const Text('Diastolic')),
+                                  const SizedBox(width: 4),
+                                  // Info icon.
+
+                                  Flexible(
+                                    child: FittedBox(
+                                      fit: BoxFit
+                                          .scaleDown, // Scales down to fit available space.
+                                      child: Icon(
+                                        Icons.info_outline,
+                                        color: Colors.grey[600],
+                                        size: 16,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Scrollable stats row.
+
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: _buildStatItems(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
       ),
     );
   }

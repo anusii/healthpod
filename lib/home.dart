@@ -37,13 +37,80 @@ import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/widgets/footer.dart';
-import 'package:healthpod/widgets/icon_grid_page.dart';
+import 'package:healthpod/dialogs/alert.dart';
+import 'package:healthpod/features/bp/combined_visualisation.dart';
+import 'package:healthpod/features/bp/editor/page.dart';
+import 'package:healthpod/features/bp/survey.dart';
+import 'package:healthpod/features/file/service.dart';
+import 'package:healthpod/widgets/home_page.dart';
 
 /// The home screen for the HealthPod app.
 ///
 /// This screen serves as the main entry point for the HealthPod application,
 /// providing users with a dashboard of features, a footer with user-specific
 /// information, and options to log out or view information about the app.
+
+// Define the [NavigationRail] tabs for the home page.
+
+final List<Map<String, dynamic>> homeTabs = [
+  {
+    'title': 'Home',
+    'icon': Icons.home,
+    'color': null,
+  },
+  {
+    'title': 'Appointments',
+    'icon': Icons.calendar_today,
+    'color': Colors.blue,
+    'message': '''
+
+    Here you will be able to access and manage your
+    appointments. You can enter historic information, update
+    when you recieve a new appointment, and download
+    appointments from other sources.
+
+    ''',
+    'dialogTitle': 'Comming Soon - Appointment',
+  },
+  {
+    'title': 'Files',
+    'icon': Icons.folder,
+    'color': Colors.blue,
+    'content': const FileService(),
+  },
+  {
+    'title': 'Vaccinations',
+    'icon': Icons.vaccines,
+    'color': Colors.blue,
+    'message': '''
+
+    Here you will be able to access and manage your record of
+    vaccinations. You can enter historic information, update
+    when you recieve a vaccination, and download from governemnt
+    records of your vaccinations.
+
+    ''',
+    'dialogTitle': 'Comming Soon - Vaccines',
+  },
+  {
+    'title': 'Survey',
+    'icon': Icons.quiz,
+    'color': Colors.blue,
+    'content': BPSurvey(),
+  },
+  {
+    'title': 'Visualisation',
+    'icon': Icons.show_chart,
+    'color': Colors.blue,
+    'content': const BPCombinedVisualisation(),
+  },
+  {
+    'title': 'BP Editor',
+    'icon': Icons.table_chart,
+    'color': Colors.blue,
+    'content': const BPEditorPage(),
+  },
+];
 
 class HealthPodHome extends StatefulWidget {
   const HealthPodHome({super.key});
@@ -55,6 +122,7 @@ class HealthPodHome extends StatefulWidget {
 class HealthPodHomeState extends State<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -159,7 +227,71 @@ class HealthPodHomeState extends State<HealthPodHome> {
         ],
       ),
       backgroundColor: titleBackgroundColor,
-      body: IconGridPage(),
+      body: Row(
+        children: [
+          ScrollConfiguration(
+            // Disable scrollbars for a cleaner look.
+
+            behavior:
+                ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: SingleChildScrollView(
+              // Allow scrolling of navigation rail when it overflows.
+
+              child: SizedBox(
+                // Set height to match screen height.
+
+                height: MediaQuery.of(context).size.height,
+                child: NavigationRail(
+                  selectedIndex: _selectedIndex,
+                  onDestinationSelected: (int index) async {
+                    setState(() {
+                      _selectedIndex = index;
+                    });
+
+                    final tab = homeTabs[index];
+
+                    // Handle different types of navigation based on tab properties.
+
+                    if (tab.containsKey('message')) {
+                      alert(context, tab['message'], tab['dialogTitle']);
+                    } else if (tab.containsKey('action')) {
+                      await tab['action'](context);
+                    }
+                  },
+                  // Show both icons and labels for all destinations.
+
+                  labelType: NavigationRailLabelType.all,
+                  destinations: homeTabs.map((tab) {
+                    // Create navigation destinations from tab configurations.
+
+                    return NavigationRailDestination(
+                      icon: Icon(tab['icon'], color: tab['color']),
+                      label: Text(
+                        tab['title'],
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    );
+                  }).toList(),
+                  // Style for selected tab label.
+
+                  selectedLabelTextStyle: const TextStyle(
+                    color: Colors.deepPurple,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  // Style for unselected tab labels.
+
+                  unselectedLabelTextStyle: TextStyle(color: Colors.grey[500]),
+                ),
+              ),
+            ),
+          ),
+          const VerticalDivider(),
+          Expanded(
+            child: homeTabs[_selectedIndex]['content'] ?? const HomePage(),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomAppBar(
         height: getFooterHeight(context),
         color: Colors.grey[200],
