@@ -31,7 +31,6 @@ import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/file/service.dart';
 import 'package:healthpod/features/vaccination/diary.dart';
-import 'package:healthpod/utils/fetch_and_navigate_to_visualisation.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -43,11 +42,8 @@ import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/widgets/footer.dart';
-import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/features/bp/combined_visualisation.dart';
-import 'package:healthpod/features/bp/editor/page.dart';
-import 'package:healthpod/features/bp/survey.dart';
-import 'package:healthpod/features/file/service.dart';
+
 import 'package:healthpod/widgets/home_page.dart';
 
 /// The home screen for the HealthPod app.
@@ -87,7 +83,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Vaccinations',
     'icon': Icons.vaccines,
     'color': Colors.blue,
-    'route': const VaccinationDiary(),
+    'content': const VaccinationDiary(),
   },
   {
     'title': 'Survey',
