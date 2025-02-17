@@ -251,6 +251,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
                     final tab = homeTabs[index];
 
                     // Handle different types of navigation based on tab properties.
+
                     if (tab.containsKey('message')) {
                       alert(context, tab['message'], tab['dialogTitle']);
                     } else if (tab.containsKey('action')) {
