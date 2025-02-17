@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/features/survey/question.dart';
 
@@ -66,12 +67,21 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   @override
   void initState() {
     super.initState();
-    // Initialise one focus node per question regardless of type.
+    // Initialise focus nodes for all questions and their options.
 
-    _focusNodes = List.generate(
-      widget.questions.length,
-      (_) => [FocusNode()],
-    );
+    _focusNodes = List.generate(widget.questions.length, (questionIndex) {
+      final question = widget.questions[questionIndex];
+      if (question.type == HealthDataType.categorical &&
+          question.options != null) {
+        // Create a focus node for each option in categorical questions.
+
+        return List.generate(question.options!.length, (_) => FocusNode());
+      } else {
+        // Single focus node for non-categorical questions.
+
+        return [FocusNode()];
+      }
+    });
   }
 
   @override
@@ -90,12 +100,42 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   /// Controls focus movement between questions in logical order
   /// regardless of their visual layout in columns.
 
-  void _handleFieldSubmitted(int questionIndex) {
-    if (questionIndex < widget.questions.length - 1) {
-      // Always move to the first (and only) focus node of the next question.
+  void _handleFieldSubmitted(int questionIndex, [int? optionIndex]) {
+    // Get current question.
 
-      _focusNodes[questionIndex + 1][0].requestFocus();
+    final currentQuestion = widget.questions[questionIndex];
+
+    if (currentQuestion.type == HealthDataType.categorical &&
+        currentQuestion.options != null) {
+      // For categorical questions.
+
+      if (optionIndex != null) {
+        if (optionIndex < currentQuestion.options!.length - 1) {
+          // Move to next option within categorical question.
+
+          _focusNodes[questionIndex][optionIndex + 1].requestFocus();
+          return;
+        }
+      }
+    }
+
+    // Move to next question if available.
+
+    if (questionIndex < widget.questions.length - 1) {
+      final nextQuestion = widget.questions[questionIndex + 1];
+      // If next question is categorical, focus its first option.
+
+      if (nextQuestion.type == HealthDataType.categorical &&
+          nextQuestion.options != null) {
+        _focusNodes[questionIndex + 1][0].requestFocus();
+      } else {
+        // Focus the input field directly.
+
+        _focusNodes[questionIndex + 1][0].requestFocus();
+      }
     } else {
+      // If we're at the last question/option, focus the submit button.
+
       _submitForm();
     }
   }
@@ -104,8 +144,9 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
 
   Widget _buildTextInput(HealthSurveyQuestion question, int questionIndex) {
     return TextFormField(
-      focusNode: _focusNodes[questionIndex]
-          [0], // First/primary focus node for this question
+      // First/primary focus node for this question.
+
+      focusNode: _focusNodes[questionIndex][0],
       decoration: InputDecoration(
         hintText: 'Enter your response',
         suffixText: question.unit,
@@ -134,9 +175,11 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   /// Generates UI for each survey question, including text, number, and categorical options.
 
   Widget _buildQuestionWidget(HealthSurveyQuestion question, int index) {
-    const double fixedWidth = 300.0; // Define a fixed width for all fields
+    // Define a fixed width for all fields.
 
-    // Build the UI for the question based on its type
+    const double fixedWidth = 300.0;
+
+    // Build the UI for the question based on its type.
 
     if (question.type == HealthDataType.text) {
       return SizedBox(
@@ -244,16 +287,24 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
       if (question.toLowerCase().contains('blood pressure') ||
           question.toLowerCase().contains('systolic') ||
           question.toLowerCase().contains('diastolic')) {
-        return Icons.favorite; // Heart icon for blood pressure
+        // Heart icon for blood pressure.
+
+        return Icons.favorite;
       } else if (question.toLowerCase().contains('heart rate')) {
-        return Icons.monitor_heart; // Heart monitor for heart rate
+        // Heart monitor for heart rate.
+
+        return Icons.monitor_heart;
       }
-      return Icons.numbers; // Default for other numeric inputs
+      // Default for other numeric inputs.
+
+      return Icons.numbers;
     }
 
     if (type == HealthDataType.categorical &&
         question.toLowerCase().contains('feeling')) {
-      return Icons.mood; // Mood icon for feeling questions
+      // Mood icon for feeling questions.
+
+      return Icons.mood;
     }
 
     return switch (type) {
@@ -270,23 +321,38 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
       if (question.toLowerCase().contains('blood pressure') ||
           question.toLowerCase().contains('systolic') ||
           question.toLowerCase().contains('diastolic')) {
-        return Colors.red.shade400; // Red for blood pressure
+        // Red for blood pressure.
+
+        return Colors.red.shade400;
       } else if (question.toLowerCase().contains('heart rate')) {
-        return Colors.pink.shade400; // Pink for heart rate
+        // Pink for heart rate.
+
+        return Colors.pink.shade400;
       }
-      return Colors.blue.shade400; // Blue for other numbers
+      // Blue for other numbers.
+
+      return Colors.blue.shade400;
     }
 
     if (type == HealthDataType.categorical &&
         question.toLowerCase().contains('feeling')) {
-      return Colors.amber.shade400; // Amber for mood/feeling
+      // Amber for mood/feeling.
+
+      return Colors.amber.shade400;
     }
 
     return switch (type) {
-      HealthDataType.text => Colors.green.shade400, // Green for text
-      HealthDataType.categorical =>
-        Colors.purple.shade400, // Purple for other categorical
-      _ => Colors.grey.shade400, // Grey as fallback
+      // Green for text.
+
+      HealthDataType.text => Colors.green.shade400,
+
+      // Purple for other categorical.
+
+      HealthDataType.categorical => Colors.purple.shade400,
+
+      // Grey as fallback.
+
+      _ => Colors.grey.shade400,
     };
   }
 
@@ -295,11 +361,14 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   Widget _buildInputField(HealthSurveyQuestion question, int index) {
     return SizedBox(
       width: double.infinity,
-      child: switch (question.type) {
-        HealthDataType.number => _buildNumberInput(question, index),
-        HealthDataType.text => _buildTextInput(question, index),
-        _ => const SizedBox(),
-      },
+      child: Focus(
+        descendantsAreFocusable: true,
+        child: switch (question.type) {
+          HealthDataType.number => _buildNumberInput(question, index),
+          HealthDataType.text => _buildTextInput(question, index),
+          _ => const SizedBox(),
+        },
+      ),
     );
   }
 
@@ -339,7 +408,16 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
         }
         return null;
       },
-      onFieldSubmitted: (_) => _handleFieldSubmitted(questionIndex),
+      onFieldSubmitted: (_) {
+        // Directly handle field submission without intermediate steps.
+
+        _handleFieldSubmitted(questionIndex);
+      },
+      onTapOutside: (event) {
+        // Prevent focus loss on tap outside.
+
+        FocusScope.of(context).unfocus();
+      },
       onSaved: (value) {
         _responses[question.fieldName] = double.tryParse(value ?? '');
       },
@@ -354,7 +432,8 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
   Widget _buildCategoricalQuestion(
       HealthSurveyQuestion question, int questionIndex) {
     return Focus(
-      focusNode: _focusNodes[questionIndex][0],
+      skipTraversal: false,
+      descendantsAreTraversable: true,
       child: FormField<String>(
         validator: (value) {
           if (question.isRequired && (value == null || value.isEmpty)) {
@@ -369,6 +448,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
             children: [
               ...question.options!.asMap().entries.map(
                 (entry) {
+                  final optionIndex = entry.key;
                   final option = entry.value;
                   return Container(
                     margin: const EdgeInsets.only(bottom: 4),
@@ -376,17 +456,59 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
                       color: Colors.grey[50],
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: RadioListTile<String>(
-                      dense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                      title: Text(option),
-                      value: option,
-                      groupValue: field.value,
-                      onChanged: (value) {
-                        field.didChange(value);
-                        _responses[question.fieldName] = value;
-                        _handleFieldSubmitted(questionIndex);
+                    child: Focus(
+                      focusNode: _focusNodes[questionIndex][optionIndex],
+                      descendantsAreFocusable: false,
+                      onFocusChange: (hasFocus) {
+                        if (hasFocus) {
+                          field.didChange(option);
+                          _responses[question.fieldName] = option;
+                        }
                       },
+                      onKeyEvent: (node, event) {
+                        if (event is KeyDownEvent) {
+                          if (event.logicalKey == LogicalKeyboardKey.tab) {
+                            if (HardwareKeyboard.instance.isShiftPressed) {
+                              // Handle Shift+Tab (backward navigation).
+
+                              if (optionIndex > 0) {
+                                _focusNodes[questionIndex][optionIndex - 1]
+                                    .requestFocus();
+                              } else if (questionIndex > 0) {
+                                _focusNodes[questionIndex - 1][0]
+                                    .requestFocus();
+                              }
+                            } else {
+                              // Direct forward navigation.
+
+                              _handleFieldSubmitted(questionIndex, optionIndex);
+                            }
+                            return KeyEventResult.handled;
+                          } else if (event.logicalKey ==
+                                  LogicalKeyboardKey.space ||
+                              event.logicalKey == LogicalKeyboardKey.enter) {
+                            field.didChange(option);
+                            _responses[question.fieldName] = option;
+                            return KeyEventResult.handled;
+                          }
+                        }
+                        return KeyEventResult.ignored;
+                      },
+                      child: RadioListTile<String>(
+                        dense: true,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 8),
+                        title: Text(option),
+                        value: option,
+                        groupValue: field.value,
+                        onChanged: (value) {
+                          field.didChange(value);
+                          _responses[question.fieldName] = value;
+                          // Direct movement to next field.
+
+                          _handleFieldSubmitted(questionIndex, optionIndex);
+                        },
+                      ),
                     ),
                   );
                 },
@@ -425,81 +547,89 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
 
   @override
   Widget build(BuildContext context) {
-    // Build the form UI.
+    return Focus(
+      skipTraversal: true,
+      descendantsAreFocusable: true,
+      child: FocusTraversalGroup(
+        policy: OrderedTraversalPolicy(),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final optimalCount = constraints.maxWidth > 900
+                        ? 3
+                        : constraints.maxWidth > 600
+                            ? 2
+                            : 1;
 
-    return Form(
-      key: _formKey,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            /// Determines optimal column count based on screen width
-            /// while preserving logical question sequence for keyboard navigation.
+                    final rows = <Widget>[];
+                    for (var i = 0;
+                        i < widget.questions.length;
+                        i += optimalCount) {
+                      final rowItems = <Widget>[];
 
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final optimalCount = constraints.maxWidth > 900
-                    ? 3
-                    : constraints.maxWidth > 600
-                        ? 2
-                        : 1;
+                      for (var j = 0;
+                          j < optimalCount && i + j < widget.questions.length;
+                          j++) {
+                        rowItems.add(
+                          FocusTraversalOrder(
+                            order: NumericFocusOrder(i + j + 1.0),
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                right: j < optimalCount - 1 ? 16.0 : 0,
+                              ),
+                              child: _buildQuestionWidget(
+                                widget.questions[i + j],
+                                i + j,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
 
-                final rows = <Widget>[];
-                for (var i = 0;
-                    i < widget.questions.length;
-                    i += optimalCount) {
-                  final rowItems = <Widget>[];
-
-                  for (var j = 0;
-                      j < optimalCount && i + j < widget.questions.length;
-                      j++) {
-                    rowItems.add(
-                      Padding(
-                        padding: EdgeInsets.only(
-                          right: j < optimalCount - 1 ? 16.0 : 0,
+                      rows.add(
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: rowItems
+                                .map((item) => Expanded(child: item))
+                                .toList(),
+                          ),
                         ),
-                        child: _buildQuestionWidget(
-                          widget.questions[i + j],
-                          i + j,
+                      );
+                    }
+
+                    return Column(children: rows);
+                  },
+                ),
+                const SizedBox(height: 40),
+                Center(
+                  child: FocusTraversalOrder(
+                    order: NumericFocusOrder(widget.questions.length + 1.0),
+                    child: SizedBox(
+                      width: 200,
+                      child: ElevatedButton.icon(
+                        onPressed: _submitForm,
+                        icon: const Icon(Icons.send),
+                        label: Text(widget.submitButtonText),
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
-                    );
-                  }
-
-                  rows.add(
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: rowItems
-                            .map((item) => Expanded(child: item))
-                            .toList(),
-                      ),
-                    ),
-                  );
-                }
-
-                return Column(children: rows);
-              },
-            ),
-            const SizedBox(height: 40),
-            Center(
-              child: SizedBox(
-                width: 200,
-                child: ElevatedButton.icon(
-                  onPressed: _submitForm,
-                  icon: const Icon(Icons.send),
-                  label: Text(widget.submitButtonText),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
