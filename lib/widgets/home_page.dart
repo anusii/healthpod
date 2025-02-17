@@ -85,15 +85,15 @@ class HomePage extends StatelessWidget {
                 MarkdownTooltip(
                   message: '''
 
-                **File Management:** Tap here to access file management features.
-                This allows you to:
+                  **File Management:** Tap here to access file management features.
+                  This allows you to:
 
-                - Browse your POD storage
-                - Upload files to your POD
-                - Download files from your POD
-                - Delete files from your POD
+                  - Browse your POD storage
+                  - Upload files to your POD
+                  - Download files from your POD
+                  - Delete files from your POD
 
-                ''',
+                  ''',
                   child: Text(
                     '• Files',
                     style: TextStyle(
