@@ -9,6 +9,7 @@ import 'package:healthpod/utils/fetch_key_saved_status.dart';
 /// - saveLocally: Function to handle local saving
 /// - saveToPod: Function to handle POD saving
 /// - title: Custom title for the save dialog (optional)
+/// - navigateBack: Boolean to determine if the screen should navigate back after saving (optional)
 Future<void> handleSurveySubmit({
   required BuildContext context,
   required Map<String, dynamic> responses,
@@ -16,6 +17,7 @@ Future<void> handleSurveySubmit({
       saveLocally,
   required Future<void> Function(BuildContext, Map<String, dynamic>) saveToPod,
   String title = 'Save Survey Results',
+  bool navigateBack = false,
 }) async {
   if (!context.mounted) return;
 
@@ -108,9 +110,11 @@ Future<void> handleSurveySubmit({
       ),
     );
 
-    await Future.delayed(const Duration(seconds: 1));
-    if (!context.mounted) return;
-    Navigator.of(context).pop();
+    if (navigateBack) {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!context.mounted) return;
+      Navigator.of(context).pop();
+    }
   } catch (e) {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
