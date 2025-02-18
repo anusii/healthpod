@@ -28,9 +28,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/features/bp/editor/page.dart';
-import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/file/service.dart';
-import 'package:healthpod/features/vaccination/survey.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -84,7 +82,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Surveys',
     'icon': Icons.assignment,
     'color': Colors.blue,
-    'content': const SurveyChooser(),
+    'content': const SurveyTab(),
   },
   {
     'title': 'Visualisation',

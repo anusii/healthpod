@@ -1,3 +1,29 @@
+/// Save survey responses to a local file.
+///
+// Time-stamp: <Wednesday 2025-02-12 15:50:35 +1100 Graham Williams>
+///
+/// Copyright (C) 2024, Software Innovation Institute, ANU.
+///
+/// Licensed under the GNU General Public License, Version 3 (the "License").
+///
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://www.gnu.org/licenses/>.
+///
+/// Authors: Ashley Tang
+library;
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -21,22 +47,26 @@ Future<void> saveResponseLocally({
   Map<String, dynamic>? additionalData,
 }) async {
   try {
-    // Combine responses with timestamp and any additional data
+    // Combine responses with timestamp and any additional data.
+
     final responseData = {
       'timestamp': DateTime.now().toIso8601String(),
       'responses': responses,
       if (additionalData != null) ...additionalData,
     };
 
-    // Convert to JSON string with proper formatting and base64 encode
+    // Convert to JSON string with proper formatting and base64 encode.
+
     final jsonString = const JsonEncoder.withIndent('  ').convert(responseData);
     final base64Content = base64Encode(utf8.encode(jsonString));
 
-    // Generate filename using consistent format
+    // Generate filename using consistent format.
+
     final timestamp = formatTimestampForFilename(DateTime.now());
     final defaultFileName = '${filePrefix}_$timestamp.json';
 
-    // Show file picker for save location
+    // Show file picker for save location.
+
     String? outputFile = await FilePicker.platform.saveFile(
       dialogTitle: dialogTitle,
       fileName: defaultFileName,
@@ -48,12 +78,14 @@ Future<void> saveResponseLocally({
       throw Exception('Save cancelled by user');
     }
 
-    // Ensure .json extension
+    // Ensure .json extension.
+
     if (!outputFile.toLowerCase().endsWith('.json')) {
       outputFile = '$outputFile.json';
     }
 
-    // Save the base64 encoded file
+    // Save the base64 encoded file.
+
     final file = File(outputFile);
     await file.writeAsString(base64Content);
   } catch (e) {
@@ -65,6 +97,8 @@ Future<void> saveResponseLocally({
         ),
       );
     }
-    rethrow; // Rethrow to allow the calling function to handle the error
+    // Rethrow to allow the calling function to handle the error.
+
+    rethrow;
   }
 }

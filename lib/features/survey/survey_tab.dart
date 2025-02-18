@@ -1,3 +1,29 @@
+/// Survey tab including blood pressure and vaccination surveys.
+///
+// Time-stamp: <Wednesday 2025-02-12 15:50:35 +1100 Graham Williams>
+///
+/// Copyright (C) 2024, Software Innovation Institute, ANU.
+///
+/// Licensed under the GNU General Public License, Version 3 (the "License").
+///
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://www.gnu.org/licenses/>.
+///
+/// Authors: Kevin Wang
+library;
+
 import 'package:flutter/material.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/vaccination/survey.dart';
@@ -17,14 +43,14 @@ final List<Map<String, dynamic>> surveyPanels = [
   },
 ];
 
-class SurveyChooser extends StatefulWidget {
-  const SurveyChooser({super.key});
+class SurveyTab extends StatefulWidget {
+  const SurveyTab({super.key});
 
   @override
-  State<SurveyChooser> createState() => _SurveyChooserState();
+  State<SurveyTab> createState() => _SurveyTabState();
 }
 
-class _SurveyChooserState extends State<SurveyChooser>
+class _SurveyTabState extends State<SurveyTab>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
