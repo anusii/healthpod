@@ -32,6 +32,12 @@ import 'package:integration_test/integration_test.dart';
 
 import 'package:healthpod/main.dart' as app;
 
+import 'utils/find_login_button.dart';
+import 'utils/navigate_to_survey.dart';
+import 'utils/submit_form.dart';
+import 'utils/verify_basic_app_structure.dart';
+import 'utils/verify_home_screen.dart';
+
 /// Main entry point for the test suite.
 ///
 /// Initialises and runs the blood pressure survey integration test.
@@ -78,8 +84,8 @@ void bpSurvey() {
             // Login Phase.
 
             debugPrint('\n📱 App launched, looking for login button...');
-            await _verifyBasicAppStructure(tester);
-            final loginButton = await _findLoginButton(tester);
+            await verifyBasicAppStructure(tester);
+            final loginButton = await findLoginButton(tester);
 
             debugPrint('\n🖱️ Tapping login button...');
             await tester.tap(loginButton);
@@ -98,8 +104,8 @@ void bpSurvey() {
             // Navigation Phase.
 
             debugPrint('\n🏠 Checking for home screen...');
-            await _verifyHomeScreen(tester);
-            await _navigateToSurvey(tester);
+            await verifyHomeScreen(tester);
+            await navigateToSurvey(tester);
 
             // Form Completion Phase.
 
@@ -110,7 +116,7 @@ void bpSurvey() {
             // Form Submission Phase.
 
             debugPrint('\n💾 Submitting form...');
-            await _submitForm(tester);
+            await submitForm(tester);
 
             // Save Dialog Phase.
 
@@ -135,79 +141,6 @@ void bpSurvey() {
       },
     );
   });
-}
-
-/// Verifies the basic app structure is present.
-///
-/// Checks for essential widgets that should be present in the initial app state.
-
-Future<void> _verifyBasicAppStructure(WidgetTester tester) async {
-  final selectionArea = find.byType(SelectionArea);
-  expect(selectionArea, findsOneWidget, reason: 'SelectionArea not found');
-
-  final materialApp = find.byType(MaterialApp);
-  expect(materialApp, findsOneWidget, reason: 'MaterialApp not found');
-}
-
-/// Finds the login button using multiple approaches.
-///
-/// Attempts different methods to locate the login button to improve test reliability.
-///
-/// Returns:
-///   Finder: The first successful button finder.
-///
-/// Throws:
-///   Exception: If no login button is found using any method.
-
-Future<Finder> _findLoginButton(WidgetTester tester) async {
-  final loginButtonByText = find.text('Login');
-  final loginButtonByType = find.byType(ElevatedButton);
-  final loginButtonByWidget = find.widgetWithText(ElevatedButton, 'Login');
-
-  debugPrint('\n🔍 Login button search results:');
-  debugPrint('By text: ${loginButtonByText.evaluate().length}');
-  debugPrint('By type: ${loginButtonByType.evaluate().length}');
-  debugPrint('By widget text: ${loginButtonByWidget.evaluate().length}');
-
-  if (loginButtonByText.evaluate().isNotEmpty) {
-    return loginButtonByText;
-  } else if (loginButtonByType.evaluate().isNotEmpty) {
-    return loginButtonByType.first;
-  } else if (loginButtonByWidget.evaluate().isNotEmpty) {
-    return loginButtonByWidget;
-  }
-
-  throw Exception('No login button found using any method');
-}
-
-/// Verifies successful navigation to home screen.
-///
-/// Checks for elements that should be present on the home screen after login.
-
-Future<void> _verifyHomeScreen(WidgetTester tester) async {
-  expect(find.byType(AppBar), findsOneWidget, reason: 'AppBar not found');
-  expect(
-    find.text('Your Health - Your Data'),
-    findsOneWidget,
-    reason: 'Home screen title not found',
-  );
-}
-
-/// Navigates to the survey page.
-///
-/// Locates and taps the survey icon to navigate to the survey form.
-
-Future<void> _navigateToSurvey(WidgetTester tester) async {
-  debugPrint('\n🔍 Looking for quiz icon...');
-  final surveyButton = find.ancestor(
-    of: find.byIcon(Icons.quiz),
-    matching: find.byType(Container),
-  );
-  expect(surveyButton, findsOneWidget, reason: 'Quiz icon container not found');
-
-  debugPrint('\n🖱️ Tapping quiz icon...');
-  await tester.tap(surveyButton);
-  await tester.pumpAndSettle();
 }
 
 /// Verifies the survey page is loaded correctly.
@@ -252,22 +185,6 @@ Future<void> _fillSurveyForm(WidgetTester tester) async {
     formFields.last,
     'Test measurement after morning walk',
   );
-  await tester.pumpAndSettle();
-}
-
-/// Submits the completed survey form.
-///
-/// Locates and taps the submit button using multiple approaches.
-
-Future<void> _submitForm(WidgetTester tester) async {
-  final submitButtonText = find.text('Submit');
-  if (submitButtonText.evaluate().isNotEmpty) {
-    await tester.tap(submitButtonText);
-  } else {
-    final submitButton = find.byType(ElevatedButton).last;
-    expect(submitButton, findsOneWidget, reason: 'Submit button not found');
-    await tester.tap(submitButton);
-  }
   await tester.pumpAndSettle();
 }
 
