@@ -254,6 +254,27 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                     backgroundColor: Colors.white,
                     extraLinesData: ExtraLinesData(
                       horizontalLines: [
+                        /// Danger systolic threshold line (180 mmHg).
+                        ///
+                        /// Uses a dashed red line to indicate dangerous systolic levels.
+
+                        HorizontalLine(
+                          y: 180,
+                          color: Colors.red,
+                          strokeWidth: 2,
+                          dashArray: [5, 5],
+                          label: HorizontalLineLabel(
+                            show: true,
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                            alignment: Alignment.topRight,
+                            labelResolver: (line) => 'Danger',
+                          ),
+                        ),
+
                         /// Threshold line indicating normal systolic pressure limit.
                         ///
                         /// Uses a dashed purple line matching the systolic data color.
