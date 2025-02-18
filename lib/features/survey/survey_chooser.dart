@@ -2,11 +2,46 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/vaccination/survey.dart';
 
-class SurveyChooser extends StatelessWidget {
+class SurveyChooser extends StatefulWidget {
   const SurveyChooser({super.key});
 
   @override
+  State<SurveyChooser> createState() => _SurveyChooserState();
+}
+
+class _SurveyChooserState extends State<SurveyChooser> {
+  Widget? _currentSurvey;
+
+  @override
   Widget build(BuildContext context) {
+    if (_currentSurvey != null) {
+      return Column(
+        children: [
+          // Back button row
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _currentSurvey = null;
+                    });
+                  },
+                  icon: const Icon(Icons.arrow_back),
+                  label: const Text('Back to Survey List'),
+                ),
+              ],
+            ),
+          ),
+          // Survey content
+          Expanded(
+            child: _currentSurvey!,
+          ),
+        ],
+      );
+    }
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -23,19 +58,22 @@ class SurveyChooser extends StatelessWidget {
             title: 'Blood Pressure',
             icon: Icons.favorite,
             color: Colors.red,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => BPSurvey()),
-            ),
+            onTap: () {
+              setState(() {
+                _currentSurvey = BPSurvey();
+              });
+            },
           ),
           const SizedBox(height: 16),
           _SurveyOption(
             title: 'Vaccinations',
             icon: Icons.vaccines,
             color: Colors.blue,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                  builder: (context) => const VaccinationSurvey()),
-            ),
+            onTap: () {
+              setState(() {
+                _currentSurvey = const VaccinationSurvey();
+              });
+            },
           ),
         ],
       ),
