@@ -1,3 +1,29 @@
+/// Vaccination survey form.
+///
+// Time-stamp: <Wednesday 2025-02-12 15:50:35 +1100 Graham Williams>
+///
+/// Copyright (C) 2024, Software Innovation Institute, ANU.
+///
+/// Licensed under the GNU General Public License, Version 3 (the "License").
+///
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://www.gnu.org/licenses/>.
+///
+/// Authors: Kevin Wang
+library;
+
 import 'package:flutter/material.dart';
 import 'package:healthpod/utils/handle_submit.dart';
 import 'package:healthpod/utils/save_response_locally.dart';
@@ -79,7 +105,8 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Date Picker
+              // Date Picker.
+
               ListTile(
                 title: const Text('Date'),
                 subtitle: Text(
@@ -90,7 +117,8 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
               ),
               const SizedBox(height: 16),
 
-              // Vaccine Name
+              // Vaccine Name.
+
               TextFormField(
                 controller: _vaccineController,
                 decoration: const InputDecoration(
@@ -106,7 +134,8 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
               ),
               const SizedBox(height: 16),
 
-              // Provider
+              // Provider.
+
               TextFormField(
                 controller: _providerController,
                 decoration: const InputDecoration(
@@ -116,7 +145,8 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
               ),
               const SizedBox(height: 16),
 
-              // Healthcare Professional
+              // Healthcare Professional.
+
               TextFormField(
                 controller: _professionalController,
                 decoration: const InputDecoration(
@@ -126,7 +156,8 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
               ),
               const SizedBox(height: 16),
 
-              // Cost
+              // Cost.
+
               TextFormField(
                 controller: _costController,
                 decoration: const InputDecoration(
@@ -138,7 +169,8 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
               ),
               const SizedBox(height: 16),
 
-              // Notes
+              // Notes.
+
               TextFormField(
                 controller: _noteController,
                 decoration: const InputDecoration(
@@ -149,14 +181,16 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
               ),
               const SizedBox(height: 24),
 
-              // Save Button
+              // Save Button.
+
               Center(
                 child: SizedBox(
                   width: 200,
                   child: ElevatedButton.icon(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // Collect form data into properly typed Map
+                        // Collect form data into properly typed Map.
+
                         final Map<String, dynamic> responses = {
                           'date':
                               '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
@@ -165,7 +199,6 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
                           'professional': _professionalController.text,
                           'cost': _costController.text,
                           'notes': _noteController.text,
-                          // Add other form fields as needed
                         };
 
                         _handleSubmit(context, responses);
