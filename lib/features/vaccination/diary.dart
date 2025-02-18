@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:healthpod/utils/handle_submit.dart';
+import 'package:healthpod/utils/save_response_locally.dart';
+import 'package:healthpod/utils/save_response_pod.dart';
 
 class VaccinationDiary extends StatefulWidget {
   const VaccinationDiary({super.key});
@@ -28,6 +31,39 @@ class _VaccinationDiaryState extends State<VaccinationDiary> {
         _selectedDate = picked;
       });
     }
+  }
+
+  Future<void> _saveResponsesLocally(
+      BuildContext context, Map<String, dynamic> responses) async {
+    await saveResponseLocally(
+      context: context,
+      responses: responses,
+      filePrefix: 'vaccination_diary',
+      dialogTitle: 'Save Vaccination Record',
+    );
+  }
+
+  Future<void> _saveResponsesToPod(
+      BuildContext context, Map<String, dynamic> responses) async {
+    await saveResponseToPod(
+      context: context,
+      responses: responses,
+      podPath: '/vaccination',
+      filePrefix: 'vaccination_diary',
+    );
+  }
+
+  /// Handles the submission of the survey.
+
+  Future<void> _handleSubmit(
+      BuildContext context, Map<String, dynamic> responses) async {
+    await handleSurveySubmit(
+      context: context,
+      responses: responses,
+      saveLocally: _saveResponsesLocally,
+      saveToPod: _saveResponsesToPod,
+      title: 'Save Vaccination Record',
+    );
   }
 
   @override
@@ -120,12 +156,19 @@ class _VaccinationDiaryState extends State<VaccinationDiary> {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // TODO: Implement save functionality
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Saving vaccination record...'),
-                          ),
-                        );
+                        // Collect form data into properly typed Map
+                        final Map<String, dynamic> responses = {
+                          'date':
+                              '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
+                          'vaccine_name': _vaccineController.text,
+                          'provider': _providerController.text,
+                          'professional': _professionalController.text,
+                          'cost': _costController.text,
+                          'notes': _noteController.text,
+                          // Add other form fields as needed
+                        };
+
+                        _handleSubmit(context, responses);
                       }
                     },
                     icon: const Icon(Icons.send),
