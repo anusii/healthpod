@@ -70,6 +70,8 @@ class _SurveyTabState extends State<SurveyTab>
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Tab Bar. Like what we have in the RattleNG app.
+
         TabBar(
           unselectedLabelColor: Colors.grey,
           controller: _tabController,
@@ -79,6 +81,9 @@ class _SurveyTabState extends State<SurveyTab>
             );
           }).toList(),
         ),
+
+        // Tab Bar View with the survey panels.
+
         Expanded(
           child: TabBarView(
             controller: _tabController,
@@ -92,7 +97,8 @@ class _SurveyTabState extends State<SurveyTab>
   }
 }
 
-/// A placeholder panel for the Overview tab
+/// A placeholder panel for the Overview tab.
+
 class SurveyOverviewPanel extends StatelessWidget {
   const SurveyOverviewPanel({super.key});
 
