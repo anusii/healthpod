@@ -83,7 +83,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Vaccinations',
     'icon': Icons.vaccines,
     'color': Colors.blue,
-    'content': const VaccinationDiary(),
+    'content': const VaccinationSurvey(),
   },
   {
     'title': 'Survey',

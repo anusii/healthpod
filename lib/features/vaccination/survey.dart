@@ -3,14 +3,14 @@ import 'package:healthpod/utils/handle_submit.dart';
 import 'package:healthpod/utils/save_response_locally.dart';
 import 'package:healthpod/utils/save_response_pod.dart';
 
-class VaccinationDiary extends StatefulWidget {
-  const VaccinationDiary({super.key});
+class VaccinationSurvey extends StatefulWidget {
+  const VaccinationSurvey({super.key});
 
   @override
-  State<VaccinationDiary> createState() => _VaccinationDiaryState();
+  State<VaccinationSurvey> createState() => _VaccinationSurveyState();
 }
 
-class _VaccinationDiaryState extends State<VaccinationDiary> {
+class _VaccinationSurveyState extends State<VaccinationSurvey> {
   final _formKey = GlobalKey<FormState>();
   DateTime _selectedDate = DateTime.now();
   final TextEditingController _vaccineController = TextEditingController();
