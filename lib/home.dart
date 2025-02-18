@@ -30,7 +30,7 @@ import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/file/service.dart';
-import 'package:healthpod/features/vaccination/diary.dart';
+import 'package:healthpod/features/vaccination/survey.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -45,6 +45,7 @@ import 'package:healthpod/widgets/footer.dart';
 import 'package:healthpod/features/bp/combined_visualisation.dart';
 
 import 'package:healthpod/widgets/home_page.dart';
+import 'package:healthpod/features/survey/survey_chooser.dart';
 
 /// The home screen for the HealthPod app.
 ///
@@ -86,10 +87,9 @@ final List<Map<String, dynamic>> homeTabs = [
     'content': const VaccinationSurvey(),
   },
   {
-    'title': 'Survey',
-    'icon': Icons.quiz,
-    'color': Colors.blue,
-    'content': BPSurvey(),
+    'title': 'Surveys',
+    'icon': Icons.assignment,
+    'content': const SurveyChooser(),
   },
   {
     'title': 'Visualisation',
