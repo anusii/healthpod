@@ -43,7 +43,7 @@ import 'package:healthpod/widgets/footer.dart';
 import 'package:healthpod/features/bp/combined_visualisation.dart';
 
 import 'package:healthpod/widgets/home_page.dart';
-import 'package:healthpod/features/survey/survey_chooser.dart';
+import 'package:healthpod/features/survey/survey_tab.dart';
 
 /// The home screen for the HealthPod app.
 ///
