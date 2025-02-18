@@ -81,14 +81,9 @@ final List<Map<String, dynamic>> homeTabs = [
     'content': const FileService(),
   },
   {
-    'title': 'Vaccinations',
-    'icon': Icons.vaccines,
-    'color': Colors.blue,
-    'content': const VaccinationSurvey(),
-  },
-  {
     'title': 'Surveys',
     'icon': Icons.assignment,
+    'color': Colors.blue,
     'content': const SurveyChooser(),
   },
   {
