@@ -2,6 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/vaccination/survey.dart';
 
+final List<Map<String, dynamic>> surveyPanels = [
+  {
+    'title': 'Overview',
+    'widget': const SurveyOverviewPanel(),
+  },
+  {
+    'title': 'Blood Pressure',
+    'widget': BPSurvey(),
+  },
+  {
+    'title': 'Vaccinations',
+    'widget': const VaccinationSurvey(),
+  },
+];
+
 class SurveyChooser extends StatefulWidget {
   const SurveyChooser({super.key});
 
@@ -9,123 +24,60 @@ class SurveyChooser extends StatefulWidget {
   State<SurveyChooser> createState() => _SurveyChooserState();
 }
 
-class _SurveyChooserState extends State<SurveyChooser> {
-  Widget? _currentSurvey;
+class _SurveyChooserState extends State<SurveyChooser>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: surveyPanels.length, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (_currentSurvey != null) {
-      return Column(
-        children: [
-          // Back button row
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                TextButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _currentSurvey = null;
-                    });
-                  },
-                  icon: const Icon(Icons.arrow_back),
-                  label: const Text('Back to Survey List'),
-                ),
-              ],
-            ),
+    return Column(
+      children: [
+        TabBar(
+          unselectedLabelColor: Colors.grey,
+          controller: _tabController,
+          tabs: surveyPanels.map((tab) {
+            return Tab(
+              text: tab['title'],
+            );
+          }).toList(),
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: surveyPanels.map((tab) {
+              return tab['widget'] as Widget;
+            }).toList(),
           ),
-          // Survey content
-          Expanded(
-            child: _currentSurvey!,
-          ),
-        ],
-      );
-    }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            'Choose a Survey',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 32),
-          _SurveyOption(
-            title: 'Blood Pressure',
-            icon: Icons.favorite,
-            color: Colors.red,
-            onTap: () {
-              setState(() {
-                _currentSurvey = BPSurvey();
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          _SurveyOption(
-            title: 'Vaccinations',
-            icon: Icons.vaccines,
-            color: Colors.blue,
-            onTap: () {
-              setState(() {
-                _currentSurvey = const VaccinationSurvey();
-              });
-            },
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class _SurveyOption extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _SurveyOption({
-    required this.title,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
+/// A placeholder panel for the Overview tab
+class SurveyOverviewPanel extends StatelessWidget {
+  const SurveyOverviewPanel({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(horizontal: 32),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 32,
-                color: color,
-              ),
-              const SizedBox(width: 16),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Spacer(),
-              const Icon(
-                Icons.arrow_forward_ios,
-                size: 16,
-              ),
-            ],
-          ),
+    return const Center(
+      child: Text(
+        'Survey Overview',
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
