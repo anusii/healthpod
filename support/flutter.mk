@@ -33,7 +33,7 @@ flutter:
 
   fix             Run `dart fix --apply`.
   format          Run `dart format`.
-  dcm             Run dart code metrics 
+  dcm             Run dart code metrics
     nullable	  Check NULLs from dart_code_metrics.
     unused_code   Check unused code from dart_code_metrics.
     unused_files  Check unused files from dart_code_metrics.
@@ -79,7 +79,7 @@ chrome:
 #
 # dart run build_runner build --delete-conflicting-outputs
 #
-# List the files that are automatically generated. Then they will get 
+# List the files that are automatically generated. Then they will get
 # built as required.
 
 # BUILD_RUNNER = \
@@ -178,13 +178,13 @@ unused_files:
 	-dart run dart_code_metrics:metrics check-unused-files --disable-sunset-warning lib
 	@echo $(SEPARATOR)
 
-.PHONY: metrics 
+.PHONY: metrics
 metrics:
 	@echo "Dart Code Metrics: METRICS"
 	-dart run dart_code_metrics:metrics analyze --disable-sunset-warning lib --reporter=console
 	@echo $(SEPARATOR)
 
-.PHONY: analyze 
+.PHONY: analyze
 analyze:
 	@echo "Futter ANALYZE"
 	-flutter analyze lib
@@ -206,7 +206,7 @@ todo:
 .PHONY: license
 license:
 	@echo "Files without a LICENSE:\n"
-	@-find lib -type f -not -name '*~' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
+	@-find lib -type f -name '*.dart' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
 	@echo $(SEPARATOR)
 
 .PHONY: riverpod
@@ -245,31 +245,79 @@ test:
 	-flutter test test
 	@echo $(SEPARATOR)
 
+# For a specific interactive test we think of it as providing a
+# demonstration of the app functionality that we may actually use to
+# create a narrated video. A INTERACT of 5 or more is then useful.
+
 %.itest:
-	flutter test --dart-define=PAUSE=5 --device-id \
-	$(shell flutter devices | grep desktop | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|') \
-	integration_test/$*_test.dart
+	@device_id=$(shell flutter devices | grep -E 'linux|macos|windows' | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|'); \
+	if [ -z "$$device_id" ]; then \
+		echo "No desktop device found. Please ensure you have the correct desktop platform enabled."; \
+		exit 1; \
+	fi; \
+	flutter test --dart-define=INTERACT=5 --device-id $$device_id integration_test/$*.dart
+
+# For a run over all tests interactively we INTERACT a little but not as
+# much as when running the individual tests.
 
 .PHONY: itest
 itest:
-	@echo "Pausing integration TEST:"
-	for t in integration_test/*_test.dart; do flutter test --dart-define=PAUSE=5 --device-id \
-	$(shell flutter devices | grep desktop | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|') \
-	$$t; done
+	@device_id=$(shell flutter devices | grep -E 'linux|macos|windows' | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|'); \
+	if [ -z "$$device_id" ]; then \
+		echo "No desktop device found. Please ensure you have the correct desktop platform enabled."; \
+		exit 1; \
+	fi; \
+	for t in integration_test/*.dart; do flutter test --dart-define=INTERACT=2 --device-id $$device_id $$t; done
 	@echo $(SEPARATOR)
+
+# For the quick tests we do not INTERACT at all. The aim is to quickly
+# test all functionality.
 
 .PHONY: qtest
 qtest:
-	@echo "Quick integration TEST:"
-	-for t in integration_test/*_test.dart; do flutter test --dart-define=PAUSE=0 --device-id \
-	$(shell flutter devices | grep desktop | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|') \
-	$$t; done
+	@device_id=$(shell flutter devices | grep -E 'linux|macos|windows' | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|'); \
+	if [ -z "$$device_id" ]; then \
+		echo "No desktop device found. Please ensure you have the correct desktop platform enabled."; \
+		exit 1; \
+	fi; \
+	for t in integration_test/*.dart; do \
+		echo "========================================"; \
+		echo $$t; /bin/echo -n $$t >&2; \
+		echo "========================================"; \
+		flutter test --dart-define=INTERACT=0 --device-id $$device_id --reporter failures-only  $$t 2>/dev/null; \
+		if [ "$$?" -eq 0 ]; then /bin/echo ' YES' >&2; else /bin/echo -n ' ...' >&2; \
+		echo '****************************************> TRY AGAIN'; \
+		flutter test --dart-define=INTERACT=0 --device-id $$device_id --reporter failures-only  $$t 2>/dev/null; \
+		if [ "$$?" -eq 0 ]; then /bin/echo ' YES' >&2; else /bin/echo ' NO *****' >&2; fi; fi; \
+	done
 	@echo $(SEPARATOR)
 
 %.qtest:
-	flutter test --dart-define=PAUSE=0 --device-id \
+	@device_id=$(shell flutter devices | grep -E 'linux|macos|windows' | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|'); \
+	if [ -z "$$device_id" ]; then \
+		echo "No desktop device found. Please ensure you have the correct desktop platform enabled."; \
+		exit 1; \
+	fi; \
+	flutter test --dart-define=INTERACT=0 --device-id $$device_id --reporter failures-only integration_test/$*.dart 2>/dev/null
+
+
+.PHONY: qtest.tmp
+qtest.tmp: qtest.all
+
+.PHONY: qtest.all
+qtest.all:
+	make qtest > qtest_$(shell date +%Y%m%d%H%M%S).txt
+
+clean::
+	rm -f qtest_*.txt
+
+.PHONY: atest
+atest:
+	@echo "Full integration TEST:"
+	flutter test --dart-define=INTERACT=0 --verbose --device-id \
 	$(shell flutter devices | grep desktop | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|') \
-	integration_test/$*_test.dart
+	integration_test
+	@echo $(SEPARATOR)
 
 .PHONY: coverage
 coverage:
