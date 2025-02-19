@@ -25,6 +25,7 @@ installers/*.tar.gz
 installers/*-linux.zip
 installers/*-macos.zip
 installers/*-windows.zip
+tools/chromedriver/
 
 # ORIGINAL
 
