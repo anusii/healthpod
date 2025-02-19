@@ -55,10 +55,9 @@ Future<void> saveResponseLocally({
       if (additionalData != null) ...additionalData,
     };
 
-    // Convert to JSON string with proper formatting and base64 encode.
+    // Convert to JSON string with proper formatting.
 
     final jsonString = const JsonEncoder.withIndent('  ').convert(responseData);
-    final base64Content = base64Encode(utf8.encode(jsonString));
 
     // Generate filename using consistent format.
 
@@ -84,10 +83,10 @@ Future<void> saveResponseLocally({
       outputFile = '$outputFile.json';
     }
 
-    // Save the base64 encoded file.
+    // Save the raw JSON file.
 
     final file = File(outputFile);
-    await file.writeAsString(base64Content);
+    await file.writeAsString(jsonString);
   } catch (e) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
