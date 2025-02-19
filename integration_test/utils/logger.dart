@@ -59,12 +59,12 @@ class Logger {
 
     // Add timestamp and log level to message.
 
-    final timestamp = DateTime.now().toIso8601String();
-    final formattedMessage = '[$timestamp] [$level]: $message';
+    final formattedMessage = '[$level]: $message';
 
     // Output formatted message to console.
+    // ignore_for_file: avoid_print
 
-    stdout.writeln(formattedMessage);
+    print(formattedMessage);
 
     // Append to log file if file logging is enabled.
 
