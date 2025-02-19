@@ -64,7 +64,7 @@ class BPExporter {
           resources.files.where((file) => file.endsWith('.enc.ttl')).toList();
 
       if (files.isEmpty) {
-        throw Exception('No BP data files found in directory');
+        throw Exception('No Blood pressure data files found in directory');
       }
 
       // Store all BP readings.
@@ -81,7 +81,7 @@ class BPExporter {
           final content = await readPod(
             '$dirPath/$fileName',
             context,
-            const Text('Reading BP data'),
+            const Text('Reading Blood pressure data'),
           );
 
           if (content == SolidFunctionCallStatus.fail ||
@@ -123,7 +123,7 @@ class BPExporter {
       }
 
       if (allReadings.isEmpty) {
-        throw Exception('No valid BP readings found');
+        throw Exception('No valid Blood pressure readings found');
       }
 
       // Sort readings by timestamp.
