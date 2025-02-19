@@ -254,6 +254,27 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                     backgroundColor: Colors.white,
                     extraLinesData: ExtraLinesData(
                       horizontalLines: [
+                        /// Danger systolic threshold line (180 mmHg).
+                        ///
+                        /// Uses a dashed red line to indicate dangerous systolic levels.
+
+                        HorizontalLine(
+                          y: 180,
+                          color: Colors.red,
+                          strokeWidth: 2,
+                          dashArray: [5, 5],
+                          label: HorizontalLineLabel(
+                            show: true,
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                            alignment: Alignment.topRight,
+                            labelResolver: (line) => 'Danger',
+                          ),
+                        ),
+
                         /// Threshold line indicating normal systolic pressure limit.
                         ///
                         /// Uses a dashed purple line matching the systolic data color.
@@ -296,20 +317,15 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                           width: 1,
                         ),
 
-                        /// Custom tooltip content generator showing pressure values
-                        /// and normal ranges for each type.
+                        /// Custom tooltip content generator showing pressure values.
+                        /// Removed normal ranges for each type.
 
                         getTooltipItems: (List<LineBarSpot> touchedSpots) {
                           return touchedSpots.map((LineBarSpot spot) {
                             final isSystolic = spot.barIndex == 0;
-                            String label = '';
-                            if (isSystolic) {
-                              label =
-                                  'Systolic: ${parseNumericInput(spot.y)} mmHg\nNormal: below 120 mmHg'; // Ensure int format.
-                            } else {
-                              label =
-                                  'Diastolic: ${parseNumericInput(spot.y)} mmHg\nNormal: below 80 mmHg';
-                            }
+                            String label = isSystolic
+                                ? 'Systolic: ${parseNumericInput(spot.y)} mmHg'
+                                : 'Diastolic: ${parseNumericInput(spot.y)} mmHg';
                             return LineTooltipItem(
                               label,
                               TextStyle(
