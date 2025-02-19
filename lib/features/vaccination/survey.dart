@@ -90,6 +90,16 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
       saveToPod: _saveResponsesToPod,
       title: 'Save Vaccination Record',
     );
+
+    // Clear all form fields after successful submission
+    setState(() {
+      _selectedDate = DateTime.now(); // Reset to current date
+      _vaccineController.clear();
+      _providerController.clear();
+      _professionalController.clear();
+      _costController.clear();
+      _noteController.clear();
+    });
   }
 
   @override
