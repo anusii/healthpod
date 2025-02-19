@@ -50,7 +50,7 @@ Future<void> initialiseFeatureFolders({
 
     // List of required feature folders.
 
-    final requiredFolders = ['bp', 'pathology'];
+    final requiredFolders = ['blood_pressure', 'pathology'];
 
     // Check current resources.
 

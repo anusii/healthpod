@@ -92,9 +92,9 @@ class _FileServiceState extends State<FileService> {
   // Helper method to check if we're in the bp/ directory.
 
   bool get isInBpDirectory {
-    return currentPath!.endsWith('/bp') ||
-        currentPath!.contains('/bp/') ||
-        currentPath == 'healthpod/data/bp';
+    return currentPath!.endsWith('/blood_pressure') ||
+        currentPath!.contains('/blood_pressure/') ||
+        currentPath == 'healthpod/data/blood_pressure';
   }
 
   /// Handles file upload by reading its contents and encrypting it for upload.
@@ -881,7 +881,7 @@ class _FileServiceState extends State<FileService> {
                         final String? outputFile =
                             await FilePicker.platform.saveFile(
                           dialogTitle: 'Save Blood pressure data as CSV:',
-                          fileName: 'bp_data.csv',
+                          fileName: 'blood_pressure_data.csv',
                         );
 
                         if (outputFile != null) {

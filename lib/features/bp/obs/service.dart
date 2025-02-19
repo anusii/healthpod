@@ -37,10 +37,10 @@ import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 /// Handles loading/saving/deleting BP observations from the Pod.
 
 class BPEditorService {
-  /// Load all BP observations from `healthpod/data/bp` directory.
+  /// Load all BP observations from `healthpod/data/blood_pressure` directory.
 
   Future<List<BPObservation>> loadData(BuildContext context) async {
-    final dirUrl = await getDirUrl('healthpod/data/bp');
+    final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
     final resources = await getResourcesInContainer(dirUrl);
 
     final List<BPObservation> loadedObservations = [];
@@ -51,7 +51,7 @@ class BPEditorService {
       if (!context.mounted) continue;
 
       final content = await readPod(
-        'healthpod/data/bp/$file',
+        'healthpod/data/blood_pressure/$file',
         context,
         const Text('Loading file'),
       );
@@ -85,7 +85,7 @@ class BPEditorService {
 
     if (!isNew && oldObservation != null) {
       final oldFilename = _filenameFromTimestamp(oldObservation.timestamp);
-      await deleteFile('healthpod/data/bp/$oldFilename');
+      await deleteFile('healthpod/data/blood_pressure/$oldFilename');
     }
 
     // Write new file.
@@ -96,7 +96,7 @@ class BPEditorService {
     if (!context.mounted) return;
 
     await writePod(
-      'bp/$newFilename',
+      'blood_pressure/$newFilename',
       jsonData,
       context,
       const Text('Saving'),
@@ -111,7 +111,7 @@ class BPEditorService {
     BPObservation observation,
   ) async {
     final filename = _filenameFromTimestamp(observation.timestamp);
-    await deleteFile('healthpod/data/bp/$filename');
+    await deleteFile('healthpod/data/blood_pressure/$filename');
   }
 
   /// Helper to generate the consistent file name from an observation's timestamp.
