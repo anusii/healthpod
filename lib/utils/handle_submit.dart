@@ -99,12 +99,20 @@ Future<void> handleSurveySubmit({
               ),
             ),
           ),
+          const SizedBox(width: 8),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop('cancel'),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
         ],
       );
     },
   );
 
-  if (saveChoice == null) return;
+  if (saveChoice == null || saveChoice == 'cancel') return;
 
   if (!context.mounted) return;
 
