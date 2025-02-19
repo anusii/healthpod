@@ -312,31 +312,89 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                     lineTouchData: LineTouchData(
                       touchTooltipData: LineTouchTooltipData(
                         tooltipRoundedRadius: 8,
-                        tooltipBorder: const BorderSide(
-                          color: Colors.white,
+                        tooltipBorder: BorderSide(
+                          color: Colors.grey[600]!,
                           width: 1,
                         ),
+                        tooltipPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        tooltipMargin: 8,
+                        maxContentWidth: 300,
+                        fitInsideHorizontally: true,
+                        fitInsideVertically: true,
+                        tooltipHorizontalAlignment:
+                            FLHorizontalAlignment.center,
 
-                        /// Custom tooltip content generator showing pressure values.
+                        /// Custom tooltip content generator showing pressure values and additional data.
                         /// Removed normal ranges for each type.
 
                         getTooltipItems: (List<LineBarSpot> touchedSpots) {
                           return touchedSpots.map((LineBarSpot spot) {
                             final isSystolic = spot.barIndex == 0;
-                            String label = isSystolic
-                                ? 'Systolic: ${parseNumericInput(spot.y)} mmHg'
-                                : 'Diastolic: ${parseNumericInput(spot.y)} mmHg';
+                            final index = spot.x.toInt();
+                            final data = _surveyData[index]['responses'];
+
+                            // Get additional data points.
+
+                            final heartRate =
+                                data[HealthSurveyConstants.fieldHeartRate] ??
+                                    'N/A';
+                            final feeling =
+                                data[HealthSurveyConstants.fieldFeeling] ??
+                                    'N/A';
+                            final notes =
+                                data[HealthSurveyConstants.fieldNotes] ?? '';
+
+                            // Format timestamp.
+
+                            final timestamp =
+                                DateTime.parse(_surveyData[index]['timestamp']);
+                            final timeStr =
+                                DateFormat('HH:mm').format(timestamp);
+
+                            // Build tooltip content.
+
+                            final pressureType =
+                                isSystolic ? "Systolic" : "Diastolic";
+                            final pressureValue = parseNumericInput(spot.y);
+
+                            // Create formatted content lines.
+
+                            final List<String> contentLines = [
+                              '${pressureType.toUpperCase()}: $pressureValue mmHg',
+                              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+                              '🕒 Time: $timeStr',
+                              '❤️ Heart Rate: $heartRate bpm',
+                              '😊 Feeling: $feeling',
+                            ];
+
+                            // Add notes if they exist.
+
+                            if (notes.isNotEmpty) {
+                              contentLines.add('📝 Notes: $notes');
+                            }
+
+                            // Join lines with consistent newlines.
+
+                            final tooltipContent = contentLines.join('\n');
+
                             return LineTooltipItem(
-                              label,
-                              TextStyle(
+                              tooltipContent,
+                              const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w500,
-                                fontSize: 12,
+                                fontSize: 13,
+                                height: 1.8,
                               ),
+                              textAlign: TextAlign.left,
                             );
                           }).toList();
                         },
                       ),
+                      handleBuiltInTouches: true,
+                      touchSpotThreshold: 20,
                     ),
 
                     /// Grid configuration for better data readability.
