@@ -63,6 +63,8 @@ class BPExporter {
       final files =
           resources.files.where((file) => file.endsWith('.enc.ttl')).toList();
 
+      // Use 'Blood pressure' instead of BP for user clarity.
+
       if (files.isEmpty) {
         throw Exception('No Blood pressure data files found in directory');
       }
