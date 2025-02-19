@@ -232,16 +232,18 @@ class HealthPodHomeState extends State<HealthPodHome> {
           ScrollConfiguration(
             // Disable scrollbars for a cleaner look.
 
-            behavior:
-                ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            behavior: ScrollConfiguration.of(context).copyWith(
+              scrollbars: false,
+              platform: Theme.of(context).platform,
+            ),
             child: SingleChildScrollView(
-              // Allow scrolling of navigation rail when it overflows.
-
-              child: SizedBox(
+              child: Container(
                 // Set height to match screen height.
 
                 height: MediaQuery.of(context).size.height,
+                color: titleBackgroundColor,
                 child: NavigationRail(
+                  backgroundColor: titleBackgroundColor,
                   selectedIndex: _selectedIndex,
                   onDestinationSelected: (int index) async {
                     setState(() {
@@ -294,13 +296,14 @@ class HealthPodHomeState extends State<HealthPodHome> {
       ),
       bottomNavigationBar: BottomAppBar(
         height: getFooterHeight(context),
-        color: Colors.grey[200],
+        color: titleBackgroundColor,
         child: SizedBox(
           child: Footer(
             webId: _webId,
             isKeySaved: _isKeySaved,
-            onKeyStatusChanged:
-                _updateKeyStatus, // Callback to update key status.
+            // Callback to update key status.
+
+            onKeyStatusChanged: _updateKeyStatus,
           ),
         ),
       ),
