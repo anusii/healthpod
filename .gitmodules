@@ -1,0 +1,3 @@
+[submodule "solidpod"]
+	path = solidpod
+	url = https://github.com/atangster/solidpod
