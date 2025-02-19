@@ -64,7 +64,7 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
     await saveResponseLocally(
       context: context,
       responses: responses,
-      filePrefix: 'vaccination_',
+      filePrefix: 'vaccination',
       dialogTitle: 'Save Vaccination Record',
     );
   }
@@ -75,7 +75,7 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
       context: context,
       responses: responses,
       podPath: '/vaccination',
-      filePrefix: 'vaccination_',
+      filePrefix: 'vaccination',
     );
   }
 
