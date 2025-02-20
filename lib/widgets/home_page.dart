@@ -1,6 +1,6 @@
 /// Home Page Widget
 //
-// Time-stamp: <Tuesday 2025-01-14 21:20:03 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -66,15 +66,15 @@ class HomePage extends StatelessWidget {
                 MarkdownTooltip(
                   message: '''
 
-                  **Appointment:** Here you will be able to access and manage
-                  your appointments. You can enter historic information, update
-                  when you recieve a new appointment, and download appointments
-                  from other sources. This will be a record of all your
-                  interactions with the health system.
+                  **Diary:** Here you will be able to access and manage your
+                  appointments. You can enter historic information, update when
+                  you recieve a new appointment, and download appointments from
+                  other sources. This will be a record of all your interactions
+                  with the health system.
 
                   ''',
                   child: Text(
-                    '• Appointments',
+                    '• Diary',
                     style: TextStyle(
                       fontSize: 16,
                       height: 1.5,
@@ -172,7 +172,7 @@ class HomePage extends StatelessWidget {
 
                   ''',
                   child: Text(
-                    '• Blood Pressure Editor',
+                    '• Data Table',
                     style: TextStyle(
                       fontSize: 16,
                       height: 1.5,

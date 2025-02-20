@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Wednesday 2025-02-12 15:50:35 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-02-21 08:29:34 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -59,7 +59,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'color': null,
   },
   {
-    'title': 'Appointments',
+    'title': 'Diary',
     'icon': Icons.calendar_today,
     'color': Colors.blue,
     'message': '''
@@ -73,42 +73,28 @@ final List<Map<String, dynamic>> homeTabs = [
     'dialogTitle': 'Comming Soon - Appointment',
   },
   {
-    'title': 'Files',
-    'icon': Icons.folder,
-    'color': Colors.blue,
-    'content': const FileService(),
-  },
-  {
-    'title': 'Vaccinations',
-    'icon': Icons.vaccines,
-    'color': Colors.blue,
-    'message': '''
-
-    Here you will be able to access and manage your record of
-    vaccinations. You can enter historic information, update
-    when you recieve a vaccination, and download from governemnt
-    records of your vaccinations.
-
-    ''',
-    'dialogTitle': 'Comming Soon - Vaccines',
-  },
-  {
-    'title': 'Survey',
+    'title': 'Update',
     'icon': Icons.quiz,
     'color': Colors.blue,
     'content': BPSurvey(),
   },
   {
-    'title': 'Visualisation',
+    'title': 'Charts',
     'icon': Icons.show_chart,
     'color': Colors.blue,
     'content': const BPCombinedVisualisation(),
   },
   {
-    'title': 'Blood Pressure Editor',
+    'title': 'Table',
     'icon': Icons.table_chart,
     'color': Colors.blue,
     'content': const BPEditorPage(),
+  },
+  {
+    'title': 'Files',
+    'icon': Icons.folder,
+    'color': Colors.blue,
+    'content': const FileService(),
   },
 ];
 
