@@ -97,6 +97,13 @@ class _FileServiceState extends State<FileService> {
         currentPath == 'healthpod/data/bp';
   }
 
+  // Helper method to check if we're in the vaccination/ directory.
+  bool get isInVaccinationDirectory {
+    return currentPath!.endsWith('/vaccination') ||
+        currentPath!.contains('/vaccination/') ||
+        currentPath == 'healthpod/data/vaccination';
+  }
+
   /// Handles file upload by reading its contents and encrypting it for upload.
 
   Future<void> handleUpload() async {
