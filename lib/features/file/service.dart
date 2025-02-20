@@ -39,6 +39,7 @@ import 'package:healthpod/features/file/browser.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
+import 'package:healthpod/features/vaccination/exporter.dart';
 
 /// File service.
 ///
@@ -832,18 +833,14 @@ class _FileServiceState extends State<FileService> {
                 ),
               ),
 
-              // Show CSV import and export buttons only when in blood pressure directory.
-
-              if (isInBpDirectory) ...[
+              // Show CSV import and export buttons when in blood pressure or vaccination directory
+              if (isInBpDirectory || isInVaccinationDirectory) ...[
                 const SizedBox(width: 8),
-                // Import CSV Button.
-
+                // Import CSV Button
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       try {
-                        // Open file picker configured for CSV files only.
-
                         final result = await FilePicker.platform.pickFiles(
                           type: FileType.custom,
                           allowedExtensions: ['csv'],
@@ -852,8 +849,6 @@ class _FileServiceState extends State<FileService> {
                         if (result != null && result.files.isNotEmpty) {
                           final file = result.files.first;
                           if (file.path != null) {
-                            // Process and import CSV data.
-
                             handleCsvImport(
                                 file.path!, currentPath ?? 'healthpod/data');
                           }
@@ -877,41 +872,39 @@ class _FileServiceState extends State<FileService> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Export CSV Button.
-
+                // Export CSV Button
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       try {
+                        final prefix = isInBpDirectory ? 'bp' : 'vaccination';
                         final String? outputFile =
                             await FilePicker.platform.saveFile(
-                          dialogTitle: 'Save BP data as CSV:',
-                          fileName: 'bp_data.csv',
+                          dialogTitle:
+                              'Save ${isInBpDirectory ? "BP" : "Vaccination"} data as CSV:',
+                          fileName: '${prefix}_data.csv',
                         );
 
-                        if (outputFile != null) {
-                          if (!mounted) return;
-
-                          // Export JSON files in bp/ to a single CSV file.
-                          // Use BPExporter to handle blood-pressure specific exporting.
-
-                          final success = await BPExporter.exportToCsv(
-                            outputFile,
-                            currentPath ?? 'healthpod/data',
-                            context,
-                          );
+                        if (outputFile != null && mounted) {
+                          final success = await (isInBpDirectory
+                              ? BPExporter.exportToCsv(
+                                  outputFile, currentPath!, context)
+                              : VaccinationExporter.exportToCsv(
+                                  outputFile, currentPath!, context));
 
                           if (!mounted) return;
 
                           if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('BP data exported successfully'),
+                              SnackBar(
+                                content: Text(
+                                    '${isInBpDirectory ? "BP" : "Vaccination"} data exported successfully'),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           } else {
-                            showAlert(context, 'Failed to export BP data');
+                            showAlert(context,
+                                'Failed to export ${isInBpDirectory ? "BP" : "Vaccination"} data');
                           }
                         }
                       } catch (e) {

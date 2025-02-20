@@ -93,3 +93,55 @@ class HealthSurveyConstants {
     ),
   ];
 }
+
+/// Defines the standard set of vaccination survey questions.
+class VaccinationSurveyConstants {
+  // Data field names (for storage/CSV)
+  static const String fieldTimestamp = 'timestamp';
+  static const String fieldVaccine = 'vaccine';
+  static const String fieldProvider = 'provider';
+  static const String fieldProfessional = 'professional';
+  static const String fieldCost = 'cost';
+  static const String fieldNotes = 'notes';
+
+  /// Question texts (for UI)
+  static const String vaccine = "Which vaccine did you receive?";
+  static const String provider = "Where did you receive the vaccine?";
+  static const String professional = "Healthcare professional name";
+  static const String cost = "Cost of vaccination";
+  static const String notes = "Any additional notes?";
+
+  /// The list of questions used in the vaccination survey
+  static final List<HealthSurveyQuestion> questions = [
+    HealthSurveyQuestion(
+      question: vaccine,
+      fieldName: fieldVaccine,
+      type: HealthDataType.text,
+      isRequired: true,
+    ),
+    HealthSurveyQuestion(
+      question: provider,
+      fieldName: fieldProvider,
+      type: HealthDataType.text,
+      isRequired: true,
+    ),
+    HealthSurveyQuestion(
+      question: professional,
+      fieldName: fieldProfessional,
+      type: HealthDataType.text,
+      isRequired: false,
+    ),
+    HealthSurveyQuestion(
+      question: cost,
+      fieldName: fieldCost,
+      type: HealthDataType.text,
+      isRequired: false,
+    ),
+    HealthSurveyQuestion(
+      question: notes,
+      fieldName: fieldNotes,
+      type: HealthDataType.text,
+      isRequired: false,
+    ),
+  ];
+}
