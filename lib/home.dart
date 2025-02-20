@@ -73,12 +73,6 @@ final List<Map<String, dynamic>> homeTabs = [
     'dialogTitle': 'Comming Soon - Appointment',
   },
   {
-    'title': 'Files',
-    'icon': Icons.folder,
-    'color': Colors.blue,
-    'content': const FileService(),
-  },
-  {
     'title': 'Update',
     'icon': Icons.assignment,
     'color': Colors.blue,
@@ -235,51 +229,55 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
                     child: SizedBox(
                       // Set height to match screen height.
-
                       height: MediaQuery.of(context).size.height,
-                      child: NavigationRail(
-                        backgroundColor: titleBackgroundColor,
-                        selectedIndex: _selectedIndex,
-                        onDestinationSelected: (int index) async {
-                          setState(() {
-                            _selectedIndex = index;
-                          });
+                      child: Container(
+                        color: titleBackgroundColor,
+                        child: NavigationRail(
+                          backgroundColor: titleBackgroundColor,
+                          selectedIndex: _selectedIndex,
+                          onDestinationSelected: (int index) async {
+                            setState(() {
+                              _selectedIndex = index;
+                            });
 
-                          final tab = homeTabs[index];
+                            final tab = homeTabs[index];
 
-                          // Handle different types of navigation based on tab properties.
+                            // Handle different types of navigation based on tab properties.
 
-                          if (tab.containsKey('message')) {
-                            alert(context, tab['message'], tab['dialogTitle']);
-                          } else if (tab.containsKey('action')) {
-                            await tab['action'](context);
-                          }
-                        },
-                        // Show both icons and labels for all destinations.
+                            if (tab.containsKey('message')) {
+                              alert(
+                                  context, tab['message'], tab['dialogTitle']);
+                            } else if (tab.containsKey('action')) {
+                              await tab['action'](context);
+                            }
+                          },
+                          // Show both icons and labels for all destinations.
 
-                        labelType: NavigationRailLabelType.all,
-                        destinations: homeTabs.map((tab) {
-                          // Create navigation destinations from tab configurations.
+                          labelType: NavigationRailLabelType.all,
+                          destinations: homeTabs.map((tab) {
+                            // Create navigation destinations from tab configurations.
 
-                          return NavigationRailDestination(
-                            icon: Icon(tab['icon'], color: tab['color']),
-                            label: Text(
-                              tab['title'],
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          );
-                        }).toList(),
-                        // Style for selected tab label.
+                            return NavigationRailDestination(
+                              icon: Icon(tab['icon'], color: tab['color']),
+                              label: Text(
+                                tab['title'],
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                            );
+                          }).toList(),
+                          // Style for selected tab label.
 
-                        selectedLabelTextStyle: const TextStyle(
-                          color: Colors.deepPurple,
-                          fontWeight: FontWeight.bold,
+                          selectedLabelTextStyle: const TextStyle(
+                            color: Colors.deepPurple,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          // Style for unselected tab labels.
+
+                          unselectedLabelTextStyle:
+                              TextStyle(color: Colors.grey[500]),
                         ),
-                        // Style for unselected tab labels.
-
-                        unselectedLabelTextStyle:
-                            TextStyle(color: Colors.grey[500]),
                       ),
                     ),
                   ),
@@ -302,8 +300,9 @@ class HealthPodHomeState extends State<HealthPodHome> {
           child: Footer(
             webId: _webId,
             isKeySaved: _isKeySaved,
-            onKeyStatusChanged:
-                _updateKeyStatus, // Callback to update key status.
+            // Callback to update key status.
+
+            onKeyStatusChanged: _updateKeyStatus,
           ),
         ),
       ),

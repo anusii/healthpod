@@ -33,12 +33,15 @@ class SurveyOverviewPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Survey Overview',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
+    return Container(
+      color: Colors.white,
+      child: const Center(
+        child: Text(
+          'Survey Overview',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
