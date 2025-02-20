@@ -95,6 +95,7 @@ class HealthSurveyConstants {
 }
 
 /// Defines the standard set of vaccination survey questions.
+
 class VaccinationSurveyConstants {
   /// Data field names (for storage/CSV).
 

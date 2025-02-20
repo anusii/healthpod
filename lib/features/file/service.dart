@@ -100,6 +100,7 @@ class _FileServiceState extends State<FileService> {
   }
 
   // Helper method to check if we're in the vaccination/ directory.
+
   bool get isInVaccinationDirectory {
     return currentPath!.endsWith('/vaccination') ||
         currentPath!.contains('/vaccination/') ||
@@ -829,14 +830,18 @@ class _FileServiceState extends State<FileService> {
                 ),
               ),
 
-              // Show CSV import and export buttons when in blood pressure or vaccination directory
+              // Show CSV import and export buttons when in blood pressure or vaccination directory.
+
               if (isInBpDirectory || isInVaccinationDirectory) ...[
                 const SizedBox(width: 8),
-                // Import CSV Button
+                // Import CSV Button.
+
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       try {
+                        // Open file picker configured for CSV files only.
+
                         final result = await FilePicker.platform.pickFiles(
                           type: FileType.custom,
                           allowedExtensions: ['csv'],
@@ -845,6 +850,8 @@ class _FileServiceState extends State<FileService> {
                         if (result != null && result.files.isNotEmpty) {
                           final file = result.files.first;
                           if (file.path != null) {
+                            // Process and import CSV data.
+
                             handleCsvImport(
                                 file.path!, currentPath ?? 'healthpod/data');
                           }
@@ -868,12 +875,18 @@ class _FileServiceState extends State<FileService> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Export CSV Button
+                // Export CSV Button.
+
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       try {
+                        // Determine the file prefix based on current directory type.
+
                         final prefix = isInBpDirectory ? 'bp' : 'vaccination';
+
+                        // Open file picker dialog to let user choose where to save the CSV.
+
                         final String? outputFile =
                             await FilePicker.platform.saveFile(
                           dialogTitle:
@@ -881,14 +894,22 @@ class _FileServiceState extends State<FileService> {
                           fileName: '${prefix}_data.csv',
                         );
 
+                        // Only proceed if user selected a save location and component is still mounted.
+
                         if (outputFile != null && mounted) {
+                          // Export the data using the appropriate exporter based on directory type.
+
                           final success = await (isInBpDirectory
                               ? BPExporter.exportToCsv(
                                   outputFile, currentPath!, context)
                               : VaccinationExporter.exportToCsv(
                                   outputFile, currentPath!, context));
 
+                          // Check if component is still mounted after async operation.
+
                           if (!mounted) return;
+
+                          // Show success or failure message to user.
 
                           if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
