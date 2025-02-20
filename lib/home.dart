@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Friday 2025-02-21 08:29:34 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-02-21 09:52:13 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -213,69 +213,79 @@ class HealthPodHomeState extends State<HealthPodHome> {
         ],
       ),
       backgroundColor: titleBackgroundColor,
-      body: Row(
+      body: Column(
         children: [
-          ScrollConfiguration(
-            // Disable scrollbars for a cleaner look.
+          Divider(height: 1, color: Colors.grey[350]),
+          Expanded(
+            child: Row(
+              children: [
+                ScrollConfiguration(
+                  // Disable scrollbars for a cleaner look.
 
-            behavior:
-                ScrollConfiguration.of(context).copyWith(scrollbars: false),
-            child: SingleChildScrollView(
-              // Allow scrolling of navigation rail when it overflows.
+                  behavior: ScrollConfiguration.of(context)
+                      .copyWith(scrollbars: false),
+                  child: SingleChildScrollView(
+                    // Allow scrolling of navigation rail when it overflows.
 
-              child: SizedBox(
-                // Set height to match screen height.
+                    child: SizedBox(
+                      // Set height to match screen height.
 
-                height: MediaQuery.of(context).size.height,
-                child: NavigationRail(
-                  selectedIndex: _selectedIndex,
-                  onDestinationSelected: (int index) async {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
+                      height: MediaQuery.of(context).size.height,
+                      child: NavigationRail(
+                        selectedIndex: _selectedIndex,
+                        onDestinationSelected: (int index) async {
+                          setState(() {
+                            _selectedIndex = index;
+                          });
 
-                    final tab = homeTabs[index];
+                          final tab = homeTabs[index];
 
-                    // Handle different types of navigation based on tab properties.
+                          // Handle different types of navigation based on tab properties.
 
-                    if (tab.containsKey('message')) {
-                      alert(context, tab['message'], tab['dialogTitle']);
-                    } else if (tab.containsKey('action')) {
-                      await tab['action'](context);
-                    }
-                  },
-                  // Show both icons and labels for all destinations.
+                          if (tab.containsKey('message')) {
+                            alert(context, tab['message'], tab['dialogTitle']);
+                          } else if (tab.containsKey('action')) {
+                            await tab['action'](context);
+                          }
+                        },
+                        // Show both icons and labels for all destinations.
 
-                  labelType: NavigationRailLabelType.all,
-                  destinations: homeTabs.map((tab) {
-                    // Create navigation destinations from tab configurations.
+                        labelType: NavigationRailLabelType.all,
+                        destinations: homeTabs.map((tab) {
+                          // Create navigation destinations from tab configurations.
 
-                    return NavigationRailDestination(
-                      icon: Icon(tab['icon'], color: tab['color']),
-                      label: Text(
-                        tab['title'],
-                        style: const TextStyle(fontSize: 16),
+                          return NavigationRailDestination(
+                            icon: Icon(tab['icon'], color: tab['color']),
+                            label: Text(
+                              tab['title'],
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          );
+                        }).toList(),
+                        // Style for selected tab label.
+
+                        selectedLabelTextStyle: const TextStyle(
+                          color: Colors.deepPurple,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        // Style for unselected tab labels.
+
+                        unselectedLabelTextStyle:
+                            TextStyle(color: Colors.grey[500]),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    );
-                  }).toList(),
-                  // Style for selected tab label.
-
-                  selectedLabelTextStyle: const TextStyle(
-                    color: Colors.deepPurple,
-                    fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  // Style for unselected tab labels.
-
-                  unselectedLabelTextStyle: TextStyle(color: Colors.grey[500]),
                 ),
-              ),
+                const VerticalDivider(),
+                Expanded(
+                  child:
+                      homeTabs[_selectedIndex]['content'] ?? const HomePage(),
+                ),
+              ],
             ),
           ),
-          const VerticalDivider(),
-          Expanded(
-            child: homeTabs[_selectedIndex]['content'] ?? const HomePage(),
-          ),
+          Divider(height: 1, color: Colors.grey[350]),
         ],
       ),
       bottomNavigationBar: BottomAppBar(
