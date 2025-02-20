@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Friday 2025-02-21 09:52:13 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-02-21 10:07:46 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -232,6 +232,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
                       height: MediaQuery.of(context).size.height,
                       child: NavigationRail(
+                        backgroundColor: titleBackgroundColor,
                         selectedIndex: _selectedIndex,
                         onDestinationSelected: (int index) async {
                           setState(() {
@@ -290,7 +291,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
       ),
       bottomNavigationBar: BottomAppBar(
         height: getFooterHeight(context),
-        color: Colors.grey[200],
+        color: titleBackgroundColor,
         child: SizedBox(
           child: Footer(
             webId: _webId,
