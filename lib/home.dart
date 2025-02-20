@@ -27,6 +27,10 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/dialogs/alert.dart';
+import 'package:healthpod/features/bp/editor/page.dart';
+import 'package:healthpod/features/file/service.dart';
+
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/colours.dart';
@@ -37,12 +41,9 @@ import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/widgets/footer.dart';
-import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/features/bp/combined_visualisation.dart';
-import 'package:healthpod/features/bp/editor/page.dart';
-import 'package:healthpod/features/bp/survey.dart';
-import 'package:healthpod/features/file/service.dart';
 import 'package:healthpod/widgets/home_page.dart';
+import 'package:healthpod/features/survey/survey_tab.dart';
 
 /// The home screen for the HealthPod app.
 ///
@@ -51,7 +52,6 @@ import 'package:healthpod/widgets/home_page.dart';
 /// information, and options to log out or view information about the app.
 
 // Define the [NavigationRail] tabs for the home page.
-
 final List<Map<String, dynamic>> homeTabs = [
   {
     'title': 'Home',
@@ -73,10 +73,16 @@ final List<Map<String, dynamic>> homeTabs = [
     'dialogTitle': 'Comming Soon - Appointment',
   },
   {
-    'title': 'Update',
-    'icon': Icons.quiz,
+    'title': 'Files',
+    'icon': Icons.folder,
     'color': Colors.blue,
-    'content': BPSurvey(),
+    'content': const FileService(),
+  },
+  {
+    'title': 'Update',
+    'icon': Icons.assignment,
+    'color': Colors.blue,
+    'content': const SurveyTab(),
   },
   {
     'title': 'Charts',
