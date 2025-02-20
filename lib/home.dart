@@ -235,59 +235,55 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
                     child: SizedBox(
                       // Set height to match screen height.
-            behavior: ScrollConfiguration.of(context).copyWith(
-              scrollbars: false,
-              platform: Theme.of(context).platform,
-            ),
-            child: SingleChildScrollView(
-              child: Container(
-                // Set height to match screen height.
+                      height: MediaQuery.of(context).size.height,
+                      child: Container(
+                        color: titleBackgroundColor,
+                        child: NavigationRail(
+                          backgroundColor: titleBackgroundColor,
+                          selectedIndex: _selectedIndex,
+                          onDestinationSelected: (int index) async {
+                            setState(() {
+                              _selectedIndex = index;
+                            });
 
-                height: MediaQuery.of(context).size.height,
-                color: titleBackgroundColor,
-                child: NavigationRail(
-                  backgroundColor: titleBackgroundColor,
-                  selectedIndex: _selectedIndex,
-                  onDestinationSelected: (int index) async {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
+                            final tab = homeTabs[index];
 
-                          final tab = homeTabs[index];
+                            // Handle different types of navigation based on tab properties.
 
-                          // Handle different types of navigation based on tab properties.
+                            if (tab.containsKey('message')) {
+                              alert(
+                                  context, tab['message'], tab['dialogTitle']);
+                            } else if (tab.containsKey('action')) {
+                              await tab['action'](context);
+                            }
+                          },
+                          // Show both icons and labels for all destinations.
 
-                          if (tab.containsKey('message')) {
-                            alert(context, tab['message'], tab['dialogTitle']);
-                          } else if (tab.containsKey('action')) {
-                            await tab['action'](context);
-                          }
-                        },
-                        // Show both icons and labels for all destinations.
+                          labelType: NavigationRailLabelType.all,
+                          destinations: homeTabs.map((tab) {
+                            // Create navigation destinations from tab configurations.
 
-                        labelType: NavigationRailLabelType.all,
-                        destinations: homeTabs.map((tab) {
-                          // Create navigation destinations from tab configurations.
+                            return NavigationRailDestination(
+                              icon: Icon(tab['icon'], color: tab['color']),
+                              label: Text(
+                                tab['title'],
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                            );
+                          }).toList(),
+                          // Style for selected tab label.
 
-                          return NavigationRailDestination(
-                            icon: Icon(tab['icon'], color: tab['color']),
-                            label: Text(
-                              tab['title'],
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          );
-                        }).toList(),
-                        // Style for selected tab label.
+                          selectedLabelTextStyle: const TextStyle(
+                            color: Colors.deepPurple,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          // Style for unselected tab labels.
 
-                        selectedLabelTextStyle: const TextStyle(
-                          color: Colors.deepPurple,
-                          fontWeight: FontWeight.bold,
+                          unselectedLabelTextStyle:
+                              TextStyle(color: Colors.grey[500]),
                         ),
-                        // Style for unselected tab labels.
-
-                        unselectedLabelTextStyle:
-                            TextStyle(color: Colors.grey[500]),
                       ),
                     ),
                   ),
