@@ -73,12 +73,6 @@ final List<Map<String, dynamic>> homeTabs = [
     'dialogTitle': 'Comming Soon - Appointment',
   },
   {
-    'title': 'Files',
-    'icon': Icons.folder,
-    'color': Colors.blue,
-    'content': const FileService(),
-  },
-  {
     'title': 'Update',
     'icon': Icons.assignment,
     'color': Colors.blue,
