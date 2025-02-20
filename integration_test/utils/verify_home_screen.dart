@@ -1,6 +1,6 @@
 /// Verifies successful navigation to home screen.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-02-19 16:44:33 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -36,7 +36,7 @@ import 'package:flutter_test/flutter_test.dart';
 Future<void> verifyHomeScreen(WidgetTester tester) async {
   expect(find.byType(AppBar), findsOneWidget, reason: 'AppBar not found');
   expect(
-    find.text('Your Health - Your Data'),
+    find.text('Your Health Data, Under Your Control'),
     findsOneWidget,
     reason: 'Home screen title not found',
   );

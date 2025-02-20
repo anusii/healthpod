@@ -39,7 +39,7 @@ import 'package:solidpod/solidpod.dart';
 class SurveyData {
   // Fetch from directory where blood pressure-related survey data resides.
 
-  static const String bpDir = 'healthpod/data/bp';
+  static const String bpDir = 'healthpod/data/blood_pressure';
 
   /// Fetches survey data from POD, ensuring it is sorted by timestamp.
   ///

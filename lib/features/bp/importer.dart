@@ -272,8 +272,8 @@ class BPImporter {
           // Construct proper save path based on directory structure.
 
           String savePath;
-          if (dirPath.endsWith('/bp')) {
-            savePath = 'bp/$outputFileName';
+          if (dirPath.endsWith('/blood_pressure')) {
+            savePath = 'blood_pressure/$outputFileName';
           } else {
             final cleanDirPath =
                 dirPath.replaceFirst(RegExp(r'^healthpod/data/?'), '');

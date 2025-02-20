@@ -254,6 +254,27 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                     backgroundColor: Colors.white,
                     extraLinesData: ExtraLinesData(
                       horizontalLines: [
+                        /// Danger systolic threshold line (180 mmHg).
+                        ///
+                        /// Uses a dashed red line to indicate dangerous systolic levels.
+
+                        HorizontalLine(
+                          y: 180,
+                          color: Colors.red,
+                          strokeWidth: 2,
+                          dashArray: [5, 5],
+                          label: HorizontalLineLabel(
+                            show: true,
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                            alignment: Alignment.topRight,
+                            labelResolver: (line) => 'Danger',
+                          ),
+                        ),
+
                         /// Threshold line indicating normal systolic pressure limit.
                         ///
                         /// Uses a dashed purple line matching the systolic data color.
@@ -291,36 +312,89 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                     lineTouchData: LineTouchData(
                       touchTooltipData: LineTouchTooltipData(
                         tooltipRoundedRadius: 8,
-                        tooltipBorder: const BorderSide(
-                          color: Colors.white,
+                        tooltipBorder: BorderSide(
+                          color: Colors.grey[600]!,
                           width: 1,
                         ),
+                        tooltipPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        tooltipMargin: 8,
+                        maxContentWidth: 300,
+                        fitInsideHorizontally: true,
+                        fitInsideVertically: true,
+                        tooltipHorizontalAlignment:
+                            FLHorizontalAlignment.center,
 
-                        /// Custom tooltip content generator showing pressure values
-                        /// and normal ranges for each type.
+                        /// Custom tooltip content generator showing pressure values and additional data.
+                        /// Removed normal ranges for each type.
 
                         getTooltipItems: (List<LineBarSpot> touchedSpots) {
                           return touchedSpots.map((LineBarSpot spot) {
                             final isSystolic = spot.barIndex == 0;
-                            String label = '';
-                            if (isSystolic) {
-                              label =
-                                  'Systolic: ${parseNumericInput(spot.y)} mmHg\nNormal: below 120 mmHg'; // Ensure int format.
-                            } else {
-                              label =
-                                  'Diastolic: ${parseNumericInput(spot.y)} mmHg\nNormal: below 80 mmHg';
+                            final index = spot.x.toInt();
+                            final data = _surveyData[index]['responses'];
+
+                            // Get additional data points.
+
+                            final heartRate =
+                                data[HealthSurveyConstants.fieldHeartRate] ??
+                                    'N/A';
+                            final feeling =
+                                data[HealthSurveyConstants.fieldFeeling] ??
+                                    'N/A';
+                            final notes =
+                                data[HealthSurveyConstants.fieldNotes] ?? '';
+
+                            // Format timestamp.
+
+                            final timestamp =
+                                DateTime.parse(_surveyData[index]['timestamp']);
+                            final timeStr =
+                                DateFormat('HH:mm').format(timestamp);
+
+                            // Build tooltip content.
+
+                            final pressureType =
+                                isSystolic ? "Systolic" : "Diastolic";
+                            final pressureValue = parseNumericInput(spot.y);
+
+                            // Create formatted content lines.
+
+                            final List<String> contentLines = [
+                              '${pressureType.toUpperCase()}: $pressureValue mmHg',
+                              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+                              '🕒 Time: $timeStr',
+                              '❤️ Heart Rate: $heartRate bpm',
+                              '😊 Feeling: $feeling',
+                            ];
+
+                            // Add notes if they exist.
+
+                            if (notes.isNotEmpty) {
+                              contentLines.add('📝 Notes: $notes');
                             }
+
+                            // Join lines with consistent newlines.
+
+                            final tooltipContent = contentLines.join('\n');
+
                             return LineTooltipItem(
-                              label,
-                              TextStyle(
+                              tooltipContent,
+                              const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w500,
-                                fontSize: 12,
+                                fontSize: 13,
+                                height: 1.8,
                               ),
+                              textAlign: TextAlign.left,
                             );
                           }).toList();
                         },
                       ),
+                      handleBuiltInTouches: true,
+                      touchSpotThreshold: 20,
                     ),
 
                     /// Grid configuration for better data readability.
