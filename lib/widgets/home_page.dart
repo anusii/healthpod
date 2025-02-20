@@ -172,7 +172,7 @@ class HomePage extends StatelessWidget {
 
                   ''',
                   child: Text(
-                    '• BP Editor',
+                    '• Blood Pressure Editor',
                     style: TextStyle(
                       fontSize: 16,
                       height: 1.5,

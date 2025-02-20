@@ -132,7 +132,7 @@ class BPSurvey extends StatelessWidget {
 
       final result = await uploadJsonToPod(
         data: responseData, // Our structured survey data
-        targetPath: '/bp', // Store in blood pressure directory
+        targetPath: '/blood_pressure', // Store in blood pressure directory
         fileNamePrefix: 'blood_pressure', // Consistent file naming
         context: context,
       );

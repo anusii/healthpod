@@ -105,7 +105,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'content': const BPCombinedVisualisation(),
   },
   {
-    'title': 'BP Editor',
+    'title': 'Blood Pressure Editor',
     'icon': Icons.table_chart,
     'color': Colors.blue,
     'content': const BPEditorPage(),
