@@ -40,6 +40,7 @@ import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
 import 'package:healthpod/features/vaccination/exporter.dart';
+import 'package:healthpod/features/vaccination/importer.dart';
 
 /// File service.
 ///
@@ -492,35 +493,30 @@ class _FileServiceState extends State<FileService> {
   /// Files are named using the timestamp from the data.
 
   Future<void> handleCsvImport(String filePath, String dirPath) async {
-    if (importInProgress) return;
-
     try {
       setState(() {
         importInProgress = true;
       });
 
-      // Process CSV and create individual JSON files for each row.
-      // Use BPImporter to handle blood-pressure specific importing.
-
-      final success =
-          await BPImporter.importFromCsv(filePath, dirPath, context);
-
-      if (!mounted) return;
+      final success = await (isInBpDirectory
+          ? BPImporter.importFromCsv(filePath, dirPath, context)
+          : VaccinationImporter.importFromCsv(filePath, dirPath, context));
 
       if (success) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('BP data imported and converted successfully'),
+          SnackBar(
+            content: Text(
+                '${isInBpDirectory ? "BP" : "Vaccination"} data imported successfully'),
             backgroundColor: Colors.green,
           ),
         );
-        // Refresh the file browser to show the new files.
-
         _browserKey.currentState?.refreshFiles();
       }
     } catch (e) {
       if (!mounted) return;
-      showAlert(context, 'Failed to import BP data: ${e.toString()}');
+      showAlert(context, 'Import error: ${e.toString()}');
+      debugPrint('Import error: $e');
     } finally {
       if (mounted) {
         setState(() {
