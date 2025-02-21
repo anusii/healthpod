@@ -128,6 +128,27 @@ void bpSurveyKeyboardNavigation() {
             debugPrint('✓ Radio button ${i + 1} tapped');
           }
 
+          // Tab from 4th radio button -> Q5 "notes" field.
+
+          debugPrint('\n🔍 Attempting 1 tab from radio4 to Q5 notes field...');
+          await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+          await tester.pump();
+
+          final notesField = formFields.at(3);
+
+          // Tap to ensure focus (optional if Tab definitely lands here).
+
+          await tester.tap(notesField);
+          await tester.pump();
+
+          // Add some notes into Q5.
+
+          const testNotes = 'Some additional notes...';
+          await tester.enterText(notesField, testNotes);
+          await tester.pump();
+          expect(find.text(testNotes), findsOneWidget);
+          debugPrint('✓ Q5 notes field typed successfully');
+
           // Navigate to and interact with submit button.
 
           debugPrint('\n🎯 Testing Submit button...');
