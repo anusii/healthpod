@@ -36,11 +36,11 @@ import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/features/file/browser.dart';
+import 'package:healthpod/features/vaccination/exporter.dart';
+import 'package:healthpod/features/vaccination/importer.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
-import 'package:healthpod/features/vaccination/exporter.dart';
-import 'package:healthpod/features/vaccination/importer.dart';
 
 /// File service.
 ///
