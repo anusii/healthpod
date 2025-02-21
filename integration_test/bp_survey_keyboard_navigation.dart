@@ -35,8 +35,8 @@ import 'package:healthpod/main.dart' as app;
 import 'package:healthpod/features/bp/survey.dart';
 
 /// Main entry point for the integration test suite.
-/// 
-/// This function initializes and runs the keyboard navigation test 
+///
+/// This function initializes and runs the keyboard navigation test
 /// for the Blood Pressure (BP) Survey screen in the HealthPod application.
 
 void main() {
@@ -46,14 +46,14 @@ void main() {
 }
 
 /// Comprehensive integration test for keyboard navigation in the BP Survey.
-/// 
+///
 /// This test verifies the following key aspects of keyboard navigation:
 /// 1. Proper app launch and navigation to the BP Survey screen
 /// 2. Text input functionality for all form fields
 /// 3. Tab key navigation between form elements
 /// 4. Radio button selection and interaction
 /// 5. Submit button accessibility
-/// 
+///
 /// The test simulates a user's keyboard-driven interaction with the survey form,
 /// ensuring that all form elements can be accessed and manipulated via keyboard.
 
@@ -81,28 +81,31 @@ void bpSurveyKeyboardNavigation() {
 
             debugPrint('\n🔍 Looking for Continue button...');
             final continueButton = find.text('Continue');
-            
+
             // Verify Continue button exists.
 
-            expect(continueButton, findsOneWidget, reason: 'Continue button not found');
+            expect(continueButton, findsOneWidget,
+                reason: 'Continue button not found');
             await tester.tap(continueButton);
             await tester.pumpAndSettle();
 
             // Pause for manual authentication .
             // This allows time for potential browser-based login.
 
-            debugPrint('\n⚠️ Please complete browser authentication manually...');
+            debugPrint(
+                '\n⚠️ Please complete browser authentication manually...');
             await Future.delayed(const Duration(seconds: 15));
             await tester.pumpAndSettle();
 
             // Navigate to Update section.
-            
+
             debugPrint('\n🔍 Looking for Update label...');
             final updateLabel = find.text('Update');
-            
+
             // Verify Update label exists.
 
-            expect(updateLabel, findsOneWidget, reason: 'Update label not found');
+            expect(updateLabel, findsOneWidget,
+                reason: 'Update label not found');
             await tester.tap(updateLabel);
             await tester.pumpAndSettle();
 
@@ -126,91 +129,90 @@ void bpSurveyKeyboardNavigation() {
             // Locate all text input fields in the form.
 
             final formFields = find.byType(TextFormField);
-            
+
             // Verify correct number of text fields (expecting 4).
 
-            expect(formFields, findsNWidgets(4), reason: 'Expected 4 text fields');
+            expect(formFields, findsNWidgets(4),
+                reason: 'Expected 4 text fields');
 
             debugPrint('\n🎯 Testing field navigation sequence...');
 
             // Test text input for each form field.
 
             for (int i = 0; i < 4; i++) {
-                final field = formFields.at(i);
-                
-                // Focus on the current field.
+              final field = formFields.at(i);
 
-                await tester.tap(field);
+              // Focus on the current field.
+
+              await tester.tap(field);
+              await tester.pump();
+
+              // Enter test text into the field.
+
+              final testValue = 'Test${i + 1}';
+              await tester.enterText(field, testValue);
+              await tester.pump();
+
+              // Verify text was correctly entered.
+
+              expect(find.text(testValue), findsOneWidget,
+                  reason: 'Text not entered in field ${i + 1}');
+
+              debugPrint('✓ Field ${i + 1} passed text input test');
+
+              // Move to next field using Tab key (except for the last field).
+
+              if (i < 3) {
+                await tester.sendKeyEvent(LogicalKeyboardKey.tab);
                 await tester.pump();
-
-                // Enter test text into the field.
-
-                final testValue = 'Test${i + 1}';
-                await tester.enterText(field, testValue);
-                await tester.pump();
-
-                // Verify text was correctly entered.
-
-                expect(
-                    find.text(testValue),
-                    findsOneWidget,
-                    reason: 'Text not entered in field ${i + 1}'
-                );
-
-                debugPrint('✓ Field ${i + 1} passed text input test');
-
-                // Move to next field using Tab key (except for the last field).
-
-                if (i < 3) {
-                    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
-                    await tester.pump();
-                }
+              }
             }
 
             // Locate radio button list tiles.
 
             final radioButtons = find.byType(RadioListTile<String>);
-            
+
             // Verify correct number of radio buttons (expecting 4).
 
-            expect(radioButtons, findsNWidgets(4), reason: 'Expected 4 radio buttons');
+            expect(radioButtons, findsNWidgets(4),
+                reason: 'Expected 4 radio buttons');
 
             // Test selection of each radio button.
 
             for (int i = 0; i < 4; i++) {
-                final radio = radioButtons.at(i);
-                
-                // Tap each radio button.
+              final radio = radioButtons.at(i);
 
-                await tester.tap(radio);
-                await tester.pump();
+              // Tap each radio button.
 
-                // Verify radio button was selected.
+              await tester.tap(radio);
+              await tester.pump();
 
-                final RadioListTile<String> radioWidget = tester.widget(radio);
-                expect(radioWidget.groupValue, isNotNull);
+              // Verify radio button was selected.
 
-                debugPrint('✓ Radio button ${i + 1} passed selection test');
+              final RadioListTile<String> radioWidget = tester.widget(radio);
+              expect(radioWidget.groupValue, isNotNull);
+
+              debugPrint('✓ Radio button ${i + 1} passed selection test');
             }
 
             // Locate and verify Submit button.
 
             final submitButton = find.text('Submit');
-            expect(submitButton, findsOneWidget, reason: 'Submit button not found');
-            
+            expect(submitButton, findsOneWidget,
+                reason: 'Submit button not found');
+
             // Attempt to tap Submit button.
 
             await tester.tap(submitButton);
             await tester.pump();
 
             debugPrint('\n✅ Navigation test completed successfully');
-
           } catch (e, stackTrace) {
             // Comprehensive error logging.
 
             debugPrint('\n❌ Navigation test failed with error: $e');
             debugPrint('\nStack trace: $stackTrace');
-            
+
             // Re-throw the error to fail the test.
 
             rethrow;
