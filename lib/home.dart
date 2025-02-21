@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Friday 2025-02-21 10:07:46 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-02-21 16:58:42 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -43,7 +43,7 @@ import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/widgets/footer.dart';
 import 'package:healthpod/features/bp/combined_visualisation.dart';
 import 'package:healthpod/widgets/home_page.dart';
-import 'package:healthpod/features/survey/survey_tab.dart';
+import 'package:healthpod/features/survey/tab.dart';
 
 /// The home screen for the HealthPod app.
 ///
