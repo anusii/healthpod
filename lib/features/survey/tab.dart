@@ -1,6 +1,6 @@
 /// Survey tab including blood pressure and vaccination surveys.
 ///
-// Time-stamp: <Friday 2025-02-21 16:56:22 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-02-21 17:02:01 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -27,13 +27,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/vaccination/survey.dart';
-import 'package:healthpod/features/survey/overview_panel.dart';
 
 final List<Map<String, dynamic>> surveyPanels = [
-  // {
-  //   'title': 'Overview',
-  //   'widget': const SurveyOverviewPanel(),
-  // },
   {
     'title': 'Blood Pressure',
     'widget': BPSurvey(),
