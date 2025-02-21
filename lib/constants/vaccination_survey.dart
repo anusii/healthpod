@@ -1,4 +1,4 @@
-/// Survey constants.
+/// Vaccination survey constants.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -21,84 +21,16 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Ashley Tang
+/// Authors: Kevin Wang
 
 library;
 
 import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/features/survey/question.dart';
 
-/// Defines the standard set of health survey questions.
-/// These questions are used consistently throughout the application
-/// for collecting health-related data.
-
-class HealthSurveyConstants {
-  // Data field names (for storage/CSV).
-
-  static const String fieldTimestamp = 'timestamp';
-  static const String fieldSystolic = 'systolic';
-  static const String fieldDiastolic = 'diastolic';
-  static const String fieldHeartRate = 'heart_rate';
-  static const String fieldFeeling = 'feeling';
-  static const String fieldNotes = 'notes';
-
-  /// Question texts (for UI only).
-
-  static const String systolicBP = "What's your systolic blood pressure?";
-  static const String diastolicBP = "What's your diastolic measurement?";
-  static const String heartRate = "What's your heart rate?";
-  static const String feeling = "How are you feeling?";
-  static const String notes = "Any additional notes about your health?";
-
-  /// The list of questions used in the health survey.
-  /// Each question includes type validation, units where applicable,
-  /// and value constraints.
-
-  static final List<HealthSurveyQuestion> questions = [
-    HealthSurveyQuestion(
-      question: systolicBP,
-      fieldName: fieldSystolic,
-      type: HealthDataType.number,
-      unit: "mm Hg",
-      min: 70,
-      max: 200,
-    ),
-    HealthSurveyQuestion(
-      question: diastolicBP,
-      fieldName: fieldDiastolic,
-      type: HealthDataType.number,
-      unit: "mm Hg",
-      min: 40,
-      max: 220,
-    ),
-    HealthSurveyQuestion(
-      question: heartRate,
-      fieldName: fieldHeartRate,
-      type: HealthDataType.number,
-      unit: "bpm",
-      min: 40,
-      max: 220,
-    ),
-    HealthSurveyQuestion(
-      question: feeling,
-      fieldName: fieldFeeling,
-      type: HealthDataType.categorical,
-      options: ["Excellent", "Good", "Fair", "Poor"],
-    ),
-    HealthSurveyQuestion(
-      question: notes,
-      fieldName: fieldNotes,
-      type: HealthDataType.text,
-      isRequired: false,
-    ),
-  ];
-}
-
 /// Defines the standard set of vaccination survey questions.
-
 class VaccinationSurveyConstants {
   /// Data field names (for storage/CSV).
-
   static const String fieldTimestamp = 'timestamp';
   static const String fieldVaccine = 'vaccine';
   static const String fieldProvider = 'provider';
@@ -107,7 +39,6 @@ class VaccinationSurveyConstants {
   static const String fieldNotes = 'notes';
 
   /// Question texts (for UI only).
-
   static const String vaccine = "Which vaccine did you receive?";
   static const String provider = "Where did you receive the vaccine?";
   static const String professional = "Healthcare professional name";
@@ -115,9 +46,6 @@ class VaccinationSurveyConstants {
   static const String notes = "Any additional notes?";
 
   /// The list of questions used in the vaccination survey.
-  /// Each question includes type validation, units where applicable,
-  /// and value constraints.
-
   static final List<HealthSurveyQuestion> questions = [
     HealthSurveyQuestion(
       question: vaccine,
