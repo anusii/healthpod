@@ -27,6 +27,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/vaccination/survey.dart';
+import 'package:healthpod/features/survey/overview_panel.dart';
 
 final List<Map<String, dynamic>> surveyPanels = [
   {
@@ -93,25 +94,6 @@ class _SurveyTabState extends State<SurveyTab>
           ),
         ),
       ],
-    );
-  }
-}
-
-/// A placeholder panel for the Overview tab.
-
-class SurveyOverviewPanel extends StatelessWidget {
-  const SurveyOverviewPanel({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        'Survey Overview',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
     );
   }
 }

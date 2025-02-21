@@ -94,9 +94,9 @@ class _FileServiceState extends State<FileService> {
   // Helper method to check if we're in the bp/ directory.
 
   bool get isInBpDirectory {
-    return currentPath!.endsWith('/bp') ||
-        currentPath!.contains('/bp/') ||
-        currentPath == 'healthpod/data/bp';
+    return currentPath!.endsWith('/blood_pressure') ||
+        currentPath!.contains('/blood_pressure/') ||
+        currentPath == 'healthpod/data/blood_pressure';
   }
 
   // Helper method to check if we're in the vaccination/ directory.
@@ -508,7 +508,7 @@ class _FileServiceState extends State<FileService> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                '${isInBpDirectory ? "BP" : "Vaccination"} data imported successfully'),
+                '${isInBpDirectory ? "Blood pressure" : "Vaccination"} data imported successfully'),
             backgroundColor: Colors.green,
           ),
         );
@@ -890,7 +890,7 @@ class _FileServiceState extends State<FileService> {
                         final String? outputFile =
                             await FilePicker.platform.saveFile(
                           dialogTitle:
-                              'Save ${isInBpDirectory ? "BP" : "Vaccination"} data as CSV:',
+                              'Save ${isInBpDirectory ? "Blood pressure" : "Vaccination"} data as CSV:',
                           fileName: '${prefix}_data.csv',
                         );
 
@@ -915,13 +915,13 @@ class _FileServiceState extends State<FileService> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                    '${isInBpDirectory ? "BP" : "Vaccination"} data exported successfully'),
+                                    '${isInBpDirectory ? "Blood pressure" : "Vaccination"} data exported successfully'),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           } else {
                             showAlert(context,
-                                'Failed to export ${isInBpDirectory ? "BP" : "Vaccination"} data');
+                                'Failed to export ${isInBpDirectory ? "Blood pressure" : "Vaccination"} data');
                           }
                         }
                       } catch (e) {

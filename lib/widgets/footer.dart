@@ -30,6 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/create_interactive_text.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/handle_logout.dart';
@@ -161,7 +162,7 @@ class Footer extends StatelessWidget {
   Widget _buildNarrowLayout(String serverUri, String loginStatus,
       Color loginStatusColor, String securityKeyStatus, BuildContext context) {
     return Container(
-      color: Colors.grey[200],
+      color: titleBackgroundColor,
       height: 90.0,
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Center(
@@ -183,7 +184,7 @@ class Footer extends StatelessWidget {
   Widget _buildMediumLayout(String serverUri, String loginStatus,
       Color loginStatusColor, String securityKeyStatus, BuildContext context) {
     return Container(
-      color: Colors.grey[200],
+      color: titleBackgroundColor,
       height: 70.0,
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Center(
@@ -213,7 +214,7 @@ class Footer extends StatelessWidget {
   Widget _buildWideLayout(String serverUri, String loginStatus,
       Color loginStatusColor, String securityKeyStatus, BuildContext context) {
     return Container(
-      color: Colors.grey[200],
+      color: titleBackgroundColor,
       height: 50.0,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(

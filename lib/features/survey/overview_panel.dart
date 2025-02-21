@@ -1,6 +1,6 @@
-/// Verifies successful navigation to home screen.
+/// Survey overview panel widget.
 //
-// Time-stamp: <Wednesday 2025-02-19 16:44:33 +1100 Graham Williams>
+// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -21,23 +21,29 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Ashley Tang
+/// Authors: Kevin Wang.
 
 library;
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_test/flutter_test.dart';
+/// A panel displaying an overview of available surveys.
+class SurveyOverviewPanel extends StatelessWidget {
+  const SurveyOverviewPanel({super.key});
 
-/// Verifies successful navigation to home screen.
-///
-/// Checks for elements that should be present on the home screen after login.
-
-Future<void> verifyHomeScreen(WidgetTester tester) async {
-  expect(find.byType(AppBar), findsOneWidget, reason: 'AppBar not found');
-  expect(
-    find.text('Your Health Data, Under Your Control'),
-    findsOneWidget,
-    reason: 'Home screen title not found',
-  );
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      child: const Center(
+        child: Text(
+          'Survey Overview',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
 }
