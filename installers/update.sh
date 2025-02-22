@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # 20241024 gjw After a github action has built the bundles and stored
-# them as artefacts on github, we can upload them to solidcommunity.au
-# for distribution.
+# them as artefacts on github, we can upload them to solidcommunity.au for
+# distribution.
 
 APP=healthpod
 
@@ -11,7 +11,7 @@ FLDR=/var/www/html/installers/
 DEST=${HOST}:${FLDR}
 
 # From the recent 'Build Installers' workflows, identify the 'Bump
-# version' pushes to the repositroy and get the latest one as the one
+# version' pushes to the repository and get the latest one as the one
 # we want to download the artefacts.
 
 bumpId=$(gh run list --limit 100 --json databaseId,displayTitle,workflowName \
@@ -38,11 +38,15 @@ if [[ "${status}" == "completed" && "${conclusion}" == "success" ]]; then
 
     version=$(grep version ../pubspec.yaml | head -1 | cut -d ':' -f 2 | sed 's/ //g')
 
-    echo '***** UPLOAD LINUX ZIP. LOCAL INSTALL'
+    echo '***** UPLOAD LINUX ZIP.'
 
     gh run download ${bumpId} --name ${APP}-linux-zip
     rsync -avzh ${APP}-dev-linux.zip ${DEST}
-    unzip -oq ${APP}-dev-linux.zip -d ${HOME}/.local/share/${APP}/
+    #
+    # 20250222 gjw No longer a local install. Instead install the deb
+    # package.
+    #
+    # unzip -oq ${APP}-dev-linux.zip -d ${HOME}/.local/share/${APP}/
     mv -f ${APP}-dev-linux.zip ARCHIVE/${APP}-${version}-linux.zip
 
     echo ""

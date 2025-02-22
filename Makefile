@@ -2,7 +2,7 @@
 #
 # Generic Makefile
 #
-# Time-stamp: <Sunday 2025-01-12 05:41:04 +1100 Graham Williams>
+# Time-stamp: <Saturday 2025-02-22 05:14:32 +1100 Graham Williams>
 #
 # Copyright (c) Graham.Williams@togaware.com
 #
@@ -25,9 +25,12 @@ DATE=$(shell date +%Y-%m-%d)
 
 DEST=/var/www/html/$(APP)
 
-# The host for the repository of packages.
+# The host for the repository of packages, the path on the server to
+# the download folder, and the URL to the downloads.
 
 REPO=solidcommunity.au
+RLOC=/var/www/html/installers/
+DWLD=https://$(REPO)/installers
 
 ########################################################################
 # Supported Makefile modules.
@@ -93,6 +96,7 @@ local: tgz
 # Linux: Upload the installers for general access from the repository.
 
 tgz::
+	chmod a+r installers/$(APP)*.tar.gz
 	rsync -avzh installers/$(APP)*.tar.gz $(REPO):/var/www/html/installers/
 	ssh $(REPO) chmod -R go+rX /var/www/html/installers/
 	ssh $(REPO) chmod go=x /var/www/html/installers/
@@ -104,13 +108,31 @@ tgz::
 # moved into ARCHIVE.
 
 apk::
-	rsync -avzh installers/$(APP).apk $(REPO):/var/www/html/installers/
-	ssh $(REPO) chmod a+r /var/www/html/installers/$(APP).apk
+	rsync -avzh installers/$(APP).apk $(REPO):$(RLOC)
+	ssh $(REPO) chmod a+r $(RLOC)/$(APP).apk
 	mv -f installers/$(APP)-*.apk installers/ARCHIVE
 	rm -f installers/$(APP).apk
 
+deb:
+	(cd installers; make $@)
+	rsync -avzh installers/$(APP)_$(VER)_amd64.deb $(REPO):$(RLOC)/$(APP)_amd64.deb
+	ssh $(REPO) chmod a+r $(RLOC)/$(APP)_amd64.deb
+	wget $(DWLD)/$(APP)_amd64.deb -O $(APP)_amd64.deb
+	wajig install $(APP)_amd64.deb
+	rm -f $(APP)_amd64.deb
+	mv -f installers/$(APP)_*.deb installers/ARCHIVE
+
 # 20250110 gjw A ginstall of the github built bundles, and the locally
 # built apk installed to the repository and moved into ARCHIVE.
+#
+# 20250218 gjw Remove the deb build for now as it is placing the data
+# and lib folders into /ust/bin/ which when we try to add another
+# package also tries to do that, which is how I found the issue.
+#
+# 20250222 gjw Solved the issue by putting the package files into
+# /usr/lib/rattle and then symlinked the executable to
+# /usr/bin/rattle. This is working so add deb into the install and now
+# utilise that for the default install on my machine.
 
-ginstall: apk
+ginstall: deb apk
 	(cd installers; make $@)
