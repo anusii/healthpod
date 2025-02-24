@@ -46,7 +46,7 @@ import 'utils/verify_home_screen.dart';
 ///    (the test expects the folder to contain exportable data)
 
 void main() {
-  exportCsvTest();
+  bpExportCSV();
 }
 
 /// Integration test for the complete CSV export flow.
@@ -63,7 +63,7 @@ void main() {
 /// - Waits for manual file save dialog interaction
 /// - Verifies success message appears
 
-void exportCsvTest() {
+void bpExportCSV() {
   // Initialise the integration test binding.
 
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
