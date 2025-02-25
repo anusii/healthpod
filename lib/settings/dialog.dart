@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:healthpod/providers/settings.dart';
+import 'package:healthpod/widgets/setting_field.dart';
 
 class SettingsDialog extends ConsumerStatefulWidget {
   const SettingsDialog({super.key});
@@ -19,16 +20,14 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-
-    // Load saved settings
     ref.read(serverURLProvider.notifier).state =
-        prefs.getString('serverURL') ?? '';
+        prefs.getString('server_url') ?? '';
     ref.read(usernameProvider.notifier).state =
         prefs.getString('username') ?? '';
     ref.read(passwordProvider.notifier).state =
         prefs.getString('password') ?? '';
     ref.read(secretKeyProvider.notifier).state =
-        prefs.getString('secretKey') ?? '';
+        prefs.getString('secret_key') ?? '';
   }
 
   @override
@@ -69,46 +68,46 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         ),
                       ),
                       const Divider(),
-                      _buildSettingField(
-                        'Server URL',
-                        serverURLProvider,
-                        'Enter server URL',
+                      SettingField(
+                        label: 'Server URL',
+                        hint: 'Enter server URL',
+                        provider: serverURLProvider,
+                        tooltip: '''
+                        **Server URL Setting**
+                        Enter the URL of your Solid Pod server.
+                        ''',
                       ),
-                      _buildSettingField(
-                        'Username',
-                        usernameProvider,
-                        'Enter username',
+                      const SizedBox(height: 16),
+                      SettingField(
+                        label: 'Username',
+                        hint: 'Enter username',
+                        provider: usernameProvider,
+                        tooltip: '''
+                        **Username Setting**
+                        Enter your Solid Pod username.
+                        ''',
                       ),
-                      _buildSettingField(
-                        'Password',
-                        passwordProvider,
-                        'Enter password',
+                      const SizedBox(height: 16),
+                      SettingField(
+                        label: 'Password',
+                        hint: 'Enter password',
+                        provider: passwordProvider,
                         isPassword: true,
+                        tooltip: '''
+                        **Password Setting**
+                        Enter your Solid Pod password.
+                        ''',
                       ),
-                      _buildSettingField(
-                        'Secret Key',
-                        secretKeyProvider,
-                        'Enter secret key',
+                      const SizedBox(height: 16),
+                      SettingField(
+                        label: 'Secret Key',
+                        hint: 'Enter secret key',
+                        provider: secretKeyProvider,
                         isPassword: true,
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: () async {
-                          final prefs = await SharedPreferences.getInstance();
-                          // Save all settings
-                          await prefs.setString(
-                              'serverURL', ref.read(serverURLProvider));
-                          await prefs.setString(
-                              'username', ref.read(usernameProvider));
-                          await prefs.setString(
-                              'password', ref.read(passwordProvider));
-                          await prefs.setString(
-                              'secretKey', ref.read(secretKeyProvider));
-                          if (context.mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        child: const Text('Save Settings'),
+                        tooltip: '''
+                        **Secret Key Setting**
+                        Enter your encryption secret key.
+                        ''',
                       ),
                     ],
                   ),
@@ -121,34 +120,11 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
               child: IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () => Navigator.of(context).pop(),
-                tooltip: 'Cancel',
+                tooltip: 'Close',
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSettingField(
-    String label,
-    StateProvider<String> provider,
-    String hint, {
-    bool isPassword = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        controller: TextEditingController(text: ref.watch(provider)),
-        obscureText: isPassword,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          border: const OutlineInputBorder(),
-        ),
-        onChanged: (value) {
-          ref.read(provider.notifier).state = value;
-        },
       ),
     );
   }
