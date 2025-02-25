@@ -30,6 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/file/service.dart';
+import 'package:healthpod/settings/dialog.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -176,6 +177,23 @@ class HealthPodHomeState extends State<HealthPodHome> {
         backgroundColor: titleBackgroundColor,
         automaticallyImplyLeading: false,
         actions: [
+          MarkdownTooltip(
+            message: '''
+
+            **Settings:** Tap here to view and manage your HealthPod account settings.
+
+            ''',
+            child: IconButton(
+              icon: const Icon(
+                Icons.settings,
+                color: Colors.blue,
+              ),
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) => const SettingsDialog(),
+              ),
+            ),
+          ),
           MarkdownTooltip(
             message: '''
 
