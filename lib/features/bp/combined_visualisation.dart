@@ -220,7 +220,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                 MarkdownTooltip(
                   message: '''
 
-                    **Blood Pressure Trends**
+                    **Blood Pressure:** A vital measurement of cardiovascular health.
+                    It shows how strongly your blood pushes against artery walls.
 
                     Blood pressure is measured in millimeters of mercury (mmHg) and recorded as two numbers: systolic/diastolic.
 
