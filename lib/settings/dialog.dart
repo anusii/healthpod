@@ -14,7 +14,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
   @override
   void initState() {
     super.initState();
-    _loadSettings();
+    // _loadSettings();
   }
 
   Future<void> _loadSettings() async {
