@@ -37,6 +37,7 @@ import 'package:healthpod/constants/survey.dart';
 import 'package:healthpod/features/visualise/stat_item.dart';
 import 'package:healthpod/utils/parse_numeric_input.dart';
 import 'package:healthpod/utils/get_month_abbrev.dart';
+import 'package:healthpod/utils/url_launcher_util.dart';
 
 /// Combined blood pressure visualisation widget.
 ///
@@ -71,7 +72,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
   }
 
   Future<void> _loadData() async {
-    // Show loading indicator
+    // Show loading indicator.
+
     setState(() {
       _isLoading = true;
     });
@@ -213,13 +215,19 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
           AppBar(
             title: Row(
               children: [
+                // Main title with basic BP explanation.
+
                 MarkdownTooltip(
                   message: '''
 
-                    **Blood Pressure:** A vital measurement of cardiovascular health.
-                    It shows how strongly your blood pushes against artery walls.
-                    Measured in mmHg, it's recorded as two numbers (systolic/diastolic).
-                    
+                    **Blood Pressure Trends**
+
+                    Blood pressure is measured in millimeters of mercury (mmHg) and recorded as two numbers: systolic/diastolic.
+
+                    * **Systolic**: Upper number - Pressure when heart contracts
+
+                    * **Diastolic**: Lower number - Pressure when heart relaxes 
+
                   ''',
                   child: Row(children: [
                     Text(
@@ -234,10 +242,88 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                     ),
                   ]),
                 ),
-                const SizedBox(width: 8),
               ],
             ),
             backgroundColor: titleBackgroundColor,
+            actions: [
+              // MarkdownTooltip explaining BP Classification ranges.
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: MarkdownTooltip(
+                  message: '''
+
+                    **BP Classifications (AHA)**
+
+                    * **Normal Blood Pressure:** <120/<80 mmHg
+
+                    * **Elevated Blood Pressure:** 120-129/<80 mmHg
+
+                    * **Stage 1 High Blood Pressure (Hypertension):** 130-139/80-89 mmHg
+
+                    * **Stage 2 Hypertension:** ≥140/≥90 mmHg
+
+                    * **Hypertensive Crisis:** >180/>120 mmHg (Seek medical attention)
+
+                    * **Low Blood Pressure (Hypotension):** <90/<60 mmHg
+
+                  ''',
+                  child: Icon(
+                    Icons.monitor_heart_outlined,
+                    color: Colors.blue,
+                  ),
+                ),
+              ),
+
+              // MarkdownTooltip for additional BP information.
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: MarkdownTooltip(
+                  message: '''
+
+                    **BP Health Information**
+
+                    * Blood pressure can vary throughout the day due to activity, stress, or other factors.
+
+                    * A single high reading doesn’t necessarily mean you have hypertension.
+
+                    * Consistent high readings should be discussed with your healthcare professional.
+
+                    * Ideal blood pressure ranges vary depending on age, health conditions, and individual circumstances.
+
+                    * Consult your doctor for personalised advice.
+
+                    * Healthy lifestyle helps maintain normal blood pressure:
+                        - Regular exercise
+                        - Balanced diet
+                        - Stress management
+                        - Limited sodium & alcohol
+                        
+                  ''',
+                  child: Icon(
+                    Icons.health_and_safety_outlined,
+                    color: Colors.green,
+                  ),
+                ),
+              ),
+
+              // AHA Link Button.
+
+              Padding(
+                padding: const EdgeInsets.only(left: 4.0, right: 8.0),
+                child: Tooltip(
+                  message: 'Visit American Heart Association',
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.open_in_new,
+                      color: Colors.red,
+                    ),
+                    onPressed: () => UrlLauncherUtil.launchAHA(context),
+                  ),
+                ),
+              ),
+            ],
           ),
           // Main chart area showing blood pressure trends.
 
