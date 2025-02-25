@@ -148,7 +148,10 @@ void connectToPod() {
         // Verify successful navigation to home screen.
 
         expect(find.byType(AppBar), findsOneWidget);
-        expect(find.text('Your Health - Your Data'), findsOneWidget);
+        // Verify home screen title.
+
+        expect(
+            find.text('Your Health Data, Under Your Control'), findsOneWidget);
 
         // Verify WebID is fetched.
 
