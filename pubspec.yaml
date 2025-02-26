@@ -47,6 +47,7 @@ dependencies:
   process_run: ^1.2.2+1
   logger: ^2.5.0
   flutter_riverpod: ^2.4.9
+  riverpod: ^2.6.1
 
 dev_dependencies:
 
