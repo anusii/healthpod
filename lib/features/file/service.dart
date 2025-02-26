@@ -802,6 +802,7 @@ class _FileServiceState extends State<FileService> {
                           // Open file picker and trigger upload if file is selected.
 
                           final result = await FilePicker.platform.pickFiles();
+                          
                           if (result != null) {
                             setState(() {
                               uploadFile = result.files.single.path!;
