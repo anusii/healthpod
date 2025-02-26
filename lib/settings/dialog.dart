@@ -83,7 +83,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
+                    color: Colors.black.withAlpha(77),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   ),
