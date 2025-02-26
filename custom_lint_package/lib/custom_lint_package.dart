@@ -52,7 +52,7 @@ class _MyPlugin extends PluginBase {
   @override
   List<LintRule> getLintRules(CustomLintConfigs configs) {
     return [
-      CustomLint(), // Lint for enforcing print statement usage. Acts as template.
+      //CustomLint(), // Lint for enforcing print statement usage. Acts as template.
       ImportOrderLint(), // Lint for enforcing import order.
     ];
   }

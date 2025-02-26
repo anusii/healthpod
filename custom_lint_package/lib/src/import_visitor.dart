@@ -171,13 +171,14 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
     );
   }
 
-  /// Sorts imports according to the specified ordering convention.
+  /// Sorts imports according to the modified ordering convention.
   ///
   /// Groups imports into categories and sorts each category alphabetically:
   /// 1. Dart SDK imports
   /// 2. Flutter package imports
-  /// 3. External package imports
+  /// 3. External package imports 
   /// 4. Project-specific imports
+  /// 5. Relative imports
 
   List<String> _sortImports(List<String> imports) {
     // Categorise imports.
@@ -185,6 +186,7 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
     List<String> dartImports = [];
     List<String> flutterImports = [];
     List<String> externalImports = [];
+    List<String> relativeImports = [];
     List<String> projectImports = [];
 
     for (var import in imports) {
@@ -194,8 +196,11 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
         flutterImports.add(import);
       } else if (import.startsWith("package:healthpod/")) {
         projectImports.add(import);
-      } else {
+      } else if (import.startsWith("package:")) {
         externalImports.add(import);
+      } else {
+        // This captures relative imports that don't start with "package:"
+        relativeImports.add(import);
       }
     }
 
@@ -204,6 +209,7 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
     dartImports.sort();
     flutterImports.sort();
     externalImports.sort();
+    relativeImports.sort();
     projectImports.sort();
 
     // Combine sorted categories in the correct order.
@@ -213,6 +219,7 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
       ...flutterImports,
       ...externalImports,
       ...projectImports,
+      ...relativeImports,
     ];
   }
 
@@ -246,11 +253,13 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
   /// - "flutter" for Flutter package imports
   /// - "project" for project-specific imports
   /// - "external" for all other package imports
+  /// - "relative" for relative path imports
 
   String _getImportCategory(String importPath) {
     if (importPath.startsWith("dart:")) return "dart";
     if (importPath.startsWith("package:flutter/")) return "flutter";
     if (importPath.startsWith("package:healthpod/")) return "project";
-    return "external";
+    if (importPath.startsWith("package:")) return "external";
+    return "relative";
   }
 }
