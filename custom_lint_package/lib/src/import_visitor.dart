@@ -176,7 +176,7 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
   /// Groups imports into categories and sorts each category alphabetically:
   /// 1. Dart SDK imports
   /// 2. Flutter package imports
-  /// 3. External package imports 
+  /// 3. External package imports
   /// 4. Project-specific imports
   /// 5. Relative imports
 
