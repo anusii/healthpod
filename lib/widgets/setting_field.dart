@@ -30,30 +30,39 @@ class SettingField extends ConsumerWidget {
 
     return MarkdownTooltip(
       message: tooltip,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 16),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: TextField(
-              controller: TextEditingController(text: value)
-                ..selection = TextSelection.collapsed(offset: value.length),
-              obscureText: isPassword,
-              onChanged: (value) {
-                ref.read(provider.notifier).state = value;
-                saveSetting(value);
-              },
-              decoration: InputDecoration(
-                border: const OutlineInputBorder(),
-                hintText: hint,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.5,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 120, // Fixed width for label
+                child: Text(
+                  label,
+                  style: const TextStyle(fontSize: 16),
+                ),
               ),
-            ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: TextField(
+                  controller: TextEditingController(text: value)
+                    ..selection = TextSelection.collapsed(offset: value.length),
+                  obscureText: isPassword,
+                  onChanged: (value) {
+                    ref.read(provider.notifier).state = value;
+                    saveSetting(value);
+                  },
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: hint,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
