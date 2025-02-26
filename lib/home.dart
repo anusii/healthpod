@@ -36,6 +36,7 @@ import 'package:healthpod/features/bp/combined_visualisation.dart';
 import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/file/service.dart';
 import 'package:healthpod/features/survey/tab.dart';
+import 'package:healthpod/settings/dialog.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
 import 'package:healthpod/utils/get_footer_height.dart';
@@ -188,6 +189,23 @@ class HealthPodHomeState extends State<HealthPodHome> {
         backgroundColor: titleBackgroundColor,
         automaticallyImplyLeading: false,
         actions: [
+          MarkdownTooltip(
+            message: '''
+
+            **Settings:** Tap here to view and manage your HealthPod account settings.
+
+            ''',
+            child: IconButton(
+              icon: const Icon(
+                Icons.settings,
+                color: Colors.blue,
+              ),
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) => const SettingsDialog(),
+              ),
+            ),
+          ),
           MarkdownTooltip(
             message: '''
 
