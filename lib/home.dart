@@ -95,6 +95,19 @@ final List<Map<String, dynamic>> homeTabs = [
     'color': Colors.blue,
     'content': const FileService(),
   },
+  {
+    'title': 'Resources',
+    'icon': Icons.library_books,
+    'color': Colors.blue,
+    'message': '''
+
+    Here you will be able to access a range of resources
+    to help you manage your health. This includes links to
+    external websites, articles, and other useful information.
+
+    ''',
+    'dialogTitle': 'Coming Soon - Resources',
+  },
 ];
 
 class HealthPodHome extends StatefulWidget {
