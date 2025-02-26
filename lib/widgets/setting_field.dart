@@ -32,6 +32,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// A reusable widget for displaying and editing settings with a label and tooltip.
 
+// Add this at the file level, before the SettingField class
+final isPasswordVisibleProvider =
+    StateProvider.autoDispose.family<bool, String>((ref, id) => false);
+
 class SettingField extends ConsumerWidget {
   final String label;
   final String hint;
@@ -53,6 +57,8 @@ class SettingField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final value = ref.watch(provider);
+    // Use the label as a unique identifier for each field's visibility state
+    final showPassword = ref.watch(isPasswordVisibleProvider(label));
 
     // Persists the setting value to local storage.
 
@@ -85,18 +91,41 @@ class SettingField extends ConsumerWidget {
               // Expandable text field that fills remaining space.
 
               Expanded(
-                child: TextField(
-                  controller: TextEditingController(text: value)
-                    ..selection = TextSelection.collapsed(offset: value.length),
-                  obscureText: isPassword,
-                  onChanged: (value) {
-                    ref.read(provider.notifier).state = value;
-                    saveSetting(value);
-                  },
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    hintText: hint,
-                  ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: TextEditingController(text: value)
+                          ..selection =
+                              TextSelection.collapsed(offset: value.length),
+                        obscureText: isPassword && !showPassword,
+                        onChanged: (value) {
+                          ref.read(provider.notifier).state = value;
+                          saveSetting(value);
+                        },
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          hintText: hint,
+                        ),
+                      ),
+                    ),
+                    if (isPassword) ...[
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: Icon(
+                          showPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          ref
+                              .read(isPasswordVisibleProvider(label).notifier)
+                              .state = !showPassword;
+                        },
+                      ),
+                    ],
+                  ],
                 ),
               ),
             ],

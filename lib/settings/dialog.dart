@@ -69,6 +69,23 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
 
+    // Add reset function to handle clearing all settings
+    void resetSettings() async {
+      // Clear SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('server_url');
+      await prefs.remove('username');
+      await prefs.remove('password');
+      await prefs.remove('secret_key');
+
+      // Reset all providers to empty strings
+
+      ref.invalidate(serverURLProvider);
+      ref.invalidate(usernameProvider);
+      ref.invalidate(passwordProvider);
+      ref.invalidate(secretKeyProvider);
+    }
+
     return Material(
       color: Colors.transparent,
       child: Padding(
@@ -151,6 +168,46 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         Enter your encryption secret key.
 
                         ''',
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Show confirmation dialog before resetting
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Reset Settings'),
+                                content: const Text(
+                                    'Are you sure you want to reset all settings to default?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      resetSettings();
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text(
+                                      'Reset',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[50],
+                        ),
+                        child: const Text(
+                          'Reset to Default',
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
                     ],
                   ),
