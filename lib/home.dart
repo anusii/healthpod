@@ -56,7 +56,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Home',
     'icon': Icons.home,
     'color': null,
-    'tooltip': 'Go to Home Dashboard',
+    'tooltip': 'Return to your main HealthPod overview and dashboard.',
   },
   {
     'title': 'Diary',
@@ -68,38 +68,51 @@ final List<Map<String, dynamic>> homeTabs = [
     appointments. You can enter historic information, update
     when you recieve a new appointment, and download
     appointments from other sources.
-
     ''',
     'dialogTitle': 'Coming Soon - Appointment',
-    'tooltip': 'Manage your appointments',
   },
   {
     'title': 'Update',
     'icon': Icons.assignment,
     'color': Colors.blue,
     'content': const SurveyTab(),
-    'tooltip': 'Update your health data',
+    'tooltip': '''
+
+    Log your Blood Pressure (systolic, diastolic, heart rate), 
+    how you are feeling, and vaccination records.
+    ''',
   },
   {
     'title': 'Charts',
     'icon': Icons.show_chart,
     'color': Colors.blue,
     'content': const BPCombinedVisualisation(),
-    'tooltip': 'View charts of your health data',
+    'tooltip':
+        'Visualize your Blood Pressure trends and other health metrics with interactive charts.',
   },
   {
     'title': 'Table',
     'icon': Icons.table_chart,
     'color': Colors.blue,
     'content': const BPEditorPage(),
-    'tooltip': 'Edit data in table view',
+    'tooltip':
+        'View and manage your Blood Pressure Observations in a detailed table view.',
   },
   {
     'title': 'Files',
     'icon': Icons.folder,
     'color': Colors.blue,
     'content': const FileService(),
-    'tooltip': 'Manage your files',
+    'tooltip': '''
+
+    Tap here to access file management features.
+    This allows you to:
+
+          - Browse your POD storage
+          - Upload files to your POD
+          - Download files from your POD
+          - Delete files from your POD
+    ''',
   },
   {
     'title': 'Resources',
@@ -110,10 +123,8 @@ final List<Map<String, dynamic>> homeTabs = [
     Here you will be able to access a range of resources
     to help you manage your health. This includes links to
     external websites, articles, and other useful information.
-
     ''',
     'dialogTitle': 'Coming Soon - Resources',
-    'tooltip': 'Access health resources',
   },
 ];
 
@@ -137,7 +148,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
   }
 
   /// Initialises all required data including footer data and feature folders.
-  
+
   Future<void> _initialiseData(BuildContext context) async {
     // First initialise footer data.
 
@@ -165,7 +176,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
   }
 
   /// Initialises the footer data by fetching the Web ID and encryption key status.
-  
+
   Future<void> _initialiseFooterData(context) async {
     final webId = await fetchWebId();
     final isKeySaved = await fetchKeySavedStatus(context);
@@ -180,7 +191,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
   ///
   /// This method is passed as a callback to child widgets to notify the home screen
   /// when the encryption key status changes.
-  
+
   void _updateKeyStatus(bool status) {
     setState(() {
       _isKeySaved = status;
@@ -275,10 +286,15 @@ class HealthPodHomeState extends State<HealthPodHome> {
                           destinations: homeTabs.map((tab) {
                             // Use a custom tooltip if provided; otherwise, default to the tab title.
 
-                            final tooltipMessage = tab['tooltip'] ?? tab['title'];
+                            final tooltipMessage =
+                                tab['tooltip'] ?? tab['message'];
                             return NavigationRailDestination(
                               icon: Tooltip(
                                 message: tooltipMessage,
+                                textStyle: const TextStyle(
+                                    fontSize: 16, color: Colors.white),
+                                margin: const EdgeInsets.only(
+                                    top: 0.0, bottom: 0.0),
                                 child: Icon(tab['icon'], color: tab['color']),
                               ),
                               label: Text(
@@ -286,7 +302,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
                                 style: const TextStyle(fontSize: 16),
                               ),
                               padding:
-                                  const EdgeInsets.symmetric(vertical: 8.0),
+                                  const EdgeInsets.symmetric(vertical: 0.0),
                             );
                           }).toList(),
                           // Style for selected tab label.
@@ -323,7 +339,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
             webId: _webId,
             isKeySaved: _isKeySaved,
             // Callback to update key status.
-            
+
             onKeyStatusChanged: _updateKeyStatus,
           ),
         ),
