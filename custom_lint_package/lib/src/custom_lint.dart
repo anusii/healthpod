@@ -29,7 +29,7 @@ import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
-import 'print_statement_visitor.dart';
+import 'package:custom_lint_package/src/print_statement_visitor.dart';
 
 /// A custom lint rule that detects and reports usage of print statements in Dart code.
 ///
