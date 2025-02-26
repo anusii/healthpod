@@ -36,6 +36,7 @@ import 'package:healthpod/features/bp/combined_visualisation.dart';
 import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/file/service.dart';
 import 'package:healthpod/features/survey/tab.dart';
+import 'package:healthpod/settings/dialog.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
 import 'package:healthpod/utils/get_footer_height.dart';
@@ -43,7 +44,6 @@ import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/widgets/footer.dart';
 import 'package:healthpod/widgets/home_page.dart';
-import 'package:healthpod/settings/dialog.dart';
 
 /// The home screen for the HealthPod app.
 ///
