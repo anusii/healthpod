@@ -57,6 +57,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Home',
     'icon': Icons.home,
     'color': null,
+    'tooltip': 'Go to Home Dashboard',
   },
   {
     'title': 'Diary',
@@ -70,31 +71,36 @@ final List<Map<String, dynamic>> homeTabs = [
     appointments from other sources.
 
     ''',
-    'dialogTitle': 'Comming Soon - Appointment',
+    'dialogTitle': 'Coming Soon - Appointment',
+    'tooltip': 'Manage your appointments',
   },
   {
     'title': 'Update',
     'icon': Icons.assignment,
     'color': Colors.blue,
     'content': const SurveyTab(),
+    'tooltip': 'Update your health data',
   },
   {
     'title': 'Charts',
     'icon': Icons.show_chart,
     'color': Colors.blue,
     'content': const BPCombinedVisualisation(),
+    'tooltip': 'View charts of your health data',
   },
   {
     'title': 'Table',
     'icon': Icons.table_chart,
     'color': Colors.blue,
     'content': const BPEditorPage(),
+    'tooltip': 'Edit data in table view',
   },
   {
     'title': 'Files',
     'icon': Icons.folder,
     'color': Colors.blue,
     'content': const FileService(),
+    'tooltip': 'Manage your files',
   },
   {
     'title': 'Resources',
@@ -108,6 +114,7 @@ final List<Map<String, dynamic>> homeTabs = [
 
     ''',
     'dialogTitle': 'Coming Soon - Resources',
+    'tooltip': 'Access health resources',
   },
 ];
 
@@ -131,7 +138,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
   }
 
   /// Initialises all required data including footer data and feature folders.
-
+  
   Future<void> _initialiseData(BuildContext context) async {
     // First initialise footer data.
 
@@ -159,7 +166,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
   }
 
   /// Initialises the footer data by fetching the Web ID and encryption key status.
-
+  
   Future<void> _initialiseFooterData(context) async {
     final webId = await fetchWebId();
     final isKeySaved = await fetchKeySavedStatus(context);
@@ -174,7 +181,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
   ///
   /// This method is passed as a callback to child widgets to notify the home screen
   /// when the encryption key status changes.
-
+  
   void _updateKeyStatus(bool status) {
     setState(() {
       _isKeySaved = status;
@@ -265,13 +272,16 @@ class HealthPodHomeState extends State<HealthPodHome> {
                             }
                           },
                           // Show both icons and labels for all destinations.
-
                           labelType: NavigationRailLabelType.all,
                           destinations: homeTabs.map((tab) {
-                            // Create navigation destinations from tab configurations.
+                            // Use a custom tooltip if provided; otherwise, default to the tab title.
 
+                            final tooltipMessage = tab['tooltip'] ?? tab['title'];
                             return NavigationRailDestination(
-                              icon: Icon(tab['icon'], color: tab['color']),
+                              icon: Tooltip(
+                                message: tooltipMessage,
+                                child: Icon(tab['icon'], color: tab['color']),
+                              ),
                               label: Text(
                                 tab['title'],
                                 style: const TextStyle(fontSize: 16),
@@ -314,7 +324,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
             webId: _webId,
             isKeySaved: _isKeySaved,
             // Callback to update key status.
-
+            
             onKeyStatusChanged: _updateKeyStatus,
           ),
         ),
