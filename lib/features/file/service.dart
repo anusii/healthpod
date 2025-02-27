@@ -265,7 +265,7 @@ class _FileServiceState extends State<FileService> {
   }
 
   /// Handles file preview before upload to display its content or basic info.
-  
+
   Future<void> handlePreview() async {
     if (uploadFile == null) return;
 
@@ -314,7 +314,7 @@ class _FileServiceState extends State<FileService> {
   }
 
   /// Builds a preview card UI to show content or info of selected file.
-  
+
   Widget _buildPreviewCard() {
     if (!showPreview || filePreview == null) return const SizedBox.shrink();
 
@@ -379,7 +379,7 @@ class _FileServiceState extends State<FileService> {
   }
 
   /// Handles file deletion by removing both the main file and its ACL file.
-  
+
   Future<void> handleDelete() async {
     if (remoteFileName == null) return;
 
@@ -454,7 +454,7 @@ class _FileServiceState extends State<FileService> {
   }
 
   /// Handles the import of BP CSV files and conversion to individual JSON files.
-  
+
   Future<void> handleCsvImport(String filePath, String dirPath) async {
     if (importInProgress) return;
 
@@ -533,7 +533,7 @@ class _FileServiceState extends State<FileService> {
   }
 
   /// Builds the mobile layout for the file service.
-  
+
   Widget _buildMobileLayout() {
     return Column(
       children: [
@@ -582,7 +582,7 @@ class _FileServiceState extends State<FileService> {
   }
 
   /// Builds the file browser panel for desktop layout.
-  
+
   Widget _buildFileBrowserPanel() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -683,7 +683,7 @@ class _FileServiceState extends State<FileService> {
   }
 
   /// Builds and returns the upload panel widget.
-  
+
   Widget _buildUploadPanel() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
