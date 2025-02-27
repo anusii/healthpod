@@ -91,41 +91,34 @@ class SettingField extends ConsumerWidget {
               // Expandable text field that fills remaining space.
 
               Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: TextEditingController(text: value)
-                          ..selection =
-                              TextSelection.collapsed(offset: value.length),
-                        obscureText: isPassword && !showPassword,
-                        onChanged: (value) {
-                          ref.read(provider.notifier).state = value;
-                          saveSetting(value);
-                        },
-                        decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          hintText: hint,
-                        ),
-                      ),
-                    ),
-                    if (isPassword) ...[
-                      const SizedBox(width: 8),
-                      IconButton(
-                        icon: Icon(
-                          showPassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: Colors.grey,
-                        ),
-                        onPressed: () {
-                          ref
-                              .read(isPasswordVisibleProvider(label).notifier)
-                              .state = !showPassword;
-                        },
-                      ),
-                    ],
-                  ],
+                child: TextField(
+                  controller: TextEditingController(text: value)
+                    ..selection = TextSelection.collapsed(offset: value.length),
+                  obscureText: isPassword && !showPassword,
+                  onChanged: (value) {
+                    ref.read(provider.notifier).state = value;
+                    saveSetting(value);
+                  },
+                  decoration: InputDecoration(
+                    border: const OutlineInputBorder(),
+                    hintText: hint,
+                    suffixIcon: isPassword
+                        ? IconButton(
+                            icon: Icon(
+                              showPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              ref
+                                  .read(
+                                      isPasswordVisibleProvider(label).notifier)
+                                  .state = !showPassword;
+                            },
+                          )
+                        : null,
+                  ),
                 ),
               ),
             ],
