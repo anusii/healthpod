@@ -48,6 +48,9 @@ dependencies:
   logger: ^2.5.0
   flutter_riverpod: ^2.4.9
   riverpod: ^2.6.1
+  pdf: ^3.11.3
+  printing: ^5.14.2
+  syncfusion_flutter_pdfviewer: ^28.2.7
 
 dev_dependencies:
 

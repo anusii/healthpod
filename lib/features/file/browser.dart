@@ -25,10 +25,14 @@
 
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:universal_io/io.dart';
 
+import 'package:healthpod/utils/view_file_content.dart';
 import 'package:healthpod/features/file/item.dart';
 
 /// A file browser widget to interact with files and directories in user's POD.
@@ -345,6 +349,69 @@ class FileBrowserState extends State<FileBrowser> {
 
                   if (showButtons) ...[
                     const SizedBox(width: 8),
+                    // Preview button.
+
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: Icon(
+                        Icons.preview,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      onPressed: () async {
+                        // For web, we assume getFileContent returns Uint8List bytes.
+                        // For mobile/desktop, we use the file path to create a File.
+                        if (kIsWeb) {
+                          Uint8List pdfBytes =
+                              await getFileContent(file.path, context)
+                                  as Uint8List;
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text("PDF Preview"),
+                              content: SizedBox(
+                                width: double.maxFinite,
+                                height: 500,
+                                child: SfPdfViewer.memory(pdfBytes),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Close"),
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          // For non-web platforms, use the file path.
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text("PDF Preview"),
+                              content: SizedBox(
+                                width: double.maxFinite,
+                                height: 500,
+                                child: SfPdfViewer.file(File(file.path)),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Close"),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      },
+                      style: IconButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primary.withAlpha(10),
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(35, 35),
+                      ),
+                    ),
+
+                    smallGapH,
                     // Download button.
 
                     IconButton(
