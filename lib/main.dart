@@ -27,6 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:window_manager/window_manager.dart';
 
 import 'package:healthpod/utils/create_solid_login.dart';
@@ -75,7 +77,11 @@ void main() async {
 
   // Ready to run the app.
 
-  runApp(const HealthPod());
+  runApp(
+    const ProviderScope(
+      child: HealthPod(),
+    ),
+  );
 }
 
 // The main widget could be in a separate file, but handy having it in main and

@@ -79,13 +79,22 @@ class ImportOrderLint extends custom_lint.DartLintRule {
   static final custom_lint.LintCode _code = custom_lint.LintCode(
     name: 'ordered_imports',
     problemMessage:
-        'Imports should be properly ordered and sorted within groups.',
+        'Imports should be properly ordered, sorted within groups, and groups separated by blank lines.',
+    errorSeverity: analyzer.ErrorSeverity.INFO,
+  );
+
+  /// Additional lint code for import group separation
+  static final custom_lint.LintCode _separationCode = custom_lint.LintCode(
+    name: 'import_group_separation',
+    problemMessage:
+        'Different import categories should be separated by blank lines.',
     errorSeverity: analyzer.ErrorSeverity.INFO,
   );
 
   /// Provides access to the lint code for external use.
 
   static custom_lint.LintCode get lintCode => _code;
+  static custom_lint.LintCode get separationLintCode => _separationCode;
 
   @override
   void run(
