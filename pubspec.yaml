@@ -50,7 +50,6 @@ dependencies:
   riverpod: ^2.6.1
   pdf: ^3.11.3
   printing: ^5.14.2
-  syncfusion_flutter_pdfviewer: ^28.2.7
 
 dev_dependencies:
 

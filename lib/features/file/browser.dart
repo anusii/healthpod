@@ -28,12 +28,13 @@ library;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:solidpod/solidpod.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-import 'package:universal_io/io.dart';
 
-import 'package:healthpod/utils/view_file_content.dart';
 import 'package:healthpod/features/file/item.dart';
+import 'package:healthpod/utils/view_file_content.dart';
 
 /// A file browser widget to interact with files and directories in user's POD.
 ///
@@ -359,12 +360,35 @@ class FileBrowserState extends State<FileBrowser> {
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       onPressed: () async {
-                        // For web, we assume getFileContent returns Uint8List bytes.
-                        // For mobile/desktop, we use the file path to create a File.
-                        if (kIsWeb) {
-                          Uint8List pdfBytes =
-                              await getFileContent(file.path, context)
-                                  as Uint8List;
+                        if (!kIsWeb) {
+                          // For desktop: Get file content as a string.
+
+                          final String fileContent =
+                              await getFileContent(file.path, context);
+
+                          // Create a PDF document from the file content.
+
+                          final pdf = pw.Document();
+                          pdf.addPage(
+                            pw.Page(
+                              pageFormat: PdfPageFormat.a4,
+                              build: (pw.Context context) {
+                                return pw.Container(
+                                  padding: const pw.EdgeInsets.all(16),
+                                  child: pw.Text(
+                                    fileContent,
+                                    style: pw.TextStyle(fontSize: 12),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                          // Convert the PDF document to bytes.
+
+                          final pdfBytes = await pdf.save();
+
+                          // Show a pop-up dialog with the PDF preview.
+
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -372,7 +396,12 @@ class FileBrowserState extends State<FileBrowser> {
                               content: SizedBox(
                                 width: double.maxFinite,
                                 height: 500,
-                                child: SfPdfViewer.memory(pdfBytes),
+                                child: PdfPreview(
+                                  build: (format) async => pdfBytes,
+                                  canChangeOrientation: false,
+                                  canChangePageFormat: false,
+                                  canDebug: false,
+                                ),
                               ),
                               actions: [
                                 TextButton(
@@ -383,16 +412,14 @@ class FileBrowserState extends State<FileBrowser> {
                             ),
                           );
                         } else {
-                          // For non-web platforms, use the file path.
+                          // On web, display a simple alert.
+                          
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text("PDF Preview"),
-                              content: SizedBox(
-                                width: double.maxFinite,
-                                height: 500,
-                                child: SfPdfViewer.file(File(file.path)),
-                              ),
+                              title: const Text("Not supported"),
+                              content: const Text(
+                                  "PDF preview is only supported on desktop for this feature."),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),
