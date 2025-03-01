@@ -26,8 +26,10 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -361,34 +363,39 @@ class FileBrowserState extends State<FileBrowser> {
                       ),
                       onPressed: () async {
                         if (!kIsWeb) {
-                          // For desktop: Get file content as a string.
-
+                          // Retrieve file content as a string.
                           final String fileContent =
                               await getFileContent(file.path, context);
 
-                          // Create a PDF document from the file content.
+                          // Load a Unicode-capable font (e.g. Open Sans) to avoid Helvetica Unicode issues.
+                          final pw.Font unicodeFont =
+                              await PdfGoogleFonts.openSansRegular();
 
+                          // Create a PDF document from the file content.
                           final pdf = pw.Document();
                           pdf.addPage(
-                            pw.Page(
+                            pw.MultiPage(
                               pageFormat: PdfPageFormat.a4,
+                              margin: const pw.EdgeInsets.all(16),
                               build: (pw.Context context) {
-                                return pw.Container(
-                                  padding: const pw.EdgeInsets.all(16),
-                                  child: pw.Text(
-                                    fileContent,
-                                    style: pw.TextStyle(fontSize: 12),
+                                return <pw.Widget>[
+                                  pw.Paragraph(
+                                    text: fileContent,
+                                    style: pw.TextStyle(
+                                        font: unicodeFont, fontSize: 12),
                                   ),
-                                );
+                                ];
                               },
                             ),
                           );
+
                           // Convert the PDF document to bytes.
+                          final Uint8List pdfBytes = await pdf.save();
 
-                          final pdfBytes = await pdf.save();
+                          // (Optional) Write to a temporary file if needed by PDFView.
+                          // For this example, PDFView uses pdfData directly.
 
-                          // Show a pop-up dialog with the PDF preview.
-
+                          // Show a pop-up dialog with the PDF preview using flutter_pdfview.
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -396,11 +403,22 @@ class FileBrowserState extends State<FileBrowser> {
                               content: SizedBox(
                                 width: double.maxFinite,
                                 height: 500,
-                                child: PdfPreview(
-                                  build: (format) async => pdfBytes,
-                                  canChangeOrientation: false,
-                                  canChangePageFormat: false,
-                                  canDebug: false,
+                                child: Flexible(
+                                  child: PDFView(
+                                    pdfData: pdfBytes,
+                                    swipeHorizontal: true,
+                                    autoSpacing: false,
+                                    pageFling: false,
+                                    pageSnap: false,
+                                    enableSwipe: true,
+                                    fitPolicy: FitPolicy.BOTH,
+                                    gestureRecognizers: <Factory<
+                                        OneSequenceGestureRecognizer>>{
+                                      Factory<OneSequenceGestureRecognizer>(
+                                        () => EagerGestureRecognizer(),
+                                      ),
+                                    },
+                                  ),
                                 ),
                               ),
                               actions: [
@@ -412,8 +430,7 @@ class FileBrowserState extends State<FileBrowser> {
                             ),
                           );
                         } else {
-                          // On web, display a simple alert.
-                          
+                          // On web, display an alert that PDF preview is not supported.
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
