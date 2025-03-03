@@ -25,13 +25,12 @@
 
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:solidpod/solidpod.dart';
 
@@ -361,91 +360,58 @@ class FileBrowserState extends State<FileBrowser> {
                         size: 20,
                         color: Theme.of(context).colorScheme.primary,
                       ),
-                      onPressed: () async {
-                        if (!kIsWeb) {
-                          // Retrieve file content as a string.
+                      onPressed: () {
+                        // Capture the current BuildContext.
+                        
+                        final BuildContext contextCopy = context;
+
+                        // Wrapper function to handle the async operations.
+
+                        void handlePdfPreview() async {
+                          // Retrieve the PDF file content as a base64-encoded string.
+
                           final String fileContent =
-                              await getFileContent(file.path, context);
+                              await getFileContent(file.path, contextCopy);
 
-                          // Load a Unicode-capable font (e.g. Open Sans) to avoid Helvetica Unicode issues.
-                          final pw.Font unicodeFont =
-                              await PdfGoogleFonts.openSansRegular();
+                          // Decode the base64 string into raw PDF bytes.
 
-                          // Create a PDF document from the file content.
-                          final pdf = pw.Document();
-                          pdf.addPage(
-                            pw.MultiPage(
-                              pageFormat: PdfPageFormat.a4,
-                              margin: const pw.EdgeInsets.all(16),
-                              build: (pw.Context context) {
-                                return <pw.Widget>[
-                                  pw.Paragraph(
-                                    text: fileContent,
-                                    style: pw.TextStyle(
-                                        font: unicodeFont, fontSize: 12),
-                                  ),
-                                ];
-                              },
-                            ),
-                          );
+                          final Uint8List pdfBytes = base64Decode(fileContent);
 
-                          // Convert the PDF document to bytes.
-                          final Uint8List pdfBytes = await pdf.save();
+                          // Check if the BuildContext is still valid before using it.
 
-                          // (Optional) Write to a temporary file if needed by PDFView.
-                          // For this example, PDFView uses pdfData directly.
+                          if (!contextCopy.mounted) return;
 
-                          // Show a pop-up dialog with the PDF preview using flutter_pdfview.
+                          // Use the verified context.
+
                           showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text("PDF Preview"),
+                            context: contextCopy,
+                            builder: (dialogContext) => AlertDialog(
+                              title: const Text("File Preview"),
                               content: SizedBox(
                                 width: double.maxFinite,
                                 height: 500,
-                                child: Flexible(
-                                  child: PDFView(
-                                    pdfData: pdfBytes,
-                                    swipeHorizontal: true,
-                                    autoSpacing: false,
-                                    pageFling: false,
-                                    pageSnap: false,
-                                    enableSwipe: true,
-                                    fitPolicy: FitPolicy.BOTH,
-                                    gestureRecognizers: <Factory<
-                                        OneSequenceGestureRecognizer>>{
-                                      Factory<OneSequenceGestureRecognizer>(
-                                        () => EagerGestureRecognizer(),
-                                      ),
-                                    },
-                                  ),
+                                child: PdfPreview(
+                                  build: (PdfPageFormat format) async =>
+                                      pdfBytes,
+                                  canChangeOrientation: false,
+                                  canChangePageFormat: false,
+                                  allowPrinting: false,
+                                  allowSharing: false,
                                 ),
                               ),
                               actions: [
                                 TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("Close"),
-                                ),
-                              ],
-                            ),
-                          );
-                        } else {
-                          // On web, display an alert that PDF preview is not supported.
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text("Not supported"),
-                              content: const Text(
-                                  "PDF preview is only supported on desktop for this feature."),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
+                                  onPressed: () => Navigator.pop(dialogContext),
                                   child: const Text("Close"),
                                 ),
                               ],
                             ),
                           );
                         }
+
+                        // Call the wrapper function.
+                        
+                        handlePdfPreview();
                       },
                       style: IconButton.styleFrom(
                         backgroundColor:
