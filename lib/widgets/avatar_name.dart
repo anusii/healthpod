@@ -58,7 +58,7 @@ class _AvatarNameState extends State<AvatarName> {
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundImage: NetworkImage(avatarUrl),
+                backgroundImage: AssetImage('assets/images/dummy_avatar_image.png'),
               ),
               Positioned(
                 bottom: -2,
