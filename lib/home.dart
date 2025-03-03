@@ -57,6 +57,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Home',
     'icon': Icons.home,
     'color': null,
+    'tooltip': 'Return to your main HealthPod overview and dashboard.',
   },
   {
     'title': 'Diary',
@@ -68,33 +69,51 @@ final List<Map<String, dynamic>> homeTabs = [
     appointments. You can enter historic information, update
     when you recieve a new appointment, and download
     appointments from other sources.
-
     ''',
-    'dialogTitle': 'Comming Soon - Appointment',
+    'dialogTitle': 'Coming Soon - Appointment',
   },
   {
     'title': 'Update',
     'icon': Icons.assignment,
     'color': Colors.blue,
     'content': const SurveyTab(),
+    'tooltip': '''
+
+    Log your Blood Pressure (systolic, diastolic, heart rate), 
+    how you are feeling, and vaccination records.
+    ''',
   },
   {
     'title': 'Charts',
     'icon': Icons.show_chart,
     'color': Colors.blue,
     'content': const BPCombinedVisualisation(),
+    'tooltip':
+        'Visualize your Blood Pressure trends and other health metrics with interactive charts.',
   },
   {
     'title': 'Table',
     'icon': Icons.table_chart,
     'color': Colors.blue,
     'content': const BPEditorPage(),
+    'tooltip':
+        'View and manage your Blood Pressure Observations in a detailed table view.',
   },
   {
     'title': 'Files',
     'icon': Icons.folder,
     'color': Colors.blue,
     'content': const FileService(),
+    'tooltip': '''
+
+    Tap here to access file management features.
+    This allows you to:
+
+          - Browse your POD storage
+          - Upload files to your POD
+          - Download files from your POD
+          - Delete files from your POD
+    ''',
   },
   {
     'title': 'Resources',
@@ -105,7 +124,6 @@ final List<Map<String, dynamic>> homeTabs = [
     Here you will be able to access a range of resources
     to help you manage your health. This includes links to
     external websites, articles, and other useful information.
-
     ''',
     'dialogTitle': 'Coming Soon - Resources',
   },
@@ -282,19 +300,27 @@ class HealthPodHomeState extends State<HealthPodHome> {
                             }
                           },
                           // Show both icons and labels for all destinations.
-
                           labelType: NavigationRailLabelType.all,
                           destinations: homeTabs.map((tab) {
-                            // Create navigation destinations from tab configurations.
+                            // Use a custom tooltip if provided; otherwise, default to the tab title.
 
+                            final tooltipMessage =
+                                tab['tooltip'] ?? tab['message'];
                             return NavigationRailDestination(
-                              icon: Icon(tab['icon'], color: tab['color']),
+                              icon: Tooltip(
+                                message: tooltipMessage,
+                                textStyle: const TextStyle(
+                                    fontSize: 16, color: Colors.white),
+                                margin: const EdgeInsets.only(
+                                    top: 0.0, bottom: 0.0),
+                                child: Icon(tab['icon'], color: tab['color']),
+                              ),
                               label: Text(
                                 tab['title'],
                                 style: const TextStyle(fontSize: 16),
                               ),
                               padding:
-                                  const EdgeInsets.symmetric(vertical: 8.0),
+                                  const EdgeInsets.symmetric(vertical: 0.0),
                             );
                           }).toList(),
                           // Style for selected tab label.
