@@ -55,8 +55,11 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Set default values if no settings are found in shared preferences.
+
     ref.read(serverURLProvider.notifier).state =
-        prefs.getString('server_url') ?? '';
+        prefs.getString('server_url') ?? 'https://pods.dev.solidcommunity.au';
     ref.read(usernameProvider.notifier).state =
         prefs.getString('username') ?? '';
     ref.read(passwordProvider.notifier).state =

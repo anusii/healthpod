@@ -58,14 +58,31 @@ class SettingField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final value = ref.watch(provider);
+
+    // If value is empty, get the stored value from SharedPreferences.
+
+    if (value.isEmpty) {
+      SharedPreferences.getInstance().then((prefs) {
+        final storedValue = prefs.getString(label) ?? '';
+        if (storedValue.isNotEmpty) {
+          ref.read(provider.notifier).state = storedValue;
+        }
+      });
+    }
+
     // Use the label as a unique identifier for each field's visibility state
     final showPassword = ref.watch(isPasswordVisibleProvider(label));
 
     // Persists the setting value to local storage.
 
     Future<void> saveSetting(String value) async {
+      // Save to SharedPreferences.
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(label.toLowerCase().replaceAll(' ', '_'), value);
+      // Save to provider.
+
+      ref.read(provider.notifier).state = value;
     }
 
     // Creates a tooltip wrapper around the setting field for additional information.
