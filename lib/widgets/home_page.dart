@@ -29,6 +29,8 @@ import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
+import 'package:healthpod/widgets/avatar_name.dart';
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -49,6 +51,8 @@ class HomePage extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              const SizedBox(height: 16),
+              AvatarName(),
               const SizedBox(height: 16),
               const Text(
                 'Your personal health data management system',
