@@ -139,7 +139,7 @@ void bpImportCSV() {
             // The importer shows progress for each row being processed.
 
             debugPrint('\n⏳ Waiting for import processing...');
-            await tester.pumpAndSettle(const Duration(seconds: 5));
+            await tester.pumpAndSettle(const Duration(seconds: 2));
 
             // Success verification phase.
 
