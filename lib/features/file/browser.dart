@@ -35,7 +35,6 @@ import 'package:printing/printing.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/file/item.dart';
-import 'package:healthpod/utils/view_file_content.dart';
 
 /// A file browser widget to interact with files and directories in user's POD.
 ///
@@ -362,7 +361,7 @@ class FileBrowserState extends State<FileBrowser> {
                       ),
                       onPressed: () {
                         // Capture the current BuildContext.
-                        
+
                         final BuildContext contextCopy = context;
 
                         // Wrapper function to handle the async operations.
@@ -370,8 +369,9 @@ class FileBrowserState extends State<FileBrowser> {
                         void handlePdfPreview() async {
                           // Retrieve the PDF file content as a base64-encoded string.
 
-                          final String fileContent =
-                              await getFileContent(file.path, contextCopy);
+                          final String fileContent = await readPod(
+                                  file.path, contextCopy, Container()) ??
+                              '';
 
                           // Decode the base64 string into raw PDF bytes.
 
@@ -410,7 +410,7 @@ class FileBrowserState extends State<FileBrowser> {
                         }
 
                         // Call the wrapper function.
-                        
+
                         handlePdfPreview();
                       },
                       style: IconButton.styleFrom(
