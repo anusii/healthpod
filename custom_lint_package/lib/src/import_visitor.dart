@@ -82,6 +82,7 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
     if (imports.isEmpty) return;
 
     _checkImportOrder(imports, reporter);
+    _checkImportSeparation(imports, node, reporter);
   }
 
   /// Analyses import ordering and reports violations.
@@ -171,6 +172,101 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
     );
   }
 
+  /// Checks for blank lines between import categories.
+  ///
+  /// This method detects when imports of different categories are not
+  /// separated by blank lines by analyzing the line numbers of imports.
+
+  void _checkImportSeparation(List<ImportDirective> imports,
+      CompilationUnit unit, ErrorReporter reporter) {
+    if (imports.length <= 1) return;
+
+    // Get line information from the unit's root node.
+
+    final lineInfo = unit.lineInfo;
+
+    List<String> importStrings =
+        imports.map((imp) => imp.uri.stringValue ?? "").toList();
+
+    // Track line information for each import.
+
+    List<int> startLines = [];
+    List<int> endLines = [];
+
+    for (var imp in imports) {
+      // Get start line number.
+
+      int startLine = lineInfo.getLocation(imp.offset).lineNumber;
+      startLines.add(startLine);
+
+      // Get end line number (import could span multiple lines).
+
+      int endOffset = imp.offset + imp.length - 1;
+      int endLine = lineInfo.getLocation(endOffset).lineNumber;
+      endLines.add(endLine);
+    }
+
+    // Collect errors for missing blank lines.
+
+    List<String> errors = [];
+
+    // Check each transition between imports for category changes.
+
+    for (int i = 0; i < imports.length - 1; i++) {
+      String currentImport = importStrings[i];
+      String nextImport = importStrings[i + 1];
+
+      String currentCategory = _getImportCategory(currentImport);
+      String nextCategory = _getImportCategory(nextImport);
+
+      // Only check if categories are different (where we need a blank line).
+
+      if (currentCategory != nextCategory) {
+        int currentEndLine = endLines[i];
+        int nextStartLine = startLines[i + 1];
+
+        // Calculate line difference between end of current import and start of next import.
+
+        int lineDifference = nextStartLine - currentEndLine;
+
+        // If there's not at least one blank line between them.
+
+        if (lineDifference <= 1) {
+          errors
+              .add('❌ Missing blank line between different import categories:\n'
+                  '   "$currentImport" ($currentCategory) and\n'
+                  '   "$nextImport" ($nextCategory)');
+        }
+      }
+    }
+
+    // Exit if no violations were found.
+
+    if (errors.isEmpty) return;
+
+    // Construct comprehensive error message.
+
+    String detailedMessage = '🚨 Missing blank lines between import groups.\n'
+        '${errors.join("\n\n")}\n\n'
+        '✅ Different import categories should be separated by blank lines.';
+
+    // Create lint code with detailed message.
+
+    final dynamicCode = custom_lint.LintCode(
+      name: 'import_group_separation',
+      problemMessage: detailedMessage,
+      errorSeverity: ErrorSeverity.INFO,
+    );
+
+    // Report the error at the location of the first import.
+
+    reporter.atOffset(
+      offset: imports.first.offset,
+      length: imports.first.length,
+      errorCode: dynamicCode,
+    );
+  }
+
   /// Sorts imports according to the modified ordering convention.
   ///
   /// Groups imports into categories and sorts each category alphabetically:
@@ -186,8 +282,8 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
     List<String> dartImports = [];
     List<String> flutterImports = [];
     List<String> externalImports = [];
-    List<String> relativeImports = [];
     List<String> projectImports = [];
+    List<String> relativeImports = [];
 
     for (var import in imports) {
       if (import.startsWith("dart:")) {
@@ -209,8 +305,8 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
     dartImports.sort();
     flutterImports.sort();
     externalImports.sort();
-    relativeImports.sort();
     projectImports.sort();
+    relativeImports.sort();
 
     // Combine sorted categories in the correct order.
 
@@ -234,7 +330,8 @@ class ImportVisitor extends RecursiveAstVisitor<void> {
     for (var import in imports) {
       String category = _getImportCategory(import);
 
-      // Add spacing between different categories
+      // Add spacing between different categories.
+
       if (category != lastCategory && formattedImports.isNotEmpty) {
         formattedImports.add("");
       }
