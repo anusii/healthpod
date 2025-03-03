@@ -108,9 +108,7 @@ class _NextAppointmentState extends State<NextAppointment> {
               ),
               Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    
-                  },
+                  onTap: () {},
                   child: Text(
                     appointmentLocation,
                     style: const TextStyle(
@@ -162,7 +160,7 @@ class _NextAppointmentState extends State<NextAppointment> {
           const SizedBox(height: 8),
 
           // Phone number and info.
-          
+
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

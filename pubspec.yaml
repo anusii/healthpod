@@ -90,10 +90,11 @@ dependency_overrides:
 flutter:
   uses-material-design: true
   assets:
+    - assets/images/dummy_avatar_image.png
+    - assets/images/dummy_doctor_image.png
     - assets/images/healthpod_icon.png
     - assets/images/healthpod_image.png
     - assets/images/healthpod_logo.png
-    - assets/images/dummy_avatar_image.png
 
 # Define launcher icons for all platforms (except Linux) so icons for
 # the apps can be automatically updated.
