@@ -1,4 +1,4 @@
-/// Avatar image card widget
+/// Avatar image card widget.
 //
 // Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
 //
