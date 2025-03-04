@@ -32,6 +32,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/widgets/avatar_name.dart';
 import 'package:healthpod/widgets/manage_plan.dart';
 import 'package:healthpod/widgets/next_appointment.dart';
+import 'package:healthpod/widgets/number_appointments.dart';
 import 'package:healthpod/widgets/personal_details.dart';
 
 class HomePage extends StatelessWidget {
@@ -63,6 +64,8 @@ class HomePage extends StatelessWidget {
                 ManagePlan(),
                 const SizedBox(height: 16),
                 PersonalDetails(),
+                const SizedBox(height: 16),
+                NumberAppointments(),
                 const SizedBox(height: 16),
                 const Text(
                   'Your personal health data management system',
