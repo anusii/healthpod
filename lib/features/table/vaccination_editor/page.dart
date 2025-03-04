@@ -30,6 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/table/vaccination_editor/controllers.dart';
 import 'package:healthpod/features/table/vaccination_editor/model.dart';
+import 'package:healthpod/features/table/vaccination_editor/service.dart';
 // Use the mock service for now until we resolve the null safety issues
 import 'package:healthpod/features/table/vaccination_editor/service_mock.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
@@ -44,7 +45,7 @@ class VaccinationEditorPage extends StatefulWidget {
 
 class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
   late VaccinationEditorState editorState;
-  late VaccinationEditorServiceMock editorService;
+  late VaccinationEditorService editorService;
 
   @override
   void initState() {
@@ -52,7 +53,7 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
 
     // Initialise state and service.
     editorState = VaccinationEditorState();
-    editorService = VaccinationEditorServiceMock();
+    editorService = VaccinationEditorService();
 
     // Load initial data.
     _loadData();
