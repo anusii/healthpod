@@ -179,7 +179,8 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                       const SizedBox(height: 32),
                       ElevatedButton(
                         onPressed: () {
-                          // Show confirmation dialog before resetting
+                          // Show confirmation dialog before resetting.
+
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {

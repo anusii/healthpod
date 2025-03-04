@@ -68,7 +68,8 @@ class SettingField extends ConsumerWidget {
       });
     }
 
-    // Use the label as a unique identifier for each field's visibility state
+    // Use the label as a unique identifier for each field's visibility state.
+
     final showPassword = ref.watch(isPasswordVisibleProvider(label));
 
     // Persists the setting value to local storage.
