@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:timelines/timelines.dart';
+import 'package:timeline_tile/timeline_tile.dart';
 import 'package:intl/intl.dart';
 
 class VaccinationRecord {
@@ -36,20 +36,22 @@ class VaccinationVisualisation extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Timeline.tileBuilder(
-        theme: TimelineThemeData(
-          nodePosition: 0,
-          color: Theme.of(context).primaryColor,
-          connectorTheme: const ConnectorThemeData(
-            thickness: 2.0,
-          ),
-        ),
-        builder: TimelineTileBuilder.connected(
-          connectionDirection: ConnectionDirection.before,
-          itemCount: sortedRecords.length,
-          contentsBuilder: (_, index) {
-            final record = sortedRecords[index];
-            return Padding(
+      child: ListView.builder(
+        itemCount: sortedRecords.length,
+        itemBuilder: (context, index) {
+          final record = sortedRecords[index];
+          return TimelineTile(
+            isFirst: index == 0,
+            isLast: index == sortedRecords.length - 1,
+            indicatorStyle: IndicatorStyle(
+              width: 16,
+              color: Theme.of(context).primaryColor,
+            ),
+            beforeLineStyle: LineStyle(
+              color: Theme.of(context).primaryColor,
+              thickness: 2,
+            ),
+            endChild: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
@@ -71,16 +73,9 @@ class VaccinationVisualisation extends StatelessWidget {
                   ),
                 ],
               ),
-            );
-          },
-          indicatorBuilder: (_, index) => Indicator.dot(
-            size: 16,
-            color: Theme.of(context).primaryColor,
-          ),
-          connectorBuilder: (_, index, ___) => SolidLineConnector(
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
