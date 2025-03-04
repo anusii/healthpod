@@ -79,8 +79,10 @@ TextSpan addressLink(String clinicAddress, BuildContext context,
                 );
               } catch (e) {
                 // Handle failure to launch the URL, potentially with a logging framework or UI feedback.
-
-                alert(context, 'Warning!', 'Cannot launch google map!');
+                
+                if (context.mounted) {
+                  alert(context, 'Warning!', 'Cannot launch google map!');
+                }
               }
             },
         );
