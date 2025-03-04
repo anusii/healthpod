@@ -43,7 +43,7 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 400, 
+      width: 400,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: titleBackgroundColor,

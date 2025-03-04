@@ -73,32 +73,19 @@ class _PersonalDetailsState extends State<PersonalDetails> {
             ),
           ),
           const SizedBox(height: 16),
-
           _buildLabeledRow('Address:', address),
-
           const SizedBox(height: 8),
-
           _buildLabeledRow('Best Contact Phone:', bestContactPhone),
-
           const SizedBox(height: 8),
-
           _buildLabeledRow(
               'Alternative Contact Number:', alternativeContactNumber),
-
           const SizedBox(height: 8),
-
           _buildLabeledRow('Email:', email),
-
           const SizedBox(height: 8),
-
           _buildLabeledRow('Date of Birth:', dateOfBirth),
-
           const SizedBox(height: 8),
-
           _buildLabeledRow('Gender:', gender),
-
           const SizedBox(height: 16),
-
           const Text(
             'Identify as Aboriginal and/or Torres Strait Islander:',
             style: TextStyle(fontWeight: FontWeight.bold),
@@ -134,7 +121,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   }
 
   /// Helper method to build a row with a bold label and regular text.
-  
+
   Widget _buildLabeledRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

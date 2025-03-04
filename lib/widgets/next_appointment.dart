@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
+import 'package:healthpod/utils/address_link.dart';
 
 class NextAppointment extends StatefulWidget {
   const NextAppointment({super.key});
@@ -117,15 +118,8 @@ class _NextAppointmentState extends State<NextAppointment> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Expanded(
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Text(
-                    appointmentLocation,
-                    style: const TextStyle(
-                      color: Colors.blue,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
+                child: SelectableText.rich(
+                  addressLink(appointmentLocation, context, fontSize: 15),
                 ),
               ),
             ],
