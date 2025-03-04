@@ -10,16 +10,16 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:healthpod/features/charts/bp_combined_visualisation.dart';
+import 'package:healthpod/features/charts/vaccination_visualisation.dart';
 
 final List<Map<String, dynamic>> chartPanels = [
   {
     'title': 'Blood Pressure',
-    'widget':
-        BPCombinedVisualisation(), // TODO: Replace with actual BP chart widget
+    'widget': BPCombinedVisualisation(),
   },
   {
     'title': 'Vaccinations',
-    'widget': Container(), // TODO: Replace with actual vaccination chart widget
+    'widget': VaccinationVisualisation(),
   },
 ];
 
