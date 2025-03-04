@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/address_link.dart';
+import 'package:healthpod/utils/touch_finger_oval.dart';
 
 class NextAppointment extends StatefulWidget {
   const NextAppointment({super.key});
@@ -131,17 +132,25 @@ class _NextAppointmentState extends State<NextAppointment> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Clinic Bus: ',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              Expanded(
+                child: SelectableText.rich(
+                  TextSpan(
+                    text: 'Clinic Bus: ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: '',
+                        style: TextStyle(fontWeight: FontWeight.normal),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              if (clinicBusAvailable)
-                const Icon(
-                  Icons.directions_bus,
-                  color: Colors.green,
-                )
-              else
-                const Text('Not Available'),
+              touchFingerOval(
+                'Call the Clinic reception for more\ninformation about transport services.',
+              ),
             ],
           ),
           const SizedBox(height: 16),
