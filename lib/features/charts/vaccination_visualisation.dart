@@ -1,3 +1,29 @@
+/// Vaccination timeline chart.
+///
+// Time-stamp: <Friday 2025-02-21 17:02:01 +1100 Graham Williams>
+///
+/// Copyright (C) 2024, Software Innovation Institute, ANU.
+///
+/// Licensed under the GNU General Public License, Version 3 (the "License").
+///
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://www.gnu.org/licenses/>.
+///
+/// Authors: Kevin Wang
+library;
+
 import 'package:flutter/material.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:intl/intl.dart';
@@ -10,7 +36,8 @@ class VaccinationRecord {
 }
 
 class VaccinationVisualisation extends StatelessWidget {
-  // Sample data with various dates throughout the year
+  // Sample data with various dates throughout the year.
+
   final List<VaccinationRecord> records = [
     VaccinationRecord(
       date: DateTime(2024, 3, 1),
@@ -46,7 +73,8 @@ class VaccinationVisualisation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sort records by date, most recent first
+    // Sort records by date, most recent first.
+
     final sortedRecords = [...records]
       ..sort((a, b) => b.date.compareTo(a.date));
 
@@ -57,15 +85,20 @@ class VaccinationVisualisation extends StatelessWidget {
         itemBuilder: (context, index) {
           final record = sortedRecords[index];
 
-          // Calculate the line length based on time difference with next record
-          double lineHeight = 50.0; // Default minimum height
+          // Calculate the line length based on time difference with next record.
+
+          // Default minimum height.
+
+          double lineHeight = 50.0;
           if (index < sortedRecords.length - 1) {
             final nextRecord = sortedRecords[index + 1];
             final daysDifference =
                 record.date.difference(nextRecord.date).inDays;
-            // Scale: 1 month ≈ 30 pixels
+            // Scale: 1 month ≈ 30 pixels.
+
             lineHeight = (daysDifference / 30) * 30;
-            // Ensure minimum height for readability
+            // Ensure minimum height for readability.
+
             lineHeight = lineHeight.clamp(50.0, 300.0);
           }
 
