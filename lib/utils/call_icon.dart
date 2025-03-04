@@ -80,28 +80,34 @@ class _CallIconState extends State<CallIcon> {
   /// the user directly to grant the required permissions.
 
   Future<void> _showPermissionDialog(BuildContext context) async {
-    showDialog(
+    if (!mounted) return;
+
+    final result = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Permission Required"),
-        content: Text(
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Permission Required"),
+        content: const Text(
             "This app requires phone call permissions to make a call. Please enable it."),
         actions: <Widget>[
           ElevatedButton(
-            child: Text("Cancel"),
-            onPressed: () => Navigator.of(context).pop(),
+            child: const Text("Cancel"),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
           ),
           ElevatedButton(
-            child: Text("Ok"),
-            onPressed: () async {
-              await Permission.phone.request();
-
-              Navigator.of(context).pop();
-            },
+            child: const Text("Ok"),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
           ),
         ],
       ),
     );
+
+    // Check mounted again before performing actions.
+
+    if (!mounted) return;
+
+    if (result == true) {
+      await Permission.phone.request();
+    }
   }
 
   /// Displays a dialog instructing the user to manually enable phone permissions.
@@ -112,12 +118,14 @@ class _CallIconState extends State<CallIcon> {
   /// the app settings to enable the permission manually.
 
   Future<void> _showManualPermissionSettingDialog() async {
-    showDialog(
+    if (!mounted) return;
+
+    final result = await showDialog<bool>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (dialogContext) {
         return AlertDialog(
-          title: Text('Permission Needed'),
-          content: SingleChildScrollView(
+          title: const Text('Permission Needed'),
+          content: const SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 Text('This app needs phone permission to make calls.'),
@@ -127,22 +135,29 @@ class _CallIconState extends State<CallIcon> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop(false);
               },
             ),
             TextButton(
-              child: Text('Settings'),
-              onPressed: () async {
-                await openAppSettings(); // This will open the app settings page
-                Navigator.of(context).pop();
+              child: const Text('Settings'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
               },
             ),
           ],
         );
       },
     );
+
+    // Check mounted again before performing actions.
+
+    if (!mounted) return;
+
+    if (result == true) {
+      await openAppSettings(); // This will open the app settings page
+    }
   }
 
   /// Shows a confirmation dialog before initiating the phone call.
@@ -176,23 +191,40 @@ class _CallIconState extends State<CallIcon> {
   /// Initiates the phone call process, including checking permissions.
 
   Future<void> _initiatePhoneCall(BuildContext context) async {
+    // Capture the BuildContext right away
+    final localContext = context;
+
+    // If the widget was unmounted in the meantime, just return
+    if (!mounted) return;
+
     setState(() {
       _iconColor = Colors.red;
     });
 
-    var callStatus = await Permission.phone.status;
+    // After an await, always check if the widget is still mounted
+    final callStatus = await Permission.phone.status;
+    if (!mounted) return;
+
     if (callStatus.isPermanentlyDenied) {
+      // This function should also avoid referencing State.context directly
       await _showManualPermissionSettingDialog();
+      if (!mounted) return;
     } else if (callStatus.isDenied) {
-      await _showPermissionDialog(context);
+      // Pass localContext instead of using State.context in the function
+      await _showPermissionDialog(localContext);
+      if (!mounted) return;
     } else {
       try {
         await UssdPhoneCallSms().phoneCall(phoneNumber: widget.contactNumber);
       } catch (e) {
-        showAlert(context,
+        if (!mounted) return;
+        // Use localContext rather than State.context
+        showAlert(localContext,
             'Fail to call ${widget.contactNumber}! Please check app permission!');
       }
     }
+
+    if (!mounted) return;
 
     setState(() {
       _iconColor = Colors.deepPurple;
