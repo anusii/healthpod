@@ -9,7 +9,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/features/charts/combined_visualisation.dart';
+import 'package:healthpod/features/charts/bp_combined_visualisation.dart';
 
 final List<Map<String, dynamic>> chartPanels = [
   {
