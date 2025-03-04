@@ -27,8 +27,11 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:audioplayers/audioplayers.dart';
+
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/address_link.dart';
+import 'package:healthpod/utils/audio_tooltip.dart';
 import 'package:healthpod/utils/touch_finger_oval.dart';
 
 class NextAppointment extends StatefulWidget {
@@ -39,6 +42,62 @@ class NextAppointment extends StatefulWidget {
 }
 
 class _NextAppointmentState extends State<NextAppointment> {
+  /// Status of playing of the audio.
+
+  bool _isPlaying = false;
+
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  /// Toggles the audio playback state.
+  ///
+  /// If the audio is currently playing, it stops the playback.
+  /// If there is one audio is currently playing, it will not play.
+  /// Otherwise, it starts playing the audio from the specified asset source.
+
+  Future<void> _toggleAudio() async {
+    if (_isPlaying) {
+      await _audioPlayer.stop();
+
+      setState(() {
+        _isPlaying = false;
+        audioInPlaying = false;
+      });
+    } else {
+      if (!audioInPlaying) {
+        await _audioPlayer.play(AssetSource('audio/transport_eligibility.m4a'));
+
+        setState(() {
+          _isPlaying = !_isPlaying;
+          audioInPlaying = true;
+        });
+      }
+    }
+  }
+
+  /// Handles the completion of audio playback.
+
+  void _onAudioComplete() {
+    setState(() {
+      _isPlaying = false;
+      audioInPlaying = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer.onPlayerComplete.listen((event) {
+      _onAudioComplete();
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    audioInPlaying = false;
+    super.dispose();
+  }
+
   // Dummy data for demonstration.
 
   final String appointmentDate = 'Monday, 13 March';
@@ -158,16 +217,21 @@ class _NextAppointmentState extends State<NextAppointment> {
           // Transport help section.
 
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Need help with transport? ',
-                style: TextStyle(fontWeight: FontWeight.bold),
+              SelectableText.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Need help with transport?',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const Icon(
-                Icons.help_outline,
-                color: Colors.green,
-              ),
+              AudioWithTooltip(
+                  isPlaying: _isPlaying, toggleAudio: _toggleAudio),
             ],
           ),
           const SizedBox(height: 8),
