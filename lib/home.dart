@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/features/charts/tab.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -87,9 +88,9 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Charts',
     'icon': Icons.show_chart,
     'color': Colors.blue,
-    'content': const BPCombinedVisualisation(),
+    'content': const ChartTab(),
     'tooltip':
-        'Visualize your Blood Pressure trends and other health metrics with interactive charts.',
+        'Visualize your Blood Pressure trends and other health metrics with interactive charts.Vaccination timeline charts are also available.',
   },
   {
     'title': 'Table',
