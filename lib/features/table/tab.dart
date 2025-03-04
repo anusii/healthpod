@@ -26,8 +26,8 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/features/table/editor/page.dart';
-import 'package:healthpod/features/vaccination/table.dart';
+import 'package:healthpod/features/table/bp_editor/page.dart';
+import 'package:healthpod/features/table/vaccination_editor/page.dart';
 
 final List<Map<String, dynamic>> tablePanels = [
   {
@@ -36,7 +36,7 @@ final List<Map<String, dynamic>> tablePanels = [
   },
   {
     'title': 'Vaccinations',
-    'widget': const VaccinationTable(),
+    'widget': const VaccinationEditorPage(),
   },
 ];
 
