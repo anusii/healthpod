@@ -46,7 +46,17 @@ class _ManagePlanState extends State<ManagePlan> {
     return Container(
       width: 400,
       padding: const EdgeInsets.all(16.0),
-      color: titleBackgroundColor,
+      decoration: BoxDecoration(
+        color: titleBackgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.8),
+            spreadRadius: 3,
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
