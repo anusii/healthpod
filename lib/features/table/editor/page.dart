@@ -28,10 +28,10 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/features/bp/editor/state.dart';
 import 'package:healthpod/features/bp/obs/service.dart';
 import 'package:healthpod/features/bp/obs/widgets/display_row.dart';
 import 'package:healthpod/features/bp/obs/widgets/editing_row.dart';
+import 'package:healthpod/features/table/editor/state.dart';
 
 /// The main editor page for blood pressure observations.
 

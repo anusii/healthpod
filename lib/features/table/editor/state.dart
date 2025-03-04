@@ -27,9 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/features/bp/editor/controllers.dart';
-
 import 'package:healthpod/features/bp/obs/model.dart';
+import 'package:healthpod/features/table/editor/controllers.dart';
 
 /// Manages all the state fields needed for the Blood Pressure Editor.
 ///
