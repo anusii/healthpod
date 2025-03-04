@@ -31,11 +31,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// A reusable widget for displaying and editing settings with a label and tooltip.
+import 'package:healthpod/providers/settings.dart';
 
-// Add this at the file level, before the SettingField class
-final isPasswordVisibleProvider =
-    StateProvider.autoDispose.family<bool, String>((ref, id) => false);
+/// A reusable widget for displaying and editing settings with a label and tooltip.
 
 class SettingField extends ConsumerWidget {
   final String label;
