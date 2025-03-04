@@ -33,7 +33,6 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
-import 'package:healthpod/features/bp/combined_visualisation.dart';
 import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/file/service.dart';
 import 'package:healthpod/features/survey/tab.dart';
