@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/features/survey/form_state.dart';
-import 'package:healthpod/features/survey/question.dart';
 import 'package:healthpod/features/survey/input_fields/categorical_input.dart';
 import 'package:healthpod/features/survey/input_fields/number_input.dart';
 import 'package:healthpod/features/survey/input_fields/text_input.dart';
+import 'package:healthpod/features/survey/question.dart';
 import 'package:healthpod/features/survey/utils/get_icon_colour.dart';
 import 'package:healthpod/features/survey/utils/get_question_icon.dart';
 
