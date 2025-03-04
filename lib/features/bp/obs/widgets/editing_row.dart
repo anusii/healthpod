@@ -26,10 +26,10 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/features/table/editor/state.dart';
 
 import 'package:intl/intl.dart';
 
-import 'package:healthpod/features/bp/editor/state.dart';
 import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/features/bp/obs/widgets/editing/action_buttons_cell.dart';
 import 'package:healthpod/features/bp/obs/widgets/editing/feeling_cell.dart';
