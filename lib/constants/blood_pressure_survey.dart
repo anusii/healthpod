@@ -1,4 +1,4 @@
-/// Utility function for formatting timestamps for filenames.
+/// Constants for blood pressure survey fields.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -21,24 +21,28 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Kevin Wang
+/// Authors: Ashley Tang
 
 library;
 
-/// Formats a DateTime object into a string suitable for use in filenames.
+/// Constants for blood pressure survey field names.
 ///
-/// The format is YYYY-MM-DD_HH-MM-SS, which ensures proper sorting and
-/// avoids characters that might be problematic in filenames.
-///
-/// Example: 2023-05-15_14-30-22 for May 15, 2023, 2:30:22 PM
+/// These constants are used to access and store blood pressure data consistently
+/// across the application, particularly in JSON serialization/deserialization.
 
-String formatTimestampForFilename(DateTime dt) {
-  final year = dt.year.toString();
-  final month = dt.month.toString().padLeft(2, '0');
-  final day = dt.day.toString().padLeft(2, '0');
-  final hour = dt.hour.toString().padLeft(2, '0');
-  final minute = dt.minute.toString().padLeft(2, '0');
-  final second = dt.second.toString().padLeft(2, '0');
+class HealthSurveyConstants {
+  /// Field name for systolic blood pressure.
+  static const String fieldSystolic = 'systolic';
 
-  return '$year-$month-$day\_$hour-$minute-$second';
+  /// Field name for diastolic blood pressure.
+  static const String fieldDiastolic = 'diastolic';
+
+  /// Field name for heart rate.
+  static const String fieldHeartRate = 'heart_rate';
+
+  /// Field name for subjective feeling.
+  static const String fieldFeeling = 'feeling';
+
+  /// Field name for additional notes.
+  static const String fieldNotes = 'notes';
 }

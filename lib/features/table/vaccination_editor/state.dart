@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/features/table/vaccination_editor/controllers.dart';
+import 'package:healthpod/features/table/vaccination_editor/model.dart';
 
 /// Manages all the state fields needed for the Vaccination Editor.
 ///

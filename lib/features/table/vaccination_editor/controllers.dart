@@ -27,43 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-/// Vaccination observation model
-class VaccinationObservation {
-  final DateTime timestamp;
-  final String vaccineName;
-  final String provider;
-  final String professional;
-  final String cost;
-  final String notes;
-
-  VaccinationObservation({
-    required this.timestamp,
-    required this.vaccineName,
-    this.provider = '',
-    this.professional = '',
-    this.cost = '',
-    this.notes = '',
-  });
-
-  /// Create a copy of this observation with updated fields
-  VaccinationObservation copyWith({
-    DateTime? timestamp,
-    String? vaccineName,
-    String? provider,
-    String? professional,
-    String? cost,
-    String? notes,
-  }) {
-    return VaccinationObservation(
-      timestamp: timestamp ?? this.timestamp,
-      vaccineName: vaccineName ?? this.vaccineName,
-      provider: provider ?? this.provider,
-      professional: professional ?? this.professional,
-      cost: cost ?? this.cost,
-      notes: notes ?? this.notes,
-    );
-  }
-}
+import 'package:healthpod/features/table/vaccination_editor/model.dart';
 
 /// Manages the TextEditingControllers for the Vaccination Editor.
 ///

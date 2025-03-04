@@ -29,66 +29,10 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/table/vaccination_editor/controllers.dart';
+import 'package:healthpod/features/table/vaccination_editor/model.dart';
+// Use the mock service for now until we resolve the null safety issues
+import 'package:healthpod/features/table/vaccination_editor/service_mock.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
-
-/// Service for handling vaccination data operations
-class VaccinationEditorService {
-  /// Load vaccination data from storage
-  Future<List<VaccinationObservation>> loadData(BuildContext context) async {
-    // This would be replaced with actual data loading logic
-    // For now, return sample data
-    await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
-
-    return [
-      VaccinationObservation(
-        timestamp: DateTime.now().subtract(const Duration(days: 5)),
-        vaccineName: 'COVID-19 Booster',
-        provider: 'City Medical Center',
-        professional: 'Dr. Smith',
-        cost: '\$45.00',
-        notes: 'Pfizer booster shot',
-      ),
-      VaccinationObservation(
-        timestamp: DateTime.now().subtract(const Duration(days: 180)),
-        vaccineName: 'Flu Shot',
-        provider: 'Community Pharmacy',
-        professional: 'Pharmacist Johnson',
-        cost: '\$25.00',
-        notes: 'Annual influenza vaccine',
-      ),
-      VaccinationObservation(
-        timestamp: DateTime.now().subtract(const Duration(days: 365)),
-        vaccineName: 'COVID-19 Second Dose',
-        provider: 'City Medical Center',
-        professional: 'Dr. Smith',
-        cost: '\$0.00',
-        notes: 'Pfizer second dose',
-      ),
-    ];
-  }
-
-  /// Save vaccination observation to storage
-  Future<void> saveObservationToPod({
-    required BuildContext context,
-    required VaccinationObservation observation,
-    required bool isNew,
-    VaccinationObservation? oldObservation,
-  }) async {
-    // This would be replaced with actual save logic
-    await Future.delayed(const Duration(milliseconds: 500));
-    // In a real implementation, this would save to storage
-  }
-
-  /// Delete vaccination observation from storage
-  Future<void> deleteObservationFromPod(
-    BuildContext context,
-    VaccinationObservation observation,
-  ) async {
-    // This would be replaced with actual delete logic
-    await Future.delayed(const Duration(milliseconds: 500));
-    // In a real implementation, this would delete from storage
-  }
-}
 
 /// The main editor page for vaccination observations.
 class VaccinationEditorPage extends StatefulWidget {
@@ -100,7 +44,7 @@ class VaccinationEditorPage extends StatefulWidget {
 
 class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
   late VaccinationEditorState editorState;
-  late VaccinationEditorService editorService;
+  late VaccinationEditorServiceMock editorService;
 
   @override
   void initState() {
@@ -108,7 +52,7 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
 
     // Initialise state and service.
     editorState = VaccinationEditorState();
-    editorService = VaccinationEditorService();
+    editorService = VaccinationEditorServiceMock();
 
     // Load initial data.
     _loadData();
@@ -248,10 +192,12 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                               );
                               if (pickedDate != null && context.mounted) {
                                 setState(() {
-                                  editorState.currentEdit =
-                                      editorState.currentEdit?.copyWith(
-                                    timestamp: pickedDate,
-                                  );
+                                  if (editorState.currentEdit != null) {
+                                    editorState.currentEdit =
+                                        editorState.currentEdit!.copyWith(
+                                      timestamp: pickedDate,
+                                    );
+                                  }
                                 });
                               }
                             },

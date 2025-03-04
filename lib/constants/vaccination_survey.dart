@@ -1,4 +1,4 @@
-/// Utility function for formatting timestamps for filenames.
+/// Constants for vaccination survey fields.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -25,20 +25,24 @@
 
 library;
 
-/// Formats a DateTime object into a string suitable for use in filenames.
+/// Constants for vaccination survey field names.
 ///
-/// The format is YYYY-MM-DD_HH-MM-SS, which ensures proper sorting and
-/// avoids characters that might be problematic in filenames.
-///
-/// Example: 2023-05-15_14-30-22 for May 15, 2023, 2:30:22 PM
+/// These constants are used to access and store vaccination data consistently
+/// across the application, particularly in JSON serialization/deserialization.
 
-String formatTimestampForFilename(DateTime dt) {
-  final year = dt.year.toString();
-  final month = dt.month.toString().padLeft(2, '0');
-  final day = dt.day.toString().padLeft(2, '0');
-  final hour = dt.hour.toString().padLeft(2, '0');
-  final minute = dt.minute.toString().padLeft(2, '0');
-  final second = dt.second.toString().padLeft(2, '0');
+class VaccinationSurveyConstants {
+  /// Field name for the vaccine name.
+  static const String fieldVaccineName = 'vaccine_name';
 
-  return '$year-$month-$day\_$hour-$minute-$second';
+  /// Field name for the provider or location.
+  static const String fieldProvider = 'provider';
+
+  /// Field name for the healthcare professional.
+  static const String fieldProfessional = 'professional';
+
+  /// Field name for the cost.
+  static const String fieldCost = 'cost';
+
+  /// Field name for additional notes.
+  static const String fieldNotes = 'notes';
 }
