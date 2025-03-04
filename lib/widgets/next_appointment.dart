@@ -32,6 +32,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/address_link.dart';
 import 'package:healthpod/utils/audio_tooltip.dart';
+import 'package:healthpod/utils/call_icon.dart';
 import 'package:healthpod/utils/touch_finger_oval.dart';
 
 class NextAppointment extends StatefulWidget {
@@ -241,7 +242,7 @@ class _NextAppointmentState extends State<NextAppointment> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(Icons.phone, color: Colors.black54),
+              CallIcon(contactNumber: phoneNumber),
               const SizedBox(width: 6),
               Expanded(
                 child: RichText(
