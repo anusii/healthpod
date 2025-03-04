@@ -28,18 +28,21 @@ library;
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/get_secret_key.dart';
 
 /// Handles loading/saving/deleting BP observations from the Pod.
 
 class BPEditorService {
   /// Load all BP observations from `healthpod/data/blood_pressure` directory.
 
-  Future<List<BPObservation>> loadData(BuildContext context) async {
+  Future<List<BPObservation>> loadData(
+      BuildContext context, WidgetRef ref) async {
     final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
     final resources = await getResourcesInContainer(dirUrl);
 
@@ -49,6 +52,21 @@ class BPEditorService {
       if (!file.endsWith('.enc.ttl')) continue;
 
       if (!context.mounted) continue;
+
+      // Get the secret key for decryption, showing a dialog if needed
+      final secretKey = await getSecretKey(
+        context,
+        ref,
+        operation: 'Decryption',
+      );
+
+      // If the user cancelled, skip this file
+      if (secretKey == null || secretKey.isEmpty) {
+        continue;
+      }
+
+      // Initialize the Pod keys with the provided secret key
+      await KeyManager.initPodKeys(secretKey);
 
       final content = await readPod(
         'healthpod/data/blood_pressure/$file',
@@ -77,10 +95,32 @@ class BPEditorService {
 
   Future<void> saveObservationToPod({
     required BuildContext context,
+    required WidgetRef ref,
     required BPObservation observation,
     required bool isNew,
     required BPObservation? oldObservation,
   }) async {
+    // Get the secret key for encryption, showing a dialog if needed
+    final secretKey = await getSecretKey(
+      context,
+      ref,
+      operation: 'Encryption',
+    );
+
+    // If the user cancelled, return
+    if (secretKey == null || secretKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cannot save without a security key'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Initialize the Pod keys with the provided secret key
+    await KeyManager.initPodKeys(secretKey);
+
     // Delete old file if not a new observation.
 
     if (!isNew && oldObservation != null) {

@@ -26,6 +26,8 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:solidpod/solidpod.dart'
     show
@@ -40,7 +42,9 @@ import 'package:solidpod/solidpod.dart'
 
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/home.dart';
+import 'package:healthpod/providers/settings.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
+import 'package:healthpod/utils/get_secret_key.dart';
 import 'package:healthpod/utils/security_key/view_keys.dart';
 
 /// Security Key Manager.
@@ -51,7 +55,7 @@ import 'package:healthpod/utils/security_key/view_keys.dart';
 
 /// Main widget for managing security keys.
 
-class SecurityKeyManager extends StatefulWidget {
+class SecurityKeyManager extends ConsumerStatefulWidget {
   // Callback to notify parent widget when key status changes.
 
   final Function(bool) onKeyStatusChanged;
@@ -68,7 +72,7 @@ class SecurityKeyManager extends StatefulWidget {
 /// State class that powers `SecurityKeyManager` widget.
 /// It encapsulates all logic and UI rendering for the dialog.
 
-class SecurityKeyManagerState extends State<SecurityKeyManager>
+class SecurityKeyManagerState extends ConsumerState<SecurityKeyManager>
     with SingleTickerProviderStateMixin {
   // Tracks whether a background operation is in progress to manage UI feedback.
 
@@ -101,6 +105,14 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
     setState(() {
       _hasExistingKey = hasKey;
     });
+
+    // Also check if the key is saved in SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final savedKey = prefs.getString('secret_key');
+    if (savedKey != null && savedKey.isNotEmpty) {
+      // Update the provider with the saved key
+      ref.read(secretKeyProvider.notifier).state = savedKey;
+    }
   }
 
   /// Defines consistent button styles.
@@ -268,6 +280,42 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
               decoration: _getInputDecoration('Confirm Security Key'),
               obscureText: true,
             ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Checkbox(
+                  value: true, // Default to checked
+                  onChanged: (value) {
+                    // Always save to SharedPreferences
+                  },
+                ),
+                const Expanded(
+                  child: Text(
+                    'Remember this key on this device',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.amber),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'The key will be stored on this device only. Anyone with access to this device may be able to decrypt your data.',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         actions: [
@@ -311,7 +359,17 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
 
     try {
       setState(() => _isLoading = true);
+
+      // Initialize the Pod keys
       await KeyManager.initPodKeys(key);
+
+      // Save the key to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('secret_key', key);
+
+      // Update the provider
+      ref.read(secretKeyProvider.notifier).state = key;
+
       widget.onKeyStatusChanged(true);
       await _checkKeyStatus();
 
@@ -479,9 +537,16 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
 
                                 late String msg;
                                 try {
+                                  // Forget the key in KeyManager
                                   await KeyManager.forgetSecurityKey();
+
+                                  // Delete the key file from the Pod
                                   final encKeyPath = await getEncKeyPath();
                                   await deleteFile(encKeyPath);
+
+                                  // Clear the key from SharedPreferences
+                                  await clearSavedSecretKey(ref);
+
                                   widget.onKeyStatusChanged(false);
                                   await _checkKeyStatus();
                                   msg =
