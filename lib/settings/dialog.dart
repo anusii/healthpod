@@ -31,6 +31,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:healthpod/providers/settings.dart';
+import 'package:healthpod/utils/constrained_dialog.dart';
 import 'package:healthpod/widgets/setting_field.dart';
 
 /// Settings dialog that allows users to configure server connection and authentication details.
@@ -101,7 +102,17 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
           children: [
             Container(
               width: size.width,
-              height: size.height,
+              // 80% of screen height.
+
+              height: size.height * 0.8,
+              constraints: BoxConstraints(
+                // Maximum height in logical pixels.
+
+                maxHeight: 600,
+                // Minimum height in logical pixels.
+
+                minHeight: 300,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(15),
@@ -178,35 +189,18 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                       ),
                       const SizedBox(height: 32),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           // Show confirmation dialog before resetting.
-
-                          showDialog(
+                          final confirmed =
+                              await showConstrainedConfirmationDialog(
                             context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Reset Settings'),
-                                content: const Text(
-                                    'Are you sure you want to reset all settings to default?'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(context).pop(),
-                                    child: const Text('Cancel'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      resetSettings();
-                                      Navigator.of(context).pop();
-                                    },
-                                    child: const Text(
-                                      'Reset',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
+                            title: 'Reset Settings',
+                            message:
+                                'Are you sure you want to reset all settings to default?',
+                            confirmText: 'Reset',
+                            confirmColor: Colors.red,
+                            maxHeight: 100,
+                            onConfirm: resetSettings,
                           );
                         },
                         style: ElevatedButton.styleFrom(
