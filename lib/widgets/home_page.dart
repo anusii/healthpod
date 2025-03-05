@@ -48,20 +48,22 @@ class HomePage extends StatelessWidget {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            _buildHeader(),
-            const SizedBox(height: 16),
-            const AvatarName(),
-            const SizedBox(height: 16),
-            const NextAppointment(),
-            const SizedBox(height: 16),
-            const ManagePlan(),
-            const SizedBox(height: 16),
-            const PersonalDetails(),
-            const SizedBox(height: 16),
-            const NumberAppointments(),
-          ],
+        child: Center(
+          child: Column(
+            children: [
+              _buildHeader(),
+              const SizedBox(height: 16),
+              const AvatarName(),
+              const SizedBox(height: 16),
+              const NextAppointment(),
+              const SizedBox(height: 16),
+              const ManagePlan(),
+              const SizedBox(height: 16),
+              const PersonalDetails(),
+              const SizedBox(height: 16),
+              const NumberAppointments(),
+            ],
+          ),
         ),
       ),
     );
