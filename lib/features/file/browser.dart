@@ -350,76 +350,82 @@ class FileBrowserState extends State<FileBrowser> {
 
                   if (showButtons) ...[
                     const SizedBox(width: 8),
-                    // Preview button.
 
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      icon: Icon(
-                        Icons.preview,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      onPressed: () {
-                        // Capture the current BuildContext.
+                    // Only show the preview button for pdf file.
 
-                        final BuildContext contextCopy = context;
+                    if (file.path.contains('.pdf'))
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(
+                          Icons.preview,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        onPressed: () {
+                          // Capture the current BuildContext.
 
-                        // Wrapper function to handle the async operations.
+                          final BuildContext contextCopy = context;
 
-                        void handlePdfPreview() async {
-                          // Retrieve the PDF file content as a base64-encoded string.
+                          // Wrapper function to handle the async operations.
 
-                          final String fileContent = await readPod(
-                                  file.path, contextCopy, Container()) ??
-                              '';
+                          void handlePdfPreview() async {
+                            // Retrieve the PDF file content as a base64-encoded string.
 
-                          // Decode the base64 string into raw PDF bytes.
+                            final String fileContent = await readPod(
+                                    file.path, contextCopy, Container()) ??
+                                '';
 
-                          final Uint8List pdfBytes = base64Decode(fileContent);
+                            // Decode the base64 string into raw PDF bytes.
 
-                          // Check if the BuildContext is still valid before using it.
+                            final Uint8List pdfBytes =
+                                base64Decode(fileContent);
 
-                          if (!contextCopy.mounted) return;
+                            // Check if the BuildContext is still valid before using it.
 
-                          // Use the verified context.
+                            if (!contextCopy.mounted) return;
 
-                          showDialog(
-                            context: contextCopy,
-                            builder: (dialogContext) => AlertDialog(
-                              title: const Text("File Preview"),
-                              content: SizedBox(
-                                width: double.maxFinite,
-                                height: 500,
-                                child: PdfPreview(
-                                  build: (PdfPageFormat format) async =>
-                                      pdfBytes,
-                                  canChangeOrientation: false,
-                                  canChangePageFormat: false,
-                                  allowPrinting: false,
-                                  allowSharing: false,
+                            // Use the verified context.
+
+                            showDialog(
+                              context: contextCopy,
+                              builder: (dialogContext) => AlertDialog(
+                                title: const Text("File Preview"),
+                                content: SizedBox(
+                                  width: double.maxFinite,
+                                  height: 500,
+                                  child: PdfPreview(
+                                    build: (PdfPageFormat format) async =>
+                                        pdfBytes,
+                                    canChangeOrientation: false,
+                                    canChangePageFormat: false,
+                                    allowPrinting: false,
+                                    allowSharing: false,
+                                  ),
                                 ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(dialogContext),
+                                    child: const Text("Close"),
+                                  ),
+                                ],
                               ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(dialogContext),
-                                  child: const Text("Close"),
-                                ),
-                              ],
-                            ),
-                          );
-                        }
+                            );
+                          }
 
-                        // Call the wrapper function.
+                          // Call the wrapper function.
 
-                        handlePdfPreview();
-                      },
-                      style: IconButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primary.withAlpha(10),
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(35, 35),
+                          handlePdfPreview();
+                        },
+                        style: IconButton.styleFrom(
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withAlpha(10),
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(35, 35),
+                        ),
                       ),
-                    ),
 
                     smallGapH,
                     // Download button.
