@@ -133,7 +133,7 @@ class _NextAppointmentState extends State<NextAppointment> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 10),
           const Text(
             'Next Appointment Details',
             style: TextStyle(
@@ -155,7 +155,7 @@ class _NextAppointmentState extends State<NextAppointment> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,7 +169,7 @@ class _NextAppointmentState extends State<NextAppointment> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
