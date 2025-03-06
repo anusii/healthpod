@@ -120,9 +120,8 @@ class FileBrowserState extends State<FileBrowser> {
 
       setState(() => directories = resources.subDirs);
 
-      currentDirFileCount = resources.files
-          .where((f) => f.endsWith('.enc.ttl'))
-          .length;
+      currentDirFileCount =
+          resources.files.where((f) => f.endsWith('.enc.ttl')).length;
 
       final counts = await FileOperations.getDirectoryCounts(
         currentPath,
