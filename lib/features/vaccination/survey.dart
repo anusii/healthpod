@@ -205,7 +205,7 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
                         final Map<String, dynamic> responses = {
                           'date':
                               '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
-                          'vaccine_name': _vaccineController.text,
+                          'vaccine': _vaccineController.text,
                           'provider': _providerController.text,
                           'professional': _professionalController.text,
                           'cost': _costController.text,

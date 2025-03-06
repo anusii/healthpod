@@ -36,6 +36,8 @@ import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/features/file/browser.dart';
+import 'package:healthpod/features/vaccination/exporter.dart';
+import 'package:healthpod/features/vaccination/importer.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
@@ -95,6 +97,14 @@ class _FileServiceState extends State<FileService> {
     return currentPath!.endsWith('/blood_pressure') ||
         currentPath!.contains('/blood_pressure/') ||
         currentPath == 'healthpod/data/blood_pressure';
+  }
+
+  // Helper method to check if we're in the vaccination/ directory.
+
+  bool get isInVaccinationDirectory {
+    return currentPath!.endsWith('/vaccination') ||
+        currentPath!.contains('/vaccination/') ||
+        currentPath == 'healthpod/data/vaccination';
   }
 
   /// Handles file upload by reading its contents and encrypting it for upload.
@@ -484,37 +494,30 @@ class _FileServiceState extends State<FileService> {
   /// Files are named using the timestamp from the data.
 
   Future<void> handleCsvImport(String filePath, String dirPath) async {
-    if (importInProgress) return;
-
     try {
       setState(() {
         importInProgress = true;
       });
 
-      // Process CSV and create individual JSON files for each row.
-      // Use BPImporter to handle blood-pressure specific importing.
-
-      final success =
-          await BPImporter.importFromCsv(filePath, dirPath, context);
-
-      if (!mounted) return;
+      final success = await (isInBpDirectory
+          ? BPImporter.importFromCsv(filePath, dirPath, context)
+          : VaccinationImporter.importFromCsv(filePath, dirPath, context));
 
       if (success) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text('Blood pressure data imported and converted successfully'),
+          SnackBar(
+            content: Text(
+                '${isInBpDirectory ? "Blood pressure" : "Vaccination"} data imported successfully'),
             backgroundColor: Colors.green,
           ),
         );
-        // Refresh the file browser to show the new files.
-
         _browserKey.currentState?.refreshFiles();
       }
     } catch (e) {
       if (!mounted) return;
-      showAlert(
-          context, 'Failed to import Blood pressure data: ${e.toString()}');
+      showAlert(context, 'Import error: ${e.toString()}');
+      debugPrint('Import error: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -827,9 +830,9 @@ class _FileServiceState extends State<FileService> {
                 ),
               ),
 
-              // Show CSV import and export buttons only when in blood pressure directory.
+              // Show CSV import and export buttons when in blood pressure or vaccination directory.
 
-              if (isInBpDirectory) ...[
+              if (isInBpDirectory || isInVaccinationDirectory) ...[
                 const SizedBox(width: 8),
                 // Import CSV Button.
 
@@ -878,37 +881,47 @@ class _FileServiceState extends State<FileService> {
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       try {
+                        // Determine the file prefix based on current directory type.
+
+                        final prefix = isInBpDirectory ? 'bp' : 'vaccination';
+
+                        // Open file picker dialog to let user choose where to save the CSV.
+
                         final String? outputFile =
                             await FilePicker.platform.saveFile(
-                          dialogTitle: 'Save Blood pressure data as CSV:',
-                          fileName: 'blood_pressure_data.csv',
+                          dialogTitle:
+                              'Save ${isInBpDirectory ? "Blood pressure" : "Vaccination"} data as CSV:',
+                          fileName: '${prefix}_data.csv',
                         );
 
-                        if (outputFile != null) {
+                        // Only proceed if user selected a save location and component is still mounted.
+
+                        if (outputFile != null && mounted) {
+                          // Export the data using the appropriate exporter based on directory type.
+
+                          final success = await (isInBpDirectory
+                              ? BPExporter.exportToCsv(
+                                  outputFile, currentPath!, context)
+                              : VaccinationExporter.exportToCsv(
+                                  outputFile, currentPath!, context));
+
+                          // Check if component is still mounted after async operation.
+
                           if (!mounted) return;
 
-                          // Export JSON files in bp/ to a single CSV file.
-                          // Use BPExporter to handle blood-pressure specific exporting.
-
-                          final success = await BPExporter.exportToCsv(
-                            outputFile,
-                            currentPath ?? 'healthpod/data',
-                            context,
-                          );
-
-                          if (!mounted) return;
+                          // Show success or failure message to user.
 
                           if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
+                              SnackBar(
                                 content: Text(
-                                    'Blood pressure data exported successfully'),
+                                    '${isInBpDirectory ? "Blood pressure" : "Vaccination"} data exported successfully'),
                                 backgroundColor: Colors.green,
                               ),
                             );
                           } else {
                             showAlert(context,
-                                'Failed to export Blood pressure data');
+                                'Failed to export ${isInBpDirectory ? "Blood pressure" : "Vaccination"} data');
                           }
                         }
                       } catch (e) {

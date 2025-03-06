@@ -32,7 +32,7 @@ import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/constants/survey.dart';
+import 'package:healthpod/constants/blood_pressure_survey.dart';
 import 'package:healthpod/features/survey/data.dart';
 import 'package:healthpod/features/visualise/stat_item.dart';
 import 'package:healthpod/utils/get_month_abbrev.dart';
