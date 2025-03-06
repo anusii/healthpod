@@ -5,7 +5,10 @@
 ///
 /// Authors: Ashley Tang
 
+library;
+
 import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/constants/colours.dart';
@@ -15,6 +18,7 @@ import 'package:healthpod/features/file/service/components/components.dart';
 ///
 /// This page includes features for uploading, downloading, and managing files
 /// in the user's POD storage.
+
 class FileService extends ConsumerWidget {
   const FileService({super.key});
 
@@ -31,4 +35,4 @@ class FileService extends ConsumerWidget {
       ),
     );
   }
-} 
+}

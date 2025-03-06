@@ -12,6 +12,7 @@ import 'package:healthpod/utils/is_text_file.dart';
 ///
 /// This component provides UI elements for selecting and uploading files,
 /// including a file picker button and upload status indicators.
+
 class FileUploadSection extends ConsumerStatefulWidget {
   const FileUploadSection({super.key});
 
@@ -24,19 +25,24 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
   bool showPreview = false;
 
   /// Handles file preview before upload to display its content or basic info.
+
   Future<void> handlePreview(String filePath) async {
     try {
       final file = File(filePath);
       String content;
 
       if (isTextFile(filePath)) {
-        // For text files, show the first 500 characters
+        // For text files, show the first 500 characters.
+
         content = await file.readAsString();
-        content = content.length > 500 ? '${content.substring(0, 500)}...' : content;
+        content =
+            content.length > 500 ? '${content.substring(0, 500)}...' : content;
       } else {
-        // For binary files, show their size and type
+        // For binary files, show their size and type.
+
         final bytes = await file.readAsBytes();
-        content = 'Binary file\nSize: ${(bytes.length / 1024).toStringAsFixed(2)} KB\nType: ${path.extension(filePath)}';
+        content =
+            'Binary file\nSize: ${(bytes.length / 1024).toStringAsFixed(2)} KB\nType: ${path.extension(filePath)}';
       }
 
       setState(() {
@@ -49,6 +55,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
   }
 
   /// Builds a preview card UI to show content or info of selected file.
+
   Widget _buildPreviewCard() {
     if (!showPreview || filePreview == null) return const SizedBox.shrink();
 
@@ -67,8 +74,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
             ),
             child: Row(
               children: [
@@ -114,13 +122,15 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(fileServiceProvider);
-    final isInBpDirectory = state.currentPath?.contains('blood_pressure') ?? false;
+    final isInBpDirectory =
+        state.currentPath?.contains('blood_pressure') ?? false;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Title
+        // Title.
+
         const Text(
           'Upload Files',
           style: TextStyle(
@@ -130,11 +140,13 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         ),
         const SizedBox(height: 16),
 
-        // Display preview card if enabled
+        // Display preview card if enabled.
+
         _buildPreviewCard(),
         if (showPreview) const SizedBox(height: 16),
 
-        // Show selected file info
+        // Show selected file info.
+
         if (state.uploadFile != null)
           Container(
             padding: const EdgeInsets.all(12),
@@ -170,10 +182,12 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           ),
         if (state.uploadFile != null) const SizedBox(height: 16),
 
-        // Upload and CSV buttons row
+        // Upload and CSV buttons row.
+
         Row(
           children: [
-            // Main upload button
+            // Main upload button.
+
             Expanded(
               child: ElevatedButton.icon(
                 onPressed: state.uploadInProgress
@@ -183,9 +197,14 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                         if (result != null && result.files.isNotEmpty) {
                           final file = result.files.first;
                           if (file.path != null) {
-                            ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
+                            ref
+                                .read(fileServiceProvider.notifier)
+                                .setUploadFile(file.path);
                             await handlePreview(file.path!);
-                            await ref.read(fileServiceProvider.notifier).handleUpload(context);
+                            if (!context.mounted) return;
+                            await ref
+                                .read(fileServiceProvider.notifier)
+                                .handleUpload(context);
                           }
                         }
                       },
@@ -193,8 +212,10 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 label: const Text('Upload'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.onPrimaryContainer,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -202,20 +223,25 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
               ),
             ),
 
-            // Show CSV import/export buttons in BP directory
+            // Show CSV import/export buttons in BP directory.
+
             if (isInBpDirectory) ...[
               const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: state.importInProgress
                       ? null
-                      : () => ref.read(fileServiceProvider.notifier).handleCsvImport(context),
+                      : () => ref
+                          .read(fileServiceProvider.notifier)
+                          .handleCsvImport(context),
                   icon: const Icon(Icons.table_chart),
                   label: const Text('Import CSV'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                    foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.secondaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onSecondaryContainer,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -227,13 +253,17 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 child: ElevatedButton.icon(
                   onPressed: state.exportInProgress
                       ? null
-                      : () => ref.read(fileServiceProvider.notifier).handleCsvExport(context),
+                      : () => ref
+                          .read(fileServiceProvider.notifier)
+                          .handleCsvExport(context),
                   icon: const Icon(Icons.download),
                   label: const Text('Export CSV'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
-                    foregroundColor: Theme.of(context).colorScheme.onTertiaryContainer,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.tertiaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onTertiaryContainer,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -244,7 +274,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           ],
         ),
 
-        // Preview button
+        // Preview button.
+
         if (state.uploadFile != null) ...[
           const SizedBox(height: 12),
           TextButton.icon(
@@ -264,4 +295,4 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
       ],
     );
   }
-} 
+}

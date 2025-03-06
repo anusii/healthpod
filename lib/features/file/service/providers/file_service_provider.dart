@@ -14,31 +14,32 @@ import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
-// Import solidpod internals for direct access to functions
-import 'package:solidpod/src/solid/api/rest_api.dart' show ResourceContentType, deleteResource;
-import 'package:solidpod/src/solid/utils/misc.dart' show getFileUrl, deleteFile;
-
 /// A provider that manages the business logic for file operations.
 ///
 /// This provider handles all file-related operations including upload, download,
 /// and deletion, while maintaining the state of these operations.
+
 class FileServiceNotifier extends StateNotifier<FileState> {
   FileServiceNotifier() : super(FileState());
 
-  // Add callback for browser refresh
+  // Add callback for browser refresh.
+
   Function? _refreshCallback;
 
-  // Method to set the refresh callback
+  // Method to set the refresh callback.
+
   void setRefreshCallback(Function callback) {
     _refreshCallback = callback;
   }
 
-  /// Updates the current path and notifies listeners
+  /// Updates the current path and notifies listeners.
+
   void updateCurrentPath(String path) {
     state = state.copyWith(currentPath: path);
   }
 
   /// Handles file upload by reading its contents and encrypting it for upload.
+
   Future<void> handleUpload(BuildContext context) async {
     if (state.uploadFile == null) return;
 
@@ -53,6 +54,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
       // For text files, we directly read the content.
       // For binary files, we encode them into base64 format.
+
       if (isTextFile(state.uploadFile!)) {
         fileContent = await file.readAsString();
       } else {
@@ -60,7 +62,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         fileContent = base64Encode(bytes);
       }
 
-      // Sanitise file name and append encryption extension
+      // Sanitise file name and append encryption extension.
+
       String sanitizedFileName = path
           .basename(state.uploadFile!)
           .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
@@ -69,15 +72,20 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       final remoteFileName = '$sanitizedFileName.enc.ttl';
       final cleanFileName = sanitizedFileName;
 
-      // Extract the subdirectory path
-      String? subPath = state.currentPath?.replaceFirst('healthpod/data', '').trim();
+      // Extract the subdirectory path.
+
+      String? subPath =
+          state.currentPath?.replaceFirst('healthpod/data', '').trim();
       String uploadPath = subPath == null || subPath.isEmpty
           ? remoteFileName
           : '${subPath.startsWith("/") ? subPath.substring(1) : subPath}/$remoteFileName';
 
       debugPrint('Upload path: $uploadPath');
 
-      // Upload file with encryption
+      if (!context.mounted) return;
+
+      // Upload file with encryption.
+
       final result = await writePod(
         uploadPath,
         fileContent,
@@ -94,7 +102,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       );
 
       if (result == SolidFunctionCallStatus.success) {
-        // Show success message
+        // Show success message.
+
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -102,11 +111,13 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               backgroundColor: Colors.green,
             ),
           );
-          // Call the refresh callback to update the browser
+          // Call the refresh callback to update the browser.
+
           _refreshCallback?.call();
         }
       } else if (context.mounted) {
-        showAlert(context, 'Upload failed - please check your connection and permissions.');
+        showAlert(context,
+            'Upload failed - please check your connection and permissions.');
       }
     } catch (e) {
       if (context.mounted) {
@@ -118,6 +129,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
   }
 
   /// Handles the download and decryption of files from the POD.
+
   Future<void> handleDownload(BuildContext context) async {
     if (state.remoteFileName == null || state.currentPath == null) return;
 
@@ -127,10 +139,12 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         downloadDone: false,
       );
 
-      // Let user choose where to save the file
+      // Let user choose where to save the file.
+
       String? outputFile = await FilePicker.platform.saveFile(
         dialogTitle: 'Save file as:',
-        fileName: state.cleanFileName ?? state.remoteFileName?.replaceAll('.enc.ttl', ''),
+        fileName: state.cleanFileName ??
+            state.remoteFileName?.replaceAll('.enc.ttl', ''),
       );
 
       if (outputFile == null) {
@@ -164,7 +178,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
       if (fileContent == SolidFunctionCallStatus.fail ||
           fileContent == SolidFunctionCallStatus.notLoggedIn) {
-        throw Exception('Download failed - please check your connection and permissions');
+        throw Exception(
+            'Download failed - please check your connection and permissions');
       }
 
       await saveDecryptedContent(fileContent, outputFile);
@@ -191,22 +206,26 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     }
   }
 
-  /// Updates the selected file for upload
+  /// Updates the selected file for upload.
+
   void setUploadFile(String? file) {
     state = state.copyWith(uploadFile: file);
   }
 
-  /// Updates the selected file for download
+  /// Updates the selected file for download.
+
   void setDownloadFile(String? file) {
     state = state.copyWith(downloadFile: file);
   }
 
-  /// Updates the file preview content
+  /// Updates the file preview content.
+
   void setFilePreview(String? preview) {
     state = state.copyWith(filePreview: preview);
   }
 
-  /// Updates the remote file name
+  /// Updates the remote file name.
+
   void setRemoteFileName(String? fileName) {
     state = state.copyWith(
       remoteFileName: fileName,
@@ -214,7 +233,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     );
   }
 
-  /// Handles file deletion from the POD
+  /// Handles file deletion from the POD.
+
   Future<void> handleDelete(BuildContext context) async {
     if (state.remoteFileName == null || state.currentPath == null) return;
 
@@ -233,7 +253,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
       if (!context.mounted) return;
 
-      // First try to delete the main file
+      // First try to delete the main file.
+
       bool mainFileDeleted = false;
       try {
         await deleteFile(basePath);
@@ -241,22 +262,27 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         debugPrint('Successfully deleted main file: $basePath');
       } catch (e) {
         debugPrint('Error deleting main file: $e');
-        // Only rethrow if it's not a 404 error
-        if (!e.toString().contains('404') && !e.toString().contains('NotFoundHttpError')) {
+        // Only rethrow if it's not a 404 error.
+
+        if (!e.toString().contains('404') &&
+            !e.toString().contains('NotFoundHttpError')) {
           rethrow;
         }
       }
 
       if (!context.mounted) return;
 
-      // If main file deletion succeeded, try to delete the ACL file
+      // If main file deletion succeeded, try to delete the ACL file.
+
       if (mainFileDeleted) {
         try {
           await deleteFile('$basePath.acl');
           debugPrint('Successfully deleted ACL file');
         } catch (e) {
-          // ACL files are optional and may not exist
-          if (e.toString().contains('404') || e.toString().contains('NotFoundHttpError')) {
+          // ACL files are optional and may not exist.
+
+          if (e.toString().contains('404') ||
+              e.toString().contains('NotFoundHttpError')) {
             debugPrint('ACL file not found (safe to ignore)');
           } else {
             debugPrint('Error deleting ACL file: ${e.toString()}');
@@ -274,7 +300,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
             ),
           );
 
-          // Call the refresh callback to update the browser
+          // Call the refresh callback to update the browser.
+
           _refreshCallback?.call();
         }
       }
@@ -283,8 +310,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
       state = state.copyWith(deleteDone: false);
 
-      // Provide user-friendly error messages
-      final message = e.toString().contains('404') || e.toString().contains('NotFoundHttpError')
+      // Provide user-friendly error messages.
+
+      final message = e.toString().contains('404') ||
+              e.toString().contains('NotFoundHttpError')
           ? 'File not found or already deleted'
           : 'Delete failed: ${e.toString()}';
 
@@ -297,12 +326,14 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     }
   }
 
-  /// Toggles the preview visibility
+  /// Toggles the preview visibility.
+
   void togglePreview() {
     state = state.copyWith(showPreview: !state.showPreview);
   }
 
-  /// Handles the import of BP CSV files and conversion to individual JSON files.
+  /// Handles the import of BP  CSV files and conversion to individual JSON files.
+
   Future<void> handleCsvImport(BuildContext context) async {
     if (state.importInProgress) return;
 
@@ -317,6 +348,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
         if (file.path != null) {
+          if (!context.mounted) return;
+
           final success = await BPImporter.importFromCsv(
             file.path!,
             state.currentPath ?? 'healthpod/data',
@@ -327,7 +360,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
             if (success) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Blood pressure data imported and converted successfully'),
+                  content: Text(
+                      'Blood pressure data imported and converted successfully'),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -337,7 +371,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       }
     } catch (e) {
       if (context.mounted) {
-        showAlert(context, 'Failed to import Blood pressure data: ${e.toString()}');
+        showAlert(
+            context, 'Failed to import Blood pressure data: ${e.toString()}');
       }
     } finally {
       if (context.mounted) {
@@ -347,6 +382,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
   }
 
   /// Handles the export of BP data to CSV format.
+
   Future<void> handleCsvExport(BuildContext context) async {
     try {
       state = state.copyWith(exportInProgress: true);
@@ -357,6 +393,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       );
 
       if (outputFile != null) {
+        if (!context.mounted) return;
+
         final success = await BPExporter.exportToCsv(
           outputFile,
           state.currentPath ?? 'healthpod/data',
@@ -389,6 +427,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 }
 
 /// The provider instance for file service operations
-final fileServiceProvider = StateNotifierProvider<FileServiceNotifier, FileState>((ref) {
+
+final fileServiceProvider =
+    StateNotifierProvider<FileServiceNotifier, FileState>((ref) {
   return FileServiceNotifier();
-}); 
+});

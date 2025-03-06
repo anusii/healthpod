@@ -4,29 +4,39 @@
 /// throughout the FileService widget, providing a more organized and maintainable
 /// way to manage file operation states.
 
+library;
+
 class FileState {
-  /// The currently selected file for upload
+  /// The currently selected file for upload.
+
   String? uploadFile;
 
-  /// The currently selected file for download
+  /// The currently selected file for download.
+
   String? downloadFile;
 
-  /// The name of the file on the remote server
+  /// The name of the file on the remote server.
+
   String? remoteFileName;
 
-  /// The clean name of the file (without encryption extension)
+  /// The clean name of the file (without encryption extension).
+
   String? cleanFileName;
 
-  /// The URL of the remote file
+  /// The URL of the remote file.
+
   String? remoteFileUrl;
 
-  /// The preview content of the selected file
+  /// The preview content of the selected file.
+
   String? filePreview;
 
-  /// The current directory path
+  /// The current directory path.
+
   String? currentPath;
 
-  /// Operation status flags
+  /// Operation status flags.
+
   bool uploadInProgress = false;
   bool downloadInProgress = false;
   bool deleteInProgress = false;
@@ -37,7 +47,8 @@ class FileState {
   bool deleteDone = false;
   bool showPreview = false;
 
-  /// Creates a new [FileState] with default values
+  /// Creates a new [FileState] with default values.
+
   FileState({
     this.uploadFile,
     this.downloadFile,
@@ -57,7 +68,8 @@ class FileState {
     this.showPreview = false,
   });
 
-  /// Creates a copy of this [FileState] with the given fields replaced with new values
+  /// Creates a copy of this [FileState] with the given fields replaced with new values.
+
   FileState copyWith({
     String? uploadFile,
     String? downloadFile,
@@ -96,10 +108,11 @@ class FileState {
     );
   }
 
-  /// Checks if the current path is in the blood pressure directory
+  /// Checks if the current path is in the blood pressure directory.
+
   bool get isInBpDirectory {
     return currentPath!.endsWith('/blood_pressure') ||
         currentPath!.contains('/blood_pressure/') ||
         currentPath == 'healthpod/data/blood_pressure';
   }
-} 
+}

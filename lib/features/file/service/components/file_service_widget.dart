@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 
@@ -10,6 +11,7 @@ import 'package:healthpod/features/file/service/providers/file_service_provider.
 ///
 /// This widget composes the individual components for file operations and provides
 /// a unified interface for file management.
+
 class FileServiceWidget extends ConsumerStatefulWidget {
   const FileServiceWidget({super.key});
 
@@ -23,7 +25,8 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
   @override
   void initState() {
     super.initState();
-    // Set up the refresh callback after the widget is built
+    // Set up the refresh callback after the widget is built.
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(fileServiceProvider.notifier).setRefreshCallback(() {
         _browserKey.currentState?.refreshFiles();
@@ -33,20 +36,23 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // Determine if we're on a wide screen
+    // Determine if we're on a wide screen.
+
     final isWideScreen = MediaQuery.of(context).size.width > 800;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Main content area
+        // Main content area.
+
         Expanded(
           child: SingleChildScrollView(
             child: isWideScreen
                 ? Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // File browser on the left
+                      // File browser on the left.
+
                       Expanded(
                         flex: 2,
                         child: Card(
@@ -69,26 +75,32 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                                   ..handleDownload(context);
                               },
                               onFileDelete: (fileName, filePath) async {
-                                // Show confirmation dialog before deleting
+                                // Show confirmation dialog before deleting.
+
                                 final bool? confirm = await showDialog<bool>(
                                   context: context,
                                   builder: (BuildContext context) {
                                     return AlertDialog(
                                       title: const Text('Confirm Delete'),
-                                      content: Text('Are you sure you want to delete "$fileName"?'),
+                                      content: Text(
+                                          'Are you sure you want to delete "$fileName"?'),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.of(context).pop(false),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(false),
                                           child: const Text('Cancel'),
                                         ),
                                         TextButton(
-                                          onPressed: () => Navigator.of(context).pop(true),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(true),
                                           child: const Text('Delete'),
                                         ),
                                       ],
                                     );
                                   },
                                 );
+
+                                if (!context.mounted) return;
 
                                 if (confirm == true) {
                                   ref.read(fileServiceProvider.notifier)
@@ -97,20 +109,24 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                                 }
                               },
                               onImportCsv: (fileName, filePath) {
-                                // Handle CSV import if needed
+                                // Handle CSV import if needed.
                               },
                               onDirectoryChanged: (path) {
-                                ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
+                                ref
+                                    .read(fileServiceProvider.notifier)
+                                    .updateCurrentPath(path);
                               },
                             ),
                           ),
                         ),
                       ),
-                      // Upload section on the right
+                      // Upload section on the right.
+
                       Expanded(
                         flex: 1,
                         child: Card(
-                          margin: const EdgeInsets.only(left: 8, right: 16, top: 16),
+                          margin: const EdgeInsets.only(
+                              left: 8, right: 16, top: 16),
                           child: const Padding(
                             padding: EdgeInsets.all(16),
                             child: FileUploadSection(),
@@ -122,7 +138,8 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // File browser
+                      // File browser.
+
                       Card(
                         margin: const EdgeInsets.all(16),
                         child: SizedBox(
@@ -143,26 +160,32 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                                 ..handleDownload(context);
                             },
                             onFileDelete: (fileName, filePath) async {
-                              // Show confirmation dialog before deleting
+                              // Show confirmation dialog before deleting.
+
                               final bool? confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     title: const Text('Confirm Delete'),
-                                    content: Text('Are you sure you want to delete "$fileName"?'),
+                                    content: Text(
+                                        'Are you sure you want to delete "$fileName"?'),
                                     actions: [
                                       TextButton(
-                                        onPressed: () => Navigator.of(context).pop(false),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
                                         child: const Text('Cancel'),
                                       ),
                                       TextButton(
-                                        onPressed: () => Navigator.of(context).pop(true),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(true),
                                         child: const Text('Delete'),
                                       ),
                                     ],
                                   );
                                 },
                               );
+
+                              if (!context.mounted) return;
 
                               if (confirm == true) {
                                 ref.read(fileServiceProvider.notifier)
@@ -171,15 +194,18 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                               }
                             },
                             onImportCsv: (fileName, filePath) {
-                              // Handle CSV import if needed
+                              // Handle CSV import if needed.
                             },
                             onDirectoryChanged: (path) {
-                              ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
+                              ref
+                                  .read(fileServiceProvider.notifier)
+                                  .updateCurrentPath(path);
                             },
                           ),
                         ),
                       ),
-                      // Upload section
+                      // Upload section.
+
                       Card(
                         margin: const EdgeInsets.all(16),
                         child: const Padding(
@@ -194,4 +220,4 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
       ],
     );
   }
-} 
+}
