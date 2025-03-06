@@ -29,10 +29,10 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/features/file/item.dart';
-import 'package:healthpod/features/file/path_bar.dart';
 import 'package:healthpod/features/file/directory_list.dart';
 import 'package:healthpod/features/file/file_list.dart';
+import 'package:healthpod/features/file/item.dart';
+import 'package:healthpod/features/file/path_bar.dart';
 
 /// A file browser widget to interact with files and directories in user's POD.
 ///
