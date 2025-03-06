@@ -58,7 +58,7 @@ class ServiceOperations {
   /// Returns a tuple of (success, remoteFileName) where:
   /// - success: Whether the upload was successful.
   /// - remoteFileName: The name of the file in the POD.
-  
+
   static Future<(bool, String)> uploadFile({
     required String filePath,
     required String currentPath,
@@ -127,7 +127,7 @@ class ServiceOperations {
   /// - [context]: Build context for UI operations.
   ///
   /// Returns whether the download was successful.
-  
+
   static Future<bool> downloadFile({
     required String fileName,
     required String currentPath,
@@ -222,4 +222,4 @@ class ServiceOperations {
       return false;
     }
   }
-} 
+}

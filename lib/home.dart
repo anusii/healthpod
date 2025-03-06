@@ -34,7 +34,7 @@ import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/bp/combined_visualisation.dart';
 import 'package:healthpod/features/bp/editor/page.dart';
-import 'package:healthpod/features/file/service.dart';
+import 'package:healthpod/features/file/service/page.dart';
 import 'package:healthpod/features/survey/tab.dart';
 import 'package:healthpod/settings/dialog.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';

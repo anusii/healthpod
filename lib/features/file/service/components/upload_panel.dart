@@ -132,8 +132,10 @@ class UploadPanel extends StatelessWidget {
                 label: const Text('Select File'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  foregroundColor:
+                      Theme.of(context).colorScheme.onPrimaryContainer,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -143,9 +145,8 @@ class UploadPanel extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: (uploadFile == null || uploadInProgress)
-                    ? null
-                    : onUpload,
+                onPressed:
+                    (uploadFile == null || uploadInProgress) ? null : onUpload,
                 icon: const Icon(Icons.upload),
                 label: const Text('Upload'),
                 style: ElevatedButton.styleFrom(
@@ -164,9 +165,8 @@ class UploadPanel extends StatelessWidget {
 
         // Preview button.
         TextButton.icon(
-          onPressed: (uploadFile == null || uploadInProgress)
-              ? null
-              : onPreview,
+          onPressed:
+              (uploadFile == null || uploadInProgress) ? null : onPreview,
           icon: const Icon(Icons.preview),
           label: const Text('Preview File'),
           style: TextButton.styleFrom(
@@ -179,4 +179,4 @@ class UploadPanel extends StatelessWidget {
       ],
     );
   }
-} 
+}
