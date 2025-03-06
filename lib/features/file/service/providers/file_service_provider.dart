@@ -242,22 +242,22 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
   /// Updates the selected file for download.
 
-  void setDownloadFile(String? file) {
+  void setDownloadFile(String file) {
     state = state.copyWith(downloadFile: file);
   }
 
   /// Updates the file preview content.
 
-  void setFilePreview(String? preview) {
+  void setFilePreview(String preview) {
     state = state.copyWith(filePreview: preview);
   }
 
   /// Updates the remote file name.
 
-  void setRemoteFileName(String? fileName) {
+  void setRemoteFileName(String fileName) {
     state = state.copyWith(
       remoteFileName: fileName,
-      cleanFileName: fileName?.replaceAll('.enc.ttl', ''),
+      cleanFileName: fileName.replaceAll('.enc.ttl', ''),
     );
   }
 
