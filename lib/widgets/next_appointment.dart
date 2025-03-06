@@ -65,7 +65,7 @@ class _NextAppointmentState extends State<NextAppointment> {
       });
     } else {
       if (!audioInPlaying) {
-        await _audioPlayer.play(AssetSource('audio/transport_eligibility.m4a'));
+        await _audioPlayer.play(AssetSource('audio/transport_eligibility.mp3'));
 
         setState(() {
           _isPlaying = !_isPlaying;
