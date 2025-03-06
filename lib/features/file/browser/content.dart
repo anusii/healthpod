@@ -27,9 +27,9 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/features/file/components/directory_list.dart';
-import 'package:healthpod/features/file/components/file_list.dart';
-import 'package:healthpod/features/file/models/file_item.dart';
+import 'package:healthpod/features/file/browser/components/directory_list.dart';
+import 'package:healthpod/features/file/browser/components/file_list.dart';
+import 'package:healthpod/features/file/browser/models/file_item.dart';
 
 /// A widget that displays the main content of the file browser.
 ///

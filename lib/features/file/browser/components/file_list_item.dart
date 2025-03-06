@@ -27,7 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/features/file/models/file_item.dart';
+import 'package:healthpod/features/file/browser/models/file_item.dart';
 
 /// A widget that displays a single file item with its metadata and actions.
 ///

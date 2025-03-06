@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/features/file/models/file_item.dart';
+import 'package:healthpod/features/file/browser/models/file_item.dart';
 
 /// A utility class for performing file system operations in the POD.
 ///

@@ -27,8 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/features/file/components/file_list_item.dart';
-import 'package:healthpod/features/file/models/file_item.dart';
+import 'package:healthpod/features/file/browser/components/file_list_item.dart';
+import 'package:healthpod/features/file/browser/models/file_item.dart';
 
 /// A widget that displays a list of files with their metadata and actions.
 ///
