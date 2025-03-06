@@ -54,10 +54,12 @@ class VaccinationRecord {
   /// Creates a VaccinationRecord from JSON data.
 
   factory VaccinationRecord.fromJson(Map<String, dynamic> json) {
-    // Extract the responses object which contains the actual vaccination details
+    // Extract the responses object which contains the actual vaccination details.
+
     final responses = json['responses'] as Map<String, dynamic>?;
 
-    // If there's no responses object, try to use the top-level data
+    // If there's no responses object, try to use the top-level data.
+
     if (responses == null) {
       return VaccinationRecord(
         date: DateTime.parse(json['timestamp'] ??
@@ -71,14 +73,17 @@ class VaccinationRecord {
       );
     }
 
-    // Use the date from responses if available, otherwise use the timestamp
+    // Use the date from responses if available, otherwise use the timestamp.
+
     DateTime date;
     if (responses['date'] != null) {
       try {
-        // Try to parse the date from responses
+        // Try to parse the date from responses.
+
         date = DateTime.parse(responses['date']);
       } catch (e) {
-        // If parsing fails, try to handle format like "2025-3-7"
+        // If parsing fails, try to handle format like "2025-3-7".
+
         final parts = responses['date'].toString().split('-');
         if (parts.length == 3) {
           date = DateTime(
@@ -87,18 +92,21 @@ class VaccinationRecord {
             int.parse(parts[2]), // day
           );
         } else {
-          // Fall back to the timestamp
+          // Fall back to the timestamp.
+
           date = DateTime.parse(json['timestamp']);
         }
       }
     } else {
-      // Use the timestamp if no date in responses
+      // Use the timestamp if no date in responses.
+
       date = DateTime.parse(json['timestamp']);
     }
 
     return VaccinationRecord(
       date: date,
-      // Check multiple possible field names for the vaccine name
+      // Check multiple possible field names for the vaccine name.
+
       name: responses['vaccine_name'] ??
           responses['vaccine'] ??
           'Unknown Vaccine',
@@ -142,18 +150,21 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
     });
 
     try {
-      // Fetch data from the server
+      // Fetch data from the server.
+
       final data = await VaccinationData.fetchAllVaccinationData(context);
 
       if (mounted) {
-        // If no data is found, use sample data
+        // If no data is found, use sample data.
+
         if (data.isEmpty) {
           setState(() {
             _records = _getSampleData();
             _isLoading = false;
           });
         } else {
-          // Convert JSON data to VaccinationRecord objects
+          // Convert JSON data to VaccinationRecord objects.
+
           setState(() {
             _records =
                 data.map((item) => VaccinationRecord.fromJson(item)).toList();
@@ -166,7 +177,8 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
         setState(() {
           _error = 'Error loading vaccination data: $e';
           _isLoading = false;
-          // Fall back to sample data on error
+          // Fall back to sample data on error.
+
           _records = _getSampleData();
         });
 
