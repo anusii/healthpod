@@ -69,7 +69,7 @@ class _CallIconState extends State<CallIcon> {
   }
 
   /// Displays a confirmation dialog before initiating the phone call.
-  
+
   Future<void> _showConfirmationDialog(BuildContext context) async {
     // Capture the current BuildContext synchronously.
 
@@ -87,7 +87,7 @@ class _CallIconState extends State<CallIcon> {
           ElevatedButton(
             child: const Text("Yes"),
             onPressed: () async {
-              Navigator.of(dialogContext).pop(); 
+              Navigator.of(dialogContext).pop();
               await _initiatePhoneCall(localContext);
             },
           ),
@@ -97,7 +97,7 @@ class _CallIconState extends State<CallIcon> {
   }
 
   /// Initiates the phone call process.
-  
+
   Future<void> _initiatePhoneCall(BuildContext context) async {
     // Capture the BuildContext synchronously.
 
