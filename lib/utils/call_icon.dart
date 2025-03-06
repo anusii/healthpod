@@ -23,6 +23,8 @@
 ///
 /// Authors: Zheyuan Xu
 
+// ignore_for_file: use_build_context_synchronously
+
 library;
 
 import 'package:flutter/material.dart';
