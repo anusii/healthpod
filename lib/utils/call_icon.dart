@@ -29,17 +29,17 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_io/io.dart' show Platform;
 import 'package:ussd_phone_call_sms/ussd_phone_call_sms.dart';
 
 import 'package:healthpod/utils/show_alert.dart';
 
 /// A widget that displays a phone icon. On iOS, Android, and Linux the icon is interactive.
-/// On Linux, we bypass permission checks because permission_handler does not support Linux.
+/// (Permission checks have been removed for Linux since permission_handler does not work there.).
 
 class CallIcon extends StatefulWidget {
   final String contactNumber;
+
   const CallIcon({
     super.key,
     required this.contactNumber,
@@ -54,7 +54,7 @@ class _CallIconState extends State<CallIcon> {
 
   @override
   Widget build(BuildContext context) {
-    // Enable interactive behavior on mobile and Linux.
+    // Enable interactive behavior on iOS, Android, and Linux.
 
     if (Platform.isIOS || Platform.isAndroid || Platform.isLinux) {
       return GestureDetector(
@@ -68,72 +68,10 @@ class _CallIconState extends State<CallIcon> {
     }
   }
 
-  Future<void> _showPermissionDialog(BuildContext context) async {
-    if (!mounted) return;
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text("Permission Required"),
-        content: const Text(
-            "This app requires phone call permissions to make a call. Please enable it."),
-        actions: <Widget>[
-          ElevatedButton(
-            child: const Text("Cancel"),
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-          ),
-          ElevatedButton(
-            child: const Text("Ok"),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-          ),
-        ],
-      ),
-    );
-    if (!mounted) return;
-    if (result == true) {
-      await Permission.phone.request();
-    }
-  }
-
-  Future<void> _showManualPermissionSettingDialog() async {
-    if (!mounted) return;
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Permission Needed'),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('This app needs phone permission to make calls.'),
-                Text('Please enable it in the app settings.'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop(false);
-              },
-            ),
-            TextButton(
-              child: const Text('Settings'),
-              onPressed: () {
-                Navigator.of(dialogContext).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    );
-    if (!mounted) return;
-    if (result == true) {
-      await openAppSettings();
-    }
-  }
-
+  /// Displays a confirmation dialog before initiating the phone call.
+  
   Future<void> _showConfirmationDialog(BuildContext context) async {
-    // Capture the context synchronously.
+    // Capture the current BuildContext synchronously.
 
     final localContext = context;
     showDialog(
@@ -149,7 +87,7 @@ class _CallIconState extends State<CallIcon> {
           ElevatedButton(
             child: const Text("Yes"),
             onPressed: () async {
-              Navigator.of(dialogContext).pop(); // Close the dialog first.
+              Navigator.of(dialogContext).pop(); 
               await _initiatePhoneCall(localContext);
             },
           ),
@@ -158,6 +96,8 @@ class _CallIconState extends State<CallIcon> {
     );
   }
 
+  /// Initiates the phone call process.
+  
   Future<void> _initiatePhoneCall(BuildContext context) async {
     // Capture the BuildContext synchronously.
 
@@ -168,45 +108,18 @@ class _CallIconState extends State<CallIcon> {
       _iconColor = Colors.red;
     });
 
-    // If running on Linux, skip permission checks.
+    // For iOS/Android/Linux, simply attempt the phone call.
 
-    if (Platform.isLinux) {
-      try {
-        await UssdPhoneCallSms().phoneCall(phoneNumber: widget.contactNumber);
-      } catch (e) {
-        if (!mounted) return;
-        showAlert(localContext,
-            'Fail to call ${widget.contactNumber}! Phone call may not be supported on Linux.');
-      }
+    try {
+      await UssdPhoneCallSms().phoneCall(phoneNumber: widget.contactNumber);
+    } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _iconColor = Colors.deepPurple;
-      });
-      return;
-    }
 
-    // For iOS/Android, use permission_handler.
-
-    final callStatus = await Permission.phone.status;
-    if (!mounted) return;
-    if (callStatus.isPermanentlyDenied) {
-      await _showManualPermissionSettingDialog();
-      if (!mounted) return;
-    } else if (callStatus.isDenied) {
-      await _showPermissionDialog(localContext);
-      if (!mounted) return;
-    } else {
-      try {
-        await UssdPhoneCallSms().phoneCall(phoneNumber: widget.contactNumber);
-      } catch (e) {
-        if (!mounted) return;
-        showAlert(localContext,
-            'Fail to call ${widget.contactNumber}! Please check app permission!');
-      }
+      showAlert(localContext,
+          'Fail to call ${widget.contactNumber}! Please check app permission or platform support!');
     }
 
     if (!mounted) return;
-
     setState(() {
       _iconColor = Colors.deepPurple;
     });
