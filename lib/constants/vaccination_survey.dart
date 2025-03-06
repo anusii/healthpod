@@ -29,8 +29,10 @@ import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/features/survey/question.dart';
 
 /// Defines the standard set of vaccination survey questions.
+
 class VaccinationSurveyConstants {
   /// Data field names (for storage/CSV).
+
   static const String fieldTimestamp = 'timestamp';
   static const String fieldVaccine = 'vaccine';
   static const String fieldProvider = 'provider';
@@ -39,6 +41,7 @@ class VaccinationSurveyConstants {
   static const String fieldNotes = 'notes';
 
   /// Question texts (for UI only).
+
   static const String vaccine = "Which vaccine did you receive?";
   static const String provider = "Where did you receive the vaccine?";
   static const String professional = "Healthcare professional name";
@@ -46,6 +49,7 @@ class VaccinationSurveyConstants {
   static const String notes = "Any additional notes?";
 
   /// The list of questions used in the vaccination survey.
+
   static final List<HealthSurveyQuestion> questions = [
     HealthSurveyQuestion(
       question: vaccine,

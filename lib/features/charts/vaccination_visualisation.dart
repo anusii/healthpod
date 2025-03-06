@@ -30,6 +30,8 @@ import 'package:intl/intl.dart';
 
 import 'package:healthpod/features/charts/vaccination_data.dart';
 
+/// Represents a single vaccination record with all its details.
+
 class VaccinationRecord {
   final DateTime date;
   final String name;
@@ -37,6 +39,8 @@ class VaccinationRecord {
   final String? professional;
   final String? cost;
   final String? notes;
+
+  /// Constructor for creating a vaccination record.
 
   VaccinationRecord({
     required this.date,
@@ -47,7 +51,8 @@ class VaccinationRecord {
     this.notes,
   });
 
-  // Create a VaccinationRecord from a Map (JSON data)
+  /// Creates a VaccinationRecord from JSON data.
+
   factory VaccinationRecord.fromJson(Map<String, dynamic> json) {
     // Extract the responses object which contains the actual vaccination details
     final responses = json['responses'] as Map<String, dynamic>?;
@@ -105,6 +110,8 @@ class VaccinationRecord {
   }
 }
 
+/// Widget for displaying vaccination history in a timeline format.
+
 class VaccinationVisualisation extends StatefulWidget {
   const VaccinationVisualisation({super.key});
 
@@ -112,6 +119,8 @@ class VaccinationVisualisation extends StatefulWidget {
   State<VaccinationVisualisation> createState() =>
       _VaccinationVisualisationState();
 }
+
+/// State for the VaccinationVisualisation widget.
 
 class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
   List<VaccinationRecord> _records = [];
@@ -124,7 +133,8 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
     _loadData();
   }
 
-  // Load vaccination data from the server
+  /// Loads vaccination data from the server.
+
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
@@ -167,7 +177,8 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
     }
   }
 
-  // Sample data to use as fallback
+  /// Provides sample data to use as fallback when server data is unavailable.
+
   List<VaccinationRecord> _getSampleData() {
     return [
       VaccinationRecord(
@@ -194,7 +205,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
         cost: '\$75.00',
         notes: 'Final dose in series',
       ),
-      // More sample records...
+      // More sample records
       VaccinationRecord(
         date: DateTime(2023, 9, 15),
         name: 'Tetanus Booster',
@@ -228,11 +239,13 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
       );
     }
 
-    // Sort records by date, most recent first.
+    /// Sort records by date, most recent first.
+
     final sortedRecords = [..._records]
       ..sort((a, b) => b.date.compareTo(a.date));
 
-    // Wrap the entire widget in a SingleChildScrollView for vertical scrolling
+    /// Wrap the entire widget in a SingleChildScrollView for vertical scrolling.
+
     return RefreshIndicator(
       onRefresh: _loadData,
       child: SingleChildScrollView(
@@ -270,24 +283,32 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                       ),
                     )
                   : ListView.builder(
-                      // Make the ListView non-scrollable since the parent SingleChildScrollView will handle scrolling
+                      /// Make the ListView non-scrollable since the parent SingleChildScrollView will handle scrolling.
+
                       physics: const NeverScrollableScrollPhysics(),
-                      // Shrink the ListView to fit its content
+
+                      /// Shrink the ListView to fit its content.
+
                       shrinkWrap: true,
                       itemCount: sortedRecords.length,
                       itemBuilder: (context, index) {
                         final record = sortedRecords[index];
 
-                        // Calculate the line length based on time difference with next record.
-                        // Default minimum height.
+                        /// Calculate the line length based on time difference with next record.
+                        /// Default minimum height.
+
                         double lineHeight = 50.0;
                         if (index < sortedRecords.length - 1) {
                           final nextRecord = sortedRecords[index + 1];
                           final daysDifference =
                               record.date.difference(nextRecord.date).inDays;
-                          // Scale: 1 month ≈ 30 pixels.
+
+                          /// Scale: 1 month ≈ 30 pixels.
+
                           lineHeight = (daysDifference / 30) * 30;
-                          // Ensure minimum height for readability.
+
+                          /// Ensure minimum height for readability.
+
                           lineHeight = lineHeight.clamp(50.0, 300.0);
                         }
 
@@ -309,7 +330,8 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                           hasIndicator: true,
                           endChild: InkWell(
                             onTap: () {
-                              // Show details in a dialog when tapped
+                              /// Show details in a dialog when tapped.
+
                               _showVaccinationDetails(context, record);
                             },
                             child: Container(
@@ -356,7 +378,8 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
     );
   }
 
-  // Show a dialog with detailed vaccination information
+  /// Shows a dialog with detailed vaccination information.
+
   void _showVaccinationDetails(BuildContext context, VaccinationRecord record) {
     showDialog(
       context: context,
