@@ -29,12 +29,12 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/features/file/browser/content.dart';
-import 'package:healthpod/features/file/browser/loading_state.dart';
-import 'package:healthpod/features/file/browser/components/path_bar.dart';
 import 'package:healthpod/features/file/browser/models/file_item.dart';
+import 'package:healthpod/features/file/browser/components/path_bar.dart';
 import 'package:healthpod/features/file/browser/operations/file_operations.dart';
 import 'package:healthpod/features/file/utils/empty_directory_view.dart';
+import 'package:healthpod/features/file/browser/loading_state.dart';
+import 'package:healthpod/features/file/browser/content.dart';
 
 /// A file browser widget to interact with files and directories in user's POD.
 ///
@@ -48,27 +48,14 @@ import 'package:healthpod/features/file/utils/empty_directory_view.dart';
 /// file.
 
 class FileBrowser extends StatefulWidget {
-  /// Callback when a file is selected.
-
   final Function(String, String) onFileSelected;
-
-  /// Callback when a file is downloaded.
-
   final Function(String, String) onFileDownload;
-
-  /// Callback when a file is deleted.
-
   final Function(String, String) onFileDelete;
-
-  /// Callback when the current directory changes.
-
   final Function(String) onDirectoryChanged;
 
   /// Callback to handle CSV file imports.
 
   final Function(String, String) onImportCsv;
-
-  /// Key to access the browser state from outside the widget.
 
   final GlobalKey<FileBrowserState> browserKey;
 
@@ -86,47 +73,16 @@ class FileBrowser extends StatefulWidget {
   State<FileBrowser> createState() => FileBrowserState();
 }
 
-/// State class for the [FileBrowser] widget.
-///
-/// Manages the browser's state including:
-/// - Current directory path and navigation history.
-/// - Lists of files and directories.
-/// - Loading states and file counts.
-/// - File selection state.
-///
-/// Handles all file operations and navigation logic.
+/// State variables for the [FileBrowser].
 
 class FileBrowserState extends State<FileBrowser> {
-  /// List of files in the current directory.
-
   List<FileItem> files = [];
-
-  /// List of subdirectories in the current directory.
-
   List<String> directories = [];
-
-  /// Map of directory names to their file counts.
-
   Map<String, int> directoryCounts = {};
-
-  /// Whether the browser is currently loading content.
-
   bool isLoading = true;
-
-  /// The currently selected file name.
-
   String? selectedFile;
-
-  /// The current directory path being displayed.
-
   String currentPath = 'healthpod/data';
-
-  /// History of visited directories for navigation.
-
   List<String> pathHistory = ['healthpod/data'];
-
-  /// Number of files in the current directory.
-
   int currentDirFileCount = 0;
 
   @override
@@ -134,10 +90,6 @@ class FileBrowserState extends State<FileBrowser> {
     super.initState();
     refreshFiles();
   }
-
-  /// Navigates into a subdirectory.
-  ///
-  /// Updates the current path and history, then refreshes the file list.
 
   Future<void> navigateToDirectory(String dirName) async {
     setState(() {
@@ -148,10 +100,6 @@ class FileBrowserState extends State<FileBrowser> {
     widget.onDirectoryChanged.call(currentPath);
   }
 
-  /// Navigates up one directory level.
-  ///
-  /// Removes the last directory from the path history and refreshes the file list.
-
   Future<void> navigateUp() async {
     if (pathHistory.length > 1) {
       pathHistory.removeLast();
@@ -161,43 +109,24 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
-  /// Refreshes the current directory's contents.
-  ///
-  /// Fetches and processes:
-  /// - List of files and directories.
-  /// - File counts for each subdirectory.
-  /// - File metadata and validation.
-
   Future<void> refreshFiles() async {
     setState(() => isLoading = true);
 
     try {
-      // Get current directory contents.
-
       final dirUrl = await getDirUrl(currentPath);
       final resources = await getResourcesInContainer(dirUrl);
 
       if (!mounted) return;
 
-      // Update directories list.
-
       setState(() => directories = resources.subDirs);
-
-      // Count files in current directory.
 
       currentDirFileCount =
           resources.files.where((f) => f.endsWith('.enc.ttl')).length;
-
-      // Get file counts for all subdirectories.
 
       final counts = await FileOperations.getDirectoryCounts(
         currentPath,
         directories,
       );
-
-      if (!mounted) return;
-
-      // Process and validate files.
 
       final processedFiles = await FileOperations.getFiles(
         currentPath,
@@ -205,8 +134,6 @@ class FileBrowserState extends State<FileBrowser> {
       );
 
       if (!mounted) return;
-
-      // Update state with processed data.
 
       setState(() {
         files = processedFiles;
@@ -232,8 +159,6 @@ class FileBrowserState extends State<FileBrowser> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Navigation and path display bar.
-
             PathBar(
               currentPath: currentPath,
               pathHistory: pathHistory,
@@ -242,11 +167,7 @@ class FileBrowserState extends State<FileBrowser> {
               isLoading: isLoading,
               currentDirFileCount: currentDirFileCount,
             ),
-
             const SizedBox(height: 12),
-
-            // Main content area with conditional rendering.
-
             Expanded(
               child: isLoading
                   ? const FileBrowserLoadingState()

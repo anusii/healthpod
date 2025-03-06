@@ -1,6 +1,6 @@
 /// A file browser widget.
 ///
-// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+/// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -29,12 +29,12 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/features/file/browser/content.dart';
+import 'package:healthpod/features/file/utils/empty_directory_view.dart';
 import 'package:healthpod/features/file/browser/loading_state.dart';
+import 'package:healthpod/features/file/browser/content.dart';
 import 'package:healthpod/features/file/browser/components/path_bar.dart';
 import 'package:healthpod/features/file/browser/models/file_item.dart';
 import 'package:healthpod/features/file/browser/operations/file_operations.dart';
-import 'package:healthpod/features/file/utils/empty_directory_view.dart';
 
 /// A file browser widget to interact with files and directories in user's POD.
 ///
