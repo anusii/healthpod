@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/features/file/utils/empty_directory_view.dart';
+import 'package:healthpod/features/file/browser/utils/empty_directory_view.dart';
 import 'package:healthpod/features/file/browser/loading_state.dart';
 import 'package:healthpod/features/file/browser/content.dart';
 import 'package:healthpod/features/file/browser/components/path_bar.dart';
