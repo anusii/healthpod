@@ -30,6 +30,9 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/file/item.dart';
+import 'package:healthpod/features/file/path_bar.dart';
+import 'package:healthpod/features/file/directory_list.dart';
+import 'package:healthpod/features/file/file_list.dart';
 
 /// A file browser widget to interact with files and directories in user's POD.
 ///
@@ -239,159 +242,6 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
-  /// Builds a list item widget for displaying a file with its metadata and actions.
-  ///
-  /// This widget adapts its layout based on available width constraints:
-  /// - At < 40px: Shows only the file name
-  /// - At 40-100px: Adds file icon with minimal spacing
-  /// - At 100-150px: Increases icon spacing
-  /// - At > 150px: Shows modification date
-  /// - At > 200px: Shows action buttons (download, delete)
-  ///
-  /// The item supports selection state, showing a highlight when selected.
-  /// Action buttons are conditionally rendered based on available space.
-  ///
-  /// Parameters:
-  /// - [file]: The FileItem containing the file's metadata
-  /// - [context]: The build context for theming
-  ///
-  /// Returns a padded, responsive list item widget with the file's information
-  /// and available actions.
-
-  Widget _buildFileListItem(FileItem file, BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Define minimum width threshold for showing action buttons.
-
-          const minWidthForButtons = 200;
-          final showButtons = constraints.maxWidth >= minWidthForButtons;
-
-          return InkWell(
-            onTap: () {
-              // Update selection state and notify parent.
-
-              setState(() {
-                selectedFile = file.name;
-              });
-              widget.onFileSelected.call(file.name, currentPath);
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              // Apply selection highlighting using theme colours.
-
-              decoration: BoxDecoration(
-                color: selectedFile == file.name
-                    ? Theme.of(context)
-                        .colorScheme
-                        .primaryContainer
-                        .withAlpha(10)
-                    : null,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              // Adjust horizontal padding based on available width.
-
-              padding: EdgeInsets.symmetric(
-                horizontal: constraints.maxWidth < 50 ? 4 : 12,
-                vertical: 8,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Show file icon only if width permits.
-
-                  if (constraints.maxWidth > 40)
-                    Icon(
-                      Icons.insert_drive_file,
-                      color: Theme.of(context).colorScheme.secondary,
-                      size: 20,
-                    ),
-                  // Responsive spacing after icon.
-
-                  if (constraints.maxWidth > 40)
-                    SizedBox(width: constraints.maxWidth < 100 ? 4 : 12),
-                  // File information column.
-
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // File name with overflow protection.
-
-                        Text(
-                          file.name,
-                          style: const TextStyle(fontWeight: FontWeight.w500),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        // Show modification date if width permits.
-
-                        if (constraints.maxWidth > 150)
-                          Text(
-                            'Modified: ${file.dateModified.toString().split('.')[0]}',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                              fontSize: 12,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                      ],
-                    ),
-                  ),
-                  // Action buttons shown only if sufficient width.
-
-                  if (showButtons) ...[
-                    const SizedBox(width: 8),
-                    // Download button.
-
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      icon: Icon(
-                        Icons.download,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      onPressed: () =>
-                          widget.onFileDownload.call(file.name, currentPath),
-                      style: IconButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primary.withAlpha(10),
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(35, 35),
-                      ),
-                    ),
-                    smallGapH,
-                    // Delete button.
-
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      icon: Icon(
-                        Icons.delete_outline,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      onPressed: () =>
-                          widget.onFileDelete.call(file.name, currentPath),
-                      style: IconButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.error.withAlpha(10),
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(35, 35),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -403,81 +253,13 @@ class FileBrowserState extends State<FileBrowser> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest
-                    .withAlpha(50),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).dividerColor.withAlpha(10),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      if (pathHistory.length > 1)
-                        IconButton(
-                          icon: Icon(
-                            Icons.arrow_back,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                          onPressed: navigateUp,
-                          tooltip: 'Go up',
-                          style: IconButton.styleFrom(
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withAlpha(10),
-                            padding: const EdgeInsets.all(8),
-                          ),
-                        ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          currentPath,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: Icon(
-                          Icons.refresh,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                        onPressed: refreshFiles,
-                        tooltip: 'Refresh',
-                        style: IconButton.styleFrom(
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .primary
-                              .withAlpha(10),
-                          padding: const EdgeInsets.all(8),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // Display current directory file count below path bar.
-
-                  if (!isLoading) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      'Files in current directory: $currentDirFileCount',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+            PathBar(
+              currentPath: currentPath,
+              pathHistory: pathHistory,
+              onNavigateUp: navigateUp,
+              onRefresh: refreshFiles,
+              isLoading: isLoading,
+              currentDirFileCount: currentDirFileCount,
             ),
             const SizedBox(height: 12),
             Expanded(
@@ -510,99 +292,33 @@ class FileBrowserState extends State<FileBrowser> {
                         )
                       : ListView(
                           children: [
-                            if (directories.isNotEmpty) ...[
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                child: Text(
-                                  'Folders',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
+                            DirectoryList(
+                              directories: directories,
+                              directoryCounts: directoryCounts,
+                              onDirectorySelected: navigateToDirectory,
+                            ),
+                            if (directories.isNotEmpty && files.isNotEmpty)
+                              Divider(
+                                height: 24,
+                                indent: 16,
+                                endIndent: 16,
+                                color: Theme.of(context)
+                                    .dividerColor
+                                    .withAlpha(20),
                               ),
-                              ...directories.map((dir) => ListTile(
-                                    leading: Icon(
-                                      Icons.folder,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                    title: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            dir,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                        ),
-                                        // Display file count badge for each directory.
-
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 8, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                                .withAlpha(10),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                          ),
-                                          child: Text(
-                                            // Show file count from directoryCounts map.
-
-                                            '${directoryCounts[dir] ?? 0} files',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    dense: true,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    onTap: () => navigateToDirectory(dir),
-                                  )),
-                              if (files.isNotEmpty)
-                                Divider(
-                                  height: 24,
-                                  indent: 16,
-                                  endIndent: 16,
-                                  color: Theme.of(context)
-                                      .dividerColor
-                                      .withAlpha(20),
-                                ),
-                            ],
-                            if (files.isNotEmpty) ...[
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                child: Text(
-                                  'Files',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                              ),
-                              ...files.map(
-                                  (file) => _buildFileListItem(file, context)),
-                            ],
+                            FileList(
+                              files: files,
+                              currentPath: currentPath,
+                              selectedFile: selectedFile,
+                              onFileSelected: (name, path) {
+                                setState(() {
+                                  selectedFile = name;
+                                });
+                                widget.onFileSelected.call(name, path);
+                              },
+                              onFileDownload: widget.onFileDownload,
+                              onFileDelete: widget.onFileDelete,
+                            ),
                           ],
                         ),
             ),
