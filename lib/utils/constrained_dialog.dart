@@ -27,9 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
-/// Shows a dialog with constrained height.
-///
 /// This function creates an AlertDialog with a height-constrained content area.
+
 Future<T?> showConstrainedDialog<T>({
   required BuildContext context,
   required Widget title,
@@ -59,6 +58,7 @@ Future<T?> showConstrainedDialog<T>({
 /// Shows a confirmation dialog with constrained height.
 ///
 /// A specialized version for confirmation dialogs with "Cancel" and "Confirm" buttons.
+
 Future<bool> showConstrainedConfirmationDialog({
   required BuildContext context,
   required String title,

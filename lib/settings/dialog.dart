@@ -191,6 +191,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                       ElevatedButton(
                         onPressed: () async {
                           // Show confirmation dialog before resetting.
+
                           final confirmed =
                               await showConstrainedConfirmationDialog(
                             context: context,
