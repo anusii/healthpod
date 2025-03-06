@@ -206,7 +206,7 @@ class _CallIconState extends State<CallIcon> {
     }
 
     if (!mounted) return;
-    
+
     setState(() {
       _iconColor = Colors.deepPurple;
     });
