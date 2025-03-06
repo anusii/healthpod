@@ -38,7 +38,7 @@ import 'package:healthpod/dialogs/alert.dart';
 /// application. If the URL fails to launch, a dialog will inform the user.
 
 TextSpan addressLink(String clinicAddress, BuildContext context,
-    {double? fontSize}) {
+    {double fontSize = 16}) {
   // Make clinicAddress understandable to Google Map.
 
   String matchAddress = '';
@@ -59,14 +59,14 @@ TextSpan addressLink(String clinicAddress, BuildContext context,
       ? TextSpan(
           text: clinicAddress,
           style: TextStyle(
-            fontSize: fontSize ?? 16,
+            fontSize: fontSize,
             color: Colors.black,
           ),
         )
       : TextSpan(
           text: clinicAddress,
           style: TextStyle(
-            fontSize: fontSize ?? 16,
+            fontSize: fontSize,
             color: Colors.blue,
             decoration: TextDecoration.underline,
           ),
