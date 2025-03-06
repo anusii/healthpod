@@ -63,11 +63,11 @@ Future<bool> showConstrainedConfirmationDialog({
   required BuildContext context,
   required String title,
   required String message,
+  required VoidCallback onConfirm,
   String confirmText = 'Confirm',
   String cancelText = 'Cancel',
   Color confirmColor = Colors.blue,
   double maxHeight = 100,
-  VoidCallback? onConfirm,
 }) async {
   final result = await showConstrainedDialog<bool>(
     context: context,
@@ -81,9 +81,7 @@ Future<bool> showConstrainedConfirmationDialog({
       ),
       TextButton(
         onPressed: () {
-          if (onConfirm != null) {
-            onConfirm();
-          }
+          onConfirm();
           Navigator.of(context).pop(true);
         },
         child: Text(

@@ -192,8 +192,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         onPressed: () async {
                           // Show confirmation dialog before resetting.
 
-                          final confirmed =
-                              await showConstrainedConfirmationDialog(
+                          await showConstrainedConfirmationDialog(
                             context: context,
                             title: 'Reset Settings',
                             message:
