@@ -1,6 +1,8 @@
-/// File item widget.
+/// A loading state widget for the file browser.
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+///
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -23,16 +25,23 @@
 
 library;
 
-// Represents a single file with its metadata such as name, path and date modified.
+import 'package:flutter/material.dart';
 
-class FileItem {
-  final String name;
-  final String path;
-  final DateTime dateModified;
+/// A widget that displays while the file browser is loading.
+///
+/// The loading state shows a centered progress indicator to provide
+/// visual feedback that the browser is fetching directory contents.
+///
+/// This widget is used during:
+/// - Initial directory load.
+/// - Directory navigation.
+/// - Manual refresh operations.
 
-  FileItem({
-    required this.name,
-    required this.path,
-    required this.dateModified,
-  });
+class FileBrowserLoadingState extends StatelessWidget {
+  const FileBrowserLoadingState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: CircularProgressIndicator());
+  }
 }
