@@ -63,7 +63,7 @@ dev_dependencies:
   custom_lint: 0.6.10
   import_order_lint:
     git:
-      url: git@github.com:anusii/import-order-lint.git
+      url: https://github.com/anusii/import-order-lint.git
       ref: main
   webdriver: 3.0.4
 
