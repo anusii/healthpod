@@ -62,7 +62,9 @@ dev_dependencies:
   ubuntu_lints: ^0.4.0
   custom_lint: 0.6.10
   import_order_lint:
-    path: import_order_lint
+    git:
+      url: https://github.com/anusii/import_order_lint.git
+      ref: main
   webdriver: 3.0.4
 
 dependency_overrides:
