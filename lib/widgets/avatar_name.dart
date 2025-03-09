@@ -1,6 +1,6 @@
 /// Avatar image card widget.
 //
-// Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
+// Time-stamp: <Sunday 2025-03-09 11:43:18 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -37,7 +37,7 @@ class AvatarName extends StatefulWidget {
 }
 
 class _AvatarNameState extends State<AvatarName> {
-  // Dummy data.
+  // Sample data.
 
   final String userName = 'Riley Breugel';
   final String patientID = 'p43623';
@@ -69,7 +69,7 @@ class _AvatarNameState extends State<AvatarName> {
               CircleAvatar(
                 radius: 24,
                 backgroundImage:
-                    AssetImage('assets/images/dummy_avatar_image.png'),
+                    AssetImage('assets/images/sample_avatar_image.png'),
               ),
               Positioned(
                 bottom: -2,

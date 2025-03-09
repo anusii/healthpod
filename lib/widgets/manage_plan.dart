@@ -1,6 +1,6 @@
 /// Management Plan card widget.
 //
-// Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
+// Time-stamp: <Sunday 2025-03-09 11:43:38 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -62,7 +62,8 @@ class _ManagePlanState extends State<ManagePlan> {
         children: [
           CircleAvatar(
             radius: 32,
-            backgroundImage: AssetImage('assets/images/dummy_doctor_image.png'),
+            backgroundImage:
+                AssetImage('assets/images/sample_doctor_image.png'),
           ),
           const SizedBox(width: 16),
           Expanded(
