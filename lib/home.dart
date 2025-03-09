@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Friday 2025-02-21 16:58:42 +1100 Graham Williams>
+// Time-stamp: <Sunday 2025-03-09 11:40:02 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
@@ -79,7 +79,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'content': const SurveyTab(),
     'tooltip': '''
 
-    Log your Blood Pressure (systolic, diastolic, heart rate), 
+    Log your Blood Pressure (systolic, diastolic, heart rate),
     how you are feeling, and vaccination records.
     ''',
   },
@@ -307,12 +307,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
                             final tooltipMessage =
                                 tab['tooltip'] ?? tab['message'];
                             return NavigationRailDestination(
-                              icon: Tooltip(
+                              icon: MarkdownTooltip(
                                 message: tooltipMessage,
-                                textStyle: const TextStyle(
-                                    fontSize: 16, color: Colors.white),
-                                margin: const EdgeInsets.only(
-                                    top: 0.0, bottom: 0.0),
                                 child: Icon(tab['icon'], color: tab['color']),
                               ),
                               label: Text(
