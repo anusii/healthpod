@@ -28,7 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
-import 'package:healthpod/features/table/editor/state.dart';
+import 'package:healthpod/features/table/bp_editor/state.dart';
 
 /// List of available feeling options.
 

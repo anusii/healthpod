@@ -26,7 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/features/table/editor/state.dart';
+import 'package:healthpod/features/table/bp_editor/state.dart';
 
 import 'package:intl/intl.dart';
 
