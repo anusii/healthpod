@@ -27,6 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/constants/appointment.dart';
+
 import 'package:healthpod/constants/colours.dart';
 
 class AvatarName extends StatefulWidget {
@@ -37,13 +39,6 @@ class AvatarName extends StatefulWidget {
 }
 
 class _AvatarNameState extends State<AvatarName> {
-  // Sample data.
-
-  final String userName = 'Riley Breugel';
-  final String patientID = 'p43623';
-  final String avatarUrl = 'https://i.pravatar.cc/300';
-  final int notificationCount = 3;
-
   @override
   Widget build(BuildContext context) {
     return Container(

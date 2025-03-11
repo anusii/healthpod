@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:audioplayers/audioplayers.dart';
 
+import 'package:healthpod/constants/appointment.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/address_link.dart';
 import 'package:healthpod/utils/audio_tooltip.dart';
@@ -98,14 +99,6 @@ class _NextAppointmentState extends State<NextAppointment> {
     audioInPlaying = false;
     super.dispose();
   }
-
-  // Dummy data for demonstration.
-
-  final String appointmentDate = 'Monday, 13 March';
-  final String appointmentTime = '14:30 pm';
-  final String appointmentLocation = 'Gurriny Yealamucka';
-  final String phoneNumber = '(07) 4226 4100';
-  final bool clinicBusAvailable = true;
 
   @override
   Widget build(BuildContext context) {
