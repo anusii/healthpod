@@ -64,7 +64,6 @@ class VaccinationEditorControllers {
     // Set initial state.
 
     _currentState = observation;
-    _onObservationChanged = onObservationChanged;
 
     // Remove existing listeners before updating.
 
@@ -92,10 +91,6 @@ class VaccinationEditorControllers {
 
     _addListeners(onObservationChanged);
   }
-
-  /// Callback for changes.
-
-  void Function(VaccinationObservation updated)? _onObservationChanged;
 
   /// Add listeners to all controllers to update the observation.
 
@@ -188,7 +183,6 @@ class VaccinationEditorControllers {
 
   void dispose() {
     _removeListeners();
-    _onObservationChanged = null;
     vaccineNameController?.dispose();
     providerController?.dispose();
     professionalController?.dispose();
