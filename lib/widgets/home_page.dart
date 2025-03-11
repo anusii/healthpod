@@ -27,11 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/widgets/avatar_name.dart';
-import 'package:healthpod/widgets/manage_plan.dart';
-import 'package:healthpod/widgets/next_appointment.dart';
-import 'package:healthpod/widgets/number_appointments.dart';
-import 'package:healthpod/widgets/personal_details.dart';
+import 'package:healthpod/features/home/service/components/components.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
