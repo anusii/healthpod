@@ -36,6 +36,7 @@ import 'package:healthpod/features/table/vaccination_editor/model.dart';
 
 class VaccinationEditorControllers {
   /// Text editing controllers for various fields.
+
   TextEditingController? vaccineNameController;
   TextEditingController? providerController;
   TextEditingController? professionalController;
@@ -43,6 +44,7 @@ class VaccinationEditorControllers {
   TextEditingController? notesController;
 
   // Store references to our listeners so we can remove them later.
+
   VoidCallback? _vaccineNameListener;
   VoidCallback? _providerListener;
   VoidCallback? _professionalListener;
@@ -50,21 +52,26 @@ class VaccinationEditorControllers {
   VoidCallback? _notesListener;
 
   /// Keep track of the current observation state.
+
   VaccinationObservation? _currentState;
 
   /// Initialize or update controllers with values from an observation.
+
   void initialize(
     VaccinationObservation observation, {
     required void Function(VaccinationObservation updated) onObservationChanged,
   }) {
     // Set initial state.
+
     _currentState = observation;
     _onObservationChanged = onObservationChanged;
 
     // Remove existing listeners before updating.
+
     _removeListeners();
 
     // Create new controllers if they don't exist.
+
     vaccineNameController ??=
         TextEditingController(text: observation.vaccineName);
     providerController ??= TextEditingController(text: observation.provider);
@@ -74,6 +81,7 @@ class VaccinationEditorControllers {
     notesController ??= TextEditingController(text: observation.notes);
 
     // Update text values if controllers exist.
+
     vaccineNameController!.text = observation.vaccineName;
     providerController!.text = observation.provider;
     professionalController!.text = observation.professional;
@@ -81,13 +89,16 @@ class VaccinationEditorControllers {
     notesController!.text = observation.notes;
 
     // Add new listeners.
+
     _addListeners(onObservationChanged);
   }
 
   /// Callback for changes.
+
   void Function(VaccinationObservation updated)? _onObservationChanged;
 
   /// Add listeners to all controllers to update the observation.
+
   void _addListeners(
     void Function(VaccinationObservation updated) onObservationChanged,
   ) {
@@ -143,6 +154,7 @@ class VaccinationEditorControllers {
   }
 
   /// Remove all listeners from controllers.
+
   void _removeListeners() {
     if (_vaccineNameListener != null) {
       vaccineNameController?.removeListener(_vaccineNameListener!);
@@ -167,11 +179,13 @@ class VaccinationEditorControllers {
   }
 
   /// Check if any required values are missing.
+
   bool hasRequiredValues() {
     return vaccineNameController?.text.isNotEmpty ?? false;
   }
 
   /// Dispose of all controllers and clean up.
+
   void dispose() {
     _removeListeners();
     _onObservationChanged = null;

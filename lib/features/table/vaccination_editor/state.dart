@@ -36,27 +36,33 @@ import 'package:healthpod/features/table/vaccination_editor/model.dart';
 /// and the state of the text editing controllers.
 ///
 /// ChangeNotifier is used to notify listeners of changes to the state.
-
 class VaccinationEditorState with ChangeNotifier {
   /// The list of loaded observations.
+
   List<VaccinationObservation> observations = [];
 
   /// Index of the observation currently being edited, or null if none.
+
   int? editingIndex;
 
   /// Whether data is currently loading (async).
+
   bool isLoading = true;
 
   /// Error message if data loading fails.
+
   String? error;
 
   /// Flag tracking whether we are creating a new observation.
+
   bool isNewObservation = false;
 
   /// Controller manager for text editing.
+
   final controllers = VaccinationEditorControllers();
 
   /// Getter for controllers.
+
   TextEditingController? get vaccineNameController =>
       controllers.vaccineNameController;
   TextEditingController? get providerController =>
@@ -67,12 +73,15 @@ class VaccinationEditorState with ChangeNotifier {
   TextEditingController? get notesController => controllers.notesController;
 
   /// The observation currently being edited.
+
   VaccinationObservation? _currentEdit;
 
   /// Getter for currentEdit.
+
   VaccinationObservation? get currentEdit => _currentEdit;
 
   /// Prepares text controllers for a given [observation].
+
   void initialiseControllers(VaccinationObservation observation) {
     controllers.initialize(
       observation,
@@ -83,6 +92,7 @@ class VaccinationEditorState with ChangeNotifier {
   }
 
   /// Resets editing fields and cancels the current edit.
+
   void cancelEdit() {
     controllers.dispose();
     editingIndex = null;
@@ -92,6 +102,7 @@ class VaccinationEditorState with ChangeNotifier {
   }
 
   /// Enters edit mode for the observation at [index].
+
   void enterEditMode(int index) {
     editingIndex = index;
     isNewObservation = false;
@@ -100,12 +111,14 @@ class VaccinationEditorState with ChangeNotifier {
   }
 
   /// Setter for currentEdit that triggers UI updates.
+
   set currentEdit(VaccinationObservation? value) {
     _currentEdit = value;
     notifyListeners();
   }
 
   /// Add new blank observation at the top of the list and go to edit mode.
+
   void addNewObservation() {
     final newObservation = VaccinationObservation(
       timestamp: DateTime.now(),
@@ -123,12 +136,14 @@ class VaccinationEditorState with ChangeNotifier {
   }
 
   /// Save the observation at [index], using the provided service.
+
   Future<void> saveObservation(
     BuildContext context,
     dynamic editorService,
     int index,
   ) async {
     // Validate required fields.
+
     if (!controllers.hasRequiredValues()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -153,6 +168,7 @@ class VaccinationEditorState with ChangeNotifier {
     if (!context.mounted) return;
 
     // Show success message.
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Vaccination record saved successfully'),
@@ -161,6 +177,7 @@ class VaccinationEditorState with ChangeNotifier {
     );
 
     // Reset editing state.
+
     editingIndex = null;
     isNewObservation = false;
     currentEdit = null;
@@ -168,6 +185,7 @@ class VaccinationEditorState with ChangeNotifier {
   }
 
   /// Delete an observation from the Pod via the [editorService].
+
   Future<void> deleteObservation(
     BuildContext context,
     dynamic editorService,

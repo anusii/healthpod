@@ -32,24 +32,35 @@ import 'package:healthpod/constants/vaccination_survey.dart';
 /// Stores complete vaccination information including timestamp, vaccine name,
 /// provider, professional, cost, and notes. Provides JSON serialization and
 /// object copying functionality.
+/// Model class representing a vaccination observation.
+///
+/// Stores complete vaccination information including timestamp, vaccine name,
+/// provider, professional, cost, and notes. Provides JSON serialization and
+/// object copying functionality.
 
 class VaccinationObservation {
   /// When the vaccination was administered.
+
   final DateTime timestamp;
 
   /// Name of the vaccine administered.
+
   final String vaccineName;
 
   /// Provider or location where vaccination was administered.
+
   final String provider;
 
   /// Healthcare professional who administered the vaccine.
+
   final String professional;
 
   /// Cost of the vaccination.
+
   final String cost;
 
   /// Additional notes or observations.
+
   final String notes;
 
   VaccinationObservation({

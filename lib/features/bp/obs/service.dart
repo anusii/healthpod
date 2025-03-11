@@ -83,18 +83,21 @@ class BPEditorService {
   }) async {
     try {
       // Delete old file if not a new observation.
+
       if (!isNew && oldObservation != null) {
         try {
           final oldFilename = _filenameFromTimestamp(oldObservation.timestamp);
 
-          // Check if the old file exists before attempting to delete it
+          // Check if the old file exists before attempting to delete it.
+
           final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
           final resources = await getResourcesInContainer(dirUrl);
 
           if (resources.files.contains(oldFilename)) {
             await deleteFile('healthpod/data/blood_pressure/$oldFilename');
           } else {
-            // Check if there's a file with a similar name
+            // Check if there's a file with a similar name.
+
             final baseFilename =
                 'blood_pressure_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
             final matchingFiles = resources.files
@@ -109,12 +112,14 @@ class BPEditorService {
             }
           }
         } catch (e) {
-          // Log the error but continue with saving the new file
+          // Log the error but continue with saving the new file.
+
           debugPrint('Error deleting old observation file: $e');
         }
       }
 
       // Write new file.
+
       final newFilename = _filenameFromTimestamp(observation.timestamp);
       final jsonData = json.encode(observation.toJson());
 
@@ -140,21 +145,25 @@ class BPEditorService {
     BPObservation observation,
   ) async {
     try {
-      // Log the resources in the directory for debugging
+      // Log the resources in the directory for debugging.
+
       final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
       final resources = await getResourcesInContainer(dirUrl);
 
       debugPrint('SubDirs: |${resources.subDirs.join(', ')}|');
       debugPrint('Files  : |${resources.files.join(', ')}|');
 
-      // Try with the current format (T separator)
+      // Try with the current format (T separator).
+
       final filename = _filenameFromTimestamp(observation.timestamp);
 
-      // Also try with the old format (underscore separator) for backward compatibility
+      // Also try with the old format (underscore separator) for backward compatibility.
+
       final filenameWithUnderscore =
           'blood_pressure_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
 
-      // Check if either file exists
+      // Check if either file exists.
+
       if (resources.files.contains(filename)) {
         await deleteFile('healthpod/data/blood_pressure/$filename');
         debugPrint('Deleted file: $filename');
@@ -166,27 +175,32 @@ class BPEditorService {
         return;
       }
 
-      // If neither exact match is found, try to find a file with a similar date part
+      // If neither exact match is found, try to find a file with a similar date part.
+
       debugPrint('File not found for deletion: $filename');
 
-      // Extract just the date part (YYYY-MM-DD) from the timestamp
+      // Extract just the date part (YYYY-MM-DD) from the timestamp.
+
       final datePart =
           formatTimestampForFilename(observation.timestamp).split('T')[0];
       final baseFilename = 'blood_pressure_$datePart';
 
-      // Find any files that start with this date part
+      // Find any files that start with this date part.
+
       final matchingFiles = resources.files
           .where((file) => file.startsWith(baseFilename))
           .toList();
 
       if (matchingFiles.isNotEmpty) {
-        // Delete the first matching file
+        // Delete the first matching file.
+
         await deleteFile(
             'healthpod/data/blood_pressure/${matchingFiles.first}');
         debugPrint('Deleted alternative file: ${matchingFiles.first}');
       } else {
-        // No matching files found, try a more flexible approach
-        // Look for any file that contains the date (without the time)
+        // No matching files found, try a more flexible approach.
+        // Look for any file that contains the date (without the time).
+
         final moreFlexibleMatches =
             resources.files.where((file) => file.contains(datePart)).toList();
 
@@ -196,14 +210,16 @@ class BPEditorService {
           debugPrint(
               'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
         } else {
-          // No matching files found
+          // No matching files found.
+
           debugPrint(
               'No matching files found for deletion with base: $baseFilename');
         }
       }
     } catch (e) {
       debugPrint('Error deleting observation: $e');
-      // Rethrow with more context to help debugging
+      // Rethrow with more context to help debugging.
+
       throw Exception('Failed to delete blood pressure observation: $e');
     }
   }

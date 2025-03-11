@@ -30,19 +30,26 @@ library;
 /// These constants are used to access and store blood pressure data consistently
 /// across the application, particularly in JSON serialization/deserialization.
 
+/// Field name for systolic blood pressure.
+
 class HealthSurveyConstants {
   /// Field name for systolic blood pressure.
+
   static const String fieldSystolic = 'systolic';
 
   /// Field name for diastolic blood pressure.
+
   static const String fieldDiastolic = 'diastolic';
 
   /// Field name for heart rate.
+
   static const String fieldHeartRate = 'heart_rate';
 
   /// Field name for subjective feeling.
+
   static const String fieldFeeling = 'feeling';
 
   /// Field name for additional notes.
+
   static const String fieldNotes = 'notes';
 }

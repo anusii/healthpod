@@ -30,19 +30,26 @@ library;
 /// These constants are used to access and store vaccination data consistently
 /// across the application, particularly in JSON serialization/deserialization.
 
+/// Field name for the vaccine name.
+
 class VaccinationSurveyConstants {
   /// Field name for the vaccine name.
+
   static const String fieldVaccineName = 'vaccine_name';
 
   /// Field name for the provider or location.
+
   static const String fieldProvider = 'provider';
 
   /// Field name for the healthcare professional.
+
   static const String fieldProfessional = 'professional';
 
   /// Field name for the cost.
+
   static const String fieldCost = 'cost';
 
   /// Field name for additional notes.
+
   static const String fieldNotes = 'notes';
 }

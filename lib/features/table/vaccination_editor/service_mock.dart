@@ -33,9 +33,11 @@ import 'package:healthpod/features/table/vaccination_editor/model.dart';
 /// This provides sample data without requiring actual Pod access.
 
 class VaccinationEditorServiceMock {
-  /// Load mock vaccination data
+  /// Load mock vaccination data.
+
   Future<List<VaccinationObservation>> loadData(BuildContext context) async {
-    // Simulate network delay
+    // Simulate network delay.
+
     await Future.delayed(const Duration(seconds: 1));
 
     return [
@@ -66,25 +68,29 @@ class VaccinationEditorServiceMock {
     ];
   }
 
-  /// Mock saving a vaccination observation
+  /// Mock saving a vaccination observation.
+
   Future<void> saveObservationToPod({
     required BuildContext context,
     required VaccinationObservation observation,
     required bool isNew,
     required VaccinationObservation? oldObservation,
   }) async {
-    // Simulate network delay
+    // Simulate network delay.
+
     await Future.delayed(const Duration(milliseconds: 500));
-    // In a real implementation, this would save to storage
+    // In a real implementation, this would save to storage.
   }
 
-  /// Mock deleting a vaccination observation
+  /// Mock deleting a vaccination observation.
+
   Future<void> deleteObservationFromPod(
     BuildContext context,
     VaccinationObservation observation,
   ) async {
-    // Simulate network delay
+    // Simulate network delay.
+
     await Future.delayed(const Duration(milliseconds: 500));
-    // In a real implementation, this would delete from storage
+    // In a real implementation, this would delete from storage.
   }
 }
