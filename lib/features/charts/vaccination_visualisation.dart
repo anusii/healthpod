@@ -31,6 +31,7 @@ import 'package:timeline_tile/timeline_tile.dart';
 
 import 'package:healthpod/features/charts/vaccination_data.dart';
 import 'package:healthpod/features/charts/models/vaccination_record.dart';
+import 'package:healthpod/features/charts/utils/vaccination_dialog_utils.dart';
 
 /// Widget for displaying vaccination history in a timeline format.
 
@@ -258,7 +259,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                             onTap: () {
                               /// Show details in a dialog when tapped.
 
-                              _showVaccinationDetails(context, record);
+                              showVaccinationDetails(context, record);
                             },
                             child: Container(
                               height: lineHeight,
@@ -300,53 +301,6 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  /// Shows a dialog with detailed vaccination information.
-
-  void _showVaccinationDetails(BuildContext context, VaccinationRecord record) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(record.name),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Date: ${DateFormat('MMMM dd, yyyy').format(record.date)}'),
-              if (record.provider != null && record.provider!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text('Provider: ${record.provider}'),
-                ),
-              if (record.professional != null &&
-                  record.professional!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text('Professional: ${record.professional}'),
-                ),
-              if (record.cost != null && record.cost!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text('Cost: ${record.cost}'),
-                ),
-              if (record.notes != null && record.notes!.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text('Notes: ${record.notes}'),
-                ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
       ),
     );
   }
