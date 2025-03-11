@@ -29,10 +29,6 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
 
-/// Global value of whether there is audio is played.
-
-bool audioInPlaying = false;
-
 /// The widget creates an icon that represents a audio and provides a tooltip
 /// when the icon is long-pressed. The tooltip message is customizable through
 /// the [title] parameter, which allows for dynamic content. The tooltip message

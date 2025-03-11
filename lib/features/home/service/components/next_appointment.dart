@@ -31,6 +31,7 @@ import 'package:audioplayers/audioplayers.dart';
 
 import 'package:healthpod/constants/appointment.dart';
 import 'package:healthpod/constants/colours.dart';
+import 'package:healthpod/features/home/service/home_utils.dart';
 import 'package:healthpod/utils/address_link.dart';
 import 'package:healthpod/utils/audio_tooltip.dart';
 import 'package:healthpod/utils/call_icon.dart';
@@ -62,15 +63,15 @@ class _NextAppointmentState extends State<NextAppointment> {
 
       setState(() {
         _isPlaying = false;
-        audioInPlaying = false;
+        transportAudioIn = false;
       });
     } else {
-      if (!audioInPlaying) {
+      if (!transportAudioIn) {
         await _audioPlayer.play(AssetSource('audio/transport_eligibility.mp3'));
 
         setState(() {
           _isPlaying = !_isPlaying;
-          audioInPlaying = true;
+          transportAudioIn = true;
         });
       }
     }
@@ -81,7 +82,7 @@ class _NextAppointmentState extends State<NextAppointment> {
   void _onAudioComplete() {
     setState(() {
       _isPlaying = false;
-      audioInPlaying = false;
+      transportAudioIn = false;
     });
   }
 
@@ -96,7 +97,7 @@ class _NextAppointmentState extends State<NextAppointment> {
   @override
   void dispose() {
     _audioPlayer.dispose();
-    audioInPlaying = false;
+    transportAudioIn = false;
     super.dispose();
   }
 
