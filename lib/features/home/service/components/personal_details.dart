@@ -29,6 +29,10 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
 
+/// A widget that displays detailed personal identification information clearly and concisely.
+///
+/// This widget allows users to verify and update their personal details easily.
+
 class PersonalDetails extends StatefulWidget {
   const PersonalDetails({super.key});
 
