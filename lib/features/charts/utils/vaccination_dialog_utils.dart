@@ -9,8 +9,10 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/features/charts/models/vaccination_record.dart';
+
 import 'package:intl/intl.dart';
+
+import 'package:healthpod/features/charts/models/vaccination_record.dart';
 
 /// Shows a dialog with detailed vaccination information.
 ///

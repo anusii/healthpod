@@ -29,9 +29,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
-import 'package:healthpod/features/charts/vaccination_data.dart';
 import 'package:healthpod/features/charts/models/vaccination_record.dart';
 import 'package:healthpod/features/charts/utils/vaccination_dialog_utils.dart';
+import 'package:healthpod/features/charts/vaccination_data.dart';
 
 /// Widget for displaying vaccination history in a timeline format.
 

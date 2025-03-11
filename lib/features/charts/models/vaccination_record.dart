@@ -8,8 +8,6 @@
 
 library;
 
-import 'package:flutter/material.dart';
-
 /// Represents a single vaccination record with all its details.
 
 class VaccinationRecord {
