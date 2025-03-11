@@ -75,23 +75,24 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
 
-    // Add reset function to handle clearing all settings.
+    // Add reset function to handle clearing only server URL.
 
     void resetSettings() async {
       // Clear SharedPreferences.
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('server_url');
-      await prefs.remove('username');
-      await prefs.remove('password');
-      await prefs.remove('secret_key');
+      // leave username, password and secret key here for now.
+      // await prefs.remove('username');
+      // await prefs.remove('password');
+      // await prefs.remove('secret_key');
 
       // Reset all providers to default values.
 
       ref.invalidate(serverURLProvider);
-      ref.invalidate(usernameProvider);
-      ref.invalidate(passwordProvider);
-      ref.invalidate(secretKeyProvider);
+      // ref.invalidate(usernameProvider);
+      // ref.invalidate(passwordProvider);
+      // ref.invalidate(secretKeyProvider);
     }
 
     return Material(
