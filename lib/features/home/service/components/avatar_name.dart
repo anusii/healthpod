@@ -31,6 +31,12 @@ import 'package:healthpod/constants/appointment.dart';
 
 import 'package:healthpod/constants/colours.dart';
 
+/// A widget that displays the user's avatar, name, patient ID,
+/// and a notification bell with the number of notifications.
+///
+/// This widget is typically used at the top of a user dashboard
+/// to provide quick identification and notifications status.
+
 class AvatarName extends StatefulWidget {
   const AvatarName({super.key});
 
@@ -39,6 +45,7 @@ class AvatarName extends StatefulWidget {
 }
 
 class _AvatarNameState extends State<AvatarName> {
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -58,14 +65,18 @@ class _AvatarNameState extends State<AvatarName> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // User avatar with lock icon indicator.
+
           Stack(
             clipBehavior: Clip.none,
             children: [
-              CircleAvatar(
+              const CircleAvatar(
                 radius: 24,
                 backgroundImage:
                     AssetImage('assets/images/sample_avatar_image.png'),
               ),
+              // Positioned lock icon at bottom-right.
+
               Positioned(
                 bottom: -2,
                 right: -2,
@@ -84,7 +95,10 @@ class _AvatarNameState extends State<AvatarName> {
               ),
             ],
           ),
+
           const SizedBox(width: 12),
+
+          // User's name and patient ID.
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -97,13 +111,15 @@ class _AvatarNameState extends State<AvatarName> {
               ),
               Text(
                 'Patient ID: $patientID',
-                style: TextStyle(
-                  color: Colors.grey[700],
-                ),
+                style: TextStyle(color: Colors.grey[700]),
               ),
             ],
           ),
+
           const SizedBox(width: 12),
+
+          // Notification bell with notification count badge.
+
           Stack(
             clipBehavior: Clip.none,
             children: [
@@ -112,6 +128,8 @@ class _AvatarNameState extends State<AvatarName> {
                 size: 28,
                 color: Colors.black54,
               ),
+              // Show notification count badge only if notifications exist.
+              
               if (notificationCount > 0)
                 Positioned(
                   right: -2,
