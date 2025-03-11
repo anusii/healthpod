@@ -2,7 +2,7 @@
 ///
 // Time-stamp: <Friday 2025-02-21 16:58:42 +1100 Graham Williams>
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -31,6 +31,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:healthpod/providers/settings.dart';
+
 /// A reusable widget for displaying and editing settings with a label and tooltip.
 
 class SettingField extends ConsumerWidget {
@@ -55,11 +57,31 @@ class SettingField extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final value = ref.watch(provider);
 
+    // If value is empty, get the stored value from SharedPreferences.
+
+    if (value.isEmpty) {
+      SharedPreferences.getInstance().then((prefs) {
+        final storedValue = prefs.getString(label) ?? '';
+        if (storedValue.isNotEmpty) {
+          ref.read(provider.notifier).state = storedValue;
+        }
+      });
+    }
+
+    // Use the label as a unique identifier for each field's visibility state.
+
+    final showPassword = ref.watch(isPasswordVisibleProvider(label));
+
     // Persists the setting value to local storage.
 
     Future<void> saveSetting(String value) async {
+      // Save to SharedPreferences.
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(label.toLowerCase().replaceAll(' ', '_'), value);
+      // Save to provider.
+
+      ref.read(provider.notifier).state = value;
     }
 
     // Creates a tooltip wrapper around the setting field for additional information.
@@ -89,7 +111,7 @@ class SettingField extends ConsumerWidget {
                 child: TextField(
                   controller: TextEditingController(text: value)
                     ..selection = TextSelection.collapsed(offset: value.length),
-                  obscureText: isPassword,
+                  obscureText: isPassword && !showPassword,
                   onChanged: (value) {
                     ref.read(provider.notifier).state = value;
                     saveSetting(value);
@@ -97,6 +119,22 @@ class SettingField extends ConsumerWidget {
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
                     hintText: hint,
+                    suffixIcon: isPassword
+                        ? IconButton(
+                            icon: Icon(
+                              showPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              ref
+                                  .read(
+                                      isPasswordVisibleProvider(label).notifier)
+                                  .state = !showPassword;
+                            },
+                          )
+                        : null,
                   ),
                 ),
               ),
