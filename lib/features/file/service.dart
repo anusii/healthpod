@@ -1,6 +1,6 @@
 /// A widget to demonstrate the upload, download, and delete large files.
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -24,8 +24,9 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show File;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
@@ -42,7 +43,7 @@ import 'package:healthpod/utils/show_alert.dart';
 
 /// File service.
 ///
-/// Demonstrates process of uploading, downloading, and deleting files.
+/// Demonstrates the process of uploading, downloading, and deleting files.
 /// It supports both text and binary file formats, providing features like encryption
 /// during upload, previewing files before uploading, and file management.
 
@@ -55,10 +56,14 @@ class FileService extends StatefulWidget {
 
 class _FileServiceState extends State<FileService> {
   // File state variables that manage the selected file, its name and its preview.
-
   final _browserKey = GlobalKey<FileBrowserState>();
 
-  String? uploadFile;
+  // uploadFile holds a String (file path) on mobile/desktop or Uint8List on web.
+
+  dynamic uploadFile;
+  // For web, we store the picked file name.
+
+  String? uploadFileName;
   String? downloadFile;
   String? remoteFileName = 'remoteFileName';
   String? cleanFileName = 'remoteFileName';
@@ -66,8 +71,7 @@ class _FileServiceState extends State<FileService> {
   String? filePreview;
 
   /// We store the current path separately from the FileBrowser's path.
-  /// This helps us track the current directory context for file operations
-  /// without relying on accessing the FileBrowser's state.
+  /// This helps us track the current directory context for file operations.
 
   String? currentPath =
       'healthpod/data'; // Initialise with the default root path.
@@ -108,38 +112,45 @@ class _FileServiceState extends State<FileService> {
         uploadDone = false;
       });
 
-      final file = File(uploadFile!);
       String fileContent;
+      String fileName;
 
-      // For text files, we directly read the content.
-      // For binary files, we encode them into base64 format.
+      if (kIsWeb) {
+        // On web, uploadFile is a Uint8List and the file name is stored in uploadFileName.
 
-      if (isTextFile(uploadFile!)) {
-        fileContent = await file.readAsString();
+        Uint8List fileBytes = uploadFile as Uint8List;
+        fileName = uploadFileName ?? "upload.pdf";
+        // For binary files on web, encode the bytes to base64.
+
+        fileContent = base64Encode(fileBytes);
       } else {
-        final bytes = await file.readAsBytes();
-        fileContent = base64Encode(bytes);
+        // On mobile/desktop, uploadFile is a file path.
+
+        final filePath = uploadFile as String;
+        fileName = path.basename(filePath);
+        final file = File(filePath);
+        // Call isTextFile() only on mobile/desktop where filePath is a String.
+
+        if (isTextFile(filePath)) {
+          fileContent = await file.readAsString();
+        } else {
+          final bytes = await file.readAsBytes();
+          fileContent = base64Encode(bytes);
+        }
       }
 
-      // Sanitise file name and append encryption extension.
+      // Sanitize the file name and append the encryption extension.
 
-      String sanitizedFileName = path
-          .basename(uploadFile!)
+      String sanitizedFileName = fileName
           .replaceAll(RegExp(r'[^a-zA-Z0-9._-]'), '_')
           .replaceAll(RegExp(r'\.enc\.ttl$'), '');
-
-      remoteFileName =
-          '$sanitizedFileName.enc.ttl'; // Add `.enc.ttl` extension for new upload file.
+      remoteFileName = '$sanitizedFileName.enc.ttl';
       cleanFileName = sanitizedFileName;
 
-      // Extract the subdirectory path by removing `healthpod/data/` prefix.
-      // This is because `healthpod/data` is the root directory for all files.
+      // Extract the subdirectory path by removing the 'healthpod/data' prefix.
 
       String? subPath = currentPath?.replaceFirst('healthpod/data', '').trim();
-
-      // If we have a subdirectory (not in root), include it in the path.
-
-      String uploadPath = subPath == null || subPath.isEmpty
+      String uploadPath = (subPath == null || subPath.isEmpty)
           ? remoteFileName!
           : '${subPath.startsWith("/") ? subPath.substring(1) : subPath}/$remoteFileName';
 
@@ -147,7 +158,7 @@ class _FileServiceState extends State<FileService> {
 
       if (!mounted) return;
 
-      // Upload file with encryption.
+      // Upload the file with encryption.
 
       final result = await writePod(
         uploadPath,
@@ -158,13 +169,11 @@ class _FileServiceState extends State<FileService> {
       );
 
       if (!mounted) return;
-
       setState(() {
         uploadDone = result == SolidFunctionCallStatus.success;
       });
-
       if (result == SolidFunctionCallStatus.success) {
-        // Refresh the file browser after successful upload.
+        // Refresh the file browser after a successful upload.
 
         _browserKey.currentState?.refreshFiles();
       } else if (mounted) {
@@ -185,11 +194,6 @@ class _FileServiceState extends State<FileService> {
   }
 
   /// Handles the download and decryption of files from the POD.
-  ///
-  /// Originally, we expected readPod to automatically handle decryption, but we discovered
-  /// that in some cases files remained encrypted and users would see raw TTL content when
-  /// downloading. This method now explicitly handles decryption using helper functions to
-  /// ensure files are always properly decrypted before saving.
 
   Future<void> handleDownload() async {
     if (downloadFile == null || remoteFileName == null) return;
@@ -200,20 +204,14 @@ class _FileServiceState extends State<FileService> {
         downloadDone = false;
       });
 
-      // Construct the relative path, being careful to handle nested directories correctly.
-      // We use baseDir as the root directory for all file operations.
-
       final baseDir = 'healthpod/data';
       final relativePath = currentPath == baseDir
-          ? '$baseDir/$remoteFileName' // We're at root, so just append the filename.
-          : '$currentPath/$remoteFileName'; // We're in a subfolder, use the full path.
+          ? '$baseDir/$remoteFileName'
+          : '$currentPath/$remoteFileName';
 
       debugPrint('Attempting to download from path: $relativePath');
 
       if (!mounted) return;
-
-      // Security key is required for decryption. This ensures it's available
-      // before we attempt to read the file.
 
       await getKeyFromUserIfRequired(
         context,
@@ -221,10 +219,6 @@ class _FileServiceState extends State<FileService> {
       );
 
       if (!mounted) return;
-
-      // Read the encrypted file content from the POD.
-      // Note: At this stage, the content is still in TTL format containing
-      // encrypted data, even though readPod may have attempted decryption.
 
       final fileContent = await readPod(
         relativePath,
@@ -234,29 +228,19 @@ class _FileServiceState extends State<FileService> {
 
       if (!mounted) return;
 
-      // Handle common error cases from readPod.
-
       if (fileContent == SolidFunctionCallStatus.fail ||
           fileContent == SolidFunctionCallStatus.notLoggedIn) {
         throw Exception(
             'Download failed - please check your connection and permissions');
       }
 
-      /// We can directly use the decrypted fileContent from readPod.
-      ///
-      /// This is because we encrypted a JSON file upon upload using the utility function.
-      /// And upon decrypting, we expect a JSON file instead of TTL content.
-
-      final saveFileName = downloadFile!.replaceAll(
-          RegExp(r'\.enc\.ttl$'), ''); // Use save path selected by user.
+      final saveFileName = downloadFile!.replaceAll(RegExp(r'\.enc\.ttl$'), '');
       await saveDecryptedContent(fileContent, saveFileName);
 
       if (!mounted) return;
       setState(() {
         downloadDone = true;
       });
-
-      // Show a success message to give user feedback.
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -267,14 +251,10 @@ class _FileServiceState extends State<FileService> {
         );
       }
     } catch (e) {
-      // Provide user-friendly error messages by removing the 'Exception:' prefix.
-
       if (!mounted) return;
       showAlert(context, e.toString().replaceAll('Exception: ', ''));
       debugPrint('Download error: $e');
     } finally {
-      // Always reset the download status, even if an error occurred.
-
       if (mounted) {
         setState(() {
           downloadInProgress = false;
@@ -289,21 +269,35 @@ class _FileServiceState extends State<FileService> {
     if (uploadFile == null) return;
 
     try {
-      final file = File(uploadFile!);
       String content;
+      if (kIsWeb) {
+        // On web, use the stored file name to determine if it's a text file.
 
-      if (isTextFile(uploadFile!)) {
-        // For text files, show the first 500 characters.
+        if (uploadFileName != null && isTextFile(uploadFileName!)) {
+          // Decode the bytes as UTF-8.
 
-        content = await file.readAsString();
-        content =
-            content.length > 500 ? '${content.substring(0, 500)}...' : content;
+          content = utf8.decode(uploadFile as Uint8List);
+          content = content.length > 500
+              ? '${content.substring(0, 500)}...'
+              : content;
+        } else {
+          final bytes = uploadFile as Uint8List;
+          content =
+              'Binary file\nSize: ${(bytes.length / 1024).toStringAsFixed(2)} KB\nType: ${path.extension(uploadFileName ?? "")}';
+        }
       } else {
-        // For binary files, show their size and type.
-
-        final bytes = await file.readAsBytes();
-        content =
-            'Binary file\nSize: ${(bytes.length / 1024).toStringAsFixed(2)} KB\nType: ${path.extension(uploadFile!)}';
+        final filePath = uploadFile as String;
+        final file = File(filePath);
+        if (isTextFile(filePath)) {
+          content = await file.readAsString();
+          content = content.length > 500
+              ? '${content.substring(0, 500)}...'
+              : content;
+        } else {
+          final bytes = await file.readAsBytes();
+          content =
+              'Binary file\nSize: ${(bytes.length / 1024).toStringAsFixed(2)} KB\nType: ${path.extension(filePath)}';
+        }
       }
 
       if (!mounted) return;
@@ -394,19 +388,11 @@ class _FileServiceState extends State<FileService> {
         deleteDone = false;
       });
 
-      /// Path Construction
-      ///
-      /// We no longer prepend the data directory path (healthpod/data) here
-      /// because currentPath from FileBrowser already includes this prefix.
-      /// This prevents path duplication like `healthpod/data/healthpod/data/...`
-
       final basePath = currentPath == null
           ? remoteFileName!
           : '$currentPath/$remoteFileName';
 
       if (!mounted) return;
-
-      // First try to delete the main file.
 
       bool mainFileDeleted = false;
       try {
@@ -415,9 +401,6 @@ class _FileServiceState extends State<FileService> {
         debugPrint('Successfully deleted main file: $basePath');
       } catch (e) {
         debugPrint('Error deleting main file: $e');
-        // Only rethrow if it's not a 404 error.
-        // 404 errors are expected in some cases (like when file is already deleted).
-
         if (!e.toString().contains('404') &&
             !e.toString().contains('NotFoundHttpError')) {
           rethrow;
@@ -426,16 +409,11 @@ class _FileServiceState extends State<FileService> {
 
       if (!mounted) return;
 
-      // If main file deletion succeeded, try to delete the ACL file.
-      // ACL files are auxiliary files that control access permissions.
-
       if (mainFileDeleted) {
         try {
           await deleteFile('$basePath.acl');
           debugPrint('Successfully deleted ACL file');
         } catch (e) {
-          // ACL files are optional and may not exist.
-
           if (e.toString().contains('404') ||
               e.toString().contains('NotFoundHttpError')) {
             debugPrint('ACL file not found (safe to ignore)');
@@ -449,8 +427,6 @@ class _FileServiceState extends State<FileService> {
           deleteDone = true;
         });
 
-        // Refresh the file browser to show updated contents.
-
         _browserKey.currentState?.refreshFiles();
       }
     } catch (e) {
@@ -459,8 +435,6 @@ class _FileServiceState extends State<FileService> {
       setState(() {
         deleteDone = false;
       });
-
-      // Provide user-friendly error messages.
 
       final message = e.toString().contains('404') ||
               e.toString().contains('NotFoundHttpError')
@@ -479,9 +453,6 @@ class _FileServiceState extends State<FileService> {
   }
 
   /// Handles the import of BP CSV files and conversion to individual JSON files.
-  ///
-  /// Each row of the CSV is processed and stored as a separate encrypted JSON file in the POD.
-  /// Files are named using the timestamp from the data.
 
   Future<void> handleCsvImport(String filePath, String dirPath) async {
     if (importInProgress) return;
@@ -490,9 +461,6 @@ class _FileServiceState extends State<FileService> {
       setState(() {
         importInProgress = true;
       });
-
-      // Process CSV and create individual JSON files for each row.
-      // Use BPImporter to handle blood-pressure specific importing.
 
       final success =
           await BPImporter.importFromCsv(filePath, dirPath, context);
@@ -507,8 +475,6 @@ class _FileServiceState extends State<FileService> {
             backgroundColor: Colors.green,
           ),
         );
-        // Refresh the file browser to show the new files.
-
         _browserKey.currentState?.refreshFiles();
       }
     } catch (e) {
@@ -533,9 +499,9 @@ class _FileServiceState extends State<FileService> {
         Expanded(
           flex: 2,
           child: Card(
-            elevation: 4, // Increased elevation for better depth
+            elevation: 4,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12), // More rounded corners
+              borderRadius: BorderRadius.circular(12),
               side: BorderSide(
                 color: Theme.of(context).dividerColor.withAlpha(10),
                 width: 1,
@@ -626,8 +592,8 @@ class _FileServiceState extends State<FileService> {
             children: [
               const Icon(Icons.folder_open),
               const SizedBox(width: 8),
-              Expanded(
-                child: const Text(
+              const Expanded(
+                child: Text(
                   'Your Files',
                   style: TextStyle(
                     fontSize: 20,
@@ -670,36 +636,24 @@ class _FileServiceState extends State<FileService> {
             key: _browserKey,
             browserKey: _browserKey,
             onFileSelected: (fileName, path) {
-              // Store both the file information and the current path.
-              // This ensures we maintain correct context for file operations.
-
               setState(() {
                 cleanFileName = fileName;
-                remoteFileName =
-                    fileName; // fileName already has existing `.enc.ttl` extension.
+                remoteFileName = fileName;
                 currentPath = path;
               });
             },
             onFileDownload: (fileName, path) async {
               setState(() {
                 cleanFileName = fileName;
-                remoteFileName =
-                    fileName; // fileName already has existing `.enc.ttl` extension.
+                remoteFileName = fileName;
                 currentPath = path;
               });
-
-              // Remove encryption extensions before showing save dialog.
-
               String cleanedFileName =
                   fileName.replaceAll(RegExp(r'\.enc\.ttl$'), '');
-
-              // Let user choose where to save the file.
-
               String? outputFile = await FilePicker.platform.saveFile(
                 dialogTitle: 'Save file as:',
                 fileName: cleanedFileName,
               );
-
               if (outputFile != null) {
                 setState(() {
                   downloadFile = outputFile;
@@ -710,9 +664,8 @@ class _FileServiceState extends State<FileService> {
             onFileDelete: (fileName, path) async {
               setState(() {
                 cleanFileName = fileName;
-                remoteFileName =
-                    fileName; // fileName already has existing `.enc.ttl` extension.
-                currentPath = path; // Maintain path context for deletion.
+                remoteFileName = fileName;
+                currentPath = path;
               });
               await handleDelete();
             },
@@ -728,11 +681,7 @@ class _FileServiceState extends State<FileService> {
     );
   }
 
-  /// Builds and returns the upload panel widget which contains
-  /// file upload functionality and CSV import options.
-  ///
-  /// This panel appears on the right side in desktop layout
-  /// and as an expandable section in mobile layout.
+  /// Builds and returns the upload panel widget.
 
   Widget _buildUploadPanel() {
     return Padding(
@@ -741,13 +690,8 @@ class _FileServiceState extends State<FileService> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Display preview card if a file is selected and preview is enabled.
-
           _buildPreviewCard(),
           const SizedBox(height: 16),
-
-          // Show selected file info container when a file is chosen.
-
           if (uploadFile != null)
             Container(
               padding: const EdgeInsets.all(12),
@@ -766,11 +710,11 @@ class _FileServiceState extends State<FileService> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(width: 8),
-                  // Display filename with overflow protection.
-
                   Expanded(
                     child: Text(
-                      path.basename(uploadFile!),
+                      kIsWeb
+                          ? (uploadFileName ?? "unknown file")
+                          : path.basename(uploadFile!),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.w500,
@@ -778,8 +722,6 @@ class _FileServiceState extends State<FileService> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  // Show success checkmark when upload completes.
-
                   if (uploadDone)
                     const Icon(Icons.check_circle,
                         color: Colors.green, size: 20),
@@ -787,28 +729,28 @@ class _FileServiceState extends State<FileService> {
               ),
             ),
           const SizedBox(height: 16),
-
           Row(
             children: [
-              // Main upload button - handles both file selection and upload.
-
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: (uploadInProgress ||
                           downloadInProgress ||
                           deleteInProgress)
-                      ? null // Disable button during any ongoing operation.
+                      ? null
                       : () async {
-                          // Open file picker and trigger upload if file is selected.
-
-                          final result = await FilePicker.platform.pickFiles();
+                          final result = await FilePicker.platform.pickFiles(
+                            type: FileType.any,
+                          );
                           if (result != null) {
                             setState(() {
-                              uploadFile = result.files.single.path!;
+                              if (kIsWeb) {
+                                uploadFile = result.files.single.bytes;
+                                uploadFileName = result.files.single.name;
+                              } else {
+                                uploadFile = result.files.single.path;
+                              }
                               uploadDone = false;
                             });
-                            // Immediately trigger upload after file selection.
-
                             await handleUpload();
                           }
                         },
@@ -826,29 +768,19 @@ class _FileServiceState extends State<FileService> {
                   ),
                 ),
               ),
-
-              // Show CSV import and export buttons only when in blood pressure directory.
-
               if (isInBpDirectory) ...[
                 const SizedBox(width: 8),
-                // Import CSV Button.
-
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () async {
                       try {
-                        // Open file picker configured for CSV files only.
-
                         final result = await FilePicker.platform.pickFiles(
                           type: FileType.custom,
                           allowedExtensions: ['csv'],
                         );
-
                         if (result != null && result.files.isNotEmpty) {
                           final file = result.files.first;
                           if (file.path != null) {
-                            // Process and import CSV data.
-
                             handleCsvImport(
                                 file.path!, currentPath ?? 'healthpod/data');
                           }
@@ -872,8 +804,6 @@ class _FileServiceState extends State<FileService> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Export CSV Button.
-
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () async {
@@ -883,21 +813,14 @@ class _FileServiceState extends State<FileService> {
                           dialogTitle: 'Save Blood pressure data as CSV:',
                           fileName: 'blood_pressure_data.csv',
                         );
-
                         if (outputFile != null) {
                           if (!mounted) return;
-
-                          // Export JSON files in bp/ to a single CSV file.
-                          // Use BPExporter to handle blood-pressure specific exporting.
-
                           final success = await BPExporter.exportToCsv(
                             outputFile,
                             currentPath ?? 'healthpod/data',
                             context,
                           );
-
                           if (!mounted) return;
-
                           if (success) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -935,9 +858,6 @@ class _FileServiceState extends State<FileService> {
             ],
           ),
           const SizedBox(height: 12),
-
-          // Preview button - enabled only when a file is selected and no operation is in progress.
-
           TextButton.icon(
             onPressed: (uploadFile == null ||
                     uploadInProgress ||
@@ -959,20 +879,14 @@ class _FileServiceState extends State<FileService> {
     );
   }
 
-  // Builds the main UI layout for the file service.
-
   @override
   Widget build(BuildContext context) {
-    // Get screen width to determine layout.
-
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'File Management',
-        ),
+        title: const Text('File Management'),
         backgroundColor: titleBackgroundColor,
       ),
       body: Padding(
