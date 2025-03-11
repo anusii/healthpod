@@ -25,8 +25,13 @@
 
 library;
 
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/file/item.dart';
@@ -345,6 +350,84 @@ class FileBrowserState extends State<FileBrowser> {
 
                   if (showButtons) ...[
                     const SizedBox(width: 8),
+
+                    // Only show the preview button for pdf file.
+
+                    if (file.path.contains('.pdf'))
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(
+                          Icons.preview,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        onPressed: () {
+                          // Capture the current BuildContext.
+
+                          final BuildContext contextCopy = context;
+
+                          // Wrapper function to handle the async operations.
+
+                          void handlePdfPreview() async {
+                            // Retrieve the PDF file content as a base64-encoded string.
+
+                            final String fileContent = await readPod(
+                                    file.path, contextCopy, Container()) ??
+                                '';
+
+                            // Decode the base64 string into raw PDF bytes.
+
+                            final Uint8List pdfBytes =
+                                base64Decode(fileContent);
+
+                            // Check if the BuildContext is still valid before using it.
+
+                            if (!contextCopy.mounted) return;
+
+                            // Use the verified context.
+
+                            showDialog(
+                              context: contextCopy,
+                              builder: (dialogContext) => AlertDialog(
+                                title: const Text("File Preview"),
+                                content: SizedBox(
+                                  width: double.maxFinite,
+                                  height: 500,
+                                  child: PdfPreview(
+                                    build: (PdfPageFormat format) async =>
+                                        pdfBytes,
+                                    canChangeOrientation: false,
+                                    canChangePageFormat: false,
+                                    allowPrinting: false,
+                                    allowSharing: false,
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(dialogContext),
+                                    child: const Text("Close"),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          // Call the wrapper function.
+
+                          handlePdfPreview();
+                        },
+                        style: IconButton.styleFrom(
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withAlpha(10),
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(35, 35),
+                        ),
+                      ),
+
+                    smallGapH,
                     // Download button.
 
                     IconButton(
