@@ -64,9 +64,11 @@ dev_dependencies:
     sdk: flutter
 
   ubuntu_lints: ^0.4.0
-  custom_lint: ^0.6.4
-  custom_lint_package:
-    path: custom_lint_package
+  custom_lint: 0.6.10
+  import_order_lint:
+    git:
+      url: https://github.com/anusii/import-order-lint.git
+      ref: main
   webdriver: 3.0.4
 
 dependency_overrides:
