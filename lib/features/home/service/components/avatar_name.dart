@@ -45,7 +45,6 @@ class AvatarName extends StatefulWidget {
 }
 
 class _AvatarNameState extends State<AvatarName> {
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -129,7 +128,7 @@ class _AvatarNameState extends State<AvatarName> {
                 color: Colors.black54,
               ),
               // Show notification count badge only if notifications exist.
-              
+
               if (notificationCount > 0)
                 Positioned(
                   right: -2,

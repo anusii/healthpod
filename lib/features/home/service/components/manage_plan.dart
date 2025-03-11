@@ -29,6 +29,12 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
 
+/// A widget that provides a summary of the user's health management plan.
+///
+/// This widget displays reminders for the user to continue their current medications,
+/// maintain healthy eating habits, and regular exercise. It visually includes a doctor's avatar
+/// alongside actionable advice points.
+
 class ManagePlan extends StatefulWidget {
   const ManagePlan({super.key});
 
@@ -37,6 +43,8 @@ class ManagePlan extends StatefulWidget {
 }
 
 class _ManagePlanState extends State<ManagePlan> {
+  // Widget content as constants (dummy placeholders for now).
+
   final String heading = 'Reminder! Health Management Plan';
   final String bulletPoint1 = 'Continue all current medications.';
   final String bulletPoint2 = 'Continue healthy eating and regular exercise.';
@@ -60,12 +68,16 @@ class _ManagePlanState extends State<ManagePlan> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             radius: 32,
             backgroundImage:
                 AssetImage('assets/images/sample_doctor_image.png'),
           ),
+
           const SizedBox(width: 16),
+
+          // Column containing heading and bullet points.
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,7 +89,11 @@ class _ManagePlanState extends State<ManagePlan> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 8),
+
+                // Bullet point 1: Medications reminder.
+
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -93,7 +109,11 @@ class _ManagePlanState extends State<ManagePlan> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 8),
+
+                // Bullet point 2: Healthy lifestyle reminder.
+
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
