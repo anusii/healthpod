@@ -1,6 +1,6 @@
 /// A widget to demonstrate the upload, download, and delete large files.
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
