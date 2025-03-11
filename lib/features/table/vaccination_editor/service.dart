@@ -81,27 +81,56 @@ class VaccinationEditorService {
     required bool isNew,
     required VaccinationObservation? oldObservation,
   }) async {
-    // Delete old file if not a new observation.
+    try {
+      // Delete old file if not a new observation.
+      if (!isNew && oldObservation != null) {
+        try {
+          final oldFilename = _filenameFromTimestamp(oldObservation.timestamp);
 
-    if (!isNew && oldObservation != null) {
-      final oldFilename = _filenameFromTimestamp(oldObservation.timestamp);
-      await deleteFile('healthpod/data/vaccination/$oldFilename');
+          // Check if the old file exists before attempting to delete it
+          final dirUrl = await getDirUrl('healthpod/data/vaccination');
+          final resources = await getResourcesInContainer(dirUrl);
+
+          if (resources.files.contains(oldFilename)) {
+            await deleteFile('healthpod/data/vaccination/$oldFilename');
+          } else {
+            // Check if there's a file with a similar name
+            final baseFilename =
+                'vaccination_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
+            final matchingFiles = resources.files
+                .where((file) => file.startsWith(baseFilename))
+                .toList();
+
+            if (matchingFiles.isNotEmpty) {
+              await deleteFile(
+                  'healthpod/data/vaccination/${matchingFiles.first}');
+              debugPrint(
+                  'Deleted alternative old file: ${matchingFiles.first}');
+            }
+          }
+        } catch (e) {
+          // Log the error but continue with saving the new file
+          debugPrint('Error deleting old observation file: $e');
+        }
+      }
+
+      // Write new file.
+      final newFilename = _filenameFromTimestamp(observation.timestamp);
+      final jsonData = json.encode(observation.toJson());
+
+      if (!context.mounted) return;
+
+      await writePod(
+        'vaccination/$newFilename',
+        jsonData,
+        context,
+        const Text('Saving'),
+        encrypted: true,
+      );
+    } catch (e) {
+      debugPrint('Error saving observation: $e');
+      throw Exception('Failed to save vaccination observation: $e');
     }
-
-    // Write new file.
-
-    final newFilename = _filenameFromTimestamp(observation.timestamp);
-    final jsonData = json.encode(observation.toJson());
-
-    if (!context.mounted) return;
-
-    await writePod(
-      'vaccination/$newFilename',
-      jsonData,
-      context,
-      const Text('Saving'),
-      encrypted: true,
-    );
   }
 
   /// Delete an observation's file from Pod.
@@ -110,8 +139,71 @@ class VaccinationEditorService {
     BuildContext context,
     VaccinationObservation observation,
   ) async {
-    final filename = _filenameFromTimestamp(observation.timestamp);
-    await deleteFile('healthpod/data/vaccination/$filename');
+    try {
+      // Log the resources in the directory for debugging
+      final dirUrl = await getDirUrl('healthpod/data/vaccination');
+      final resources = await getResourcesInContainer(dirUrl);
+
+      debugPrint('SubDirs: |${resources.subDirs.join(', ')}|');
+      debugPrint('Files  : |${resources.files.join(', ')}|');
+
+      // Try with the current format (T separator)
+      final filename = _filenameFromTimestamp(observation.timestamp);
+
+      // Also try with the old format (underscore separator) for backward compatibility
+      final filenameWithUnderscore =
+          'vaccination_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
+
+      // Check if either file exists
+      if (resources.files.contains(filename)) {
+        await deleteFile('healthpod/data/vaccination/$filename');
+        debugPrint('Deleted file: $filename');
+        return;
+      } else if (resources.files.contains(filenameWithUnderscore)) {
+        await deleteFile('healthpod/data/vaccination/$filenameWithUnderscore');
+        debugPrint('Deleted file with underscore: $filenameWithUnderscore');
+        return;
+      }
+
+      // If neither exact match is found, try to find a file with a similar date part
+      debugPrint('File not found for deletion: $filename');
+
+      // Extract just the date part (YYYY-MM-DD) from the timestamp
+      final datePart =
+          formatTimestampForFilename(observation.timestamp).split('T')[0];
+      final baseFilename = 'vaccination_$datePart';
+
+      // Find any files that start with this date part
+      final matchingFiles = resources.files
+          .where((file) => file.startsWith(baseFilename))
+          .toList();
+
+      if (matchingFiles.isNotEmpty) {
+        // Delete the first matching file
+        await deleteFile('healthpod/data/vaccination/${matchingFiles.first}');
+        debugPrint('Deleted alternative file: ${matchingFiles.first}');
+      } else {
+        // No matching files found, try a more flexible approach
+        // Look for any file that contains the date (without the time)
+        final moreFlexibleMatches =
+            resources.files.where((file) => file.contains(datePart)).toList();
+
+        if (moreFlexibleMatches.isNotEmpty) {
+          await deleteFile(
+              'healthpod/data/vaccination/${moreFlexibleMatches.first}');
+          debugPrint(
+              'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
+        } else {
+          // No matching files found
+          debugPrint(
+              'No matching files found for deletion with base: $baseFilename');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error deleting observation: $e');
+      // Rethrow with more context to help debugging
+      throw Exception('Failed to delete vaccination observation: $e');
+    }
   }
 
   /// Helper to generate the consistent file name from an observation's timestamp.
