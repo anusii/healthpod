@@ -28,11 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/colours.dart';
-import 'package:healthpod/features/table/vaccination_editor/controllers.dart';
-import 'package:healthpod/features/table/vaccination_editor/model.dart';
 import 'package:healthpod/features/table/vaccination_editor/service.dart';
-// Use the mock service for now until we resolve the null safety issues
-import 'package:healthpod/features/table/vaccination_editor/service_mock.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
 
 /// The main editor page for vaccination observations.
@@ -50,21 +46,24 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
   @override
   void initState() {
     super.initState();
-
     // Initialise state and service.
+
     editorState = VaccinationEditorState();
     editorService = VaccinationEditorService();
 
     // Load initial data.
+
     _loadData();
   }
 
   /// Loads vaccination observations from storage.
+
   Future<void> _loadData() async {
     try {
       setState(() => editorState.isLoading = true);
 
       // Load observations from storage using the service.
+
       final observations = await editorService.loadData(context);
       setState(() {
         editorState.observations = observations;
@@ -82,6 +81,7 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
   }
 
   /// Adds a new observation and immediately switches to edit mode.
+
   void _addNewObservation() {
     setState(() {
       editorState.addNewObservation();
@@ -89,10 +89,12 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
   }
 
   /// Handles canceling the current edit.
+
   void _handleCancelEdit() {
     setState(() {
       if (editorState.isNewObservation) {
         // Remove the new observation from the list.
+
         editorState.observations.removeAt(0);
       }
       editorState.cancelEdit();

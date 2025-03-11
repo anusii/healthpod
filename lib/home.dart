@@ -26,7 +26,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/features/table/tab.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
@@ -36,6 +35,7 @@ import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/bp/combined_visualisation.dart';
 import 'package:healthpod/features/file/service.dart';
 import 'package:healthpod/features/survey/tab.dart';
+import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/settings/dialog.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';

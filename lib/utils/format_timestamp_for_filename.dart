@@ -59,5 +59,5 @@ String formatTimestampForFilenameWithUnderscore(DateTime dt) {
   final minute = dt.minute.toString().padLeft(2, '0');
   final second = dt.second.toString().padLeft(2, '0');
 
-  return '$year-$month-$day\_$hour-$minute-$second';
+  return '$year-$month-${day}_$hour-$minute-$second';
 }
