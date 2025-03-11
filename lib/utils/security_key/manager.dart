@@ -2,7 +2,7 @@
 ///
 // Time-stamp: <Friday 2024-06-28 13:35:54 +1000 Graham Williams>
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
