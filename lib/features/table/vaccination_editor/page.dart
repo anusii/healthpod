@@ -2,11 +2,11 @@
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
-/// Copyright (C) 2025, Software Innovation Institute, ANU
+/// Copyright (C) 2025, Software Innovation Institute, ANU.
 ///
-/// Licensed under the GNU General Public License, Version 3 (the "License");
+/// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -21,7 +21,7 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Kevin Wang
+/// Authors: Kevin Wang.
 
 library;
 
@@ -32,6 +32,7 @@ import 'package:healthpod/features/table/vaccination_editor/service.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
 
 /// The main editor page for vaccination observations.
+
 class VaccinationEditorPage extends StatefulWidget {
   const VaccinationEditorPage({super.key});
 
@@ -46,6 +47,7 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
   @override
   void initState() {
     super.initState();
+
     // Initialise state and service.
 
     editorState = VaccinationEditorState();
@@ -158,7 +160,34 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
           return const Center(child: CircularProgressIndicator());
         }
         if (error != null) {
-          return Center(child: Text('Error: $error'));
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.assignment,
+                  size: 64,
+                  color: Colors.blue,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Please go to Update page to submit your first vaccination record.',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Error details: $error',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          );
         }
 
         return SingleChildScrollView(
@@ -180,7 +209,8 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                   final obs = observations[index];
 
                   if (editorState.editingIndex == index) {
-                    // Editing row
+                    // Editing row.
+
                     return DataRow(
                       cells: [
                         DataCell(
@@ -274,7 +304,8 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                     );
                   }
 
-                  // Display row
+                  // Display row.
+
                   return DataRow(
                     cells: [
                       DataCell(Text(
