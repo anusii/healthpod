@@ -25,6 +25,9 @@
 
 library;
 
+import 'package:healthpod/constants/health_data_type.dart';
+import 'package:healthpod/features/survey/question.dart';
+
 /// Constants for vaccination survey field names.
 ///
 /// These constants are used to access and store vaccination data consistently
@@ -52,4 +55,47 @@ class VaccinationSurveyConstants {
   /// Field name for additional notes.
 
   static const String fieldNotes = 'notes';
+
+  /// Question texts (for UI only).
+
+  static const String vaccine = "Which vaccine did you receive?";
+  static const String provider = "Where did you receive the vaccine?";
+  static const String professional = "Healthcare professional name";
+  static const String cost = "Cost of vaccination";
+  static const String notes = "Any additional notes?";
+
+  /// The list of questions used in the vaccination survey.
+
+  static final List<HealthSurveyQuestion> questions = [
+    HealthSurveyQuestion(
+      question: vaccine,
+      fieldName: fieldVaccineName,
+      type: HealthDataType.text,
+      isRequired: true,
+    ),
+    HealthSurveyQuestion(
+      question: provider,
+      fieldName: fieldProvider,
+      type: HealthDataType.text,
+      isRequired: true,
+    ),
+    HealthSurveyQuestion(
+      question: professional,
+      fieldName: fieldProfessional,
+      type: HealthDataType.text,
+      isRequired: false,
+    ),
+    HealthSurveyQuestion(
+      question: cost,
+      fieldName: fieldCost,
+      type: HealthDataType.text,
+      isRequired: false,
+    ),
+    HealthSurveyQuestion(
+      question: notes,
+      fieldName: fieldNotes,
+      type: HealthDataType.text,
+      isRequired: false,
+    ),
+  ];
 }
