@@ -102,4 +102,4 @@ class FileState {
         currentPath!.contains('/blood_pressure/') ||
         currentPath == 'healthpod/data/blood_pressure';
   }
-} 
+}

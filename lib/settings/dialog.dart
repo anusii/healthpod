@@ -2,7 +2,7 @@
 ///
 // Time-stamp: <Friday 2025-02-21 16:58:42 +1100 Graham Williams>
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -31,6 +31,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:healthpod/providers/settings.dart';
+import 'package:healthpod/utils/constrained_dialog.dart';
 import 'package:healthpod/widgets/setting_field.dart';
 
 /// Settings dialog that allows users to configure server connection and authentication details.
@@ -55,8 +56,11 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+
+    // Set default values if no settings are found in shared preferences.
+
     ref.read(serverURLProvider.notifier).state =
-        prefs.getString('server_url') ?? '';
+        prefs.getString('server_url') ?? 'https://pods.dev.solidcommunity.au';
     ref.read(usernameProvider.notifier).state =
         prefs.getString('username') ?? '';
     ref.read(passwordProvider.notifier).state =
@@ -71,6 +75,26 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
 
+    // Add reset function to handle clearing only server URL.
+
+    void resetSettings() async {
+      // Clear SharedPreferences.
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('server_url');
+      // leave username, password and secret key here for now.
+      // await prefs.remove('username');
+      // await prefs.remove('password');
+      // await prefs.remove('secret_key');
+
+      // Reset all providers to default values.
+
+      ref.invalidate(serverURLProvider);
+      // ref.invalidate(usernameProvider);
+      // ref.invalidate(passwordProvider);
+      // ref.invalidate(secretKeyProvider);
+    }
+
     return Material(
       color: Colors.transparent,
       child: Padding(
@@ -79,7 +103,17 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
           children: [
             Container(
               width: size.width,
-              height: size.height,
+              // 80% of screen height.
+
+              height: size.height * 0.8,
+              constraints: BoxConstraints(
+                // Maximum height in logical pixels.
+
+                maxHeight: 600,
+                // Minimum height in logical pixels.
+
+                minHeight: 300,
+              ),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(15),
@@ -153,6 +187,30 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         Enter your encryption secret key.
 
                         ''',
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton(
+                        onPressed: () async {
+                          // Show confirmation dialog before resetting.
+
+                          await showConstrainedConfirmationDialog(
+                            context: context,
+                            title: 'Reset Settings',
+                            message:
+                                'Are you sure you want to reset all settings to default?',
+                            confirmText: 'Reset',
+                            confirmColor: Colors.red,
+                            maxHeight: 100,
+                            onConfirm: resetSettings,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[50],
+                        ),
+                        child: const Text(
+                          'Reset to Default',
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
                     ],
                   ),

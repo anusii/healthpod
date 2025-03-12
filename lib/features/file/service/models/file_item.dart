@@ -32,15 +32,15 @@ library;
 
 class FileItem {
   /// The name of the file.
-  
+
   final String name;
 
   /// The full path to the file.
-  
+
   final String path;
 
   /// The date and time the file was last modified.
-  
+
   final DateTime dateModified;
 
   /// Creates a new [FileItem] instance.
@@ -55,4 +55,4 @@ class FileItem {
     required this.path,
     required this.dateModified,
   });
-} 
+}

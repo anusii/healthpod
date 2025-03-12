@@ -25,7 +25,13 @@
 
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
+import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/file/browser/models/file_item.dart';
 
@@ -157,6 +163,69 @@ class FileListItem extends StatelessWidget {
 
                   if (showButtons) ...[
                     const SizedBox(width: 8),
+                    // Preview button for PDF files.
+
+                    if (file.name.toLowerCase().contains('.pdf.enc.ttl'))
+                      IconButton(
+                        visualDensity: VisualDensity.compact,
+                        icon: Icon(
+                          Icons.preview,
+                          size: 20,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        onPressed: () async {
+                          // Retrieve the PDF file content as a base64-encoded string.
+
+                          final String fileContent = await readPod(
+                                  '$currentPath/${file.name}',
+                                  context,
+                                  Container()) ??
+                              '';
+
+                          // Decode the base64 string into raw PDF bytes.
+
+                          final pdfBytes = base64Decode(fileContent);
+
+                          if (!context.mounted) return;
+
+                          // Show the PDF preview dialog.
+
+                          showDialog(
+                            context: context,
+                            builder: (dialogContext) => AlertDialog(
+                              title: const Text("File Preview"),
+                              content: SizedBox(
+                                width: double.maxFinite,
+                                height: 500,
+                                child: PdfPreview(
+                                  build: (PdfPageFormat format) async =>
+                                      pdfBytes,
+                                  canChangeOrientation: false,
+                                  canChangePageFormat: false,
+                                  allowPrinting: false,
+                                  allowSharing: false,
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(dialogContext),
+                                  child: const Text("Close"),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        style: IconButton.styleFrom(
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withAlpha(10),
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(35, 35),
+                        ),
+                      ),
+                    if (file.name.toLowerCase().contains('.pdf.enc.ttl'))
+                      const SizedBox(width: 10),
                     // Download button.
 
                     IconButton(

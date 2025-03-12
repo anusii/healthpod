@@ -2,7 +2,7 @@
 ///
 // Time-stamp: <Wednesday 2025-02-12 15:50:35 +1100 Graham Williams>
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -205,7 +205,7 @@ class _VaccinationSurveyState extends State<VaccinationSurvey> {
                         final Map<String, dynamic> responses = {
                           'date':
                               '${_selectedDate.year}-${_selectedDate.month}-${_selectedDate.day}',
-                          'vaccine_name': _vaccineController.text,
+                          'vaccine': _vaccineController.text,
                           'provider': _providerController.text,
                           'professional': _professionalController.text,
                           'cost': _costController.text,

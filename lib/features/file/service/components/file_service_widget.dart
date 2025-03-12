@@ -75,14 +75,17 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                                   builder: (BuildContext context) {
                                     return AlertDialog(
                                       title: const Text('Confirm Delete'),
-                                      content: Text('Are you sure you want to delete "$fileName"?'),
+                                      content: Text(
+                                          'Are you sure you want to delete "$fileName"?'),
                                       actions: [
                                         TextButton(
-                                          onPressed: () => Navigator.of(context).pop(false),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(false),
                                           child: const Text('Cancel'),
                                         ),
                                         TextButton(
-                                          onPressed: () => Navigator.of(context).pop(true),
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(true),
                                           child: const Text('Delete'),
                                         ),
                                       ],
@@ -100,7 +103,9 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                                 // Handle CSV import if needed
                               },
                               onDirectoryChanged: (path) {
-                                ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
+                                ref
+                                    .read(fileServiceProvider.notifier)
+                                    .updateCurrentPath(path);
                               },
                             ),
                           ),
@@ -110,7 +115,8 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                       Expanded(
                         flex: 1,
                         child: Card(
-                          margin: const EdgeInsets.only(left: 8, right: 16, top: 16),
+                          margin: const EdgeInsets.only(
+                              left: 8, right: 16, top: 16),
                           child: const Padding(
                             padding: EdgeInsets.all(16),
                             child: FileUploadSection(),
@@ -149,14 +155,17 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                                 builder: (BuildContext context) {
                                   return AlertDialog(
                                     title: const Text('Confirm Delete'),
-                                    content: Text('Are you sure you want to delete "$fileName"?'),
+                                    content: Text(
+                                        'Are you sure you want to delete "$fileName"?'),
                                     actions: [
                                       TextButton(
-                                        onPressed: () => Navigator.of(context).pop(false),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(false),
                                         child: const Text('Cancel'),
                                       ),
                                       TextButton(
-                                        onPressed: () => Navigator.of(context).pop(true),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop(true),
                                         child: const Text('Delete'),
                                       ),
                                     ],
@@ -174,7 +183,9 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                               // Handle CSV import if needed
                             },
                             onDirectoryChanged: (path) {
-                              ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
+                              ref
+                                  .read(fileServiceProvider.notifier)
+                                  .updateCurrentPath(path);
                             },
                           ),
                         ),
@@ -194,4 +205,4 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
       ],
     );
   }
-} 
+}
