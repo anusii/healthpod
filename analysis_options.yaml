@@ -32,9 +32,18 @@ analyzer:
     - custom_lint
   errors:
     undefined_lint: ignore
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
 
 linter:
   rules:
     - my_custom_lint # Custom template rule for checking print statements in production.
-    - ordered_imports # Import ordering rule.
     # ignore_for_file: undefined_lint
+
+custom_lint:
+  rules:
+    - import_order_lint
+  options:
+    import_order_lint:
+      project_name: healthpod

@@ -21,173 +21,114 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Kevin Wang
+/// Authors: Kevin Wang, Zheyuan Xu
 
 library;
 
 import 'package:flutter/material.dart';
 
-import 'package:markdown_tooltip/markdown_tooltip.dart';
+import 'package:healthpod/features/home/service/components/components.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
+  Widget _buildHeader() {
+    return const Text(
+      'Your Personal Health Data Management System',
+      style: TextStyle(fontSize: 20, color: Colors.grey),
+      textAlign: TextAlign.center,
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Center(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
-                'Welcome to HealthPod',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              _buildHeader(),
               const SizedBox(height: 16),
-              const Text(
-                'Your personal health data management system',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 32),
-              const Text(
-                'Use the navigation rail on the left to access different features:',
-                style: TextStyle(fontSize: 16),
-              ),
+              const AvatarName(),
               const SizedBox(height: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  MarkdownTooltip(
-                    message: '''
-
-                    **Diary:** Here you will be able to access and manage your
-                    appointments. You can enter historic information, update when
-                    you recieve a new appointment, and download appointments from
-                    other sources. This will be a record of all your interactions
-                    with the health system.
-
-                    ''',
-                    child: Text(
-                      '• Diary',
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 1.5,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                  ),
-                  MarkdownTooltip(
-                    message: '''
-
-                    **File Management:** Tap here to access file management features.
-                    This allows you to:
-
-                    - Browse your POD storage
-                    - Upload files to your POD
-                    - Download files from your POD
-                    - Delete files from your POD
-
-                    ''',
-                    child: Text(
-                      '• Files',
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 1.5,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                  ),
-                  MarkdownTooltip(
-                    message: '''
-
-                    **Record of Vaccinations:** Tap here to access and manage your
-                    record of vaccinations. You can enter historic information,
-                    update when you recieve a vaccination, and download from
-                    governemnt records of your vaccinations.
-
-                    ''',
-                    child: Text(
-                      '• Vaccinations',
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 1.5,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                  ),
-                  MarkdownTooltip(
-                    message: '''
-
-                    **Health Survey:** Tap here to start the Health Survey.
-                    This allows you to answer important health-related questions,
-                    track your responses, and share them securely with your healthcare
-                    provider if needed.
-
-                    ''',
-                    child: Text(
-                      '• Survey',
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 1.5,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                  ),
-                  MarkdownTooltip(
-                    message: '''
-
-                    **Data Visualisation:** Tap here to access interactive data
-                    visualisation tools. You can:
-
-                    - View health trends over time
-                    - Analyse patterns in your health data
-                    - Generate comprehensive health reports
-                    - Track progress towards health goals
-
-                    ''',
-                    child: Text(
-                      '• Visualisation',
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 1.5,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                  ),
-                  MarkdownTooltip(
-                    message: '''
-
-                    **Blood Pressure Data Editor:** Edit your blood pressure readings:
-
-                    - View all readings
-                    - Add new readings
-                    - Edit existing data
-                    - Delete observations
-
-                    ''',
-                    child: Text(
-                      '• Data Table',
-                      style: TextStyle(
-                        fontSize: 16,
-                        height: 1.5,
-                        color: Colors.blue[700],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              const NextAppointment(),
+              const SizedBox(height: 16),
+              const ManagePlan(),
+              const SizedBox(height: 16),
+              const PersonalDetails(),
+              const SizedBox(height: 16),
+              const NumberAppointments(),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGridItem(int index) {
+    final List<Widget> gridItems = [
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          AvatarName(),
+          SizedBox(height: 10),
+          NumberAppointments(),
+          SizedBox(height: 10),
+          ManagePlan(),
+        ],
+      ),
+      const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [NextAppointment()],
+      ),
+      const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [PersonalDetails()],
+      ),
+    ];
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 400, minHeight: 220),
+      child: gridItems[index],
+    );
+  }
+
+  Widget _buildDesktopLayout(double maxWidth) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 16),
+            GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: maxWidth < 1200 ? 2 : 3,
+                mainAxisSpacing: 24,
+                crossAxisSpacing: 24,
+                mainAxisExtent: 370,
+              ),
+              itemCount: 3,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) => _buildGridItem(index),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return constraints.maxWidth < 800
+              ? _buildMobileLayout()
+              : _buildDesktopLayout(constraints.maxWidth);
+        },
       ),
     );
   }

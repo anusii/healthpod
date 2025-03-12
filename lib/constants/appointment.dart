@@ -1,7 +1,7 @@
-/// <DESCRIPTION>
-///
-// Time-stamp: <Thursday 2025-01-30 08:36:00 +1100 Graham Williams>
-///
+/// Appointment constants.
+//
+// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+//
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
@@ -21,8 +21,19 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: <AUTHORS>
+/// Authors: Zheyuan Xu
 
 library;
 
-// ignore_for_file: unintended_html_in_doc_comment
+/// Dummy data for the avatar and appointment section in home screen.
+
+final String appointmentDate = 'Monday, 13 March';
+final String appointmentTime = '14:30 pm';
+final String appointmentLocation = 'Gurriny Yealamucka';
+final String patientID = 'p43623';
+final String phoneNumber = '(07) 4226 4100';
+final String userName = 'Riley Breugel';
+
+final bool clinicBusAvailable = true;
+
+final int notificationCount = 3;

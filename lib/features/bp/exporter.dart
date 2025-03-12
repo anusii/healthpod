@@ -33,7 +33,7 @@ import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/constants/survey.dart';
+import 'package:healthpod/constants/blood_pressure_survey.dart';
 import 'package:healthpod/utils/normalise_timestamp.dart';
 
 /// Handles exporting blood pressure data from JSON files to a single CSV file.

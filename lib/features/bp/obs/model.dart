@@ -25,7 +25,7 @@
 
 library;
 
-import 'package:healthpod/constants/survey.dart';
+import 'package:healthpod/constants/blood_pressure_survey.dart';
 
 /// Model class representing a blood pressure observation.
 ///

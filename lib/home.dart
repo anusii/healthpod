@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Friday 2025-02-21 16:58:42 +1100 Graham Williams>
+// Time-stamp: <Sunday 2025-03-09 11:40:02 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -32,7 +32,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
-import 'package:healthpod/features/bp/combined_visualisation.dart';
+import 'package:healthpod/features/charts/tab.dart';
 import 'package:healthpod/features/file/service.dart';
 import 'package:healthpod/features/survey/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
@@ -79,7 +79,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'content': const SurveyTab(),
     'tooltip': '''
 
-    Log your Blood Pressure (systolic, diastolic, heart rate), 
+    Log your Blood Pressure (systolic, diastolic, heart rate),
     how you are feeling, and vaccination records.
     ''',
   },
@@ -87,9 +87,9 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Charts',
     'icon': Icons.show_chart,
     'color': Colors.blue,
-    'content': const BPCombinedVisualisation(),
+    'content': const ChartTab(),
     'tooltip':
-        'Visualize your Blood Pressure trends and other health metrics with interactive charts.',
+        'Visualize your Blood Pressure trends and other health metrics with interactive charts.Vaccination timeline charts are also available.',
   },
   {
     'title': 'Table',
@@ -307,12 +307,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
                             final tooltipMessage =
                                 tab['tooltip'] ?? tab['message'];
                             return NavigationRailDestination(
-                              icon: Tooltip(
+                              icon: MarkdownTooltip(
                                 message: tooltipMessage,
-                                textStyle: const TextStyle(
-                                    fontSize: 16, color: Colors.white),
-                                margin: const EdgeInsets.only(
-                                    top: 0.0, bottom: 0.0),
                                 child: Icon(tab['icon'], color: tab['color']),
                               ),
                               label: Text(

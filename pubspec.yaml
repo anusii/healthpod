@@ -17,8 +17,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  audioplayers: ^6.2.0
   intl: ^0.20.2
   shared_preferences: ^2.5.2
+  timeline_tile: ^2.0.0
 
   file_picker: ^8.1.7
   flutter_launcher_icons: ^0.14.2
@@ -48,6 +50,7 @@ dependencies:
   logger: ^2.5.0
   flutter_riverpod: ^2.4.9
   riverpod: ^2.6.1
+  badges: ^3.1.2
   pdf: ^3.11.3
   printing: ^5.14.2
 
@@ -62,9 +65,11 @@ dev_dependencies:
     sdk: flutter
 
   ubuntu_lints: ^0.4.0
-  custom_lint: ^0.6.4
-  custom_lint_package:
-    path: custom_lint_package
+  custom_lint: 0.6.10
+  import_order_lint:
+    git:
+      url: https://github.com/anusii/import-order-lint.git
+      ref: main
   webdriver: 3.0.4
 
 dependency_overrides:
@@ -91,9 +96,8 @@ dependency_overrides:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/healthpod_icon.png
-    - assets/images/healthpod_image.png
-    - assets/images/healthpod_logo.png
+    - assets/audio/
+    - assets/images/
 
 # Define launcher icons for all platforms (except Linux) so icons for
 # the apps can be automatically updated.

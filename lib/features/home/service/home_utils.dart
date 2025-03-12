@@ -1,6 +1,6 @@
-/// Color constants used throughout the app.
+/// Global variables used in home page.
 ///
-// Time-stamp: <Tuesday 2025-01-07 14:24:22 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-02-21 16:58:42 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -21,16 +21,8 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Graham Williams
+/// Authors: Zheyuan Xu
 
 library;
 
-import 'package:flutter/material.dart';
-
-const anuGold = Color(0xFFBE830E);
-
-const iconColor = Colors.white;
-
-const iconGreen = Colors.green;
-
-const titleBackgroundColor = Color(0xFFF0E4D7);
+bool transportAudioIn = false;
