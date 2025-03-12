@@ -32,8 +32,8 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
-import 'package:healthpod/features/bp/combined_visualisation.dart';
 import 'package:healthpod/features/bp/editor/page.dart';
+import 'package:healthpod/features/charts/tab.dart';
 import 'package:healthpod/features/file/service.dart';
 import 'package:healthpod/features/survey/tab.dart';
 import 'package:healthpod/settings/dialog.dart';
@@ -87,9 +87,9 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Charts',
     'icon': Icons.show_chart,
     'color': Colors.blue,
-    'content': const BPCombinedVisualisation(),
+    'content': const ChartTab(),
     'tooltip':
-        'Visualize your Blood Pressure trends and other health metrics with interactive charts.',
+        'Visualize your Blood Pressure trends and other health metrics with interactive charts.Vaccination timeline charts are also available.',
   },
   {
     'title': 'Table',

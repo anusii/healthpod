@@ -27,7 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/constants/survey.dart';
+import 'package:healthpod/constants/blood_pressure_survey.dart';
 import 'package:healthpod/features/survey/form.dart';
 import 'package:healthpod/features/survey/question.dart';
 import 'package:healthpod/utils/handle_submit.dart';
@@ -62,7 +62,7 @@ class BPSurvey extends StatelessWidget {
     await saveResponseToPod(
       context: context,
       responses: responses,
-      podPath: '/bp',
+      podPath: '/blood_pressure',
       filePrefix: 'blood_pressure',
     );
   }
