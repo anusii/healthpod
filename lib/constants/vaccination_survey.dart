@@ -56,6 +56,11 @@ class VaccinationSurveyConstants {
 
   static const String fieldNotes = 'notes';
 
+  /// Data field names (for storage/CSV).
+
+  static const String fieldTimestamp = 'timestamp';
+  static const String fieldVaccine = 'vaccine';
+
   /// Question texts (for UI only).
 
   static const String vaccine = "Which vaccine did you receive?";
