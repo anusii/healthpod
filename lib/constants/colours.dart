@@ -2,7 +2,7 @@
 ///
 // Time-stamp: <Tuesday 2025-01-07 14:24:22 +1100 Graham Williams>
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -27,6 +27,10 @@ library;
 
 import 'package:flutter/material.dart';
 
-const titleBackgroundColor = Color(0xFFF0E4D7);
+const anuGold = Color(0xFFBE830E);
 
 const iconColor = Colors.white;
+
+const iconGreen = Colors.green;
+
+const titleBackgroundColor = Color(0xFFF0E4D7);

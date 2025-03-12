@@ -17,6 +17,8 @@ TMP*
 qtest*.txt
 REMOVE
 *.json
+solidpod
+import_order_lint
 
 installers/*.apk
 installers/*.exe
