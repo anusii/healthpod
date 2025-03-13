@@ -43,7 +43,6 @@ import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 /// Parameters:
 /// - [dataType]: The type of data (e.g., 'blood_pressure', 'vaccination')
 /// - [filename]: The primary filename to delete
-/// - [filenameWithUnderscore]: Optional alternative filename with underscore format
 /// - [timestamp]: The DateTime associated with the file, used for fallback searches
 /// - [resources]: The container resources with a 'files' list property
 ///
@@ -61,7 +60,6 @@ import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 Future<bool> deletePodFileWithFallback({
   required String dataType,
   required String filename,
-  String? filenameWithUnderscore,
   required DateTime timestamp,
   required dynamic resources,
 }) async {
@@ -74,10 +72,11 @@ Future<bool> deletePodFileWithFallback({
     return true;
   }
 
-  // Try with the underscore format if provided.
+  // Try with the underscore format.
+  final filenameWithUnderscore =
+      '${dataType}_${formatTimestampForFilenameWithUnderscore(timestamp)}.json.enc.ttl';
 
-  if (filenameWithUnderscore != null &&
-      resources.files.contains(filenameWithUnderscore)) {
+  if (resources.files.contains(filenameWithUnderscore)) {
     final filePathWithUnderscore =
         constructPodPath(dataType, filenameWithUnderscore);
     await deleteFile(filePathWithUnderscore);

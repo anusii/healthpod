@@ -34,8 +34,8 @@ import 'package:solidpod/solidpod.dart';
 import 'package:healthpod/features/table/vaccination_editor/model.dart';
 import 'package:healthpod/utils/construct_pod_dir_path.dart';
 import 'package:healthpod/utils/construct_pod_path.dart';
-import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
+import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
 /// Handles loading/saving/deleting vaccination observations from the Pod.
 
@@ -95,8 +95,6 @@ class VaccinationEditorService {
       if (!isNew && oldObservation != null) {
         try {
           final oldFilename = _filenameFromTimestamp(oldObservation.timestamp);
-          final filenameWithUnderscore =
-              '${dataType}_${formatTimestampForFilenameWithUnderscore(oldObservation.timestamp)}.json.enc.ttl';
 
           // Check if the old file exists before attempting to delete it.
 
@@ -109,7 +107,6 @@ class VaccinationEditorService {
           await deletePodFileWithFallback(
             dataType: dataType,
             filename: oldFilename,
-            filenameWithUnderscore: filenameWithUnderscore,
             timestamp: oldObservation.timestamp,
             resources: resources,
           );
@@ -160,17 +157,11 @@ class VaccinationEditorService {
 
       final filename = _filenameFromTimestamp(observation.timestamp);
 
-      // Also try with the old format (underscore separator) for backward compatibility.
-
-      final filenameWithUnderscore =
-          '${dataType}_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
-
       // Use the utility function to handle file deletion with fallback options.
 
       final deleted = await deletePodFileWithFallback(
         dataType: dataType,
         filename: filename,
-        filenameWithUnderscore: filenameWithUnderscore,
         timestamp: observation.timestamp,
         resources: resources,
       );
