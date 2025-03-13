@@ -32,8 +32,9 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/table/vaccination_editor/model.dart';
+import 'package:healthpod/utils/construct_pod_dir_path.dart';
+import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
-import 'package:healthpod/utils/pod_path_helper.dart';
 
 /// Handles loading/saving/deleting vaccination observations from the Pod.
 

@@ -1,4 +1,4 @@
-/// Utility functions for constructing Pod paths.
+/// Utility function for constructing Pod file paths.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -44,24 +44,4 @@ library;
 
 String constructPodPath(String dataType, String filename) {
   return 'healthpod/data/$dataType/$filename';
-}
-
-/// Constructs a path for a data directory in the Pod.
-///
-/// This function standardizes the path construction for Pod data directories,
-/// ensuring consistency across the application.
-///
-/// Parameters:
-/// - [dataType]: The type of data (e.g., 'blood_pressure', 'vaccination').
-///
-/// Returns a string representing the full path to the data directory in the Pod.
-///
-/// Example:
-/// ```dart
-/// final dirPath = constructPodDirPath('blood_pressure');
-/// // Returns: 'healthpod/data/blood_pressure'
-/// ```
-
-String constructPodDirPath(String dataType) {
-  return 'healthpod/data/$dataType';
 }
