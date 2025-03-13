@@ -32,10 +32,10 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
-import 'package:healthpod/features/bp/editor/page.dart';
 import 'package:healthpod/features/charts/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
 import 'package:healthpod/features/survey/tab.dart';
+import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/settings/dialog.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
@@ -95,9 +95,9 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Table',
     'icon': Icons.table_chart,
     'color': Colors.blue,
-    'content': const BPEditorPage(),
+    'content': const TableTab(),
     'tooltip':
-        'View and manage your Blood Pressure Observations in a detailed table view.',
+        'View and manage your Blood Pressure and Vaccination records in a detailed table view.',
   },
   {
     'title': 'Files',

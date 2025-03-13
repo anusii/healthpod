@@ -1,4 +1,4 @@
-/// Format timestamp for filename which includes the 'T' but does not include milliseconds.
+/// Utility function for formatting timestamps for filenames.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -21,20 +21,43 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Ashley Tang
+/// Authors: Kevin Wang
 
 library;
 
-/// Formats timestamp for consistent file naming without milliseconds.
+/// Formats a DateTime object into a string suitable for use in filenames.
+///
+/// The format is YYYY-MM-DDThh-mm-ss, which ensures proper sorting and
+/// avoids characters that might be problematic in filenames.
+/// The 'T' separator is used between date and time to match ISO 8601 format.
+///
+/// Example: 2023-05-15T14-30-22 for May 15, 2023, 2:30:22 PM
 
-String formatTimestampForFilename(DateTime timestamp) {
-  // Convert to ISO string and remove milliseconds.
+String formatTimestampForFilename(DateTime dt) {
+  final year = dt.year.toString();
+  final month = dt.month.toString().padLeft(2, '0');
+  final day = dt.day.toString().padLeft(2, '0');
+  final hour = dt.hour.toString().padLeft(2, '0');
+  final minute = dt.minute.toString().padLeft(2, '0');
+  final second = dt.second.toString().padLeft(2, '0');
 
-  String isoString = timestamp.toIso8601String();
-  // Remove milliseconds portion if it exists (everything after the decimal point).
+  return '$year-$month-${day}T$hour-$minute-$second';
+}
 
-  isoString = isoString.split('.')[0];
-  // Replace colons and periods with hyphens for file naming.
+/// Formats a DateTime object into a string suitable for use in filenames with underscore separator.
+/// This is provided for backward compatibility with older files.
+///
+/// The format is YYYY-MM-DD_HH-MM-SS.
+///
+/// Example: 2023-05-15_14-30-22 for May 15, 2023, 2:30:22 PM
 
-  return isoString.replaceAll(RegExp(r'[:.]+'), '-');
+String formatTimestampForFilenameWithUnderscore(DateTime dt) {
+  final year = dt.year.toString();
+  final month = dt.month.toString().padLeft(2, '0');
+  final day = dt.day.toString().padLeft(2, '0');
+  final hour = dt.hour.toString().padLeft(2, '0');
+  final minute = dt.minute.toString().padLeft(2, '0');
+  final second = dt.second.toString().padLeft(2, '0');
+
+  return '$year-$month-${day}_$hour-$minute-$second';
 }

@@ -1,4 +1,4 @@
-/// Blood pressure editor state management.
+/// Vaccination editor state management.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -21,27 +21,25 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Ashley Tang.
+/// Authors: Kevin Wang
 
 library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/features/bp/editor/controllers.dart';
+import 'package:healthpod/features/table/vaccination_editor/controllers.dart';
+import 'package:healthpod/features/table/vaccination_editor/model.dart';
 
-import 'package:healthpod/features/bp/obs/model.dart';
-
-/// Manages all the state fields needed for the Blood Pressure Editor.
+/// Manages all the state fields needed for the Vaccination Editor.
 ///
 /// Contains the list of observations, the current observation being edited,
 /// and the state of the text editing controllers.
 ///
 /// ChangeNotifier is used to notify listeners of changes to the state.
-
-class BPEditorState with ChangeNotifier {
+class VaccinationEditorState with ChangeNotifier {
   /// The list of loaded observations.
 
-  List<BPObservation> observations = [];
+  List<VaccinationObservation> observations = [];
 
   /// Index of the observation currently being edited, or null if none.
 
@@ -61,29 +59,30 @@ class BPEditorState with ChangeNotifier {
 
   /// Controller manager for text editing.
 
-  final controllers = BPEditorControllers();
+  final controllers = VaccinationEditorControllers();
 
   /// Getter for controllers.
 
-  TextEditingController? get systolicController =>
-      controllers.systolicController;
-  TextEditingController? get diastolicController =>
-      controllers.diastolicController;
-  TextEditingController? get heartRateController =>
-      controllers.heartRateController;
+  TextEditingController? get vaccineNameController =>
+      controllers.vaccineNameController;
+  TextEditingController? get providerController =>
+      controllers.providerController;
+  TextEditingController? get professionalController =>
+      controllers.professionalController;
+  TextEditingController? get costController => controllers.costController;
   TextEditingController? get notesController => controllers.notesController;
 
   /// The observation currently being edited.
 
-  BPObservation? _currentEdit;
+  VaccinationObservation? _currentEdit;
 
   /// Getter for currentEdit.
 
-  BPObservation? get currentEdit => _currentEdit;
+  VaccinationObservation? get currentEdit => _currentEdit;
 
   /// Prepares text controllers for a given [observation].
 
-  void initialiseControllers(BPObservation observation) {
+  void initialiseControllers(VaccinationObservation observation) {
     controllers.initialize(
       observation,
       onObservationChanged: (updated) {
@@ -113,7 +112,7 @@ class BPEditorState with ChangeNotifier {
 
   /// Setter for currentEdit that triggers UI updates.
 
-  set currentEdit(BPObservation? value) {
+  set currentEdit(VaccinationObservation? value) {
     _currentEdit = value;
     notifyListeners();
   }
@@ -121,12 +120,12 @@ class BPEditorState with ChangeNotifier {
   /// Add new blank observation at the top of the list and go to edit mode.
 
   void addNewObservation() {
-    final newObservation = BPObservation(
+    final newObservation = VaccinationObservation(
       timestamp: DateTime.now(),
-      systolic: 0,
-      diastolic: 0,
-      heartRate: 0,
-      feeling: '',
+      vaccineName: '',
+      provider: '',
+      professional: '',
+      cost: '',
       notes: '',
     );
     observations.insert(0, newObservation);
@@ -149,7 +148,7 @@ class BPEditorState with ChangeNotifier {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
-            'Please enter values for Systolic, Diastolic, and Heart Rate',
+            'Please enter a vaccine name',
           ),
           backgroundColor: Colors.red,
         ),
@@ -172,7 +171,7 @@ class BPEditorState with ChangeNotifier {
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Blood pressure reading saved successfully'),
+        content: Text('Vaccination record saved successfully'),
         backgroundColor: Colors.green,
       ),
     );
@@ -190,7 +189,7 @@ class BPEditorState with ChangeNotifier {
   Future<void> deleteObservation(
     BuildContext context,
     dynamic editorService,
-    BPObservation observation,
+    VaccinationObservation observation,
   ) async {
     await editorService.deleteObservationFromPod(context, observation);
   }

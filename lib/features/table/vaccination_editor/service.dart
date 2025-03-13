@@ -1,4 +1,4 @@
-/// Blood pressure observation service.
+/// Vaccination observation service.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -21,7 +21,7 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Ashley Tang.
+/// Authors: Kevin Wang
 
 library;
 
@@ -31,19 +31,19 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/features/bp/obs/model.dart';
+import 'package:healthpod/features/table/vaccination_editor/model.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
-/// Handles loading/saving/deleting BP observations from the Pod.
+/// Handles loading/saving/deleting vaccination observations from the Pod.
 
-class BPEditorService {
-  /// Load all BP observations from `healthpod/data/blood_pressure` directory.
+class VaccinationEditorService {
+  /// Load all vaccination observations from `healthpod/data/vaccinations` directory.
 
-  Future<List<BPObservation>> loadData(BuildContext context) async {
-    final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
+  Future<List<VaccinationObservation>> loadData(BuildContext context) async {
+    final dirUrl = await getDirUrl('healthpod/data/vaccination');
     final resources = await getResourcesInContainer(dirUrl);
 
-    final List<BPObservation> loadedObservations = [];
+    final List<VaccinationObservation> loadedObservations = [];
 
     for (final file in resources.files) {
       if (!file.endsWith('.enc.ttl')) continue;
@@ -51,7 +51,7 @@ class BPEditorService {
       if (!context.mounted) continue;
 
       final content = await readPod(
-        'healthpod/data/blood_pressure/$file',
+        'healthpod/data/vaccination/$file',
         context,
         const Text('Loading file'),
       );
@@ -63,7 +63,7 @@ class BPEditorService {
 
       try {
         final data = json.decode(content.toString());
-        loadedObservations.add(BPObservation.fromJson(data));
+        loadedObservations.add(VaccinationObservation.fromJson(data));
       } catch (e) {
         debugPrint('Error parsing file $file: $e');
       }
@@ -72,14 +72,14 @@ class BPEditorService {
     return loadedObservations;
   }
 
-  /// Save a BP observation to Pod. If this is an existing observation update,
+  /// Save a vaccination observation to Pod. If this is an existing observation update,
   /// remove the old file first.
 
   Future<void> saveObservationToPod({
     required BuildContext context,
-    required BPObservation observation,
+    required VaccinationObservation observation,
     required bool isNew,
-    required BPObservation? oldObservation,
+    required VaccinationObservation? oldObservation,
   }) async {
     try {
       // Delete old file if not a new observation.
@@ -90,23 +90,23 @@ class BPEditorService {
 
           // Check if the old file exists before attempting to delete it.
 
-          final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
+          final dirUrl = await getDirUrl('healthpod/data/vaccination');
           final resources = await getResourcesInContainer(dirUrl);
 
           if (resources.files.contains(oldFilename)) {
-            await deleteFile('healthpod/data/blood_pressure/$oldFilename');
+            await deleteFile('healthpod/data/vaccination/$oldFilename');
           } else {
             // Check if there's a file with a similar name.
 
             final baseFilename =
-                'blood_pressure_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
+                'vaccination_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
             final matchingFiles = resources.files
                 .where((file) => file.startsWith(baseFilename))
                 .toList();
 
             if (matchingFiles.isNotEmpty) {
               await deleteFile(
-                  'healthpod/data/blood_pressure/${matchingFiles.first}');
+                  'healthpod/data/vaccination/${matchingFiles.first}');
               debugPrint(
                   'Deleted alternative old file: ${matchingFiles.first}');
             }
@@ -126,7 +126,7 @@ class BPEditorService {
       if (!context.mounted) return;
 
       await writePod(
-        'blood_pressure/$newFilename',
+        'vaccination/$newFilename',
         jsonData,
         context,
         const Text('Saving'),
@@ -134,7 +134,7 @@ class BPEditorService {
       );
     } catch (e) {
       debugPrint('Error saving observation: $e');
-      throw Exception('Failed to save blood pressure observation: $e');
+      throw Exception('Failed to save vaccination observation: $e');
     }
   }
 
@@ -142,12 +142,12 @@ class BPEditorService {
 
   Future<void> deleteObservationFromPod(
     BuildContext context,
-    BPObservation observation,
+    VaccinationObservation observation,
   ) async {
     try {
       // Log the resources in the directory for debugging.
 
-      final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
+      final dirUrl = await getDirUrl('healthpod/data/vaccination');
       final resources = await getResourcesInContainer(dirUrl);
 
       debugPrint('SubDirs: |${resources.subDirs.join(', ')}|');
@@ -160,17 +160,16 @@ class BPEditorService {
       // Also try with the old format (underscore separator) for backward compatibility.
 
       final filenameWithUnderscore =
-          'blood_pressure_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
+          'vaccination_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
 
       // Check if either file exists.
 
       if (resources.files.contains(filename)) {
-        await deleteFile('healthpod/data/blood_pressure/$filename');
+        await deleteFile('healthpod/data/vaccination/$filename');
         debugPrint('Deleted file: $filename');
         return;
       } else if (resources.files.contains(filenameWithUnderscore)) {
-        await deleteFile(
-            'healthpod/data/blood_pressure/$filenameWithUnderscore');
+        await deleteFile('healthpod/data/vaccination/$filenameWithUnderscore');
         debugPrint('Deleted file with underscore: $filenameWithUnderscore');
         return;
       }
@@ -183,7 +182,7 @@ class BPEditorService {
 
       final datePart =
           formatTimestampForFilename(observation.timestamp).split('T')[0];
-      final baseFilename = 'blood_pressure_$datePart';
+      final baseFilename = 'vaccination_$datePart';
 
       // Find any files that start with this date part.
 
@@ -194,11 +193,11 @@ class BPEditorService {
       if (matchingFiles.isNotEmpty) {
         // Delete the first matching file.
 
-        await deleteFile(
-            'healthpod/data/blood_pressure/${matchingFiles.first}');
+        await deleteFile('healthpod/data/vaccination/${matchingFiles.first}');
         debugPrint('Deleted alternative file: ${matchingFiles.first}');
       } else {
         // No matching files found, try a more flexible approach.
+
         // Look for any file that contains the date (without the time).
 
         final moreFlexibleMatches =
@@ -206,7 +205,7 @@ class BPEditorService {
 
         if (moreFlexibleMatches.isNotEmpty) {
           await deleteFile(
-              'healthpod/data/blood_pressure/${moreFlexibleMatches.first}');
+              'healthpod/data/vaccination/${moreFlexibleMatches.first}');
           debugPrint(
               'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
         } else {
@@ -220,7 +219,7 @@ class BPEditorService {
       debugPrint('Error deleting observation: $e');
       // Rethrow with more context to help debugging.
 
-      throw Exception('Failed to delete blood pressure observation: $e');
+      throw Exception('Failed to delete vaccination observation: $e');
     }
   }
 
@@ -228,6 +227,6 @@ class BPEditorService {
 
   String _filenameFromTimestamp(DateTime dt) {
     final formatted = formatTimestampForFilename(dt);
-    return 'blood_pressure_$formatted.json.enc.ttl';
+    return 'vaccination_$formatted.json.enc.ttl';
   }
 }
