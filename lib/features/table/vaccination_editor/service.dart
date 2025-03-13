@@ -33,14 +33,19 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/table/vaccination_editor/model.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/pod_path_helper.dart';
 
 /// Handles loading/saving/deleting vaccination observations from the Pod.
 
 class VaccinationEditorService {
+  /// The data type identifier for vaccination records.
+  static const String dataType = 'vaccination';
+
   /// Load all vaccination observations from `healthpod/data/vaccinations` directory.
 
   Future<List<VaccinationObservation>> loadData(BuildContext context) async {
-    final dirUrl = await getDirUrl('healthpod/data/vaccination');
+    final dirPath = constructPodDirPath(dataType);
+    final dirUrl = await getDirUrl(dirPath);
     final resources = await getResourcesInContainer(dirUrl);
 
     final List<VaccinationObservation> loadedObservations = [];
@@ -50,8 +55,9 @@ class VaccinationEditorService {
 
       if (!context.mounted) continue;
 
+      final filePath = constructPodPath(dataType, file);
       final content = await readPod(
-        'healthpod/data/vaccination/$file',
+        filePath,
         context,
         const Text('Loading file'),
       );
@@ -90,23 +96,26 @@ class VaccinationEditorService {
 
           // Check if the old file exists before attempting to delete it.
 
-          final dirUrl = await getDirUrl('healthpod/data/vaccination');
+          final dirPath = constructPodDirPath(dataType);
+          final dirUrl = await getDirUrl(dirPath);
           final resources = await getResourcesInContainer(dirUrl);
 
           if (resources.files.contains(oldFilename)) {
-            await deleteFile('healthpod/data/vaccination/$oldFilename');
+            final oldFilePath = constructPodPath(dataType, oldFilename);
+            await deleteFile(oldFilePath);
           } else {
             // Check if there's a file with a similar name.
 
             final baseFilename =
-                'vaccination_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
+                '${dataType}_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
             final matchingFiles = resources.files
                 .where((file) => file.startsWith(baseFilename))
                 .toList();
 
             if (matchingFiles.isNotEmpty) {
-              await deleteFile(
-                  'healthpod/data/vaccination/${matchingFiles.first}');
+              final matchingFilePath =
+                  constructPodPath(dataType, matchingFiles.first);
+              await deleteFile(matchingFilePath);
               debugPrint(
                   'Deleted alternative old file: ${matchingFiles.first}');
             }
@@ -126,7 +135,7 @@ class VaccinationEditorService {
       if (!context.mounted) return;
 
       await writePod(
-        'vaccination/$newFilename',
+        '$dataType/$newFilename',
         jsonData,
         context,
         const Text('Saving'),
@@ -147,7 +156,8 @@ class VaccinationEditorService {
     try {
       // Log the resources in the directory for debugging.
 
-      final dirUrl = await getDirUrl('healthpod/data/vaccination');
+      final dirPath = constructPodDirPath(dataType);
+      final dirUrl = await getDirUrl(dirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
       debugPrint('SubDirs: |${resources.subDirs.join(', ')}|');
@@ -160,16 +170,19 @@ class VaccinationEditorService {
       // Also try with the old format (underscore separator) for backward compatibility.
 
       final filenameWithUnderscore =
-          'vaccination_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
+          '${dataType}_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
 
       // Check if either file exists.
 
       if (resources.files.contains(filename)) {
-        await deleteFile('healthpod/data/vaccination/$filename');
+        final filePath = constructPodPath(dataType, filename);
+        await deleteFile(filePath);
         debugPrint('Deleted file: $filename');
         return;
       } else if (resources.files.contains(filenameWithUnderscore)) {
-        await deleteFile('healthpod/data/vaccination/$filenameWithUnderscore');
+        final filePathWithUnderscore =
+            constructPodPath(dataType, filenameWithUnderscore);
+        await deleteFile(filePathWithUnderscore);
         debugPrint('Deleted file with underscore: $filenameWithUnderscore');
         return;
       }
@@ -182,7 +195,7 @@ class VaccinationEditorService {
 
       final datePart =
           formatTimestampForFilename(observation.timestamp).split('T')[0];
-      final baseFilename = 'vaccination_$datePart';
+      final baseFilename = '${dataType}_$datePart';
 
       // Find any files that start with this date part.
 
@@ -193,7 +206,9 @@ class VaccinationEditorService {
       if (matchingFiles.isNotEmpty) {
         // Delete the first matching file.
 
-        await deleteFile('healthpod/data/vaccination/${matchingFiles.first}');
+        final matchingFilePath =
+            constructPodPath(dataType, matchingFiles.first);
+        await deleteFile(matchingFilePath);
         debugPrint('Deleted alternative file: ${matchingFiles.first}');
       } else {
         // No matching files found, try a more flexible approach.
@@ -204,8 +219,9 @@ class VaccinationEditorService {
             resources.files.where((file) => file.contains(datePart)).toList();
 
         if (moreFlexibleMatches.isNotEmpty) {
-          await deleteFile(
-              'healthpod/data/vaccination/${moreFlexibleMatches.first}');
+          final flexibleMatchPath =
+              constructPodPath(dataType, moreFlexibleMatches.first);
+          await deleteFile(flexibleMatchPath);
           debugPrint(
               'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
         } else {
@@ -227,6 +243,6 @@ class VaccinationEditorService {
 
   String _filenameFromTimestamp(DateTime dt) {
     final formatted = formatTimestampForFilename(dt);
-    return 'vaccination_$formatted.json.enc.ttl';
+    return '${dataType}_$formatted.json.enc.ttl';
   }
 }
