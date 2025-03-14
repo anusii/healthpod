@@ -152,6 +152,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
     final state = ref.watch(fileServiceProvider);
     final isInBpDirectory =
         state.currentPath?.contains('blood_pressure') ?? false;
+    final isInVaccinationDirectory =
+        state.currentPath?.contains('vaccination') ?? false;
+    final showCsvButtons = isInBpDirectory || isInVaccinationDirectory;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -251,9 +254,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
               ),
             ),
 
-            // Show CSV import/export buttons in BP directory.
+            // Show CSV import/export buttons in BP or Vaccination directory.
 
-            if (isInBpDirectory) ...[
+            if (showCsvButtons) ...[
               const SizedBox(width: 8),
               Expanded(
                 child: ElevatedButton.icon(
@@ -261,7 +264,10 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                       ? null
                       : () => ref
                           .read(fileServiceProvider.notifier)
-                          .handleCsvImport(context),
+                          .handleCsvImport(
+                            context,
+                            isVaccination: isInVaccinationDirectory,
+                          ),
                   icon: const Icon(Icons.table_chart),
                   label: const Text('Import CSV'),
                   style: ElevatedButton.styleFrom(
@@ -283,7 +289,10 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                       ? null
                       : () => ref
                           .read(fileServiceProvider.notifier)
-                          .handleCsvExport(context),
+                          .handleCsvExport(
+                            context,
+                            isVaccination: isInVaccinationDirectory,
+                          ),
                   icon: const Icon(Icons.download),
                   label: const Text('Export CSV'),
                   style: ElevatedButton.styleFrom(

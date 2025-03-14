@@ -41,6 +41,8 @@ import 'package:healthpod/features/file/service/models/file_state.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
+import 'package:healthpod/features/vaccination/importer.dart';
+import 'package:healthpod/features/vaccination/exporter.dart';
 
 /// A provider that manages the business logic for file operations.
 ///
@@ -360,11 +362,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     state = state.copyWith(showPreview: !state.showPreview);
   }
 
-  /// Handles the import of BP  CSV files and conversion to individual JSON files.
+  /// Handles the import of BP or Vaccination data from CSV format.
 
-  Future<void> handleCsvImport(BuildContext context) async {
-    if (state.importInProgress) return;
-
+  Future<void> handleCsvImport(BuildContext context,
+      {bool isVaccination = false}) async {
     try {
       state = state.copyWith(importInProgress: true);
 
@@ -378,18 +379,33 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         if (file.path != null) {
           if (!context.mounted) return;
 
-          final success = await BPImporter.importFromCsv(
-            file.path!,
-            state.currentPath ?? 'healthpod/data',
-            context,
-          );
+          bool success;
+          String dataType;
+
+          if (isVaccination) {
+            // Use VaccinationImporter for vaccination data
+            success = await VaccinationImporter.importFromCsv(
+              file.path!,
+              state.currentPath ?? 'healthpod/data',
+              context,
+            );
+            dataType = 'Vaccination';
+          } else {
+            // Use BPImporter for blood pressure data
+            success = await BPImporter.importFromCsv(
+              file.path!,
+              state.currentPath ?? 'healthpod/data',
+              context,
+            );
+            dataType = 'Blood pressure';
+          }
 
           if (context.mounted) {
             if (success) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text(
-                      'Blood pressure data imported and converted successfully'),
+                      '$dataType data imported and converted successfully'),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -399,8 +415,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       }
     } catch (e) {
       if (context.mounted) {
-        showAlert(
-            context, 'Failed to import Blood pressure data: ${e.toString()}');
+        final dataType = isVaccination ? 'Vaccination' : 'Blood pressure';
+        showAlert(context, 'Failed to import $dataType data: ${e.toString()}');
       }
     } finally {
       if (context.mounted) {
@@ -409,42 +425,60 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     }
   }
 
-  /// Handles the export of BP data to CSV format.
+  /// Handles the export of BP or Vaccination data to CSV format.
 
-  Future<void> handleCsvExport(BuildContext context) async {
+  Future<void> handleCsvExport(BuildContext context,
+      {bool isVaccination = false}) async {
     try {
       state = state.copyWith(exportInProgress: true);
 
+      final dataType = isVaccination ? 'Vaccination' : 'Blood pressure';
+      final fileName =
+          isVaccination ? 'vaccination_data.csv' : 'blood_pressure_data.csv';
+
       final String? outputFile = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save Blood pressure data as CSV:',
-        fileName: 'blood_pressure_data.csv',
+        dialogTitle: 'Save $dataType data as CSV:',
+        fileName: fileName,
       );
 
       if (outputFile != null) {
         if (!context.mounted) return;
 
-        final success = await BPExporter.exportToCsv(
-          outputFile,
-          state.currentPath ?? 'healthpod/data',
-          context,
-        );
+        bool success;
+
+        if (isVaccination) {
+          // Use VaccinationExporter for vaccination data
+          success = await VaccinationExporter.exportToCsv(
+            outputFile,
+            state.currentPath ?? 'healthpod/data',
+            context,
+          );
+        } else {
+          // Use BPExporter for blood pressure data
+          success = await BPExporter.exportToCsv(
+            outputFile,
+            state.currentPath ?? 'healthpod/data',
+            context,
+          );
+        }
 
         if (context.mounted) {
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Blood pressure data exported successfully'),
+              SnackBar(
+                content: Text('$dataType data exported successfully'),
                 backgroundColor: Colors.green,
               ),
             );
           } else {
-            showAlert(context, 'Failed to export Blood pressure data');
+            showAlert(context, 'Failed to export $dataType data');
           }
         }
       }
     } catch (e) {
       if (context.mounted) {
-        showAlert(context, 'Export error: ${e.toString()}');
+        final dataType = isVaccination ? 'Vaccination' : 'Blood pressure';
+        showAlert(context, 'Failed to export $dataType data: ${e.toString()}');
       }
     } finally {
       if (context.mounted) {

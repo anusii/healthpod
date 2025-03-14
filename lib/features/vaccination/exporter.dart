@@ -114,8 +114,8 @@ class VaccinationExporter {
 
           allRecords.add({
             VaccinationSurveyConstants.fieldTimestamp: timestamp,
-            VaccinationSurveyConstants.fieldVaccine:
-                responses[VaccinationSurveyConstants.fieldVaccine],
+            VaccinationSurveyConstants.fieldVaccineName:
+                responses[VaccinationSurveyConstants.fieldVaccineName],
             VaccinationSurveyConstants.fieldProvider:
                 responses[VaccinationSurveyConstants.fieldProvider],
             VaccinationSurveyConstants.fieldProfessional:
@@ -148,7 +148,7 @@ class VaccinationExporter {
 
       final headers = [
         VaccinationSurveyConstants.fieldTimestamp,
-        VaccinationSurveyConstants.fieldVaccine,
+        VaccinationSurveyConstants.fieldVaccineName,
         VaccinationSurveyConstants.fieldProvider,
         VaccinationSurveyConstants.fieldProfessional,
         VaccinationSurveyConstants.fieldCost,

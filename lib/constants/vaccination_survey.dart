@@ -59,7 +59,6 @@ class VaccinationSurveyConstants {
   /// Data field names (for storage/CSV).
 
   static const String fieldTimestamp = 'timestamp';
-  static const String fieldVaccine = 'vaccine';
 
   /// Question texts (for UI only).
 

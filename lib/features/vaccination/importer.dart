@@ -85,7 +85,7 @@ class VaccinationImporter {
 
       final requiredColumns = [
         VaccinationSurveyConstants.fieldTimestamp.toLowerCase(),
-        VaccinationSurveyConstants.fieldVaccine.toLowerCase(),
+        VaccinationSurveyConstants.fieldVaccineName.toLowerCase(),
         VaccinationSurveyConstants.fieldProvider.toLowerCase(),
       ];
 
@@ -101,7 +101,7 @@ class VaccinationImporter {
 
         The following columns are required:
         - ${VaccinationSurveyConstants.fieldTimestamp}
-        - ${VaccinationSurveyConstants.fieldVaccine}
+        - ${VaccinationSurveyConstants.fieldVaccineName}
         - ${VaccinationSurveyConstants.fieldProvider}
 
         These columns are optional:
@@ -139,7 +139,7 @@ class VaccinationImporter {
           // Initialize the responses map with empty values for all fields.
 
           final Map<String, dynamic> responses = {
-            VaccinationSurveyConstants.fieldVaccine: '',
+            VaccinationSurveyConstants.fieldVaccineName: '',
             VaccinationSurveyConstants.fieldProvider: '',
             VaccinationSurveyConstants.fieldProfessional: '',
             VaccinationSurveyConstants.fieldCost: '',
@@ -179,12 +179,13 @@ class VaccinationImporter {
 
               case String h
                   when h ==
-                      VaccinationSurveyConstants.fieldVaccine.toLowerCase():
+                      VaccinationSurveyConstants.fieldVaccineName.toLowerCase():
                 if (value.isEmpty) {
                   hasRequiredFields = false;
                   debugPrint('Row $i: Missing required vaccine name');
                 } else {
-                  responses[VaccinationSurveyConstants.fieldVaccine] = value;
+                  responses[VaccinationSurveyConstants.fieldVaccineName] =
+                      value;
                 }
 
               case String h
