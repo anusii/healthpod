@@ -392,7 +392,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
             dataType = 'Vaccination';
           } else {
             // Use BPImporter for blood pressure data
-            success = await BPImporter.importFromCsv(
+            success = await BPImporter.importCsv(
               file.path!,
               state.currentPath ?? 'healthpod/data',
               context,
