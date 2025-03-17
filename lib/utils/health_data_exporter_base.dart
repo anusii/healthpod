@@ -43,12 +43,15 @@ import 'package:healthpod/utils/normalise_timestamp.dart';
 
 abstract class HealthDataExporterBase {
   /// The data type identifier (e.g., 'blood_pressure', 'vaccination').
+
   String get dataType;
 
   /// The field name for timestamp in the data model.
+
   String get timestampField;
 
   /// Get the list of column headers for the CSV file.
+
   List<String> get csvHeaders;
 
   /// Process a JSON record into a map of field values.
@@ -60,6 +63,7 @@ abstract class HealthDataExporterBase {
   /// - [jsonData]: The parsed JSON data from the file
   ///
   /// Returns a map with keys matching the CSV headers.
+
   Map<String, dynamic> processRecord(Map<String, dynamic> jsonData);
 
   /// Export health data to a CSV file.
@@ -73,6 +77,7 @@ abstract class HealthDataExporterBase {
   /// - [context]: Flutter build context for UI interactions
   ///
   /// Returns a boolean indicating whether the export was successful.
+
   Future<bool> exportToCsv(
     String savePath,
     String dirPath,
@@ -80,30 +85,38 @@ abstract class HealthDataExporterBase {
   ) async {
     try {
       // Get the directory URL for the health data folder.
+
       final dirUrl = await getDirUrl(dirPath);
 
       // Get all resources in the container.
+
       final resources = await getResourcesInContainer(dirUrl);
 
       // Filter for only encrypted files with .enc.ttl extension.
+
       final files =
           resources.files.where((file) => file.endsWith('.enc.ttl')).toList();
 
       // Throw error if no files are found.
+
       if (files.isEmpty) {
         throw Exception('No $dataType data files found in directory');
       }
 
       // Initialize list to store all health records.
+
       List<Map<String, dynamic>> allRecords = [];
 
       // Process each file one by one.
+
       for (var fileName in files) {
         try {
           // Check if context is still valid before proceeding.
+
           if (!context.mounted) return false;
 
           // Read and decrypt the file contents.
+
           final content = await readPod(
             '$dirPath/$fileName',
             context,
@@ -111,51 +124,63 @@ abstract class HealthDataExporterBase {
           );
 
           // Skip file if read operation failed.
+
           if (content == SolidFunctionCallStatus.fail ||
               content == SolidFunctionCallStatus.notLoggedIn) {
             continue;
           }
 
           // Parse the JSON content from the file.
+
           final jsonData = json.decode(content.toString());
 
           // Process the record using the implementation-specific method.
+
           final record = processRecord(jsonData);
 
           // Add the processed record to the collection.
+
           allRecords.add(record);
         } catch (e) {
           // Log error and continue with next file if current file fails.
+
           debugPrint('Error processing file $fileName: $e');
           continue;
         }
       }
 
       // Verify we have at least one valid record.
+
       if (allRecords.isEmpty) {
         throw Exception('No valid $dataType records found');
       }
 
       // Sort all records by timestamp in ascending order.
+
       allRecords.sort((a, b) => a[timestampField].compareTo(b[timestampField]));
 
       // Create CSV rows starting with headers.
+
       List<List<dynamic>> rows = [csvHeaders];
 
       // Add data rows by mapping each record to the headers.
+
       for (var record in allRecords) {
         rows.add(csvHeaders.map((header) => record[header]).toList());
       }
 
       // Convert rows to CSV format.
+
       final csv = const ListToCsvConverter().convert(rows);
 
       // Write the CSV content to the specified file.
+
       await File(savePath).writeAsString(csv);
 
       return true;
     } catch (e) {
       // Log any errors during export process.
+
       debugPrint('Export error: $e');
       return false;
     }
