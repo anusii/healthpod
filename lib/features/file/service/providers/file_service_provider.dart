@@ -385,7 +385,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           if (isVaccination) {
             // Use VaccinationImporter for vaccination data.
 
-            success = await VaccinationImporter.importFromCsv(
+            success = await VaccinationImporter.importCsv(
               file.path!,
               state.currentPath ?? 'healthpod/data',
               context,
