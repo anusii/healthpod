@@ -29,16 +29,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
 import 'package:csv/csv.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/blood_pressure_survey.dart';
-import 'package:healthpod/utils/format_timestamp_for_display.dart';
-import 'package:healthpod/utils/is_valid_timestamp.dart';
-import 'package:healthpod/utils/normalise_timestamp.dart';
-import 'package:healthpod/utils/round_timestamp_to_second.dart';
-import 'package:healthpod/utils/show_alert.dart';
 import 'package:healthpod/utils/health_data_importer_base.dart';
+import 'package:healthpod/utils/show_alert.dart';
 
 /// Handles importing blood pressure data from CSV files into JSON format.
 ///
@@ -150,6 +147,7 @@ class BPImporter extends HealthDataImporterBase {
   /// Each row is saved as a separate JSON file with timestamp and responses.
   /// Files are saved in the specified directory with timestamps in filenames.
 
+  @override
   Future<bool> importFromCsv(
     String filePath, // Path to the input CSV file.
     String dirPath, // Directory path where JSON files will be saved.
@@ -216,7 +214,6 @@ class BPImporter extends HealthDataImporterBase {
 
       // Initialise tracking variables for processing state.
 
-      final Set<String> seenTimestamps = {}; // Track unique timestamps.
       final List<String> duplicateTimestamps =
           []; // Track duplicate timestamps for warning.
       bool allSuccess = true; // Track overall success.

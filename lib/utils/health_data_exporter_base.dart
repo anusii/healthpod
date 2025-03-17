@@ -33,8 +33,6 @@ import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/utils/normalise_timestamp.dart';
-
 /// Abstract base class for health data exporters.
 ///
 /// This class provides common functionality for exporting health data to CSV files,
