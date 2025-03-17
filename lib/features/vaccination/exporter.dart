@@ -34,17 +34,66 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/vaccination_survey.dart';
 import 'package:healthpod/utils/normalise_timestamp.dart';
+import 'package:healthpod/utils/health_data_exporter_base.dart';
 
 /// Handles exporting vaccination data from JSON files to a single CSV file.
 ///
-/// This module is specifically focused on vaccination data export functionality.
-/// It reads all JSON files from the vaccination directory, processes them, and combines
-/// them into a single CSV file sorted by timestamp.
+/// This class extends HealthDataExporterBase to provide specific implementation
+/// for vaccination data export functionality.
 
-class VaccinationExporter {
+class VaccinationExporter extends HealthDataExporterBase {
+  @override
+  String get dataType => 'vaccination';
+
+  @override
+  String get timestampField => VaccinationSurveyConstants.fieldTimestamp;
+
+  @override
+  List<String> get csvHeaders => [
+        VaccinationSurveyConstants.fieldTimestamp,
+        VaccinationSurveyConstants.fieldVaccineName,
+        VaccinationSurveyConstants.fieldProvider,
+        VaccinationSurveyConstants.fieldProfessional,
+        VaccinationSurveyConstants.fieldCost,
+        VaccinationSurveyConstants.fieldNotes,
+      ];
+
+  @override
+  Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
+    var timestamp = normaliseTimestamp(
+        jsonData[VaccinationSurveyConstants.fieldTimestamp],
+        toIso: true);
+
+    final responses = jsonData['responses'];
+
+    return {
+      VaccinationSurveyConstants.fieldTimestamp: timestamp,
+      VaccinationSurveyConstants.fieldVaccineName:
+          responses[VaccinationSurveyConstants.fieldVaccineName],
+      VaccinationSurveyConstants.fieldProvider:
+          responses[VaccinationSurveyConstants.fieldProvider],
+      VaccinationSurveyConstants.fieldProfessional:
+          responses[VaccinationSurveyConstants.fieldProfessional],
+      VaccinationSurveyConstants.fieldCost:
+          responses[VaccinationSurveyConstants.fieldCost],
+      VaccinationSurveyConstants.fieldNotes:
+          responses[VaccinationSurveyConstants.fieldNotes],
+    };
+  }
+
+  /// Static method to maintain backward compatibility with existing code.
+
+  static Future<bool> exportCsv(
+    String savePath,
+    String dirPath,
+    BuildContext context,
+  ) async {
+    return VaccinationExporter().exportToCsv(savePath, dirPath, context);
+  }
+
   /// Process vaccination JSON files to CSV export.
   ///
-  static Future<bool> exportToCsv(
+  Future<bool> exportToCsv(
     String savePath,
     String dirPath,
     BuildContext context,

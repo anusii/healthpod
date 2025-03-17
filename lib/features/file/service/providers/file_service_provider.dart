@@ -451,7 +451,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         if (isVaccination) {
           // Use VaccinationExporter for vaccination data.
 
-          success = await VaccinationExporter.exportToCsv(
+          success = await VaccinationExporter.exportCsv(
             outputFile,
             state.currentPath ?? 'healthpod/data',
             context,
@@ -459,7 +459,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         } else {
           // Use BPExporter for blood pressure data.
 
-          success = await BPExporter.exportToCsv(
+          success = await BPExporter.exportCsv(
             outputFile,
             state.currentPath ?? 'healthpod/data',
             context,
