@@ -45,22 +45,33 @@ import 'package:healthpod/utils/show_alert.dart';
 /// including file reading, CSV parsing, timestamp validation, and file saving.
 /// Specific health data importers should extend this class and implement the abstract methods.
 
+/// Abstract base class for health data importers.
+///
+/// This class provides common functionality for importing health data from CSV files,
+/// including file reading, CSV parsing, timestamp validation, and file saving.
+/// Specific health data importers should extend this class and implement the abstract methods.
+
 abstract class HealthDataImporterBase {
   /// The data type identifier (e.g., 'blood_pressure', 'vaccination').
+
   String get dataType;
 
   /// The field name for timestamp in the data model.
+
   String get timestampField;
 
   /// Get the list of required column names that must be present in the CSV.
+
   List<String> get requiredColumns;
 
   /// Get the list of optional column names that may be present in the CSV.
+
   List<String> get optionalColumns;
 
   /// Create a response map with default values for a new record.
   ///
   /// This method should initialize a map with all the fields needed for the specific data type.
+
   Map<String, dynamic> createDefaultResponseMap();
 
   /// Process a specific field from the CSV row.
@@ -73,6 +84,7 @@ abstract class HealthDataImporterBase {
   /// - [value]: The value from the CSV
   /// - [responses]: The map to update with the processed value
   /// - [rowIndex]: The current row index for error reporting
+
   bool processField(
     String header,
     String value,
@@ -91,6 +103,7 @@ abstract class HealthDataImporterBase {
   /// - [context]: Flutter build context for UI interactions
   ///
   /// Returns a boolean indicating whether the import was successful.
+
   Future<bool> importFromCsv(
     String filePath,
     String dirPath,
@@ -98,11 +111,13 @@ abstract class HealthDataImporterBase {
   ) async {
     try {
       // Start processing the CSV file by reading its contents.
+
       debugPrint('Starting CSV processing');
       final file = File(filePath);
       final String content = await file.readAsString();
 
       // Convert CSV content to a list of fields using specific parsing settings.
+
       final fields = const CsvToListConverter(
         shouldParseNumbers: false,
         eol: '\n',
@@ -113,15 +128,18 @@ abstract class HealthDataImporterBase {
       ).convert(content);
 
       // Check if the CSV file contains any data.
+
       if (fields.isEmpty) {
         throw Exception('CSV file is empty');
       }
 
       // Extract and normalize the header row from the CSV.
+
       final headers = List<String>.from(
           fields[0].map((h) => h.toString().trim().toLowerCase()));
 
       // Check for any missing required columns and show an alert if any are missing.
+
       final lowerRequiredColumns =
           requiredColumns.map((col) => col.toLowerCase()).toList();
       final missingColumns =
@@ -131,6 +149,7 @@ abstract class HealthDataImporterBase {
         if (!context.mounted) return false;
 
         // Build the alert message with required and optional columns.
+
         final requiredColumnsStr =
             requiredColumns.map((col) => '- $col').join('\n');
         final optionalColumnsStr =
@@ -149,37 +168,45 @@ abstract class HealthDataImporterBase {
       }
 
       // Initialize tracking variables for duplicate detection and success monitoring.
+
       final Set<String> seenTimestamps = {};
       final List<String> duplicateTimestamps = [];
       bool allSuccess = true;
       int successfulSaves = 0;
 
       // Process each row in the CSV file starting from the second row.
+
       for (var i = 1; i < fields.length; i++) {
         try {
           // Convert row data to a list of strings, handling null values.
+
           final row =
               List<String>.from(fields[i].map((f) => f?.toString() ?? ''));
           if (row.isEmpty) continue;
 
           // Pad the row with empty strings if it has fewer columns than headers.
+
           while (row.length < headers.length) {
             row.add('');
           }
 
           // Initialize the responses map with default values.
+
           final Map<String, dynamic> responses = createDefaultResponseMap();
 
           // Initialize timestamp and validation flag.
+
           String timestamp = "";
           bool hasRequiredFields = true;
 
           // Process each column in the current row.
+
           for (var j = 0; j < headers.length; j++) {
             final header = headers[j];
             final value = row[j].toString().trim();
 
             // Handle timestamp field specially
+
             if (header == timestampField.toLowerCase()) {
               if (value.isEmpty) {
                 hasRequiredFields = false;
@@ -200,6 +227,7 @@ abstract class HealthDataImporterBase {
             }
 
             // Process other fields using the implementation-specific method
+
             final fieldProcessed = processField(header, value, responses, i);
             if (!fieldProcessed && lowerRequiredColumns.contains(header)) {
               hasRequiredFields = false;
@@ -207,6 +235,7 @@ abstract class HealthDataImporterBase {
           }
 
           // Skip rows with missing required fields.
+
           if (!hasRequiredFields) {
             debugPrint(
                 'Skipping row $i due to missing or invalid required fields');
@@ -214,16 +243,19 @@ abstract class HealthDataImporterBase {
           }
 
           // Create the JSON data structure for the current record.
+
           final jsonData = {
             timestampField: timestamp,
             'responses': responses,
           };
 
           // Generate a safe filename using the timestamp.
+
           final safeTimestamp = timestamp.replaceAll(RegExp(r'[:.]+'), '-');
           final outputFileName = '${dataType}_$safeTimestamp.json.enc.ttl';
 
           // Determine the correct save path based on the directory structure.
+
           String savePath;
           if (dirPath.endsWith('/$dataType')) {
             savePath = '$dataType/$outputFileName';
@@ -236,9 +268,11 @@ abstract class HealthDataImporterBase {
           }
 
           // Check if context is still valid before proceeding.
+
           if (!context.mounted) return false;
 
           // Write the encrypted data to the pod.
+
           final result = await writePod(
             savePath,
             json.encode(jsonData),
@@ -248,6 +282,7 @@ abstract class HealthDataImporterBase {
           );
 
           // Track the success status of each save operation.
+
           if (result == SolidFunctionCallStatus.success) {
             successfulSaves++;
           } else {
@@ -261,10 +296,12 @@ abstract class HealthDataImporterBase {
       }
 
       // Log the completion status.
+
       debugPrint(
           'Processing complete. Successfully saved $successfulSaves files');
 
       // Show warning for any duplicate timestamps found.
+
       if (duplicateTimestamps.isNotEmpty) {
         if (!context.mounted) return allSuccess;
         showAlert(
@@ -274,9 +311,11 @@ abstract class HealthDataImporterBase {
       }
 
       // Return overall success status.
+
       return allSuccess && successfulSaves > 0;
     } catch (e) {
       // Handle any errors during the import process.
+
       debugPrint('Import error: $e');
       if (context.mounted) {
         showAlert(context, 'Error importing CSV: ${e.toString()}');

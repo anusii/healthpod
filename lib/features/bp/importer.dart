@@ -86,6 +86,7 @@ class BPImporter extends HealthDataImporterBase {
   ) {
     switch (header) {
       // Required field: Systolic blood pressure.
+
       case String h when h == HealthSurveyConstants.fieldSystolic.toLowerCase():
         final systolic = double.tryParse(value);
         if (systolic == null) {
@@ -98,6 +99,7 @@ class BPImporter extends HealthDataImporterBase {
         }
 
       // Required field: Diastolic blood pressure.
+
       case String h
           when h == HealthSurveyConstants.fieldDiastolic.toLowerCase():
         final diastolic = double.tryParse(value);
@@ -111,6 +113,7 @@ class BPImporter extends HealthDataImporterBase {
         }
 
       // Required field: Heart rate.
+
       case String h
           when h == HealthSurveyConstants.fieldHeartRate.toLowerCase():
         final heartRate = double.tryParse(value);
@@ -124,17 +127,20 @@ class BPImporter extends HealthDataImporterBase {
         }
 
       // Optional field: Feeling - can be any value including empty.
+
       case String h when h == HealthSurveyConstants.fieldFeeling.toLowerCase():
         responses[HealthSurveyConstants.fieldFeeling] = value;
         return true;
 
       // Optional field: Notes - can be any value including empty.
+
       case String h when h == HealthSurveyConstants.fieldNotes.toLowerCase():
         responses[HealthSurveyConstants.fieldNotes] = value;
         return true;
 
       default:
-        // Ignore unknown fields
+        // Ignore unknown fields.
+
         return true;
     }
   }
@@ -348,6 +354,7 @@ class BPImporter extends HealthDataImporterBase {
   }
 
   /// Static method to maintain backward compatibility with existing code.
+
   static Future<bool> importCsv(
     String filePath,
     String dirPath,

@@ -383,7 +383,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           String dataType;
 
           if (isVaccination) {
-            // Use VaccinationImporter for vaccination data
+            // Use VaccinationImporter for vaccination data.
+
             success = await VaccinationImporter.importFromCsv(
               file.path!,
               state.currentPath ?? 'healthpod/data',
@@ -391,7 +392,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
             );
             dataType = 'Vaccination';
           } else {
-            // Use BPImporter for blood pressure data
+            // Use BPImporter for blood pressure data.
+
             success = await BPImporter.importCsv(
               file.path!,
               state.currentPath ?? 'healthpod/data',
@@ -447,14 +449,16 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         bool success;
 
         if (isVaccination) {
-          // Use VaccinationExporter for vaccination data
+          // Use VaccinationExporter for vaccination data.
+
           success = await VaccinationExporter.exportToCsv(
             outputFile,
             state.currentPath ?? 'healthpod/data',
             context,
           );
         } else {
-          // Use BPExporter for blood pressure data
+          // Use BPExporter for blood pressure data.
+
           success = await BPExporter.exportToCsv(
             outputFile,
             state.currentPath ?? 'healthpod/data',
@@ -488,7 +492,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
   }
 }
 
-/// The provider instance for file service operations
+/// The provider instance for file service operations.
 
 final fileServiceProvider =
     StateNotifierProvider<FileServiceNotifier, FileState>((ref) {
