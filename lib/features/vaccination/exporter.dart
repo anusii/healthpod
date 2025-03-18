@@ -93,6 +93,7 @@ class VaccinationExporter extends HealthDataExporterBase {
 
   /// Process vaccination JSON files to CSV export.
   ///
+  @override
   Future<bool> exportToCsv(
     String savePath,
     String dirPath,
