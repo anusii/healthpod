@@ -30,6 +30,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
+import 'package:healthpod/constants/paths.dart';
 
 /// Survey data widget.
 ///
@@ -39,7 +40,7 @@ import 'package:solidpod/solidpod.dart';
 class SurveyData {
   // Fetch from directory where blood pressure-related survey data resides.
 
-  static const String bpDir = 'healthpod/data/blood_pressure';
+  static const String bpDir = '$kHealthDataBasePath/blood_pressure';
 
   /// Fetches survey data from POD, ensuring it is sorted by timestamp.
   ///

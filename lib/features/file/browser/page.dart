@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/file/browser/components/path_bar.dart';
 import 'package:healthpod/features/file/browser/content.dart';
 import 'package:healthpod/features/file/browser/loading_state.dart';
@@ -119,11 +120,11 @@ class FileBrowserState extends State<FileBrowser> {
 
   /// The current directory path being displayed.
 
-  String currentPath = 'healthpod/data';
+  String currentPath = kHealthDataBasePath;
 
   /// History of visited directories for navigation.
 
-  List<String> pathHistory = ['healthpod/data'];
+  List<String> pathHistory = [kHealthDataBasePath];
 
   /// Number of files in the current directory.
 

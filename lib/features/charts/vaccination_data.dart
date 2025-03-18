@@ -30,6 +30,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
+import 'package:healthpod/constants/paths.dart';
 
 /// Vaccination data service.
 ///
@@ -39,7 +40,7 @@ import 'package:solidpod/solidpod.dart';
 class VaccinationData {
   /// Directory where vaccination-related data resides.
 
-  static const String vaccinationDir = 'healthpod/data/vaccination';
+  static const String vaccinationDir = '$kHealthDataBasePath/vaccination';
 
   /// Fetches vaccination data from POD, ensuring it is sorted by timestamp.
   ///

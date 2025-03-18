@@ -25,6 +25,8 @@
 
 library;
 
+import 'package:healthpod/constants/paths.dart';
+
 /// Constructs a path for a feature in the Pod.
 ///
 /// This function standardizes the path construction for Pod features,
@@ -48,6 +50,6 @@ library;
 /// ```
 
 String getFeaturePath(String feature, [String? filename]) {
-  final basePath = 'healthpod/data/$feature';
+  final basePath = '$kHealthDataBasePath/$feature';
   return filename != null ? '$basePath/$filename' : basePath;
 }

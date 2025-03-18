@@ -35,6 +35,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/features/file/service/models/file_state.dart';
@@ -103,7 +104,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       // Extract the subdirectory path.
 
       String? subPath =
-          state.currentPath?.replaceFirst('healthpod/data', '').trim();
+          state.currentPath?.replaceFirst(kHealthDataBasePath, '').trim();
       String uploadPath = subPath == null || subPath.isEmpty
           ? remoteFileName
           : '${subPath.startsWith("/") ? subPath.substring(1) : subPath}/$remoteFileName';
@@ -180,7 +181,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         return;
       }
 
-      final baseDir = 'healthpod/data';
+      final baseDir = kHealthDataBasePath;
       final relativePath = state.currentPath == baseDir
           ? '$baseDir/${state.remoteFileName}'
           : '${state.currentPath}/${state.remoteFileName}';
@@ -272,7 +273,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         deleteDone: false,
       );
 
-      final baseDir = 'healthpod/data';
+      final baseDir = kHealthDataBasePath;
       final basePath = state.currentPath == baseDir
           ? '$baseDir/${state.remoteFileName}'
           : '${state.currentPath}/${state.remoteFileName}';
@@ -380,7 +381,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
           final success = await BPImporter.importFromCsv(
             file.path!,
-            state.currentPath ?? 'healthpod/data',
+            state.currentPath ?? kHealthDataBasePath,
             context,
           );
 
@@ -425,7 +426,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
         final success = await BPExporter.exportToCsv(
           outputFile,
-          state.currentPath ?? 'healthpod/data',
+          state.currentPath ?? kHealthDataBasePath,
           context,
         );
 
