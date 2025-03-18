@@ -25,9 +25,11 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/features/table/bp_editor/page.dart';
 import 'package:healthpod/features/table/vaccination_editor/page.dart';
+import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> tablePanels = [
   {
@@ -40,14 +42,14 @@ final List<Map<String, dynamic>> tablePanels = [
   },
 ];
 
-class TableTab extends StatefulWidget {
+class TableTab extends ConsumerStatefulWidget {
   const TableTab({super.key});
 
   @override
-  State<TableTab> createState() => _TableTabState();
+  ConsumerState<TableTab> createState() => _TableTabState();
 }
 
-class _TableTabState extends State<TableTab>
+class _TableTabState extends ConsumerState<TableTab>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -64,23 +66,28 @@ class _TableTabState extends State<TableTab>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set initial tab index from provider
+    _tabController.index = ref.watch(tabStateProvider).tablesTabIndex;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Tab Bar. Like what we have in the RattleNG app.
-
         TabBar(
           unselectedLabelColor: Colors.grey,
           controller: _tabController,
+          onTap: (index) {
+            ref.read(tabStateProvider.notifier).setTablesTabIndex(index);
+          },
           tabs: tablePanels.map((tab) {
             return Tab(
               text: tab['title'],
             );
           }).toList(),
         ),
-
-        // Tab Bar View with the table panels.
-
         Expanded(
           child: TabBarView(
             controller: _tabController,

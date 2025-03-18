@@ -25,9 +25,11 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/features/charts/bp_combined_visualisation.dart';
 import 'package:healthpod/features/charts/vaccination_visualisation.dart';
+import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> chartPanels = [
   {
@@ -40,14 +42,14 @@ final List<Map<String, dynamic>> chartPanels = [
   },
 ];
 
-class ChartTab extends StatefulWidget {
+class ChartTab extends ConsumerStatefulWidget {
   const ChartTab({super.key});
 
   @override
-  State<ChartTab> createState() => _ChartTabState();
+  ConsumerState<ChartTab> createState() => _ChartTabState();
 }
 
-class _ChartTabState extends State<ChartTab>
+class _ChartTabState extends ConsumerState<ChartTab>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -64,12 +66,22 @@ class _ChartTabState extends State<ChartTab>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Set initial tab index from provider
+    _tabController.index = ref.watch(tabStateProvider).chartsTabIndex;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         TabBar(
           unselectedLabelColor: Colors.grey,
           controller: _tabController,
+          onTap: (index) {
+            ref.read(tabStateProvider.notifier).setChartsTabIndex(index);
+          },
           tabs: chartPanels.map((tab) {
             return Tab(
               text: tab['title'],
