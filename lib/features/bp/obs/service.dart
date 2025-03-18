@@ -38,14 +38,13 @@ import 'package:healthpod/utils/get_feature_path.dart';
 /// Handles loading/saving/deleting BP observations from the Pod.
 
 class BPEditorService {
-  /// The data type identifier for blood pressure records.
-
-  static const String dataType = 'blood_pressure';
+  /// The type of data being handled.
+  static const String feature = 'blood_pressure';
 
   /// Load all BP observations from `healthpod/data/blood_pressure` directory.
 
   Future<List<BPObservation>> loadData(BuildContext context) async {
-    final dirPath = getFeaturePath(dataType);
+    final dirPath = getFeaturePath(feature);
     final dirUrl = await getDirUrl(dirPath);
     final resources = await getResourcesInContainer(dirUrl);
 
@@ -56,7 +55,7 @@ class BPEditorService {
 
       if (!context.mounted) continue;
 
-      final filePath = getFeaturePath(dataType, file);
+      final filePath = getFeaturePath(feature, file);
       final content = await readPod(
         filePath,
         context,
@@ -97,25 +96,25 @@ class BPEditorService {
 
           // Check if the old file exists before attempting to delete it.
 
-          final dirPath = getFeaturePath(dataType);
+          final dirPath = getFeaturePath(feature);
           final dirUrl = await getDirUrl(dirPath);
           final resources = await getResourcesInContainer(dirUrl);
 
           if (resources.files.contains(oldFilename)) {
-            final oldFilePath = getFeaturePath(dataType, oldFilename);
+            final oldFilePath = getFeaturePath(feature, oldFilename);
             await deleteFile(oldFilePath);
           } else {
             // Check if there's a file with a similar name.
 
             final baseFilename =
-                '${dataType}_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
+                '${feature}_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
             final matchingFiles = resources.files
                 .where((file) => file.startsWith(baseFilename))
                 .toList();
 
             if (matchingFiles.isNotEmpty) {
               final matchingFilePath =
-                  getFeaturePath(dataType, matchingFiles.first);
+                  getFeaturePath(feature, matchingFiles.first);
               await deleteFile(matchingFilePath);
               debugPrint(
                   'Deleted alternative old file: ${matchingFiles.first}');
@@ -136,7 +135,7 @@ class BPEditorService {
       if (!context.mounted) return;
 
       await writePod(
-        '$dataType/$newFilename',
+        '$feature/$newFilename',
         jsonData,
         context,
         const Text('Saving'),
@@ -157,7 +156,7 @@ class BPEditorService {
     try {
       // Log the resources in the directory for debugging.
 
-      final dirPath = getFeaturePath(dataType);
+      final dirPath = getFeaturePath(feature);
       final dirUrl = await getDirUrl(dirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
@@ -171,18 +170,18 @@ class BPEditorService {
       // Also try with the old format (underscore separator) for backward compatibility.
 
       final filenameWithUnderscore =
-          '${dataType}_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
+          '${feature}_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
 
       // Check if either file exists.
 
       if (resources.files.contains(filename)) {
-        final filePath = getFeaturePath(dataType, filename);
+        final filePath = getFeaturePath(feature, filename);
         await deleteFile(filePath);
         debugPrint('Deleted file: $filename');
         return;
       } else if (resources.files.contains(filenameWithUnderscore)) {
         final filePathWithUnderscore =
-            getFeaturePath(dataType, filenameWithUnderscore);
+            getFeaturePath(feature, filenameWithUnderscore);
         await deleteFile(filePathWithUnderscore);
         debugPrint('Deleted file with underscore: $filenameWithUnderscore');
         return;
@@ -196,7 +195,7 @@ class BPEditorService {
 
       final datePart =
           formatTimestampForFilename(observation.timestamp).split('T')[0];
-      final baseFilename = '${dataType}_$datePart';
+      final baseFilename = '${feature}_$datePart';
 
       // Find any files that start with this date part.
 
@@ -207,7 +206,7 @@ class BPEditorService {
       if (matchingFiles.isNotEmpty) {
         // Delete the first matching file.
 
-        final matchingFilePath = getFeaturePath(dataType, matchingFiles.first);
+        final matchingFilePath = getFeaturePath(feature, matchingFiles.first);
         await deleteFile(matchingFilePath);
         debugPrint('Deleted alternative file: ${matchingFiles.first}');
       } else {
@@ -219,7 +218,7 @@ class BPEditorService {
 
         if (moreFlexibleMatches.isNotEmpty) {
           final flexibleMatchPath =
-              getFeaturePath(dataType, moreFlexibleMatches.first);
+              getFeaturePath(feature, moreFlexibleMatches.first);
           await deleteFile(flexibleMatchPath);
           debugPrint(
               'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
@@ -242,6 +241,6 @@ class BPEditorService {
 
   String _filenameFromTimestamp(DateTime dt) {
     final formatted = formatTimestampForFilename(dt);
-    return '${dataType}_$formatted.json.enc.ttl';
+    return '${feature}_$formatted.json.enc.ttl';
   }
 }
