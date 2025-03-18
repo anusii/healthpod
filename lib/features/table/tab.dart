@@ -63,7 +63,9 @@ class _TableTabState extends ConsumerState<TableTab>
   void didChangeDependencies() {
     super.didChangeDependencies();
     final tabState = ref.watch(tabStateProvider);
-    _tabController.animateTo(tabState.tablesIndex);
+    if (_tabController.index != tabState.selectedIndex) {
+      _tabController.animateTo(tabState.selectedIndex);
+    }
   }
 
   @override
@@ -80,7 +82,9 @@ class _TableTabState extends ConsumerState<TableTab>
           unselectedLabelColor: Colors.grey,
           controller: _tabController,
           onTap: (index) {
-            ref.read(tabStateProvider.notifier).setTablesIndex(index);
+            if (index != ref.read(tabStateProvider).selectedIndex) {
+              ref.read(tabStateProvider.notifier).setSelectedIndex(index);
+            }
           },
           tabs: tablePanels.map((tab) {
             return Tab(

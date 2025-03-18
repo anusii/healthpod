@@ -28,33 +28,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// State class to manage tab selections across features.
 class TabState {
-  /// The selected index for the charts feature.
-  final int chartsIndex;
+  /// The selected index shared across all features.
+  final int selectedIndex;
 
-  /// The selected index for the tables feature.
-  final int tablesIndex;
+  /// The maximum number of tabs across all features.
+  static const int maxTabs = 2;
 
-  /// The selected index for the survey feature.
-  final int surveyIndex;
-
-  /// Creates a new [TabState] with the given indices.
+  /// Creates a new [TabState] with the given index.
   const TabState({
-    this.chartsIndex = 0,
-    this.tablesIndex = 0,
-    this.surveyIndex = 0,
+    this.selectedIndex = 0,
   });
 
   /// Creates a copy of this [TabState] with the given fields replaced with new values.
   TabState copyWith({
-    int? chartsIndex,
-    int? tablesIndex,
-    int? surveyIndex,
+    int? selectedIndex,
   }) {
     return TabState(
-      chartsIndex: chartsIndex ?? this.chartsIndex,
-      tablesIndex: tablesIndex ?? this.tablesIndex,
-      surveyIndex: surveyIndex ?? this.surveyIndex,
+      selectedIndex: selectedIndex != null
+          ? _normalizeIndex(selectedIndex)
+          : this.selectedIndex,
     );
+  }
+
+  /// Normalizes the index to ensure it's within valid range.
+  static int _normalizeIndex(int index) {
+    if (index < 0) return 0;
+    if (index >= maxTabs) return maxTabs - 1;
+    return index;
   }
 }
 
@@ -69,18 +69,8 @@ class TabStateNotifier extends StateNotifier<TabState> {
   /// Creates a new [TabStateNotifier] with initial state.
   TabStateNotifier() : super(const TabState());
 
-  /// Updates the charts tab index.
-  void setChartsIndex(int index) {
-    state = state.copyWith(chartsIndex: index);
-  }
-
-  /// Updates the tables tab index.
-  void setTablesIndex(int index) {
-    state = state.copyWith(tablesIndex: index);
-  }
-
-  /// Updates the survey tab index.
-  void setSurveyIndex(int index) {
-    state = state.copyWith(surveyIndex: index);
+  /// Updates the selected index for all features.
+  void setSelectedIndex(int index) {
+    state = state.copyWith(selectedIndex: TabState._normalizeIndex(index));
   }
 }

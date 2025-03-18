@@ -63,7 +63,9 @@ class _ChartTabState extends ConsumerState<ChartTab>
   void didChangeDependencies() {
     super.didChangeDependencies();
     final tabState = ref.watch(tabStateProvider);
-    _tabController.animateTo(tabState.chartsIndex);
+    if (_tabController.index != tabState.selectedIndex) {
+      _tabController.animateTo(tabState.selectedIndex);
+    }
   }
 
   @override
@@ -80,7 +82,9 @@ class _ChartTabState extends ConsumerState<ChartTab>
           unselectedLabelColor: Colors.grey,
           controller: _tabController,
           onTap: (index) {
-            ref.read(tabStateProvider.notifier).setChartsIndex(index);
+            if (index != ref.read(tabStateProvider).selectedIndex) {
+              ref.read(tabStateProvider.notifier).setSelectedIndex(index);
+            }
           },
           tabs: chartPanels.map((tab) {
             return Tab(
