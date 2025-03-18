@@ -1,8 +1,8 @@
-/// Table tab including blood pressure and vaccination tables.
+/// Survey tab including blood pressure and vaccination surveys.
 ///
 // Time-stamp: <Friday 2025-02-21 17:02:01 +1100 Graham Williams>
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -25,45 +25,36 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:healthpod/features/table/bp_editor/page.dart';
-import 'package:healthpod/features/table/vaccination_editor/page.dart';
-import 'package:healthpod/providers/tab_state.dart';
+import 'package:healthpod/features/bp/survey.dart';
+import 'package:healthpod/features/vaccination/survey.dart';
 
-final List<Map<String, dynamic>> tablePanels = [
+final List<Map<String, dynamic>> surveyPanels = [
   {
     'title': 'Blood Pressure',
-    'widget': const BPEditorPage(),
+    'widget': BPSurvey(),
   },
   {
     'title': 'Vaccinations',
-    'widget': const VaccinationEditorPage(),
+    'widget': const VaccinationSurvey(),
   },
 ];
 
-class TableTab extends ConsumerStatefulWidget {
-  const TableTab({super.key});
+class SurveyTab extends StatefulWidget {
+  const SurveyTab({super.key});
 
   @override
-  ConsumerState<TableTab> createState() => _TableTabState();
+  State<SurveyTab> createState() => _SurveyTabState();
 }
 
-class _TableTabState extends ConsumerState<TableTab>
+class _SurveyTabState extends State<SurveyTab>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: tablePanels.length, vsync: this);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final tabState = ref.watch(tabStateProvider);
-    _tabController.animateTo(tabState.tablesIndex);
+    _tabController = TabController(length: surveyPanels.length, vsync: this);
   }
 
   @override
@@ -76,22 +67,24 @@ class _TableTabState extends ConsumerState<TableTab>
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Tab Bar. Like what we have in the RattleNG app.
+
         TabBar(
           unselectedLabelColor: Colors.grey,
           controller: _tabController,
-          onTap: (index) {
-            ref.read(tabStateProvider.notifier).setTablesIndex(index);
-          },
-          tabs: tablePanels.map((tab) {
+          tabs: surveyPanels.map((tab) {
             return Tab(
               text: tab['title'],
             );
           }).toList(),
         ),
+
+        // Tab Bar View with the survey panels.
+
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: tablePanels.map((tab) {
+            children: surveyPanels.map((tab) {
               return tab['widget'] as Widget;
             }).toList(),
           ),
