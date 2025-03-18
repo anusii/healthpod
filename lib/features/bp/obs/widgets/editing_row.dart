@@ -60,7 +60,8 @@ DataRow buildEditingRow({
   required double width,
 }) {
   final cells = <DataCell>[
-    // Timestamp cell
+    // Timestamp cell.
+
     DataCell(
       InkWell(
         onTap: () async {
@@ -101,20 +102,23 @@ DataRow buildEditingRow({
       ),
     ),
 
-    // Systolic cell
+    // Systolic cell.
+
     numericCell(
       controller: editorState.systolicController,
       onValueChange: (_) {},
     ),
 
-    // Diastolic cell
+    // Diastolic cell.
+
     numericCell(
       controller: editorState.diastolicController,
       onValueChange: (_) {},
     ),
   ];
 
-  // Add heart rate if screen is wide enough
+  // Add heart rate if screen is wide enough.
+
   if (width > 600) {
     cells.add(
       numericCell(
@@ -124,13 +128,15 @@ DataRow buildEditingRow({
     );
   }
 
-  // Add feeling and notes if screen is wide enough
+  // Add feeling and notes if screen is wide enough.
+
   if (width > 800) {
     cells.add(feelingCell(editorState, observation));
     cells.add(notesCell(editorState, observation));
   }
 
-  // Add actions column
+  // Add actions column.
+
   cells.add(actionButtonsCell(onSave: onSave, onCancel: onCancel));
 
   return DataRow(cells: cells);

@@ -60,18 +60,21 @@ DataRow buildDisplayRow({
     DataCell(Text('${observation.diastolic}')),
   ];
 
-  // Add heart rate if screen is wide enough
+  // Add heart rate if screen is wide enough.
+
   if (width > 600) {
     cells.add(DataCell(Text('${observation.heartRate}')));
   }
 
-  // Add feeling and notes if screen is wide enough
+  // Add feeling and notes if screen is wide enough.
+
   if (width > 800) {
     cells.add(DataCell(Text(observation.feeling)));
     cells.add(DataCell(Text(observation.notes)));
   }
 
-  // Add actions column
+  // Add actions column.
+  
   cells.add(
     DataCell(
       Row(
