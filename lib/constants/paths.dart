@@ -1,8 +1,8 @@
-/// Path constants for the application.
-//
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
-//
-/// Copyright (C) 2025, Software Innovation Institute, ANU.
+/// Path constants for the health pod application.
+///
+// Time-stamp: <Friday 2025-02-21 17:02:01 +1100 Graham Williams>
+///
+/// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -23,5 +23,8 @@
 ///
 /// Authors: Kevin Wang.
 
+library;
+
 /// Base path for all health data in the Pod.
+
 const String kHealthDataBasePath = 'healthpod/data';
