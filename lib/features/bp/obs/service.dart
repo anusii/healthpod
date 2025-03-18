@@ -32,9 +32,8 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
-import 'package:healthpod/utils/construct_pod_dir_path.dart';
-import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/get_feature_path.dart';
 
 /// Handles loading/saving/deleting BP observations from the Pod.
 
@@ -46,7 +45,7 @@ class BPEditorService {
   /// Load all BP observations from `healthpod/data/blood_pressure` directory.
 
   Future<List<BPObservation>> loadData(BuildContext context) async {
-    final dirPath = constructPodDirPath(dataType);
+    final dirPath = getFeaturePath(dataType);
     final dirUrl = await getDirUrl(dirPath);
     final resources = await getResourcesInContainer(dirUrl);
 
@@ -57,7 +56,7 @@ class BPEditorService {
 
       if (!context.mounted) continue;
 
-      final filePath = constructPodPath(dataType, file);
+      final filePath = getFeaturePath(dataType, file);
       final content = await readPod(
         filePath,
         context,
@@ -98,12 +97,12 @@ class BPEditorService {
 
           // Check if the old file exists before attempting to delete it.
 
-          final dirPath = constructPodDirPath(dataType);
+          final dirPath = getFeaturePath(dataType);
           final dirUrl = await getDirUrl(dirPath);
           final resources = await getResourcesInContainer(dirUrl);
 
           if (resources.files.contains(oldFilename)) {
-            final oldFilePath = constructPodPath(dataType, oldFilename);
+            final oldFilePath = getFeaturePath(dataType, oldFilename);
             await deleteFile(oldFilePath);
           } else {
             // Check if there's a file with a similar name.
@@ -116,7 +115,7 @@ class BPEditorService {
 
             if (matchingFiles.isNotEmpty) {
               final matchingFilePath =
-                  constructPodPath(dataType, matchingFiles.first);
+                  getFeaturePath(dataType, matchingFiles.first);
               await deleteFile(matchingFilePath);
               debugPrint(
                   'Deleted alternative old file: ${matchingFiles.first}');
@@ -158,7 +157,7 @@ class BPEditorService {
     try {
       // Log the resources in the directory for debugging.
 
-      final dirPath = constructPodDirPath(dataType);
+      final dirPath = getFeaturePath(dataType);
       final dirUrl = await getDirUrl(dirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
@@ -177,13 +176,13 @@ class BPEditorService {
       // Check if either file exists.
 
       if (resources.files.contains(filename)) {
-        final filePath = constructPodPath(dataType, filename);
+        final filePath = getFeaturePath(dataType, filename);
         await deleteFile(filePath);
         debugPrint('Deleted file: $filename');
         return;
       } else if (resources.files.contains(filenameWithUnderscore)) {
         final filePathWithUnderscore =
-            constructPodPath(dataType, filenameWithUnderscore);
+            getFeaturePath(dataType, filenameWithUnderscore);
         await deleteFile(filePathWithUnderscore);
         debugPrint('Deleted file with underscore: $filenameWithUnderscore');
         return;
@@ -208,8 +207,7 @@ class BPEditorService {
       if (matchingFiles.isNotEmpty) {
         // Delete the first matching file.
 
-        final matchingFilePath =
-            constructPodPath(dataType, matchingFiles.first);
+        final matchingFilePath = getFeaturePath(dataType, matchingFiles.first);
         await deleteFile(matchingFilePath);
         debugPrint('Deleted alternative file: ${matchingFiles.first}');
       } else {
@@ -221,7 +219,7 @@ class BPEditorService {
 
         if (moreFlexibleMatches.isNotEmpty) {
           final flexibleMatchPath =
-              constructPodPath(dataType, moreFlexibleMatches.first);
+              getFeaturePath(dataType, moreFlexibleMatches.first);
           await deleteFile(flexibleMatchPath);
           debugPrint(
               'Deleted file with flexible matching: ${moreFlexibleMatches.first}');

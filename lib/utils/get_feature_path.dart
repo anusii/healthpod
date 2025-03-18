@@ -1,4 +1,4 @@
-/// Utility function for constructing Pod file paths.
+/// Utility function for constructing Pod paths.
 //
 // Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
@@ -25,23 +25,29 @@
 
 library;
 
-/// Constructs a path for a file in the Pod.
+/// Constructs a path for a feature in the Pod.
 ///
-/// This function standardizes the path construction for Pod files,
+/// This function standardizes the path construction for Pod features,
 /// ensuring consistency across the application.
 ///
 /// Parameters:
-/// - [dataType]: The type of data (e.g., 'blood_pressure', 'vaccination').
-/// - [filename]: The filename to append to the path.
+/// - [feature]: The feature name (e.g., 'blood_pressure', 'vaccination').
+/// - [filename]: Optional filename to append to the path.
 ///
-/// Returns a string representing the full path to the file in the Pod.
+/// Returns a string representing the full path in the Pod.
 ///
 /// Example:
 /// ```dart
-/// final path = constructPodPath('blood_pressure', 'bp_2023-05-15T14-30-22.json.enc.ttl');
+/// // Get directory path
+/// final dirPath = getFeaturePath('blood_pressure');
+/// // Returns: 'healthpod/data/blood_pressure'
+///
+/// // Get file path
+/// final filePath = getFeaturePath('blood_pressure', 'bp_2023-05-15T14-30-22.json.enc.ttl');
 /// // Returns: 'healthpod/data/blood_pressure/bp_2023-05-15T14-30-22.json.enc.ttl'
 /// ```
 
-String constructPodPath(String dataType, String filename) {
-  return 'healthpod/data/$dataType/$filename';
+String getFeaturePath(String feature, [String? filename]) {
+  final basePath = 'healthpod/data/$feature';
+  return filename != null ? '$basePath/$filename' : basePath;
 }
