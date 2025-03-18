@@ -33,8 +33,8 @@ import 'package:csv/csv.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/vaccination_survey.dart';
-import 'package:healthpod/utils/normalise_timestamp.dart';
 import 'package:healthpod/utils/health_data_exporter_base.dart';
+import 'package:healthpod/utils/normalise_timestamp.dart';
 
 /// Handles exporting vaccination data from JSON files to a single CSV file.
 ///
