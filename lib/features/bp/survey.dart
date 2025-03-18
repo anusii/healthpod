@@ -28,8 +28,8 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/blood_pressure_survey.dart';
-import 'package:healthpod/features/survey/form.dart';
 import 'package:healthpod/features/survey/question.dart';
+import 'package:healthpod/features/update/form.dart';
 import 'package:healthpod/utils/handle_submit.dart';
 import 'package:healthpod/utils/save_response_locally.dart';
 import 'package:healthpod/utils/save_response_pod.dart';
@@ -37,11 +37,11 @@ import 'package:healthpod/utils/save_response_pod.dart';
 /// A page for collecting blood pressure survey data.
 
 class BPSurvey extends StatelessWidget {
-  // Define questions using centralised Health Survey constants.
+  /// The list of questions for the blood pressure survey.
+  final List<HealthSurveyQuestion> questions;
 
-  final List<HealthSurveyQuestion> questions = HealthSurveyConstants.questions;
-
-  BPSurvey({super.key});
+  /// Creates a new [BPSurvey] widget.
+  BPSurvey({super.key}) : questions = HealthSurveyConstants.questions;
 
   /// Saves the survey responses to a local file.
 

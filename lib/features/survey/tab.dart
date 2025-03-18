@@ -52,10 +52,12 @@ class SurveyTab extends ConsumerStatefulWidget {
 class _SurveyTabState extends ConsumerState<SurveyTab>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late final List<Widget> _tabWidgets;
 
   @override
   void initState() {
     super.initState();
+    _tabWidgets = surveyPanels.map((tab) => tab['widget'] as Widget).toList();
     _tabController = TabController(length: surveyPanels.length, vsync: this);
   }
 
@@ -95,9 +97,7 @@ class _SurveyTabState extends ConsumerState<SurveyTab>
         Expanded(
           child: TabBarView(
             controller: _tabController,
-            children: surveyPanels.map((tab) {
-              return tab['widget'] as Widget;
-            }).toList(),
+            children: _tabWidgets,
           ),
         ),
       ],
