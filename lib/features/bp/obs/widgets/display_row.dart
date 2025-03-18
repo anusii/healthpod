@@ -74,7 +74,7 @@ DataRow buildDisplayRow({
   }
 
   // Add actions column.
-  
+
   cells.add(
     DataCell(
       Row(
