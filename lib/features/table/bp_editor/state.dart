@@ -30,12 +30,11 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/features/table/bp_editor/controllers.dart';
 
-/// Manages all the state fields needed for the Blood Pressure Editor.
+/// State management for the Blood Pressure editor.
 ///
-/// Contains the list of observations, the current observation being edited,
-/// and the state of the text editing controllers.
-///
-/// ChangeNotifier is used to notify listeners of changes to the state.
+/// This class manages the state of the Blood Pressure editor, including the current
+/// observation being edited, text controllers for various fields, and methods for
+/// updating and saving observations.
 
 class BPEditorState with ChangeNotifier {
   /// The list of loaded blood pressure observations, sorted by timestamp.

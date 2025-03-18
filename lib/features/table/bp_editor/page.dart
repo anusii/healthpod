@@ -31,6 +31,8 @@ import 'package:intl/intl.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/bp/obs/service.dart';
 import 'package:healthpod/features/bp/obs/model.dart';
+import 'package:healthpod/features/bp/obs/widgets/display_row.dart';
+import 'package:healthpod/features/bp/obs/widgets/editing_row.dart';
 import 'package:healthpod/features/table/bp_editor/state.dart';
 
 /// The main editor page for blood pressure observations.
@@ -131,219 +133,57 @@ class _BPEditorPageState extends State<BPEditorPage> {
             editorState.observations.length,
             (index) {
               final obs = editorState.observations[index];
-              final cells = <DataCell>[];
-
-              // Always add timestamp.
-
-              cells.add(DataCell(
-                Text(DateFormat('yyyy-MM-dd HH:mm:ss').format(obs.timestamp)),
-              ));
-
-              // Always add systolic and diastolic.
-
-              cells.add(DataCell(Text(obs.systolic.toString())));
-              cells.add(DataCell(Text(obs.diastolic.toString())));
-
-              // Add heart rate if width > 600.
-
-              if (width > 600) {
-                cells.add(DataCell(Text(obs.heartRate.toString())));
-              }
-
-              // Add feeling and notes if width > 800.
-
-              if (width > 800) {
-                cells.add(DataCell(Text(obs.feeling)));
-                cells.add(DataCell(
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: 200),
-                    child: Text(
-                      obs.notes,
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 3,
-                    ),
-                  ),
-                ));
-              }
-
-              // Always add actions.
-
-              cells.add(
-                DataCell(
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => setState(() {
-                          editorState.enterEditMode(index);
-                        }),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () async {
-                          await editorState.deleteObservation(
-                            context,
-                            editorService,
-                            obs,
-                          );
-                          _loadData();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              );
 
               if (editorState.editingIndex == index) {
-                return _buildEditingDataRow(obs, index, width);
+                return buildEditingRow(
+                  context: context,
+                  width: width,
+                  editorState: editorState,
+                  editorService: editorService,
+                  observation: obs,
+                  index: index,
+                  onCancel: _handleCancelEdit,
+                  onSave: () async {
+                    await editorState.saveObservation(
+                      context,
+                      editorService,
+                      index,
+                    );
+                    _loadData();
+                  },
+                  onTimestampChanged: (DateTime newTimestamp) {
+                    setState(() {
+                      editorState.currentEdit =
+                          editorState.currentEdit?.copyWith(
+                        timestamp: newTimestamp,
+                      );
+                    });
+                  },
+                );
               }
 
-              return DataRow(cells: cells);
+              return buildDisplayRow(
+                context: context,
+                width: width,
+                observation: obs,
+                index: index,
+                onEdit: () => setState(() {
+                  editorState.enterEditMode(index);
+                }),
+                onDelete: () async {
+                  await editorState.deleteObservation(
+                    context,
+                    editorService,
+                    obs,
+                  );
+                  _loadData();
+                },
+              );
             },
           ),
         ),
       ),
     );
-  }
-
-  /// Builds an editing row for the DataTable in desktop layout.
-  ///
-  /// Creates a row with editable fields that match the current visible columns based on screen width.
-  /// Includes interactive fields for timestamp, blood pressure values, and optional fields based on width.
-  ///
-  /// @param obs The blood pressure observation being edited.
-  /// @param index The index of the observation in the list.
-  /// @param width The current screen width.
-  /// @returns A DataRow configured for editing the observation.
-  DataRow _buildEditingDataRow(BPObservation obs, int index, double width) {
-    final cells = <DataCell>[];
-
-    // Timestamp cell.
-
-    cells.add(
-      DataCell(
-        InkWell(
-          onTap: () async {
-            final date = await showDatePicker(
-              context: context,
-              initialDate: editorState.currentEdit?.timestamp ?? obs.timestamp,
-              firstDate: DateTime(2000),
-              lastDate: DateTime.now(),
-            );
-
-            if (date != null) {
-              if (!mounted) return;
-              final time = await showTimePicker(
-                context: context,
-                initialTime: TimeOfDay.fromDateTime(
-                  editorState.currentEdit?.timestamp ?? obs.timestamp,
-                ),
-              );
-              if (time != null && context.mounted) {
-                final newTimestamp = DateTime(
-                  date.year,
-                  date.month,
-                  date.day,
-                  time.hour,
-                  time.minute,
-                );
-                setState(() {
-                  editorState.currentEdit = editorState.currentEdit?.copyWith(
-                    timestamp: newTimestamp,
-                  );
-                });
-              }
-            }
-          },
-          child: Text(
-            DateFormat('yyyy-MM-dd HH:mm:ss').format(
-              editorState.currentEdit?.timestamp ?? obs.timestamp,
-            ),
-            style: const TextStyle(
-              decoration: TextDecoration.underline,
-              color: Colors.blue,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    // Always add systolic and diastolic.
-
-    cells.add(DataCell(TextField(
-      controller: editorState.systolicController,
-      keyboardType: TextInputType.number,
-      decoration: const InputDecoration(suffixText: 'mmHg'),
-    )));
-    cells.add(DataCell(TextField(
-      controller: editorState.diastolicController,
-      keyboardType: TextInputType.number,
-      decoration: const InputDecoration(suffixText: 'mmHg'),
-    )));
-
-    // Add heart rate if width > 600.
-
-    if (width > 600) {
-      cells.add(DataCell(TextField(
-        controller: editorState.heartRateController,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(suffixText: 'BPM'),
-      )));
-    }
-
-    // Add feeling and notes if width > 800.
-
-    if (width > 800) {
-      cells.add(DataCell(DropdownButtonFormField<String>(
-        value: editorState.currentEdit?.feeling.isEmpty ?? true
-            ? 'Good'
-            : editorState.currentEdit?.feeling ?? obs.feeling,
-        decoration: const InputDecoration(labelText: 'Feeling'),
-        items: ['Excellent', 'Good', 'Fair', 'Poor']
-            .map((String value) => DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                ))
-            .toList(),
-        onChanged: (String? newValue) {
-          if (newValue != null) {
-            setState(() {
-              editorState.updateFeeling(newValue);
-            });
-          }
-        },
-      )));
-      cells.add(DataCell(TextField(
-        controller: editorState.notesController,
-        maxLines: 3,
-      )));
-    }
-
-    // Always add actions.
-
-    cells.add(DataCell(Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.save),
-          onPressed: () async {
-            await editorState.saveObservation(
-              context,
-              editorService,
-              index,
-            );
-            _loadData();
-          },
-        ),
-        IconButton(
-          icon: const Icon(Icons.cancel),
-          onPressed: _handleCancelEdit,
-        ),
-      ],
-    )));
-
-    return DataRow(cells: cells);
   }
 
   /// Builds the mobile layout for the blood pressure editor.
@@ -422,6 +262,23 @@ class _BPEditorPageState extends State<BPEditorPage> {
     );
   }
 
+  /// Builds a mobile-optimised numeric input field.
+
+  Widget _buildMobileNumericField({
+    required TextEditingController? controller,
+    required String label,
+    required String suffix,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: label,
+        suffixText: suffix,
+      ),
+    );
+  }
+
   /// Builds an editing card for the mobile layout.
   ///
   /// Creates a form-style card with fields for editing all observation properties.
@@ -485,31 +342,22 @@ class _BPEditorPageState extends State<BPEditorPage> {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
+            _buildMobileNumericField(
               controller: editorState.systolicController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Systolic',
-                suffixText: 'mmHg',
-              ),
+              label: 'Systolic',
+              suffix: 'mmHg',
             ),
             const SizedBox(height: 8),
-            TextField(
+            _buildMobileNumericField(
               controller: editorState.diastolicController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Diastolic',
-                suffixText: 'mmHg',
-              ),
+              label: 'Diastolic',
+              suffix: 'mmHg',
             ),
             const SizedBox(height: 8),
-            TextField(
+            _buildMobileNumericField(
               controller: editorState.heartRateController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Heart Rate',
-                suffixText: 'BPM',
-              ),
+              label: 'Heart Rate',
+              suffix: 'BPM',
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
