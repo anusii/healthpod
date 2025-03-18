@@ -44,8 +44,8 @@ class VaccinationEditorService {
   /// Load all vaccination observations from `healthpod/data/vaccinations` directory.
 
   Future<List<VaccinationObservation>> loadData(BuildContext context) async {
-    final dirPath = getFeaturePath(feature);
-    final dirUrl = await getDirUrl(dirPath);
+    final podDirPath = getFeaturePath(feature);
+    final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
 
     final List<VaccinationObservation> loadedObservations = [];
@@ -96,8 +96,8 @@ class VaccinationEditorService {
 
           // Check if the old file exists before attempting to delete it.
 
-          final dirPath = getFeaturePath(feature);
-          final dirUrl = await getDirUrl(dirPath);
+          final podDirPath = getFeaturePath(feature);
+          final dirUrl = await getDirUrl(podDirPath);
           final resources = await getResourcesInContainer(dirUrl);
 
           if (resources.files.contains(oldFilename)) {
@@ -156,8 +156,8 @@ class VaccinationEditorService {
     try {
       // Log the resources in the directory for debugging.
 
-      final dirPath = getFeaturePath(feature);
-      final dirUrl = await getDirUrl(dirPath);
+      final podDirPath = getFeaturePath(feature);
+      final dirUrl = await getDirUrl(podDirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
       debugPrint('SubDirs: |${resources.subDirs.join(', ')}|');
