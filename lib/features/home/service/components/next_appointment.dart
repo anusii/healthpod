@@ -101,7 +101,7 @@ class _NextAppointmentState extends State<NextAppointment> {
     super.dispose();
   }
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Container(
       width: 400,
@@ -110,7 +110,7 @@ class _NextAppointmentState extends State<NextAppointment> {
         color: titleBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.8),
+            color: Colors.grey.withAlpha(80),
             spreadRadius: 3,
             blurRadius: 4,
             offset: const Offset(0, 1),
@@ -137,6 +137,8 @@ class _NextAppointmentState extends State<NextAppointment> {
           ),
           const SizedBox(height: 16),
 
+          // Date.
+
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -145,11 +147,17 @@ class _NextAppointmentState extends State<NextAppointment> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Expanded(
-                child: Text(appointmentDate),
+                child: Text(
+                  appointmentDate,
+                  // Ensure the text is wrapped to the next line if it's too long.
+                  softWrap: true,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
+
+          // Time.
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,11 +167,18 @@ class _NextAppointmentState extends State<NextAppointment> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Expanded(
-                child: Text(appointmentTime),
+                child: Text(
+                  appointmentTime,
+                  // Ensure the text is wrapped to the next line if it's too long.
+
+                  softWrap: true,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
+
+          // Location.
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +189,9 @@ class _NextAppointmentState extends State<NextAppointment> {
               ),
               Expanded(
                 child: SelectableText.rich(
-                  addressLink(appointmentLocation, context, fontSize: 15),
+                  addressLink(appointmentLocation, context, fontSize: 14),
+                  maxLines: 2,
+                  style: const TextStyle(height: 1.2),
                 ),
               ),
             ],
@@ -186,7 +203,7 @@ class _NextAppointmentState extends State<NextAppointment> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
+              const Expanded(
                 child: SelectableText.rich(
                   TextSpan(
                     text: 'Clinic Bus: ',
@@ -213,20 +230,20 @@ class _NextAppointmentState extends State<NextAppointment> {
 
           Row(
             children: [
-              SelectableText.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Need help with transport?',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+              const Expanded(
+                child: SelectableText.rich(
+                  TextSpan(
+                    text: 'Need help with transport?',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
+                  ),
                 ),
               ),
               AudioWithTooltip(
-                  isPlaying: _isPlaying, toggleAudio: _toggleAudio),
+                isPlaying: _isPlaying,
+                toggleAudio: _toggleAudio,
+              ),
             ],
           ),
           const SizedBox(height: 8),
@@ -242,7 +259,7 @@ class _NextAppointmentState extends State<NextAppointment> {
                 child: RichText(
                   text: TextSpan(
                     style: DefaultTextStyle.of(context).style.copyWith(
-                          fontSize: 14,
+                          fontSize: 13,
                         ),
                     children: [
                       TextSpan(
