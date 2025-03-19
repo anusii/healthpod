@@ -35,6 +35,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/feature.dart';
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
@@ -380,45 +381,40 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           if (!context.mounted) return;
 
           bool success;
-          String dataType;
+          final feature =
+              isVaccination ? Feature.vaccination : Feature.bloodPressure;
 
           if (isVaccination) {
-            // Use VaccinationImporter for vaccination data.
-
             success = await VaccinationImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
-            dataType = 'Vaccination';
           } else {
-            // Use BPImporter for blood pressure data.
-
             success = await BPImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
-            dataType = 'Blood pressure';
           }
 
-          if (context.mounted) {
-            if (success) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                      '$dataType data imported and converted successfully'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            }
+          if (context.mounted && success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    '${feature.displayName} data imported and converted successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
           }
         }
       }
     } catch (e) {
       if (context.mounted) {
-        final dataType = isVaccination ? 'Vaccination' : 'Blood pressure';
-        showAlert(context, 'Failed to import $dataType data: ${e.toString()}');
+        final feature =
+            isVaccination ? Feature.vaccination : Feature.bloodPressure;
+        showAlert(context,
+            'Failed to import ${feature.displayName} data: ${e.toString()}');
       }
     } finally {
       if (context.mounted) {
@@ -434,12 +430,13 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     try {
       state = state.copyWith(exportInProgress: true);
 
-      final dataType = isVaccination ? 'Vaccination' : 'Blood pressure';
+      final feature =
+          isVaccination ? Feature.vaccination : Feature.bloodPressure;
       final fileName =
           isVaccination ? 'vaccination_data.csv' : 'blood_pressure_data.csv';
 
       final String? outputFile = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save $dataType data as CSV:',
+        dialogTitle: 'Save ${feature.displayName} data as CSV:',
         fileName: fileName,
       );
 
@@ -449,16 +446,12 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         bool success;
 
         if (isVaccination) {
-          // Use VaccinationExporter for vaccination data.
-
           success = await VaccinationExporter.exportCsv(
             outputFile,
             state.currentPath ?? basePath,
             context,
           );
         } else {
-          // Use BPExporter for blood pressure data.
-
           success = await BPExporter.exportCsv(
             outputFile,
             state.currentPath ?? basePath,
@@ -470,19 +463,22 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('$dataType data exported successfully'),
+                content:
+                    Text('${feature.displayName} data exported successfully'),
                 backgroundColor: Colors.green,
               ),
             );
           } else {
-            showAlert(context, 'Failed to export $dataType data');
+            showAlert(context, 'Failed to export ${feature.displayName} data');
           }
         }
       }
     } catch (e) {
       if (context.mounted) {
-        final dataType = isVaccination ? 'Vaccination' : 'Blood pressure';
-        showAlert(context, 'Failed to export $dataType data: ${e.toString()}');
+        final feature =
+            isVaccination ? Feature.vaccination : Feature.bloodPressure;
+        showAlert(context,
+            'Failed to export ${feature.displayName} data: ${e.toString()}');
       }
     } finally {
       if (context.mounted) {
