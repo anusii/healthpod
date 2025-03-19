@@ -32,15 +32,22 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
+
+import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/get_feature_path.dart';
 
 /// Handles loading/saving/deleting BP observations from the Pod.
 
 class BPEditorService {
+  /// The type of data being handled.
+  static const String feature = 'blood_pressure';
+
   /// Load all BP observations from `healthpod/data/blood_pressure` directory.
 
   Future<List<BPObservation>> loadData(BuildContext context) async {
-    final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
+    final podDirPath = getFeaturePath(feature);
+    final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
 
     final List<BPObservation> loadedObservations = [];
@@ -50,8 +57,9 @@ class BPEditorService {
 
       if (!context.mounted) continue;
 
+      final filePath = getFeaturePath(feature, file);
       final content = await readPod(
-        'healthpod/data/blood_pressure/$file',
+        filePath,
         context,
         const Text('Loading file'),
       );
@@ -90,27 +98,18 @@ class BPEditorService {
 
           // Check if the old file exists before attempting to delete it.
 
-          final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
+          final podDirPath = getFeaturePath(feature);
+          final dirUrl = await getDirUrl(podDirPath);
           final resources = await getResourcesInContainer(dirUrl);
 
-          if (resources.files.contains(oldFilename)) {
-            await deleteFile('healthpod/data/blood_pressure/$oldFilename');
-          } else {
-            // Check if there's a file with a similar name.
+          // Use the utility function to handle file deletion with fallback options.
 
-            final baseFilename =
-                'blood_pressure_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
-            final matchingFiles = resources.files
-                .where((file) => file.startsWith(baseFilename))
-                .toList();
-
-            if (matchingFiles.isNotEmpty) {
-              await deleteFile(
-                  'healthpod/data/blood_pressure/${matchingFiles.first}');
-              debugPrint(
-                  'Deleted alternative old file: ${matchingFiles.first}');
-            }
-          }
+          await deletePodFileWithFallback(
+            dataType: feature,
+            filename: oldFilename,
+            timestamp: oldObservation.timestamp,
+            resources: resources,
+          );
         } catch (e) {
           // Log the error but continue with saving the new file.
 
@@ -126,7 +125,7 @@ class BPEditorService {
       if (!context.mounted) return;
 
       await writePod(
-        'blood_pressure/$newFilename',
+        '$feature/$newFilename',
         jsonData,
         context,
         const Text('Saving'),
@@ -147,7 +146,8 @@ class BPEditorService {
     try {
       // Log the resources in the directory for debugging.
 
-      final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
+      final podDirPath = getFeaturePath(feature);
+      final dirUrl = await getDirUrl(podDirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
       debugPrint('SubDirs: |${resources.subDirs.join(', ')}|');
@@ -157,64 +157,19 @@ class BPEditorService {
 
       final filename = _filenameFromTimestamp(observation.timestamp);
 
-      // Also try with the old format (underscore separator) for backward compatibility.
+      // Use the utility function to handle file deletion with fallback options.
 
-      final filenameWithUnderscore =
-          'blood_pressure_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
+      final deleted = await deletePodFileWithFallback(
+        dataType: feature,
+        filename: filename,
+        timestamp: observation.timestamp,
+        resources: resources,
+      );
 
-      // Check if either file exists.
+      if (!deleted) {
+        // If no file was deleted, throw an exception.
 
-      if (resources.files.contains(filename)) {
-        await deleteFile('healthpod/data/blood_pressure/$filename');
-        debugPrint('Deleted file: $filename');
-        return;
-      } else if (resources.files.contains(filenameWithUnderscore)) {
-        await deleteFile(
-            'healthpod/data/blood_pressure/$filenameWithUnderscore');
-        debugPrint('Deleted file with underscore: $filenameWithUnderscore');
-        return;
-      }
-
-      // If neither exact match is found, try to find a file with a similar date part.
-
-      debugPrint('File not found for deletion: $filename');
-
-      // Extract just the date part (YYYY-MM-DD) from the timestamp.
-
-      final datePart =
-          formatTimestampForFilename(observation.timestamp).split('T')[0];
-      final baseFilename = 'blood_pressure_$datePart';
-
-      // Find any files that start with this date part.
-
-      final matchingFiles = resources.files
-          .where((file) => file.startsWith(baseFilename))
-          .toList();
-
-      if (matchingFiles.isNotEmpty) {
-        // Delete the first matching file.
-
-        await deleteFile(
-            'healthpod/data/blood_pressure/${matchingFiles.first}');
-        debugPrint('Deleted alternative file: ${matchingFiles.first}');
-      } else {
-        // No matching files found, try a more flexible approach.
-        // Look for any file that contains the date (without the time).
-
-        final moreFlexibleMatches =
-            resources.files.where((file) => file.contains(datePart)).toList();
-
-        if (moreFlexibleMatches.isNotEmpty) {
-          await deleteFile(
-              'healthpod/data/blood_pressure/${moreFlexibleMatches.first}');
-          debugPrint(
-              'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
-        } else {
-          // No matching files found.
-
-          debugPrint(
-              'No matching files found for deletion with base: $baseFilename');
-        }
+        throw Exception('No matching file found for deletion');
       }
     } catch (e) {
       debugPrint('Error deleting observation: $e');
@@ -228,6 +183,6 @@ class BPEditorService {
 
   String _filenameFromTimestamp(DateTime dt) {
     final formatted = formatTimestampForFilename(dt);
-    return 'blood_pressure_$formatted.json.enc.ttl';
+    return '${feature}_$formatted.json.enc.ttl';
   }
 }

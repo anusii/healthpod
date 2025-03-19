@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Sunday 2025-03-09 11:40:02 +1100 Graham Williams>
+// Time-stamp: <Sunday 2025-03-09 11:50:04 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -302,10 +302,12 @@ class HealthPodHomeState extends State<HealthPodHome> {
                           // Show both icons and labels for all destinations.
                           labelType: NavigationRailLabelType.all,
                           destinations: homeTabs.map((tab) {
-                            // Use a custom tooltip if provided; otherwise, default to the tab title.
+                            // Use a custom tooltip if provided. Otherwise,
+                            // default to the tab title.
 
                             final tooltipMessage =
                                 tab['tooltip'] ?? tab['message'];
+
                             return NavigationRailDestination(
                               icon: MarkdownTooltip(
                                 message: tooltipMessage,
