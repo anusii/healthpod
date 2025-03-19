@@ -105,7 +105,7 @@ class VaccinationEditorService {
           // Use the utility function to handle file deletion with fallback options.
 
           await deletePodFileWithFallback(
-            dataType: dataType,
+            dataType: feature,
             filename: oldFilename,
             timestamp: oldObservation.timestamp,
             resources: resources,
@@ -160,7 +160,7 @@ class VaccinationEditorService {
       // Use the utility function to handle file deletion with fallback options.
 
       final deleted = await deletePodFileWithFallback(
-        dataType: dataType,
+        dataType: feature,
         filename: filename,
         timestamp: observation.timestamp,
         resources: resources,
