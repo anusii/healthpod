@@ -33,14 +33,19 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/table/vaccination_editor/model.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/get_feature_path.dart';
 
 /// Handles loading/saving/deleting vaccination observations from the Pod.
 
 class VaccinationEditorService {
+  /// The type of data being handled.
+  static const String feature = 'vaccination';
+
   /// Load all vaccination observations from `healthpod/data/vaccinations` directory.
 
   Future<List<VaccinationObservation>> loadData(BuildContext context) async {
-    final dirUrl = await getDirUrl('healthpod/data/vaccination');
+    final podDirPath = getFeaturePath(feature);
+    final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
 
     final List<VaccinationObservation> loadedObservations = [];
@@ -50,8 +55,9 @@ class VaccinationEditorService {
 
       if (!context.mounted) continue;
 
+      final filePath = getFeaturePath(feature, file);
       final content = await readPod(
-        'healthpod/data/vaccination/$file',
+        filePath,
         context,
         const Text('Loading file'),
       );
@@ -90,23 +96,26 @@ class VaccinationEditorService {
 
           // Check if the old file exists before attempting to delete it.
 
-          final dirUrl = await getDirUrl('healthpod/data/vaccination');
+          final podDirPath = getFeaturePath(feature);
+          final dirUrl = await getDirUrl(podDirPath);
           final resources = await getResourcesInContainer(dirUrl);
 
           if (resources.files.contains(oldFilename)) {
-            await deleteFile('healthpod/data/vaccination/$oldFilename');
+            final oldFilePath = getFeaturePath(feature, oldFilename);
+            await deleteFile(oldFilePath);
           } else {
             // Check if there's a file with a similar name.
 
             final baseFilename =
-                'vaccination_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
+                '${feature}_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
             final matchingFiles = resources.files
                 .where((file) => file.startsWith(baseFilename))
                 .toList();
 
             if (matchingFiles.isNotEmpty) {
-              await deleteFile(
-                  'healthpod/data/vaccination/${matchingFiles.first}');
+              final matchingFilePath =
+                  getFeaturePath(feature, matchingFiles.first);
+              await deleteFile(matchingFilePath);
               debugPrint(
                   'Deleted alternative old file: ${matchingFiles.first}');
             }
@@ -126,7 +135,7 @@ class VaccinationEditorService {
       if (!context.mounted) return;
 
       await writePod(
-        'vaccination/$newFilename',
+        '$feature/$newFilename',
         jsonData,
         context,
         const Text('Saving'),
@@ -147,7 +156,8 @@ class VaccinationEditorService {
     try {
       // Log the resources in the directory for debugging.
 
-      final dirUrl = await getDirUrl('healthpod/data/vaccination');
+      final podDirPath = getFeaturePath(feature);
+      final dirUrl = await getDirUrl(podDirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
       debugPrint('SubDirs: |${resources.subDirs.join(', ')}|');
@@ -160,16 +170,19 @@ class VaccinationEditorService {
       // Also try with the old format (underscore separator) for backward compatibility.
 
       final filenameWithUnderscore =
-          'vaccination_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
+          '${feature}_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
 
       // Check if either file exists.
 
       if (resources.files.contains(filename)) {
-        await deleteFile('healthpod/data/vaccination/$filename');
+        final filePath = getFeaturePath(feature, filename);
+        await deleteFile(filePath);
         debugPrint('Deleted file: $filename');
         return;
       } else if (resources.files.contains(filenameWithUnderscore)) {
-        await deleteFile('healthpod/data/vaccination/$filenameWithUnderscore');
+        final filePathWithUnderscore =
+            getFeaturePath(feature, filenameWithUnderscore);
+        await deleteFile(filePathWithUnderscore);
         debugPrint('Deleted file with underscore: $filenameWithUnderscore');
         return;
       }
@@ -182,7 +195,7 @@ class VaccinationEditorService {
 
       final datePart =
           formatTimestampForFilename(observation.timestamp).split('T')[0];
-      final baseFilename = 'vaccination_$datePart';
+      final baseFilename = '${feature}_$datePart';
 
       // Find any files that start with this date part.
 
@@ -193,7 +206,8 @@ class VaccinationEditorService {
       if (matchingFiles.isNotEmpty) {
         // Delete the first matching file.
 
-        await deleteFile('healthpod/data/vaccination/${matchingFiles.first}');
+        final matchingFilePath = getFeaturePath(feature, matchingFiles.first);
+        await deleteFile(matchingFilePath);
         debugPrint('Deleted alternative file: ${matchingFiles.first}');
       } else {
         // No matching files found, try a more flexible approach.
@@ -204,8 +218,9 @@ class VaccinationEditorService {
             resources.files.where((file) => file.contains(datePart)).toList();
 
         if (moreFlexibleMatches.isNotEmpty) {
-          await deleteFile(
-              'healthpod/data/vaccination/${moreFlexibleMatches.first}');
+          final flexibleMatchPath =
+              getFeaturePath(feature, moreFlexibleMatches.first);
+          await deleteFile(flexibleMatchPath);
           debugPrint(
               'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
         } else {
@@ -227,6 +242,6 @@ class VaccinationEditorService {
 
   String _filenameFromTimestamp(DateTime dt) {
     final formatted = formatTimestampForFilename(dt);
-    return 'vaccination_$formatted.json.enc.ttl';
+    return '${feature}_$formatted.json.enc.ttl';
   }
 }

@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/create_feature_folder.dart';
 
 /// Initialises required feature folders in the user's POD.
@@ -54,7 +55,7 @@ Future<void> initialiseFeatureFolders({
 
     // Check current resources.
 
-    final dirUrl = await getDirUrl('healthpod/data');
+    final dirUrl = await getDirUrl(basePath);
     final resources = await getResourcesInContainer(dirUrl);
 
     // Create each missing folder.

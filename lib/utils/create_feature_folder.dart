@@ -27,6 +27,8 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
+
 /// Creates or verifies a feature folder in POD.
 
 /// Creates a feature folder in POD with initialisation file.
@@ -47,7 +49,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
 
     // Check current resources.
 
-    final dirUrl = await getDirUrl('healthpod/data');
+    final dirUrl = await getDirUrl(basePath);
     final resources = await getResourcesInContainer(dirUrl);
 
     // Check if exists as directory.
@@ -70,7 +72,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
       // Full path for deletion needs to include healthpod/data.
 
       await deleteFile(
-        'healthpod/data/$featureName',
+        '$basePath/$featureName',
       );
     }
 

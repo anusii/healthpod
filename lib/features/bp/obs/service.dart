@@ -33,14 +33,19 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/get_feature_path.dart';
 
 /// Handles loading/saving/deleting BP observations from the Pod.
 
 class BPEditorService {
+  /// The type of data being handled.
+  static const String feature = 'blood_pressure';
+
   /// Load all BP observations from `healthpod/data/blood_pressure` directory.
 
   Future<List<BPObservation>> loadData(BuildContext context) async {
-    final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
+    final podDirPath = getFeaturePath(feature);
+    final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
 
     final List<BPObservation> loadedObservations = [];
@@ -50,8 +55,9 @@ class BPEditorService {
 
       if (!context.mounted) continue;
 
+      final filePath = getFeaturePath(feature, file);
       final content = await readPod(
-        'healthpod/data/blood_pressure/$file',
+        filePath,
         context,
         const Text('Loading file'),
       );
@@ -90,23 +96,26 @@ class BPEditorService {
 
           // Check if the old file exists before attempting to delete it.
 
-          final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
+          final podDirPath = getFeaturePath(feature);
+          final dirUrl = await getDirUrl(podDirPath);
           final resources = await getResourcesInContainer(dirUrl);
 
           if (resources.files.contains(oldFilename)) {
-            await deleteFile('healthpod/data/blood_pressure/$oldFilename');
+            final oldFilePath = getFeaturePath(feature, oldFilename);
+            await deleteFile(oldFilePath);
           } else {
             // Check if there's a file with a similar name.
 
             final baseFilename =
-                'blood_pressure_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
+                '${feature}_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
             final matchingFiles = resources.files
                 .where((file) => file.startsWith(baseFilename))
                 .toList();
 
             if (matchingFiles.isNotEmpty) {
-              await deleteFile(
-                  'healthpod/data/blood_pressure/${matchingFiles.first}');
+              final matchingFilePath =
+                  getFeaturePath(feature, matchingFiles.first);
+              await deleteFile(matchingFilePath);
               debugPrint(
                   'Deleted alternative old file: ${matchingFiles.first}');
             }
@@ -126,7 +135,7 @@ class BPEditorService {
       if (!context.mounted) return;
 
       await writePod(
-        'blood_pressure/$newFilename',
+        '$feature/$newFilename',
         jsonData,
         context,
         const Text('Saving'),
@@ -147,7 +156,8 @@ class BPEditorService {
     try {
       // Log the resources in the directory for debugging.
 
-      final dirUrl = await getDirUrl('healthpod/data/blood_pressure');
+      final podDirPath = getFeaturePath(feature);
+      final dirUrl = await getDirUrl(podDirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
       debugPrint('SubDirs: |${resources.subDirs.join(', ')}|');
@@ -160,17 +170,19 @@ class BPEditorService {
       // Also try with the old format (underscore separator) for backward compatibility.
 
       final filenameWithUnderscore =
-          'blood_pressure_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
+          '${feature}_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
 
       // Check if either file exists.
 
       if (resources.files.contains(filename)) {
-        await deleteFile('healthpod/data/blood_pressure/$filename');
+        final filePath = getFeaturePath(feature, filename);
+        await deleteFile(filePath);
         debugPrint('Deleted file: $filename');
         return;
       } else if (resources.files.contains(filenameWithUnderscore)) {
-        await deleteFile(
-            'healthpod/data/blood_pressure/$filenameWithUnderscore');
+        final filePathWithUnderscore =
+            getFeaturePath(feature, filenameWithUnderscore);
+        await deleteFile(filePathWithUnderscore);
         debugPrint('Deleted file with underscore: $filenameWithUnderscore');
         return;
       }
@@ -183,7 +195,7 @@ class BPEditorService {
 
       final datePart =
           formatTimestampForFilename(observation.timestamp).split('T')[0];
-      final baseFilename = 'blood_pressure_$datePart';
+      final baseFilename = '${feature}_$datePart';
 
       // Find any files that start with this date part.
 
@@ -194,8 +206,8 @@ class BPEditorService {
       if (matchingFiles.isNotEmpty) {
         // Delete the first matching file.
 
-        await deleteFile(
-            'healthpod/data/blood_pressure/${matchingFiles.first}');
+        final matchingFilePath = getFeaturePath(feature, matchingFiles.first);
+        await deleteFile(matchingFilePath);
         debugPrint('Deleted alternative file: ${matchingFiles.first}');
       } else {
         // No matching files found, try a more flexible approach.
@@ -205,8 +217,9 @@ class BPEditorService {
             resources.files.where((file) => file.contains(datePart)).toList();
 
         if (moreFlexibleMatches.isNotEmpty) {
-          await deleteFile(
-              'healthpod/data/blood_pressure/${moreFlexibleMatches.first}');
+          final flexibleMatchPath =
+              getFeaturePath(feature, moreFlexibleMatches.first);
+          await deleteFile(flexibleMatchPath);
           debugPrint(
               'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
         } else {
@@ -228,6 +241,6 @@ class BPEditorService {
 
   String _filenameFromTimestamp(DateTime dt) {
     final formatted = formatTimestampForFilename(dt);
-    return 'blood_pressure_$formatted.json.enc.ttl';
+    return '${feature}_$formatted.json.enc.ttl';
   }
 }
