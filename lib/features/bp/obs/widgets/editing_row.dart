@@ -34,139 +34,66 @@ import 'package:healthpod/features/bp/obs/widgets/editing/action_buttons_cell.da
 import 'package:healthpod/features/bp/obs/widgets/editing/feeling_cell.dart';
 import 'package:healthpod/features/bp/obs/widgets/editing/notes_cell.dart';
 import 'package:healthpod/features/bp/obs/widgets/editing/numeric_cell.dart';
-import 'package:healthpod/features/table/bp_editor/state.dart';
 
-/// Builds an editable [DataRow] for modifying a [BPObservation].
+/// Builds an editing row for a blood pressure observation.
 ///
-/// This row shows text fields for systolic, diastolic, and heart rate,
-/// a dropdown for the "feeling" field, a multi-line text field for notes,
-/// and a timestamp cell for picking date/time down to the minute.
-///
-/// All changes are reflected in [editorState.currentEdit], so the user sees
-/// them in real time. Actual file operations happen only on "Save."
+/// @param context The build context.
+/// @param editorState The editor state containing current values.
+/// @param editorService The service for saving observations.
+/// @param observation The observation being edited.
+/// @param index The index of the observation in the list.
+/// @param onCancel Callback when edit is cancelled.
+/// @param onSave Callback when edit is saved.
+/// @param onTimestampChanged Callback when timestamp is changed.
+/// @param width The width of the screen.
+/// @returns A DataRow widget configured for editing mode.
 
 DataRow buildEditingRow({
   required BuildContext context,
-  required BPEditorState editorState,
+  required dynamic editorState,
   required dynamic editorService,
   required BPObservation observation,
   required int index,
   required VoidCallback onCancel,
   required VoidCallback onSave,
-  required ValueChanged<DateTime> onTimestampChanged,
+  required Function(DateTime) onTimestampChanged,
+  required double width,
 }) {
-  // Get the "currentEdit" model that holds unsaved changes.
+  final cells = <DataCell>[
+    // Timestamp cell.
 
-  final currentEdit = editorState.currentEdit ?? observation;
-
-  return DataRow(
-    cells: [
-      buildTimestampCell(
-        context: context,
-        editorState: editorState,
-        observation: observation,
-        currentEdit: currentEdit,
-        onTimestampChanged: onTimestampChanged,
-      ),
-
-      // Generic numeric cells for systolic, diastolic, heart rate.
-
-      numericCell(
-        controller: editorState.systolicController,
-        // Value updates handled by controller listeners.
-
-        onValueChange: (val) {},
-      ),
-      numericCell(
-        controller: editorState.diastolicController,
-        onValueChange:
-            (val) {}, // Value updates handled by controller listeners
-      ),
-      numericCell(
-        controller: editorState.heartRateController,
-        onValueChange:
-            (val) {}, // Value updates handled by controller listeners
-      ),
-
-      // Feeling dropdown and Notes cell.
-
-      feelingCell(editorState, currentEdit),
-      notesCell(editorState, currentEdit),
-
-      // Action buttons for saving and canceling.
-
-      actionButtonsCell(
-        onSave: onSave,
-        onCancel: onCancel,
-      ),
-    ],
-  );
-}
-
-/// Builds a [DataCell] that lets the user pick a date/time, calling [onTimestampChanged]
-/// to update the timestamp in a parent setState, which triggers a rebuild.
-
-DataCell buildTimestampCell({
-  required BuildContext context,
-  required BPEditorState editorState,
-  required BPObservation observation,
-  required BPObservation currentEdit,
-
-  // The callback we just added.
-
-  required ValueChanged<DateTime> onTimestampChanged,
-}) {
-  return DataCell(
-    InkWell(
-      onTap: () async {
-        final date = await showDatePicker(
-          context: context,
-          initialDate: currentEdit.timestamp,
-          firstDate: DateTime(2000),
-          lastDate: DateTime.now(),
-        );
-        if (!context.mounted) return;
-
-        if (date != null) {
-          final time = await showTimePicker(
+    DataCell(
+      InkWell(
+        onTap: () async {
+          final date = await showDatePicker(
             context: context,
-            initialTime: TimeOfDay.fromDateTime(currentEdit.timestamp),
+            initialDate: observation.timestamp,
+            firstDate: DateTime(2000),
+            lastDate: DateTime.now(),
           );
-          if (time != null && context.mounted) {
-            final newTimestamp = DateTime(
-              date.year,
-              date.month,
-              date.day,
-              time.hour,
-              time.minute,
-            );
+          if (!context.mounted) return;
 
-            // Check for duplicates.
-
-            final conflict = editorState.observations.any(
-              (r) => r.timestamp == newTimestamp && r != observation,
+          if (date != null) {
+            final time = await showTimePicker(
+              context: context,
+              initialTime: TimeOfDay.fromDateTime(observation.timestamp),
             );
-            if (conflict) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'An observation with this date/time already exists',
-                  ),
-                ),
+            if (time != null && context.mounted) {
+              final newTimestamp = DateTime(
+                date.year,
+                date.month,
+                date.day,
+                time.hour,
+                time.minute,
               );
-              return;
+              onTimestampChanged(newTimestamp);
             }
-
-            // Instead of updating editorState here, call the parent's callback.
-
-            onTimestampChanged(newTimestamp);
           }
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        },
         child: Text(
-          DateFormat('yyyy-MM-dd HH:mm:ss').format(currentEdit.timestamp),
+          DateFormat('yyyy-MM-dd HH:mm').format(
+            editorState.currentEdit?.timestamp ?? observation.timestamp,
+          ),
           style: const TextStyle(
             decoration: TextDecoration.underline,
             color: Colors.blue,
@@ -174,5 +101,43 @@ DataCell buildTimestampCell({
         ),
       ),
     ),
-  );
+
+    // Systolic cell.
+
+    numericCell(
+      controller: editorState.systolicController,
+      onValueChange: (_) {},
+    ),
+
+    // Diastolic cell.
+
+    numericCell(
+      controller: editorState.diastolicController,
+      onValueChange: (_) {},
+    ),
+  ];
+
+  // Add heart rate if screen is wide enough.
+
+  if (width > 600) {
+    cells.add(
+      numericCell(
+        controller: editorState.heartRateController,
+        onValueChange: (_) {},
+      ),
+    );
+  }
+
+  // Add feeling and notes if screen is wide enough.
+
+  if (width > 800) {
+    cells.add(feelingCell(editorState, observation));
+    cells.add(notesCell(editorState, observation));
+  }
+
+  // Add actions column.
+
+  cells.add(actionButtonsCell(onSave: onSave, onCancel: onCancel));
+
+  return DataRow(cells: cells);
 }

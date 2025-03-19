@@ -30,7 +30,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
-import 'package:healthpod/utils/parse_numeric_input.dart';
 
 /// Creates a read-only [DataRow] for displaying a single [BPObservation].
 ///
@@ -52,61 +51,47 @@ DataRow buildDisplayRow({
   required int index,
   required VoidCallback onEdit,
   required VoidCallback onDelete,
+  required double width,
 }) {
-  return DataRow(
-    cells: [
-      // Timestamp cell.
+  final cells = <DataCell>[
+    DataCell(
+        Text(DateFormat('yyyy-MM-dd HH:mm').format(observation.timestamp))),
+    DataCell(Text('${observation.systolic}')),
+    DataCell(Text('${observation.diastolic}')),
+  ];
 
-      DataCell(
-        Text(DateFormat('yyyy-MM-dd HH:mm:ss').format(observation.timestamp)),
-      ),
+  // Add heart rate if screen is wide enough.
 
-      // Systolic cell.
+  if (width > 600) {
+    cells.add(DataCell(Text('${observation.heartRate}')));
+  }
 
-      DataCell(Text(parseNumericInput(observation.systolic))),
+  // Add feeling and notes if screen is wide enough.
 
-      // Diastolic cell.
+  if (width > 800) {
+    cells.add(DataCell(Text(observation.feeling)));
+    cells.add(DataCell(Text(observation.notes)));
+  }
 
-      DataCell(Text(parseNumericInput(observation.diastolic))),
+  // Add actions column.
 
-      // Heart rate cell.
-
-      DataCell(Text(parseNumericInput(observation.heartRate))),
-
-      // Feeling cell.
-
-      DataCell(Text(observation.feeling)),
-
-      // Notes cell (with a max width to limit horizontal space usage).
-
-      DataCell(
-        Container(
-          constraints: const BoxConstraints(maxWidth: 200),
-          child: Text(
-            observation.notes,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 3,
+  cells.add(
+    DataCell(
+      Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: onEdit,
           ),
-        ),
+          IconButton(
+            icon: const Icon(Icons.delete),
+            onPressed: onDelete,
+          ),
+        ],
       ),
-
-      // Actions cell: edit and delete icons.
-
-      DataCell(
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: onEdit,
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: onDelete,
-            ),
-          ],
-        ),
-      ),
-    ],
+    ),
   );
+
+  return DataRow(cells: cells);
 }

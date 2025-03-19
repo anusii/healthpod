@@ -34,21 +34,59 @@ import 'package:csv/csv.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/blood_pressure_survey.dart';
+import 'package:healthpod/constants/csv_fields.dart';
+import 'package:healthpod/utils/health_data_exporter_base.dart';
 import 'package:healthpod/utils/normalise_timestamp.dart';
 
 /// Handles exporting blood pressure data from JSON files to a single CSV file.
 ///
-/// This module is specifically focused on BP data export functionality.
-/// It reads all JSON files from the BP directory, processes them, and combines
-/// them into a single CSV file sorted by timestamp.
+/// This class extends HealthDataExporterBase to provide specific implementation
+/// for blood pressure data export functionality.
 
-class BPExporter {
+class BPExporter extends HealthDataExporterBase {
+  @override
+  String get dataType => 'blood_pressure';
+
+  @override
+  String get timestampField => HealthSurveyConstants.fieldTimestamp;
+
+  @override
+  List<String> get csvHeaders => BPCSVFields.allFields;
+
+  @override
+  Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
+    var timestamp =
+        normaliseTimestamp(jsonData[BPCSVFields.fieldTimestamp], toIso: true);
+
+    final responses = jsonData['responses'];
+
+    return {
+      BPCSVFields.fieldTimestamp: timestamp,
+      BPCSVFields.fieldSystolic: responses[BPCSVFields.fieldSystolic],
+      BPCSVFields.fieldDiastolic: responses[BPCSVFields.fieldDiastolic],
+      BPCSVFields.fieldHeartRate: responses[BPCSVFields.fieldHeartRate],
+      BPCSVFields.fieldFeeling: responses[BPCSVFields.fieldFeeling],
+      BPCSVFields.fieldNotes: responses[BPCSVFields.fieldNotes],
+    };
+  }
+
+  /// Static method to maintain backward compatibility with existing code.
+
+  static Future<bool> exportCsv(
+    String savePath,
+    String dirPath,
+    BuildContext context,
+  ) async {
+    return BPExporter().exportToCsv(savePath, dirPath, context);
+  }
+
   /// Process BP JSON files to CSV export.
   ///
   /// Reads all JSON files in the BP directory, extracts the blood pressure data,
   /// and combines them into a single CSV file sorted by timestamp.
 
-  static Future<bool> exportToCsv(
+  @override
+  Future<bool> exportToCsv(
     String savePath,
     String dirPath,
     BuildContext context,
@@ -99,7 +137,7 @@ class BPExporter {
           // Ensure we use ISO format for timestamp with T and Z.
 
           var timestamp = normaliseTimestamp(
-              jsonData[HealthSurveyConstants.fieldTimestamp],
+              jsonData[BPCSVFields.fieldTimestamp],
               toIso: true);
 
           final responses = jsonData['responses'];
@@ -107,17 +145,12 @@ class BPExporter {
           // Add to readings list.
 
           allReadings.add({
-            HealthSurveyConstants.fieldTimestamp: timestamp,
-            HealthSurveyConstants.fieldSystolic:
-                responses[HealthSurveyConstants.fieldSystolic],
-            HealthSurveyConstants.fieldDiastolic:
-                responses[HealthSurveyConstants.fieldDiastolic],
-            HealthSurveyConstants.fieldHeartRate:
-                responses[HealthSurveyConstants.fieldHeartRate],
-            HealthSurveyConstants.fieldFeeling:
-                responses[HealthSurveyConstants.fieldFeeling],
-            HealthSurveyConstants.fieldNotes:
-                responses[HealthSurveyConstants.fieldNotes],
+            BPCSVFields.fieldTimestamp: timestamp,
+            BPCSVFields.fieldSystolic: responses[BPCSVFields.fieldSystolic],
+            BPCSVFields.fieldDiastolic: responses[BPCSVFields.fieldDiastolic],
+            BPCSVFields.fieldHeartRate: responses[BPCSVFields.fieldHeartRate],
+            BPCSVFields.fieldFeeling: responses[BPCSVFields.fieldFeeling],
+            BPCSVFields.fieldNotes: responses[BPCSVFields.fieldNotes],
           });
         } catch (e) {
           debugPrint('Error processing file $fileName: $e');
@@ -131,19 +164,12 @@ class BPExporter {
 
       // Sort readings by timestamp.
 
-      allReadings.sort((a, b) => a[HealthSurveyConstants.fieldTimestamp]
-          .compareTo(b[HealthSurveyConstants.fieldTimestamp]));
+      allReadings.sort((a, b) => a[BPCSVFields.fieldTimestamp]
+          .compareTo(b[BPCSVFields.fieldTimestamp]));
 
       // Prepare CSV data.
 
-      final headers = [
-        HealthSurveyConstants.fieldTimestamp,
-        HealthSurveyConstants.fieldSystolic,
-        HealthSurveyConstants.fieldDiastolic,
-        HealthSurveyConstants.fieldHeartRate,
-        HealthSurveyConstants.fieldFeeling,
-        HealthSurveyConstants.fieldNotes,
-      ];
+      final headers = BPCSVFields.allFields;
 
       List<List<dynamic>> rows = [headers];
 

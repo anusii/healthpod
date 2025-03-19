@@ -27,7 +27,10 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:intl/intl.dart';
+
 import 'package:healthpod/constants/colours.dart';
+import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/features/bp/obs/service.dart';
 import 'package:healthpod/features/bp/obs/widgets/display_row.dart';
 import 'package:healthpod/features/bp/obs/widgets/editing_row.dart';
@@ -109,11 +112,384 @@ class _BPEditorPageState extends State<BPEditorPage> {
     });
   }
 
+  /// Builds the desktop layout for the blood pressure editor.
+  ///
+  /// Uses a DataTable with responsive columns that adapt based on screen width.
+  /// The table shows a minimum set of columns (timestamp, systolic, diastolic) and
+  /// progressively reveals more columns (heart rate, feeling, notes) as screen width increases.
+  ///
+  /// @param context The build context.
+  /// @param width The current screen width.
+  /// @returns A Widget containing the desktop layout.
+
+  Widget _buildDesktopLayout(BuildContext context, double width) {
+    final columns = _getColumns(width);
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: SingleChildScrollView(
+        child: DataTable(
+          columns: columns,
+          rows: List<DataRow>.generate(
+            editorState.observations.length,
+            (index) {
+              final obs = editorState.observations[index];
+
+              if (editorState.editingIndex == index) {
+                return buildEditingRow(
+                  context: context,
+                  width: width,
+                  editorState: editorState,
+                  editorService: editorService,
+                  observation: obs,
+                  index: index,
+                  onCancel: _handleCancelEdit,
+                  onSave: () async {
+                    await editorState.saveObservation(
+                      context,
+                      editorService,
+                      index,
+                    );
+                    _loadData();
+                  },
+                  onTimestampChanged: (DateTime newTimestamp) {
+                    setState(() {
+                      editorState.currentEdit =
+                          editorState.currentEdit?.copyWith(
+                        timestamp: newTimestamp,
+                      );
+                    });
+                  },
+                );
+              }
+
+              return buildDisplayRow(
+                context: context,
+                width: width,
+                observation: obs,
+                index: index,
+                onEdit: () => setState(() {
+                  editorState.enterEditMode(index);
+                }),
+                onDelete: () async {
+                  await editorState.deleteObservation(
+                    context,
+                    editorService,
+                    obs,
+                  );
+                  _loadData();
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Builds the mobile layout for the blood pressure editor.
+  ///
+  /// Creates a scrollable list of cards, each representing a blood pressure observation.
+  /// Cards can be expanded to show additional details and include edit/delete actions.
+  ///
+  /// @param context The build context.
+  /// @returns A Widget containing the mobile layout.
+
+  Widget _buildMobileLayout(BuildContext context) {
+    return ListView.builder(
+      itemCount: editorState.observations.length,
+      itemBuilder: (context, index) {
+        final obs = editorState.observations[index];
+        final isEditing = editorState.editingIndex == index;
+
+        if (isEditing) {
+          return _buildMobileEditCard(obs, index);
+        }
+
+        return Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: ExpansionTile(
+            title: Text(
+              DateFormat('yyyy-MM-dd HH:mm').format(obs.timestamp),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            subtitle: Text(
+              'BP: ${obs.systolic}/${obs.diastolic} mmHg',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildInfoRow('Heart Rate', '${obs.heartRate} BPM'),
+                    const SizedBox(height: 8),
+                    _buildInfoRow('Feeling', obs.feeling),
+                    if (obs.notes.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      _buildInfoRow('Notes', obs.notes),
+                    ],
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () => setState(() {
+                            editorState.enterEditMode(index);
+                          }),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () async {
+                            await editorState.deleteObservation(
+                              context,
+                              editorService,
+                              obs,
+                            );
+                            _loadData();
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Builds a mobile-optimised numeric input field.
+
+  Widget _buildMobileNumericField({
+    required TextEditingController? controller,
+    required String label,
+    required String suffix,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: label,
+        suffixText: suffix,
+      ),
+    );
+  }
+
+  /// Builds an editing card for the mobile layout.
+  ///
+  /// Creates a form-style card with fields for editing all observation properties.
+  /// Optimized for touch interaction and mobile screen sizes.
+  ///
+  /// @param obs The blood pressure observation being edited.
+  /// @param index The index of the observation in the list.
+  /// @returns A Widget containing the mobile editing form.
+
+  Widget _buildMobileEditCard(BPObservation obs, int index) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Edit Reading',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () async {
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: obs.timestamp,
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime.now(),
+                );
+                if (!context.mounted) return;
+
+                if (date != null) {
+                  if (!mounted) return;
+                  final time = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.fromDateTime(obs.timestamp),
+                  );
+                  if (time != null && context.mounted) {
+                    final newTimestamp = DateTime(
+                      date.year,
+                      date.month,
+                      date.day,
+                      time.hour,
+                      time.minute,
+                    );
+                    setState(() {
+                      editorState.currentEdit =
+                          editorState.currentEdit?.copyWith(
+                        timestamp: newTimestamp,
+                      );
+                    });
+                  }
+                }
+              },
+              child: _buildInfoRow(
+                'Date/Time',
+                DateFormat('yyyy-MM-dd HH:mm').format(
+                    editorState.currentEdit?.timestamp ?? obs.timestamp),
+                isEditable: true,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildMobileNumericField(
+              controller: editorState.systolicController,
+              label: 'Systolic',
+              suffix: 'mmHg',
+            ),
+            const SizedBox(height: 8),
+            _buildMobileNumericField(
+              controller: editorState.diastolicController,
+              label: 'Diastolic',
+              suffix: 'mmHg',
+            ),
+            const SizedBox(height: 8),
+            _buildMobileNumericField(
+              controller: editorState.heartRateController,
+              label: 'Heart Rate',
+              suffix: 'BPM',
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: editorState.currentEdit?.feeling.isEmpty ?? true
+                  ? 'Good'
+                  : editorState.currentEdit?.feeling ?? obs.feeling,
+              decoration: const InputDecoration(labelText: 'Feeling'),
+              items: ['Excellent', 'Good', 'Fair', 'Poor']
+                  .map((String value) => DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      ))
+                  .toList(),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    editorState.updateFeeling(newValue);
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: editorState.notesController,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Notes',
+                alignLabelWithHint: true,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: _handleCancelEdit,
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    await editorState.saveObservation(
+                      context,
+                      editorService,
+                      index,
+                    );
+                    _loadData();
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Builds a consistent row layout for displaying information.
+  ///
+  /// Creates a two-column layout with a label and value, optionally styling the value
+  /// to indicate it is editable.
+  ///
+  /// @param label The label text to display.
+  /// @param value The value text to display.
+  /// @param isEditable Whether to style the value as an editable field.
+  /// @returns A Widget containing the formatted information row.
+
+  Widget _buildInfoRow(String label, String value, {bool isEditable = false}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              decoration: isEditable ? TextDecoration.underline : null,
+              color: isEditable ? Colors.blue : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Gets the list of columns to display in the DataTable based on screen width.
+  ///
+  /// Implements responsive column visibility:
+  /// - Base columns (Timestamp, Systolic, Diastolic) always visible
+  /// - Heart Rate visible when width > 600
+  /// - Feeling and Notes visible when width > 800
+  /// - Actions column always visible
+  ///
+  /// @param width The current screen width.
+  /// @returns A list of DataColumn objects.
+
+  List<DataColumn> _getColumns(double width) {
+    final List<DataColumn> columns = [
+      const DataColumn(label: Text('Timestamp')),
+      const DataColumn(label: Text('Systolic')),
+      const DataColumn(label: Text('Diastolic')),
+    ];
+
+    if (width > 600) {
+      columns.add(const DataColumn(label: Text('Heart Rate')));
+    }
+
+    if (width > 800) {
+      columns.add(const DataColumn(label: Text('Feeling')));
+      columns.add(const DataColumn(label: Text('Notes')));
+    }
+
+    columns.add(const DataColumn(label: Text('Actions')));
+
+    return columns;
+  }
+
   @override
   Widget build(BuildContext context) {
     final error = editorState.error;
     final isLoading = editorState.isLoading;
-    final observations = editorState.observations;
 
     return Scaffold(
       appBar: AppBar(
@@ -169,81 +545,16 @@ class _BPEditorPageState extends State<BPEditorPage> {
           return Center(child: Text('Error: $error'));
         }
 
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: SingleChildScrollView(
-            child: DataTable(
-              columns: const [
-                DataColumn(label: Text('Timestamp')),
-                DataColumn(label: Text('Systolic')),
-                DataColumn(label: Text('Diastolic')),
-                DataColumn(label: Text('Heart Rate')),
-                DataColumn(label: Text('Feeling')),
-                DataColumn(label: Text('Notes')),
-                DataColumn(label: Text('Actions')),
-              ],
-              rows: List<DataRow>.generate(
-                observations.length,
-                (index) {
-                  final obs = observations[index];
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final isSmallScreen = constraints.maxWidth < 600;
 
-                  if (editorState.editingIndex == index) {
-                    // Build editing row from UI components.
-
-                    return buildEditingRow(
-                      context: context,
-                      editorState: editorState,
-                      editorService: editorService,
-                      observation: obs,
-                      index: index,
-                      onCancel: _handleCancelEdit,
-                      onSave: () async {
-                        // Attempt to save observation, then reload data on success.
-
-                        await editorState.saveObservation(
-                          context,
-                          editorService,
-                          index,
-                        );
-                        _loadData();
-                      },
-                      // Update timestamp display in real time.
-
-                      onTimestampChanged: (DateTime newTimestamp) {
-                        // Wrap the update in setState to rebuild the UI.
-
-                        setState(() {
-                          editorState.currentEdit =
-                              editorState.currentEdit?.copyWith(
-                            timestamp: newTimestamp,
-                          );
-                        });
-                      },
-                    );
-                  }
-
-                  // Build display row from UI components.
-
-                  return buildDisplayRow(
-                    context: context,
-                    observation: obs,
-                    index: index,
-                    onEdit: () => setState(() {
-                      editorState.enterEditMode(index);
-                    }),
-                    onDelete: () async {
-                      await editorState.deleteObservation(
-                        context,
-                        editorService,
-                        obs,
-                      );
-                      _loadData();
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
+            if (isSmallScreen) {
+              return _buildMobileLayout(context);
+            } else {
+              return _buildDesktopLayout(context, constraints.maxWidth);
+            }
+          },
         );
       })(),
     );
