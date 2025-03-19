@@ -92,6 +92,21 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Back button to root folder
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
+          child: TextButton.icon(
+            onPressed: () {
+              const rootPath = 'healthpod/data';
+              ref
+                  .read(fileServiceProvider.notifier)
+                  .updateCurrentPath(rootPath);
+              _browserKey.currentState?.navigateToPath(rootPath);
+            },
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Back to Data Folder'),
+          ),
+        ),
         // Main content area.
 
         Expanded(
