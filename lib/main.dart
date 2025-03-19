@@ -26,12 +26,13 @@
 library;
 
 import 'package:flutter/material.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'package:healthpod/theme/app_theme.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
-import 'package:healthpod/theme/app_theme.dart';
 import 'package:healthpod/widgets/theme_toggle.dart';
 
 // Theme mode provider to manage light/dark theme state
