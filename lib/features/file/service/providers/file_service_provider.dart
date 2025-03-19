@@ -387,7 +387,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
             success = await VaccinationImporter.importCsv(
               file.path!,
-              state.currentPath ?? 'healthpod/data',
+              state.currentPath ?? basePath,
               context,
             );
             dataType = 'Vaccination';
@@ -396,7 +396,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
             success = await BPImporter.importCsv(
               file.path!,
-              state.currentPath ?? 'healthpod/data',
+              state.currentPath ?? basePath,
               context,
             );
             dataType = 'Blood pressure';
@@ -453,7 +453,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
           success = await VaccinationExporter.exportCsv(
             outputFile,
-            state.currentPath ?? 'healthpod/data',
+            state.currentPath ?? basePath,
             context,
           );
         } else {
@@ -461,7 +461,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
           success = await BPExporter.exportCsv(
             outputFile,
-            state.currentPath ?? 'healthpod/data',
+            state.currentPath ?? basePath,
             context,
           );
         }
