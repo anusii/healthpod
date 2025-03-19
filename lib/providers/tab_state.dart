@@ -27,19 +27,24 @@ library;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// State class to manage tab selections across features.
+
 class TabState {
   /// The selected index shared across all features.
+
   final int selectedIndex;
 
   /// The maximum number of tabs across all features.
+
   static const int maxTabs = 2;
 
   /// Creates a new [TabState] with the given index.
+
   const TabState({
     this.selectedIndex = 0,
   });
 
   /// Creates a copy of this [TabState] with the given fields replaced with new values.
+
   TabState copyWith({
     int? selectedIndex,
   }) {
@@ -51,6 +56,7 @@ class TabState {
   }
 
   /// Normalizes the index to ensure it's within valid range.
+
   static int _normalizeIndex(int index) {
     if (index < 0) return 0;
     if (index >= maxTabs) return maxTabs - 1;
@@ -59,17 +65,21 @@ class TabState {
 }
 
 /// Provider for the tab state.
+
 final tabStateProvider =
     StateNotifierProvider<TabStateNotifier, TabState>((ref) {
   return TabStateNotifier();
 });
 
 /// Notifier class for managing tab state changes.
+
 class TabStateNotifier extends StateNotifier<TabState> {
   /// Creates a new [TabStateNotifier] with initial state.
+
   TabStateNotifier() : super(const TabState());
 
   /// Updates the selected index for all features.
+
   void setSelectedIndex(int index) {
     state = state.copyWith(selectedIndex: TabState._normalizeIndex(index));
   }

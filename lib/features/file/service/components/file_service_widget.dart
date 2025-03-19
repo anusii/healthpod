@@ -51,7 +51,8 @@ class FileServiceWidget extends ConsumerStatefulWidget {
 class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
   final _browserKey = GlobalKey<FileBrowserState>();
 
-  /// Navigate to the appropriate folder based on the selected tab
+  /// Navigate to the appropriate folder based on the selected tab.
+
   void _navigateToFeatureFolder() {
     final selectedIndex = ref.read(tabStateProvider).selectedIndex;
     final feature =
@@ -68,7 +69,7 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
   @override
   void initState() {
     super.initState();
-    // Set up the refresh callback after the widget is built
+    // Set up the refresh callback after the widget is built.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(fileServiceProvider.notifier).setRefreshCallback(() {
         _browserKey.currentState?.refreshFiles();
@@ -92,7 +93,8 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Back button to root folder
+        // Back button to root folder.
+
         Padding(
           padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
           child: TextButton.icon(

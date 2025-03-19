@@ -222,7 +222,8 @@ class FileBrowserState extends State<FileBrowser> {
     }
   }
 
-  /// Navigate to a specific path in the file browser
+  /// Navigate to a specific path in the file browser.
+
   void navigateToPath(String path) {
     setState(() {
       currentPath = path;
