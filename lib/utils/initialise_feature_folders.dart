@@ -55,7 +55,7 @@ Future<void> initialiseFeatureFolders({
 
     // Check current resources.
 
-    final dirUrl = await getDirUrl(kHealthDataBasePath);
+    final dirUrl = await getDirUrl(basePath);
     final resources = await getResourcesInContainer(dirUrl);
 
     // Create each missing folder.

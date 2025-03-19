@@ -50,6 +50,6 @@ import 'package:healthpod/constants/paths.dart';
 /// ```
 
 String getFeaturePath(String feature, [String? filename]) {
-  final basePath = '$kHealthDataBasePath/$feature';
-  return filename != null ? '$basePath/$filename' : basePath;
+  final featurePath = '$basePath/$feature';
+  return filename != null ? '$featurePath/$filename' : featurePath;
 }

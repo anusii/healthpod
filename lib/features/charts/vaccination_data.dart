@@ -41,7 +41,7 @@ import 'package:healthpod/constants/paths.dart';
 class VaccinationData {
   /// Directory where vaccination-related data resides.
 
-  static const String vaccinationDir = '$kHealthDataBasePath/vaccination';
+  static const String vaccinationDir = '$basePath/vaccination';
 
   /// Fetches vaccination data from POD, ensuring it is sorted by timestamp.
   ///

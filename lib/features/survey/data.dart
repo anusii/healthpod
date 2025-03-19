@@ -41,7 +41,7 @@ import 'package:healthpod/constants/paths.dart';
 class SurveyData {
   // Fetch from directory where blood pressure-related survey data resides.
 
-  static const String bpDir = '$kHealthDataBasePath/blood_pressure';
+  static const String bpDir = '$basePath/blood_pressure';
 
   /// Fetches survey data from POD, ensuring it is sorted by timestamp.
   ///

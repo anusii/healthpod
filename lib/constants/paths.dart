@@ -26,5 +26,4 @@
 library;
 
 /// Base path for all health data in the Pod.
-
-const String kHealthDataBasePath = 'healthpod/data';
+const String basePath = 'healthpod/data';

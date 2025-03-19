@@ -49,7 +49,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
 
     // Check current resources.
 
-    final dirUrl = await getDirUrl(kHealthDataBasePath);
+    final dirUrl = await getDirUrl(basePath);
     final resources = await getResourcesInContainer(dirUrl);
 
     // Check if exists as directory.
@@ -72,7 +72,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
       // Full path for deletion needs to include healthpod/data.
 
       await deleteFile(
-        '$kHealthDataBasePath/$featureName',
+        '$basePath/$featureName',
       );
     }
 

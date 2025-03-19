@@ -83,7 +83,7 @@ class FileState {
     this.cleanFileName = 'remoteFileName',
     this.remoteFileUrl,
     this.filePreview,
-    this.currentPath = kHealthDataBasePath,
+    this.currentPath = basePath,
     this.uploadInProgress = false,
     this.downloadInProgress = false,
     this.deleteInProgress = false,
@@ -140,6 +140,6 @@ class FileState {
   bool get isInBpDirectory {
     return currentPath!.endsWith('/blood_pressure') ||
         currentPath!.contains('/blood_pressure/') ||
-        currentPath == '$kHealthDataBasePath/blood_pressure';
+        currentPath == '$basePath/blood_pressure';
   }
 }

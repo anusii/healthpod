@@ -120,11 +120,11 @@ class FileBrowserState extends State<FileBrowser> {
 
   /// The current directory path being displayed.
 
-  String currentPath = kHealthDataBasePath;
+  String currentPath = basePath;
 
   /// History of visited directories for navigation.
 
-  List<String> pathHistory = [kHealthDataBasePath];
+  List<String> pathHistory = [basePath];
 
   /// Number of files in the current directory.
 
