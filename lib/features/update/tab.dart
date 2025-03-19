@@ -25,9 +25,11 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/vaccination/survey.dart';
+import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> surveyPanels = [
   {
@@ -40,14 +42,14 @@ final List<Map<String, dynamic>> surveyPanels = [
   },
 ];
 
-class SurveyTab extends StatefulWidget {
+class SurveyTab extends ConsumerStatefulWidget {
   const SurveyTab({super.key});
 
   @override
-  State<SurveyTab> createState() => _SurveyTabState();
+  ConsumerState<SurveyTab> createState() => _SurveyTabState();
 }
 
-class _SurveyTabState extends State<SurveyTab>
+class _SurveyTabState extends ConsumerState<SurveyTab>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -55,6 +57,15 @@ class _SurveyTabState extends State<SurveyTab>
   void initState() {
     super.initState();
     _tabController = TabController(length: surveyPanels.length, vsync: this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final tabState = ref.watch(tabStateProvider);
+    if (_tabController.index != tabState.selectedIndex) {
+      _tabController.animateTo(tabState.selectedIndex);
+    }
   }
 
   @override
@@ -67,20 +78,20 @@ class _SurveyTabState extends State<SurveyTab>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Tab Bar. Like what we have in the RattleNG app.
-
         TabBar(
           unselectedLabelColor: Colors.grey,
           controller: _tabController,
+          onTap: (index) {
+            if (index != ref.read(tabStateProvider).selectedIndex) {
+              ref.read(tabStateProvider.notifier).setSelectedIndex(index);
+            }
+          },
           tabs: surveyPanels.map((tab) {
             return Tab(
               text: tab['title'],
             );
           }).toList(),
         ),
-
-        // Tab Bar View with the survey panels.
-
         Expanded(
           child: TabBarView(
             controller: _tabController,
