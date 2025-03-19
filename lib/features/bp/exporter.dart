@@ -34,6 +34,7 @@ import 'package:csv/csv.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/blood_pressure_survey.dart';
+import 'package:healthpod/constants/csv_fields.dart';
 import 'package:healthpod/utils/health_data_exporter_base.dart';
 import 'package:healthpod/utils/normalise_timestamp.dart';
 
@@ -50,35 +51,22 @@ class BPExporter extends HealthDataExporterBase {
   String get timestampField => HealthSurveyConstants.fieldTimestamp;
 
   @override
-  List<String> get csvHeaders => [
-        HealthSurveyConstants.fieldTimestamp,
-        HealthSurveyConstants.fieldSystolic,
-        HealthSurveyConstants.fieldDiastolic,
-        HealthSurveyConstants.fieldHeartRate,
-        HealthSurveyConstants.fieldFeeling,
-        HealthSurveyConstants.fieldNotes,
-      ];
+  List<String> get csvHeaders => BPCSVFields.allFields;
 
   @override
   Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
-    var timestamp = normaliseTimestamp(
-        jsonData[HealthSurveyConstants.fieldTimestamp],
-        toIso: true);
+    var timestamp =
+        normaliseTimestamp(jsonData[BPCSVFields.fieldTimestamp], toIso: true);
 
     final responses = jsonData['responses'];
 
     return {
-      HealthSurveyConstants.fieldTimestamp: timestamp,
-      HealthSurveyConstants.fieldSystolic:
-          responses[HealthSurveyConstants.fieldSystolic],
-      HealthSurveyConstants.fieldDiastolic:
-          responses[HealthSurveyConstants.fieldDiastolic],
-      HealthSurveyConstants.fieldHeartRate:
-          responses[HealthSurveyConstants.fieldHeartRate],
-      HealthSurveyConstants.fieldFeeling:
-          responses[HealthSurveyConstants.fieldFeeling],
-      HealthSurveyConstants.fieldNotes:
-          responses[HealthSurveyConstants.fieldNotes],
+      BPCSVFields.fieldTimestamp: timestamp,
+      BPCSVFields.fieldSystolic: responses[BPCSVFields.fieldSystolic],
+      BPCSVFields.fieldDiastolic: responses[BPCSVFields.fieldDiastolic],
+      BPCSVFields.fieldHeartRate: responses[BPCSVFields.fieldHeartRate],
+      BPCSVFields.fieldFeeling: responses[BPCSVFields.fieldFeeling],
+      BPCSVFields.fieldNotes: responses[BPCSVFields.fieldNotes],
     };
   }
 
@@ -149,7 +137,7 @@ class BPExporter extends HealthDataExporterBase {
           // Ensure we use ISO format for timestamp with T and Z.
 
           var timestamp = normaliseTimestamp(
-              jsonData[HealthSurveyConstants.fieldTimestamp],
+              jsonData[BPCSVFields.fieldTimestamp],
               toIso: true);
 
           final responses = jsonData['responses'];
@@ -157,17 +145,12 @@ class BPExporter extends HealthDataExporterBase {
           // Add to readings list.
 
           allReadings.add({
-            HealthSurveyConstants.fieldTimestamp: timestamp,
-            HealthSurveyConstants.fieldSystolic:
-                responses[HealthSurveyConstants.fieldSystolic],
-            HealthSurveyConstants.fieldDiastolic:
-                responses[HealthSurveyConstants.fieldDiastolic],
-            HealthSurveyConstants.fieldHeartRate:
-                responses[HealthSurveyConstants.fieldHeartRate],
-            HealthSurveyConstants.fieldFeeling:
-                responses[HealthSurveyConstants.fieldFeeling],
-            HealthSurveyConstants.fieldNotes:
-                responses[HealthSurveyConstants.fieldNotes],
+            BPCSVFields.fieldTimestamp: timestamp,
+            BPCSVFields.fieldSystolic: responses[BPCSVFields.fieldSystolic],
+            BPCSVFields.fieldDiastolic: responses[BPCSVFields.fieldDiastolic],
+            BPCSVFields.fieldHeartRate: responses[BPCSVFields.fieldHeartRate],
+            BPCSVFields.fieldFeeling: responses[BPCSVFields.fieldFeeling],
+            BPCSVFields.fieldNotes: responses[BPCSVFields.fieldNotes],
           });
         } catch (e) {
           debugPrint('Error processing file $fileName: $e');
@@ -181,19 +164,12 @@ class BPExporter extends HealthDataExporterBase {
 
       // Sort readings by timestamp.
 
-      allReadings.sort((a, b) => a[HealthSurveyConstants.fieldTimestamp]
-          .compareTo(b[HealthSurveyConstants.fieldTimestamp]));
+      allReadings.sort((a, b) => a[BPCSVFields.fieldTimestamp]
+          .compareTo(b[BPCSVFields.fieldTimestamp]));
 
       // Prepare CSV data.
 
-      final headers = [
-        HealthSurveyConstants.fieldTimestamp,
-        HealthSurveyConstants.fieldSystolic,
-        HealthSurveyConstants.fieldDiastolic,
-        HealthSurveyConstants.fieldHeartRate,
-        HealthSurveyConstants.fieldFeeling,
-        HealthSurveyConstants.fieldNotes,
-      ];
+      final headers = BPCSVFields.allFields;
 
       List<List<dynamic>> rows = [headers];
 

@@ -34,6 +34,7 @@ import 'package:csv/csv.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/blood_pressure_survey.dart';
+import 'package:healthpod/constants/csv_fields.dart';
 import 'package:healthpod/utils/health_data_importer_base.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
@@ -50,27 +51,19 @@ class BPImporter extends HealthDataImporterBase {
   String get timestampField => HealthSurveyConstants.fieldTimestamp;
 
   @override
-  List<String> get requiredColumns => [
-        HealthSurveyConstants.fieldTimestamp,
-        HealthSurveyConstants.fieldSystolic,
-        HealthSurveyConstants.fieldDiastolic,
-        HealthSurveyConstants.fieldHeartRate,
-      ];
+  List<String> get requiredColumns => BPCSVFields.requiredFields;
 
   @override
-  List<String> get optionalColumns => [
-        HealthSurveyConstants.fieldFeeling,
-        HealthSurveyConstants.fieldNotes,
-      ];
+  List<String> get optionalColumns => BPCSVFields.optionalFields;
 
   @override
   Map<String, dynamic> createDefaultResponseMap() {
     return {
-      HealthSurveyConstants.fieldSystolic: 0,
-      HealthSurveyConstants.fieldDiastolic: 0,
-      HealthSurveyConstants.fieldHeartRate: 0,
-      HealthSurveyConstants.fieldFeeling: "",
-      HealthSurveyConstants.fieldNotes: "",
+      BPCSVFields.fieldSystolic: 0,
+      BPCSVFields.fieldDiastolic: 0,
+      BPCSVFields.fieldHeartRate: 0,
+      BPCSVFields.fieldFeeling: "",
+      BPCSVFields.fieldNotes: "",
     };
   }
 
