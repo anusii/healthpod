@@ -101,7 +101,7 @@ class _NextAppointmentState extends State<NextAppointment> {
     super.dispose();
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
     return Container(
       width: 400,

@@ -126,14 +126,14 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
   /// Helper method to build a row with a bold label and regular text.
 
-   Widget _buildLabeledRow(String label, String value) {
+  Widget _buildLabeledRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
           // Fixed width for label column.
 
-          width: 100,  
+          width: 100,
           child: Text(
             '$label ',
             style: const TextStyle(
