@@ -46,10 +46,10 @@ class TabState {
   /// Creates a copy of this [TabState] with the given fields replaced with new values.
 
   TabState copyWith({
-    int? selectedIndex,
+    int selectedIndex = -1,
   }) {
     return TabState(
-      selectedIndex: selectedIndex != null
+      selectedIndex: selectedIndex != -1
           ? _normalizeIndex(selectedIndex)
           : this.selectedIndex,
     );
