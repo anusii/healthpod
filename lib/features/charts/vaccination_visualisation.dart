@@ -44,7 +44,6 @@ class VaccinationVisualisation extends StatefulWidget {
 }
 
 /// State for the VaccinationVisualisation widget.
-
 class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
   List<VaccinationRecord> _records = [];
   bool _isLoading = true;
@@ -132,7 +131,8 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
         cost: '\$75.00',
         notes: 'Final dose in series',
       ),
-      // More sample records
+      // More sample records.
+
       VaccinationRecord(
         date: DateTime(2023, 9, 15),
         name: 'Tetanus Booster',
@@ -170,6 +170,12 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
 
     final sortedRecords = [..._records]
       ..sort((a, b) => b.date.compareTo(a.date));
+
+    /// Calculate the total date range for scaling.
+
+    final DateTime latestDate = sortedRecords.first.date;
+    final DateTime earliestDate = sortedRecords.last.date;
+    final int totalDays = latestDate.difference(earliestDate).inDays;
 
     /// Wrap the entire widget in a SingleChildScrollView for vertical scrolling.
 
@@ -210,33 +216,36 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                       ),
                     )
                   : ListView.builder(
-                      /// Make the ListView non-scrollable since the parent SingleChildScrollView will handle scrolling.
-
                       physics: const NeverScrollableScrollPhysics(),
-
-                      /// Shrink the ListView to fit its content.
-
                       shrinkWrap: true,
                       itemCount: sortedRecords.length,
                       itemBuilder: (context, index) {
                         final record = sortedRecords[index];
 
-                        /// Calculate the line length based on time difference with next record.
-                        /// Default minimum height.
+                        /// Calculate proportional line height based on date differences.
 
-                        double lineHeight = 50.0;
+                        double lineHeight = 50.0; // Minimum height
                         if (index < sortedRecords.length - 1) {
                           final nextRecord = sortedRecords[index + 1];
                           final daysDifference =
                               record.date.difference(nextRecord.date).inDays;
 
-                          /// Scale: 1 month ≈ 30 pixels.
+                          // Scale the height proportionally to the total date range.
 
-                          lineHeight = (daysDifference / 30) * 30;
+                          lineHeight = (daysDifference / totalDays) *
+                              600; // Max total height
+                          lineHeight = lineHeight.clamp(
+                              50.0, 300.0); // Clamp between min and max
+                        }
 
-                          /// Ensure minimum height for readability.
+                        /// Get appropriate emoji based on vaccination type.
 
-                          lineHeight = lineHeight.clamp(50.0, 300.0);
+                        String emoji = '';
+                        final nameLower = record.name.toLowerCase();
+                        if (nameLower.contains('flu')) {
+                          emoji = '💉';
+                        } else if (nameLower.contains('covid')) {
+                          emoji = '🦠';
                         }
 
                         return TimelineTile(
@@ -257,8 +266,6 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                           hasIndicator: true,
                           endChild: InkWell(
                             onTap: () {
-                              /// Show details in a dialog when tapped.
-
                               showVaccinationDetails(context, record);
                             },
                             child: Container(
@@ -269,7 +276,9 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                                   SizedBox(
                                     width: 120,
                                     child: Text(
-                                      DateFormat('MMM dd, yyyy')
+                                      // Australian date format.
+
+                                      DateFormat('dd/MM/yyyy')
                                           .format(record.date),
                                       style: const TextStyle(
                                         fontSize: 16,
@@ -278,19 +287,23 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                                     ),
                                   ),
                                   Expanded(
-                                    child: Text(
-                                      record.name,
-                                      style: const TextStyle(fontSize: 16),
+                                    child: Row(
+                                      children: [
+                                        if (emoji.isNotEmpty)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 8.0),
+                                            child: Text(emoji,
+                                                style: const TextStyle(
+                                                    fontSize: 16)),
+                                          ),
+                                        Text(
+                                          record.name,
+                                          style: const TextStyle(fontSize: 16),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  if (record.provider != null ||
-                                      record.professional != null ||
-                                      record.notes != null)
-                                    const Icon(
-                                      Icons.info_outline,
-                                      size: 16,
-                                      color: Colors.grey,
-                                    ),
                                 ],
                               ),
                             ),
