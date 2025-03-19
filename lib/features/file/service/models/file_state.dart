@@ -25,6 +25,8 @@
 
 library;
 
+import 'package:healthpod/constants/paths.dart';
+
 /// A model class to manage the state of file operations in the file service.
 ///
 /// This class encapsulates all the state variables that were previously scattered
@@ -81,7 +83,7 @@ class FileState {
     this.cleanFileName = 'remoteFileName',
     this.remoteFileUrl,
     this.filePreview,
-    this.currentPath = 'healthpod/data',
+    this.currentPath = basePath,
     this.uploadInProgress = false,
     this.downloadInProgress = false,
     this.deleteInProgress = false,
@@ -138,6 +140,6 @@ class FileState {
   bool get isInBpDirectory {
     return currentPath!.endsWith('/blood_pressure') ||
         currentPath!.contains('/blood_pressure/') ||
-        currentPath == 'healthpod/data/blood_pressure';
+        currentPath == '$basePath/blood_pressure';
   }
 }

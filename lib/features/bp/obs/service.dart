@@ -32,23 +32,22 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
-import 'package:healthpod/utils/construct_pod_dir_path.dart';
-import 'package:healthpod/utils/construct_pod_path.dart';
+
 import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/get_feature_path.dart';
 
 /// Handles loading/saving/deleting BP observations from the Pod.
 
 class BPEditorService {
-  /// The data type identifier for blood pressure records.
-
-  static const String dataType = 'blood_pressure';
+  /// The type of data being handled.
+  static const String feature = 'blood_pressure';
 
   /// Load all BP observations from `healthpod/data/blood_pressure` directory.
 
   Future<List<BPObservation>> loadData(BuildContext context) async {
-    final dirPath = constructPodDirPath(dataType);
-    final dirUrl = await getDirUrl(dirPath);
+    final podDirPath = getFeaturePath(feature);
+    final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
 
     final List<BPObservation> loadedObservations = [];
@@ -58,7 +57,7 @@ class BPEditorService {
 
       if (!context.mounted) continue;
 
-      final filePath = constructPodPath(dataType, file);
+      final filePath = getFeaturePath(feature, file);
       final content = await readPod(
         filePath,
         context,
@@ -99,8 +98,8 @@ class BPEditorService {
 
           // Check if the old file exists before attempting to delete it.
 
-          final dirPath = constructPodDirPath(dataType);
-          final dirUrl = await getDirUrl(dirPath);
+          final podDirPath = getFeaturePath(feature);
+          final dirUrl = await getDirUrl(podDirPath);
           final resources = await getResourcesInContainer(dirUrl);
 
           // Use the utility function to handle file deletion with fallback options.
@@ -126,7 +125,7 @@ class BPEditorService {
       if (!context.mounted) return;
 
       await writePod(
-        '$dataType/$newFilename',
+        '$feature/$newFilename',
         jsonData,
         context,
         const Text('Saving'),
@@ -147,8 +146,8 @@ class BPEditorService {
     try {
       // Log the resources in the directory for debugging.
 
-      final dirPath = constructPodDirPath(dataType);
-      final dirUrl = await getDirUrl(dirPath);
+      final podDirPath = getFeaturePath(feature);
+      final dirUrl = await getDirUrl(podDirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
       debugPrint('SubDirs: |${resources.subDirs.join(', ')}|');
@@ -184,6 +183,6 @@ class BPEditorService {
 
   String _filenameFromTimestamp(DateTime dt) {
     final formatted = formatTimestampForFilename(dt);
-    return '${dataType}_$formatted.json.enc.ttl';
+    return '${feature}_$formatted.json.enc.ttl';
   }
 }

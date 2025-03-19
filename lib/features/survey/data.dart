@@ -31,6 +31,8 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
+
 /// Survey data widget.
 ///
 /// This service handles the retrieval of survey data from remote POD storage.
@@ -39,7 +41,7 @@ import 'package:solidpod/solidpod.dart';
 class SurveyData {
   // Fetch from directory where blood pressure-related survey data resides.
 
-  static const String bpDir = 'healthpod/data/blood_pressure';
+  static const String bpDir = '$basePath/blood_pressure';
 
   /// Fetches survey data from POD, ensuring it is sorted by timestamp.
   ///

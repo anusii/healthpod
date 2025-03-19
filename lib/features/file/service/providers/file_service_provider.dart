@@ -35,6 +35,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/features/file/service/models/file_state.dart';
@@ -102,8 +103,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
       // Extract the subdirectory path.
 
-      String? subPath =
-          state.currentPath?.replaceFirst('healthpod/data', '').trim();
+      String? subPath = state.currentPath?.replaceFirst(basePath, '').trim();
       String uploadPath = subPath == null || subPath.isEmpty
           ? remoteFileName
           : '${subPath.startsWith("/") ? subPath.substring(1) : subPath}/$remoteFileName';
@@ -180,7 +180,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         return;
       }
 
-      final baseDir = 'healthpod/data';
+      final baseDir = basePath;
       final relativePath = state.currentPath == baseDir
           ? '$baseDir/${state.remoteFileName}'
           : '${state.currentPath}/${state.remoteFileName}';
@@ -272,12 +272,12 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         deleteDone: false,
       );
 
-      final baseDir = 'healthpod/data';
-      final basePath = state.currentPath == baseDir
+      final baseDir = basePath;
+      final filePath = state.currentPath == baseDir
           ? '$baseDir/${state.remoteFileName}'
           : '${state.currentPath}/${state.remoteFileName}';
 
-      debugPrint('Attempting to delete file at path: $basePath');
+      debugPrint('Attempting to delete file at path: $filePath');
 
       if (!context.mounted) return;
 
@@ -285,9 +285,9 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
       bool mainFileDeleted = false;
       try {
-        await deleteFile(basePath);
+        await deleteFile(filePath);
         mainFileDeleted = true;
-        debugPrint('Successfully deleted main file: $basePath');
+        debugPrint('Successfully deleted main file: $filePath');
       } catch (e) {
         debugPrint('Error deleting main file: $e');
         // Only rethrow if it's not a 404 error.
@@ -304,7 +304,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
       if (mainFileDeleted) {
         try {
-          await deleteFile('$basePath.acl');
+          await deleteFile('$filePath.acl');
           debugPrint('Successfully deleted ACL file');
         } catch (e) {
           // ACL files are optional and may not exist.
@@ -380,7 +380,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
           final success = await BPImporter.importFromCsv(
             file.path!,
-            state.currentPath ?? 'healthpod/data',
+            state.currentPath ?? basePath,
             context,
           );
 
@@ -425,7 +425,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
         final success = await BPExporter.exportToCsv(
           outputFile,
-          state.currentPath ?? 'healthpod/data',
+          state.currentPath ?? basePath,
           context,
         );
 

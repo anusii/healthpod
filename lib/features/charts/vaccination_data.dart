@@ -31,6 +31,8 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
+
 /// Vaccination data service.
 ///
 /// This service handles the retrieval of vaccination data from remote POD storage.
@@ -39,7 +41,7 @@ import 'package:solidpod/solidpod.dart';
 class VaccinationData {
   /// Directory where vaccination-related data resides.
 
-  static const String vaccinationDir = 'healthpod/data/vaccination';
+  static const String vaccinationDir = '$basePath/vaccination';
 
   /// Fetches vaccination data from POD, ensuring it is sorted by timestamp.
   ///

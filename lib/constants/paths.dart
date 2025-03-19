@@ -1,8 +1,8 @@
-/// Utility function for constructing Pod directory paths.
-//
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
-//
-/// Copyright (C) 2025, Software Innovation Institute, ANU.
+/// Path constants for the health pod application.
+///
+// Time-stamp: <Friday 2025-02-21 17:02:01 +1100 Graham Williams>
+///
+/// Copyright (C) 2024, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -25,22 +25,5 @@
 
 library;
 
-/// Constructs a path for a data directory in the Pod.
-///
-/// This function standardizes the path construction for Pod data directories,
-/// ensuring consistency across the application.
-///
-/// Parameters:
-/// - [dataType]: The type of data (e.g., 'blood_pressure', 'vaccination').
-///
-/// Returns a string representing the full path to the data directory in the Pod.
-///
-/// Example:
-/// ```dart
-/// final dirPath = constructPodDirPath('blood_pressure');
-/// // Returns: 'healthpod/data/blood_pressure'
-/// ```
-
-String constructPodDirPath(String dataType) {
-  return 'healthpod/data/$dataType';
-}
+/// Base path for all health data in the Pod.
+const String basePath = 'healthpod/data';
