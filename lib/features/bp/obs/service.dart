@@ -32,6 +32,8 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
+
+import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
 
@@ -100,26 +102,14 @@ class BPEditorService {
           final dirUrl = await getDirUrl(podDirPath);
           final resources = await getResourcesInContainer(dirUrl);
 
-          if (resources.files.contains(oldFilename)) {
-            final oldFilePath = getFeaturePath(feature, oldFilename);
-            await deleteFile(oldFilePath);
-          } else {
-            // Check if there's a file with a similar name.
+          // Use the utility function to handle file deletion with fallback options.
 
-            final baseFilename =
-                '${feature}_${formatTimestampForFilename(oldObservation.timestamp).split('T')[0]}';
-            final matchingFiles = resources.files
-                .where((file) => file.startsWith(baseFilename))
-                .toList();
-
-            if (matchingFiles.isNotEmpty) {
-              final matchingFilePath =
-                  getFeaturePath(feature, matchingFiles.first);
-              await deleteFile(matchingFilePath);
-              debugPrint(
-                  'Deleted alternative old file: ${matchingFiles.first}');
-            }
-          }
+          await deletePodFileWithFallback(
+            dataType: feature,
+            filename: oldFilename,
+            timestamp: oldObservation.timestamp,
+            resources: resources,
+          );
         } catch (e) {
           // Log the error but continue with saving the new file.
 
@@ -167,67 +157,19 @@ class BPEditorService {
 
       final filename = _filenameFromTimestamp(observation.timestamp);
 
-      // Also try with the old format (underscore separator) for backward compatibility.
+      // Use the utility function to handle file deletion with fallback options.
 
-      final filenameWithUnderscore =
-          '${feature}_${formatTimestampForFilenameWithUnderscore(observation.timestamp)}.json.enc.ttl';
+      final deleted = await deletePodFileWithFallback(
+        dataType: feature,
+        filename: filename,
+        timestamp: observation.timestamp,
+        resources: resources,
+      );
 
-      // Check if either file exists.
+      if (!deleted) {
+        // If no file was deleted, throw an exception.
 
-      if (resources.files.contains(filename)) {
-        final filePath = getFeaturePath(feature, filename);
-        await deleteFile(filePath);
-        debugPrint('Deleted file: $filename');
-        return;
-      } else if (resources.files.contains(filenameWithUnderscore)) {
-        final filePathWithUnderscore =
-            getFeaturePath(feature, filenameWithUnderscore);
-        await deleteFile(filePathWithUnderscore);
-        debugPrint('Deleted file with underscore: $filenameWithUnderscore');
-        return;
-      }
-
-      // If neither exact match is found, try to find a file with a similar date part.
-
-      debugPrint('File not found for deletion: $filename');
-
-      // Extract just the date part (YYYY-MM-DD) from the timestamp.
-
-      final datePart =
-          formatTimestampForFilename(observation.timestamp).split('T')[0];
-      final baseFilename = '${feature}_$datePart';
-
-      // Find any files that start with this date part.
-
-      final matchingFiles = resources.files
-          .where((file) => file.startsWith(baseFilename))
-          .toList();
-
-      if (matchingFiles.isNotEmpty) {
-        // Delete the first matching file.
-
-        final matchingFilePath = getFeaturePath(feature, matchingFiles.first);
-        await deleteFile(matchingFilePath);
-        debugPrint('Deleted alternative file: ${matchingFiles.first}');
-      } else {
-        // No matching files found, try a more flexible approach.
-        // Look for any file that contains the date (without the time).
-
-        final moreFlexibleMatches =
-            resources.files.where((file) => file.contains(datePart)).toList();
-
-        if (moreFlexibleMatches.isNotEmpty) {
-          final flexibleMatchPath =
-              getFeaturePath(feature, moreFlexibleMatches.first);
-          await deleteFile(flexibleMatchPath);
-          debugPrint(
-              'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
-        } else {
-          // No matching files found.
-
-          debugPrint(
-              'No matching files found for deletion with base: $baseFilename');
-        }
+        throw Exception('No matching file found for deletion');
       }
     } catch (e) {
       debugPrint('Error deleting observation: $e');
