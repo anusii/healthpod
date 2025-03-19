@@ -150,7 +150,7 @@ class _NextAppointmentState extends State<NextAppointment> {
                 child: Text(
                   appointmentDate,
                   // Ensure the text is wrapped to the next line if it's too long.
-                  
+
                   softWrap: true,
                 ),
               ),
