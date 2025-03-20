@@ -41,11 +41,11 @@ class VaccinationImporter extends HealthDataImporterBase {
   String get dataType => 'vaccination';
 
   @override
-  String get timestampField => VaccinationSurveyConstants.fieldTimestamp;
+  String get timestampField => VaccinationSurveyConstants.fieldDate;
 
   @override
   List<String> get requiredColumns => [
-        VaccinationSurveyConstants.fieldTimestamp,
+        VaccinationSurveyConstants.fieldDate,
         VaccinationSurveyConstants.fieldVaccineName,
         VaccinationSurveyConstants.fieldProvider,
       ];

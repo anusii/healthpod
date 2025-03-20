@@ -1,12 +1,12 @@
-/// Constants for vaccination survey fields.
+/// Survey constants.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-02-12 15:50:35 +1100 Graham Williams>
 //
-/// Copyright (C) 2025, Software Innovation Institute, ANU
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
-/// Licensed under the GNU General Public License, Version 3 (the "License");
+/// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -28,40 +28,23 @@ library;
 import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/features/survey/question.dart';
 
-/// Constants for vaccination survey field names.
-///
-/// These constants are used to access and store vaccination data consistently
-/// across the application, particularly in JSON serialization/deserialization.
-
-/// Field name for the vaccine name.
+/// Defines the standard set of vaccination survey questions.
+/// These questions are used consistently throughout the application
+/// for collecting vaccination-related data.
 
 class VaccinationSurveyConstants {
-  /// Field name for the vaccine name.
+  // Data field names (for storage/CSV).
 
-  static const String fieldVaccineName = 'vaccine_name';
-
-  /// Field name for the provider or location.
-
+  static const String fieldDate = 'date';
+  static const String fieldVaccineName = 'vaccine';
   static const String fieldProvider = 'provider';
-
-  /// Field name for the healthcare professional.
-
   static const String fieldProfessional = 'professional';
-
-  /// Field name for the cost.
-
   static const String fieldCost = 'cost';
-
-  /// Field name for additional notes.
-
   static const String fieldNotes = 'notes';
-
-  /// Data field names (for storage/CSV).
-
-  static const String fieldTimestamp = 'timestamp';
 
   /// Question texts (for UI only).
 
+  static const String date = "When did you receive the vaccination?";
   static const String vaccine = "Which vaccine did you receive?";
   static const String provider = "Where did you receive the vaccine?";
   static const String professional = "Healthcare professional name";
@@ -69,8 +52,15 @@ class VaccinationSurveyConstants {
   static const String notes = "Any additional notes?";
 
   /// The list of questions used in the vaccination survey.
+  /// Each question includes type validation and required status.
 
   static final List<HealthSurveyQuestion> questions = [
+    HealthSurveyQuestion(
+      question: date,
+      fieldName: fieldDate,
+      type: HealthDataType.date,
+      isRequired: true,
+    ),
     HealthSurveyQuestion(
       question: vaccine,
       fieldName: fieldVaccineName,

@@ -35,6 +35,7 @@ import 'package:healthpod/constants/health_data_type.dart';
 /// - Mood icon for categorical data related to feelings.
 /// - Notes icon for text-based data.
 /// - Checklist icon for general categorical data.
+/// - Calendar icon for date inputs.
 /// - Help outline icon for unclassified types.
 
 IconData getQuestionIcon(HealthDataType type, String question) {
@@ -49,15 +50,15 @@ IconData getQuestionIcon(HealthDataType type, String question) {
       return Icons.monitor_heart;
     }
     return Icons.numbers;
+  } else if (type == HealthDataType.categorical) {
+    if (lowerQuestion.contains('feeling')) {
+      return Icons.mood;
+    }
+    return Icons.checklist;
+  } else if (type == HealthDataType.text) {
+    return Icons.notes;
+  } else if (type == HealthDataType.date) {
+    return Icons.calendar_today;
   }
-
-  if (type == HealthDataType.categorical && lowerQuestion.contains('feeling')) {
-    return Icons.mood;
-  }
-
-  return switch (type) {
-    HealthDataType.text => Icons.notes,
-    HealthDataType.categorical => Icons.checklist,
-    _ => Icons.help_outline,
-  };
+  return Icons.help_outline;
 }

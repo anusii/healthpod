@@ -46,11 +46,11 @@ class VaccinationExporter extends HealthDataExporterBase {
   String get dataType => 'vaccination';
 
   @override
-  String get timestampField => VaccinationSurveyConstants.fieldTimestamp;
+  String get timestampField => VaccinationSurveyConstants.fieldDate;
 
   @override
   List<String> get csvHeaders => [
-        VaccinationSurveyConstants.fieldTimestamp,
+        VaccinationSurveyConstants.fieldDate,
         VaccinationSurveyConstants.fieldVaccineName,
         VaccinationSurveyConstants.fieldProvider,
         VaccinationSurveyConstants.fieldProfessional,
@@ -61,13 +61,13 @@ class VaccinationExporter extends HealthDataExporterBase {
   @override
   Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
     var timestamp = normaliseTimestamp(
-        jsonData[VaccinationSurveyConstants.fieldTimestamp],
+        jsonData[VaccinationSurveyConstants.fieldDate],
         toIso: true);
 
     final responses = jsonData['responses'];
 
     return {
-      VaccinationSurveyConstants.fieldTimestamp: timestamp,
+      VaccinationSurveyConstants.fieldDate: timestamp,
       VaccinationSurveyConstants.fieldVaccineName:
           responses[VaccinationSurveyConstants.fieldVaccineName],
       VaccinationSurveyConstants.fieldProvider:
@@ -153,7 +153,7 @@ class VaccinationExporter extends HealthDataExporterBase {
           // Normalize the timestamp to ISO format.
 
           var timestamp = normaliseTimestamp(
-              jsonData[VaccinationSurveyConstants.fieldTimestamp],
+              jsonData[VaccinationSurveyConstants.fieldDate],
               toIso: true);
 
           // Extract the responses section containing vaccination details.
@@ -163,7 +163,7 @@ class VaccinationExporter extends HealthDataExporterBase {
           // Add the record with all fields to the collection.
 
           allRecords.add({
-            VaccinationSurveyConstants.fieldTimestamp: timestamp,
+            VaccinationSurveyConstants.fieldDate: timestamp,
             VaccinationSurveyConstants.fieldVaccineName:
                 responses[VaccinationSurveyConstants.fieldVaccineName],
             VaccinationSurveyConstants.fieldProvider:
@@ -191,13 +191,13 @@ class VaccinationExporter extends HealthDataExporterBase {
 
       // Sort all records by timestamp in ascending order.
 
-      allRecords.sort((a, b) => a[VaccinationSurveyConstants.fieldTimestamp]
-          .compareTo(b[VaccinationSurveyConstants.fieldTimestamp]));
+      allRecords.sort((a, b) => a[VaccinationSurveyConstants.fieldDate]
+          .compareTo(b[VaccinationSurveyConstants.fieldDate]));
 
       // Define the CSV column headers.
 
       final headers = [
-        VaccinationSurveyConstants.fieldTimestamp,
+        VaccinationSurveyConstants.fieldDate,
         VaccinationSurveyConstants.fieldVaccineName,
         VaccinationSurveyConstants.fieldProvider,
         VaccinationSurveyConstants.fieldProfessional,
