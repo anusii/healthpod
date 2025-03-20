@@ -240,7 +240,7 @@ Learn more about health tracking:
   /// Parameters:
   /// * [context] - The build context
   /// * [message] - The error message to display
-  
+
   static void _showError(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
