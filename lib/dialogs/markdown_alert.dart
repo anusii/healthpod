@@ -62,7 +62,8 @@ Future<void> markdownAlert(
           child: MarkdownBody(
             data: markdownContent,
             selectable: true,
-            // Handle link taps by opening them in external browser
+            // Handle link taps by opening them in external browser.
+
             onTapLink: (text, href, title) {
               if (href != null) {
                 ResourceService.openExternalLink(context, href);
