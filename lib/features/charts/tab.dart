@@ -26,8 +26,11 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:healthpod/features/charts/bp_combined_visualisation.dart';
 import 'package:healthpod/features/charts/vaccination_visualisation.dart';
+import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> chartPanels = [
   {
@@ -40,14 +43,14 @@ final List<Map<String, dynamic>> chartPanels = [
   },
 ];
 
-class ChartTab extends StatefulWidget {
+class ChartTab extends ConsumerStatefulWidget {
   const ChartTab({super.key});
 
   @override
-  State<ChartTab> createState() => _ChartTabState();
+  ConsumerState<ChartTab> createState() => _ChartTabState();
 }
 
-class _ChartTabState extends State<ChartTab>
+class _ChartTabState extends ConsumerState<ChartTab>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
@@ -55,6 +58,15 @@ class _ChartTabState extends State<ChartTab>
   void initState() {
     super.initState();
     _tabController = TabController(length: chartPanels.length, vsync: this);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final tabState = ref.watch(tabStateProvider);
+    if (_tabController.index != tabState.selectedIndex) {
+      _tabController.animateTo(tabState.selectedIndex);
+    }
   }
 
   @override
@@ -70,6 +82,11 @@ class _ChartTabState extends State<ChartTab>
         TabBar(
           unselectedLabelColor: Colors.grey,
           controller: _tabController,
+          onTap: (index) {
+            if (index != ref.read(tabStateProvider).selectedIndex) {
+              ref.read(tabStateProvider.notifier).setSelectedIndex(index);
+            }
+          },
           tabs: chartPanels.map((tab) {
             return Tab(
               text: tab['title'],
