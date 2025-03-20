@@ -222,23 +222,26 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                       itemBuilder: (context, index) {
                         final record = sortedRecords[index];
 
-                        /// Calculate proportional line height based on date differences.
+                        // Calculate proportional line height based on date differences.
+                        // Minimum height.
 
-                        double lineHeight = 50.0; // Minimum height
+                        double lineHeight = 50.0;
                         if (index < sortedRecords.length - 1) {
                           final nextRecord = sortedRecords[index + 1];
                           final daysDifference =
                               record.date.difference(nextRecord.date).inDays;
 
                           // Scale the height proportionally to the total date range.
+                          // Max total height.
 
-                          lineHeight = (daysDifference / totalDays) *
-                              600; // Max total height
-                          lineHeight = lineHeight.clamp(
-                              50.0, 300.0); // Clamp between min and max
+                          lineHeight = (daysDifference / totalDays) * 600;
+
+                          // Clamp between min and max.
+
+                          lineHeight = lineHeight.clamp(50.0, 300.0);
                         }
 
-                        /// Get appropriate emoji based on vaccination type.
+                        // Get appropriate emoji based on vaccination type.
 
                         String emoji = '';
                         final nameLower = record.name.toLowerCase();
