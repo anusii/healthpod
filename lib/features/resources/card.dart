@@ -31,24 +31,24 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 class ResourceCard extends StatelessWidget {
   /// The title of the resource.
-  
+
   final String title;
 
   /// A brief description of the resource.
-  
+
   final String description;
 
   /// The icon to display next to the title.
-  
+
   final IconData icon;
 
   /// Callback function when the card is tapped.
-  
+
   final VoidCallback onTap;
 
   /// Whether this resource opens in an external browser.
   /// If true, displays an external link icon.
-  
+
   final bool isExternalLink;
 
   /// Creates a resource card.
@@ -59,7 +59,7 @@ class ResourceCard extends StatelessWidget {
   /// * [icon] - The icon to display next to the title
   /// * [onTap] - Callback function when the card is tapped
   /// * [isExternalLink] - Whether this resource opens externally (defaults to false)
-  
+
   const ResourceCard({
     super.key,
     required this.title,
@@ -124,4 +124,4 @@ class ResourceCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

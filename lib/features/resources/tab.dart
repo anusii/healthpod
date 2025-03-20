@@ -32,7 +32,7 @@ import 'package:healthpod/features/resources/service/resource_service.dart';
 
 class ResourcesTab extends StatelessWidget {
   /// Creates a resources tab.
-  
+
   const ResourcesTab({super.key});
 
   @override
@@ -59,7 +59,8 @@ class ResourcesTab extends StatelessWidget {
               cards: [
                 ResourceCard(
                   title: 'Blood Pressure Guide',
-                  description: 'Understanding blood pressure readings and management',
+                  description:
+                      'Understanding blood pressure readings and management',
                   icon: Icons.favorite,
                   onTap: () => ResourceService.showHealthInfo(
                     context,
@@ -148,7 +149,7 @@ class ResourcesTab extends StatelessWidget {
   /// * [title] - The section title
   /// * [icon] - The icon to display next to the title
   /// * [cards] - List of [ResourceCard]s to display in this section
-  
+
   Widget _buildSection(
     BuildContext context, {
     required String title,
@@ -174,7 +175,7 @@ class ResourcesTab extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         // Wrap cards in a responsive grid.
-        
+
         Wrap(
           spacing: 16,
           runSpacing: 16,
@@ -184,4 +185,3 @@ class ResourcesTab extends StatelessWidget {
     );
   }
 }
-

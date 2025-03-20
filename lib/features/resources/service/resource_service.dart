@@ -42,7 +42,7 @@ class ResourceService {
   /// * [url] - The URL to open
   ///
   /// Shows an error message if the URL cannot be opened.
-  
+
   static Future<void> openExternalLink(BuildContext context, String url) async {
     final uri = Uri.parse(url);
     try {
@@ -69,7 +69,7 @@ class ResourceService {
   /// Available topics:
   /// * 'blood-pressure' - Blood pressure guide with classifications
   /// * 'vaccination' - Vaccination information and schedules
-  
+
   static void showHealthInfo(BuildContext context, String topic) {
     String content;
     String title;
@@ -248,4 +248,4 @@ Learn more about health tracking:
       ),
     );
   }
-} 
+}
