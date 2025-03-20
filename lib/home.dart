@@ -33,6 +33,7 @@ import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/charts/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
+import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/survey/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/settings/dialog.dart';
@@ -118,13 +119,14 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Resources',
     'icon': Icons.library_books,
     'color': Colors.blue,
-    'message': '''
+    'content': const ResourcesTab(),
+    'tooltip': '''
 
-    Here you will be able to access a range of resources
-    to help you manage your health. This includes links to
-    external websites, articles, and other useful information.
+    Access a comprehensive collection of health resources including:
+    - Health information and guides
+    - External trusted resources
+    - Useful health calculators and tools
     ''',
-    'dialogTitle': 'Coming Soon - Resources',
   },
 ];
 
