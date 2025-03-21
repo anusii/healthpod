@@ -30,9 +30,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 
+import 'package:healthpod/constants/feature.dart';
 import 'package:healthpod/features/file/browser/page.dart';
 import 'package:healthpod/features/file/service/components/file_upload_section.dart';
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
+import 'package:healthpod/providers/tab_state.dart';
 
 /// The main file service widget that provides file upload, download, and preview functionality.
 ///
@@ -49,16 +51,37 @@ class FileServiceWidget extends ConsumerStatefulWidget {
 class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
   final _browserKey = GlobalKey<FileBrowserState>();
 
+  /// Navigate to the appropriate folder based on the selected tab.
+
+  void _navigateToFeatureFolder() {
+    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
+    final feature =
+        selectedIndex == 0 ? Feature.bloodPressure : Feature.vaccination;
+    final path =
+        'healthpod/data/${feature.displayName.toLowerCase().replaceAll(' ', '_')}';
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
+      _browserKey.currentState?.navigateToPath(path);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     // Set up the refresh callback after the widget is built.
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(fileServiceProvider.notifier).setRefreshCallback(() {
         _browserKey.currentState?.refreshFiles();
       });
+      _navigateToFeatureFolder();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _navigateToFeatureFolder();
   }
 
   @override
@@ -70,6 +93,22 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Back button to root folder.
+
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
+          child: TextButton.icon(
+            onPressed: () {
+              const rootPath = 'healthpod/data';
+              ref
+                  .read(fileServiceProvider.notifier)
+                  .updateCurrentPath(rootPath);
+              _browserKey.currentState?.navigateToPath(rootPath);
+            },
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Back to Data Folder'),
+          ),
+        ),
         // Main content area.
 
         Expanded(
