@@ -25,314 +25,116 @@
 
 library;
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
-import 'package:csv/csv.dart';
-import 'package:solidpod/solidpod.dart';
-
 import 'package:healthpod/constants/blood_pressure_survey.dart';
-import 'package:healthpod/utils/format_timestamp_for_display.dart';
-import 'package:healthpod/utils/is_valid_timestamp.dart';
-import 'package:healthpod/utils/normalise_timestamp.dart';
-import 'package:healthpod/utils/round_timestamp_to_second.dart';
-import 'package:healthpod/utils/show_alert.dart';
+import 'package:healthpod/constants/csv_fields.dart';
+import 'package:healthpod/utils/health_data_importer_base.dart';
 
 /// Handles importing blood pressure data from CSV files into JSON format.
 ///
-/// This module focuses specifically on BP data import functionality.
-/// It processes CSV files containing BP readings and creates individual
-/// JSON files for each reading.
+/// This class extends HealthDataImporterBase to provide specific implementation
+/// for blood pressure data import functionality.
 
-class BPImporter {
-  /// Process BP CSV file import, creating individual JSON files for each row.
-  ///
-  /// Each row is saved as a separate JSON file with timestamp and responses.
-  /// Files are saved in the specified directory with timestamps in filenames.
+class BPImporter extends HealthDataImporterBase {
+  @override
+  String get dataType => 'blood_pressure';
 
-  static Future<bool> importFromCsv(
-    String filePath, // Path to the input CSV file.
-    String dirPath, // Directory path where JSON files will be saved.
-    BuildContext context, // Flutter build context for UI interactions.
-  ) async {
-    try {
-      // Start processing and log initial parameters.
+  @override
+  String get timestampField => HealthSurveyConstants.fieldTimestamp;
 
-      debugPrint('Starting CSV processing');
-      final file = File(filePath);
-      final String content = await file.readAsString();
+  @override
+  List<String> get requiredColumns => BPCSVFields.requiredFields;
 
-      /// Configure CSV parser with specific settings for handling blood pressure data.
-      ///
-      /// - shouldParseNumbers: false -> Keep all values as strings initially for proper validation.
-      /// - allowInvalid: true -> Don't fail on malformed rows, we'll validate manually.
-      /// - textDelimiter: '"' -> Handle quoted fields (e.g., for notes with commas).
+  @override
+  List<String> get optionalColumns => BPCSVFields.optionalFields;
 
-      final fields = const CsvToListConverter(
-        shouldParseNumbers: false,
-        eol: '\n',
-        fieldDelimiter: ',',
-        allowInvalid: true,
-        textDelimiter: '"',
-        textEndDelimiter: '"',
-      ).convert(content);
+  @override
+  Map<String, dynamic> createDefaultResponseMap() {
+    return {
+      BPCSVFields.fieldSystolic: 0,
+      BPCSVFields.fieldDiastolic: 0,
+      BPCSVFields.fieldHeartRate: 0,
+      BPCSVFields.fieldFeeling: "",
+      BPCSVFields.fieldNotes: "",
+    };
+  }
 
-      // Basic validation - ensure file isn't empty.
+  @override
+  bool processField(
+    String header,
+    String value,
+    Map<String, dynamic> responses,
+    int rowIndex,
+  ) {
+    switch (header) {
+      // Required field: Systolic blood pressure.
 
-      if (fields.isEmpty) {
-        throw Exception('CSV file is empty');
-      }
-
-      // Extract headers and normalise them (lowercase, trimmed) for consistent comparison.
-
-      final headers = List<String>.from(
-          fields[0].map((h) => h.toString().trim().toLowerCase()));
-
-      // Define required columns - these must be present in the CSV.
-      // Optional columns (feeling, notes) don't need to be validated here.
-
-      final requiredColumns = [
-        HealthSurveyConstants.fieldTimestamp.toLowerCase(),
-        HealthSurveyConstants.fieldSystolic.toLowerCase(),
-        HealthSurveyConstants.fieldDiastolic.toLowerCase(),
-        HealthSurveyConstants.fieldHeartRate.toLowerCase(),
-      ];
-
-      // Validate that all required columns are present in the CSV.
-
-      final missingColumns =
-          requiredColumns.where((col) => !headers.contains(col)).toList();
-      if (missingColumns.isNotEmpty) {
-        if (!context.mounted) return false;
-        // Show detailed error message explaining required and optional columns.
-
-        showAlert(context, '''
-
-        Required columns missing: ${missingColumns.join(", ")}
-
-        The following columns are required:
-        - ${HealthSurveyConstants.fieldTimestamp}
-        - ${HealthSurveyConstants.fieldSystolic}
-        - ${HealthSurveyConstants.fieldDiastolic}
-        - ${HealthSurveyConstants.fieldHeartRate}
-
-        These columns are optional:
-        - ${HealthSurveyConstants.fieldFeeling}
-        - ${HealthSurveyConstants.fieldNotes}
-
-        ''');
-        return false;
-      }
-
-      // Initialise tracking variables for processing state.
-
-      final Set<String> seenTimestamps = {}; // Track unique timestamps.
-      final List<String> duplicateTimestamps =
-          []; // Track duplicate timestamps for warning.
-      bool allSuccess = true; // Track overall success.
-      int successfulSaves = 0; // Count successful saves.
-
-      // Process each data row (skip header row by starting at index 1).
-
-      for (var i = 1; i < fields.length; i++) {
-        try {
-          // Convert row data to strings, replacing null values with empty strings.
-
-          final row =
-              List<String>.from(fields[i].map((f) => f?.toString() ?? ''));
-          if (row.isEmpty) continue; // Skip empty rows.
-
-          // Ensure row has enough columns by padding with empty strings if needed.
-
-          while (row.length < headers.length) {
-            row.add('');
-          }
-
-          // Initialise response map with default values
-          // Required fields default to 0, optional fields to empty string.
-
-          final Map<String, dynamic> responses = {
-            HealthSurveyConstants.fieldSystolic: 0,
-            HealthSurveyConstants.fieldDiastolic: 0,
-            HealthSurveyConstants.fieldHeartRate: 0,
-            HealthSurveyConstants.fieldFeeling: "",
-            HealthSurveyConstants.fieldNotes: "",
-          };
-
-          String timestamp = "";
-          bool hasRequiredFields =
-              true; // Track if all required fields are valid.
-
-          // Process each field in the row.
-
-          for (var j = 0; j < headers.length; j++) {
-            final header = headers[j];
-            final value = row[j].toString().trim();
-
-            // Use pattern matching to handle different field types.
-
-            switch (header) {
-              // Required field: Timestamp.
-
-              case String h
-                  when h == HealthSurveyConstants.fieldTimestamp.toLowerCase():
-                if (value.isEmpty) {
-                  hasRequiredFields = false;
-                  debugPrint('Row $i: Missing required timestamp');
-                  break;
-                }
-                // Normalise and validate timestamp format.
-
-                timestamp = normaliseTimestamp(roundTimestampToSecond(value));
-                if (!isValidTimestamp(timestamp)) {
-                  throw FormatException(
-                      'Row $i: Invalid timestamp format: $value');
-                }
-                // Track duplicate timestamps.
-
-                if (!seenTimestamps.add(timestamp)) {
-                  duplicateTimestamps.add(formatTimestampForDisplay(timestamp));
-                }
-
-              // Required field: Systolic blood pressure.
-
-              case String h
-                  when h == HealthSurveyConstants.fieldSystolic.toLowerCase():
-                final systolic =
-                    double.tryParse(value); // Handle decimal numbers as well.
-                if (systolic == null) {
-                  hasRequiredFields = false;
-                  debugPrint(
-                      'Row $i: Invalid or missing systolic value: $value');
-                } else {
-                  responses[HealthSurveyConstants.fieldSystolic] = systolic;
-                }
-
-              // Required field: Diastolic blood pressure.
-
-              case String h
-                  when h == HealthSurveyConstants.fieldDiastolic.toLowerCase():
-                final diastolic = double.tryParse(value);
-                if (diastolic == null) {
-                  hasRequiredFields = false;
-                  debugPrint(
-                      'Row $i: Invalid or missing diastolic value: $value');
-                } else {
-                  responses[HealthSurveyConstants.fieldDiastolic] = diastolic;
-                }
-
-              // Required field: Heart rate.
-
-              case String h
-                  when h == HealthSurveyConstants.fieldHeartRate.toLowerCase():
-                final heartRate = double.tryParse(value);
-                if (heartRate == null) {
-                  hasRequiredFields = false;
-                  debugPrint(
-                      'Row $i: Invalid or missing heart rate value: $value');
-                } else {
-                  responses[HealthSurveyConstants.fieldHeartRate] = heartRate;
-                }
-
-              // Optional field: Feeling - can be any value including empty.
-
-              case String h
-                  when h == HealthSurveyConstants.fieldFeeling.toLowerCase():
-                responses[HealthSurveyConstants.fieldFeeling] = value;
-
-              // Optional field: Notes - can be any value including empty.
-
-              case String h
-                  when h == HealthSurveyConstants.fieldNotes.toLowerCase():
-                responses[HealthSurveyConstants.fieldNotes] = value;
-            }
-          }
-
-          // Skip this row if any required field is missing or invalid.
-
-          if (!hasRequiredFields) {
-            debugPrint(
-                'Skipping row $i due to missing or invalid required fields');
-            continue;
-          }
-
-          // Prepare JSON data structure.
-
-          final jsonData = {
-            HealthSurveyConstants.fieldTimestamp: timestamp,
-            'responses': responses,
-          };
-
-          // Create safe filename by replacing invalid characters.
-
-          final safeTimestamp = timestamp.replaceAll(RegExp(r'[:.]+'), '-');
-          final outputFileName = 'blood_pressure_$safeTimestamp.json.enc.ttl';
-
-          // Construct proper save path based on directory structure.
-
-          String savePath;
-          if (dirPath.endsWith('/blood_pressure')) {
-            savePath = 'blood_pressure/$outputFileName';
-          } else {
-            final cleanDirPath =
-                dirPath.replaceFirst(RegExp(r'^healthpod/data/?'), '');
-            savePath = cleanDirPath.isEmpty
-                ? outputFileName
-                : '$cleanDirPath/$outputFileName';
-          }
-
-          if (!context.mounted) return false;
-
-          // Save encrypted JSON file to POD.
-
-          final result = await writePod(
-            savePath,
-            json.encode(jsonData),
-            context,
-            Text('Converting row $i'),
-            encrypted: true,
-          );
-
-          // Track save success/failure.
-
-          if (result == SolidFunctionCallStatus.success) {
-            successfulSaves++;
-          } else {
-            allSuccess = false;
-            debugPrint('Failed to save file for row $i');
-          }
-        } catch (rowError) {
-          debugPrint('Error processing row $i: $rowError');
-          allSuccess = false;
+      case String h when h == HealthSurveyConstants.fieldSystolic.toLowerCase():
+        final systolic = double.tryParse(value);
+        if (systolic == null) {
+          debugPrint(
+              'Row $rowIndex: Invalid or missing systolic value: $value');
+          return false;
+        } else {
+          responses[HealthSurveyConstants.fieldSystolic] = systolic;
+          return true;
         }
-      }
 
-      debugPrint(
-          'Processing complete. Successfully saved $successfulSaves files');
+      // Required field: Diastolic blood pressure.
 
-      // Show warning if duplicate timestamps were found.
+      case String h
+          when h == HealthSurveyConstants.fieldDiastolic.toLowerCase():
+        final diastolic = double.tryParse(value);
+        if (diastolic == null) {
+          debugPrint(
+              'Row $rowIndex: Invalid or missing diastolic value: $value');
+          return false;
+        } else {
+          responses[HealthSurveyConstants.fieldDiastolic] = diastolic;
+          return true;
+        }
 
-      if (duplicateTimestamps.isNotEmpty) {
-        if (!context.mounted) return allSuccess;
-        showAlert(
-          context,
-          'Warning: Multiple entries found for these timestamps:\n${duplicateTimestamps.join("\n")}\n\nOnly the last entry for each timestamp will be saved.',
-        );
-      }
+      // Required field: Heart rate.
 
-      // Return true only if at least one file was successfully saved.
+      case String h
+          when h == HealthSurveyConstants.fieldHeartRate.toLowerCase():
+        final heartRate = double.tryParse(value);
+        if (heartRate == null) {
+          debugPrint(
+              'Row $rowIndex: Invalid or missing heart rate value: $value');
+          return false;
+        } else {
+          responses[HealthSurveyConstants.fieldHeartRate] = heartRate;
+          return true;
+        }
 
-      return allSuccess && successfulSaves > 0;
-    } catch (e) {
-      // Handle any unexpected errors.
+      // Optional field: Feeling - can be any value including empty.
 
-      debugPrint('Import error: $e');
-      if (context.mounted) {
-        showAlert(context, 'Error importing CSV: ${e.toString()}');
-      }
-      return false;
+      case String h when h == HealthSurveyConstants.fieldFeeling.toLowerCase():
+        responses[HealthSurveyConstants.fieldFeeling] = value;
+        return true;
+
+      // Optional field: Notes - can be any value including empty.
+
+      case String h when h == HealthSurveyConstants.fieldNotes.toLowerCase():
+        responses[HealthSurveyConstants.fieldNotes] = value;
+        return true;
+
+      default:
+        // Ignore unknown fields.
+
+        return true;
     }
+  }
+
+  /// Static method to maintain backward compatibility with existing code.
+
+  static Future<bool> importCsv(
+    String filePath,
+    String dirPath,
+    BuildContext context,
+  ) async {
+    return BPImporter().importFromCsv(filePath, dirPath, context);
   }
 }
