@@ -56,8 +56,22 @@ IconData getQuestionIcon(HealthDataType type, String question) {
     }
     return Icons.checklist;
   } else if (type == HealthDataType.text) {
+    if (lowerQuestion.contains('which vaccine did you receive')) {
+      return Icons.vaccines;
+    } else if (lowerQuestion.contains('where did you receive the vaccine')) {
+      return Icons.local_hospital;
+    } else if (lowerQuestion.contains('healthcare professional name')) {
+      return Icons.person;
+    } else if (lowerQuestion.contains('cost of vaccination')) {
+      return Icons.attach_money;
+    } else if (lowerQuestion.contains('any additional notes')) {
+      return Icons.notes;
+    }
     return Icons.notes;
   } else if (type == HealthDataType.date) {
+    if (lowerQuestion.contains('when did you receive the vaccination')) {
+      return Icons.calendar_month;
+    }
     return Icons.calendar_today;
   }
   return Icons.help_outline;
