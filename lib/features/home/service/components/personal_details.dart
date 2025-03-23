@@ -53,7 +53,10 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(maxWidth: 400),
+      constraints: const BoxConstraints(
+        maxWidth: 400,
+        minHeight: 300,
+      ),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: titleBackgroundColor,

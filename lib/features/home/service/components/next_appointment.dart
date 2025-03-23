@@ -104,7 +104,10 @@ class _NextAppointmentState extends State<NextAppointment> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(maxWidth: 400),
+      constraints: const BoxConstraints(
+        maxWidth: 400,
+        minHeight: 300,
+      ),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: titleBackgroundColor,
@@ -117,173 +120,185 @@ class _NextAppointmentState extends State<NextAppointment> {
           ),
         ],
       ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Reminder!',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.minHeight,
+                maxHeight: constraints.maxHeight,
               ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Next Appointment Details',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Date.
-
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Date: ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Expanded(
-                  child: Text(
-                    appointmentDate,
-                    // Ensure the text is wrapped to the next line if it's too long.
-
-                    softWrap: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Reminder!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // Time.
-
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Time: ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Expanded(
-                  child: Text(
-                    appointmentTime,
-                    // Ensure the text is wrapped to the next line if it's too long.
-
-                    softWrap: true,
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Next Appointment Details',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
+                  const SizedBox(height: 16),
 
-            // Location.
+                  // Date.
 
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Where: ',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Expanded(
-                  child: SelectableText.rich(
-                    addressLink(appointmentLocation, context, fontSize: 14),
-                    maxLines: 2,
-                    style: const TextStyle(height: 1.2),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-
-            // Clinic bus info.
-
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Expanded(
-                  child: SelectableText.rich(
-                    TextSpan(
-                      text: 'Clinic Bus: ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Date: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: '',
-                          style: TextStyle(fontWeight: FontWeight.normal),
+                      Expanded(
+                        child: Text(
+                          appointmentDate,
+                          // Ensure the text is wrapped to the next line if it's too long.
+
+                          softWrap: true,
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                touchFingerOval(
-                  'Call the Clinic reception for more\ninformation about transport services.',
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Transport help section.
-
-            Row(
-              children: [
-                const Expanded(
-                  child: SelectableText.rich(
-                    TextSpan(
-                      text: 'Need help with transport?',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
                       ),
-                    ),
+                    ],
                   ),
-                ),
-                AudioWithTooltip(
-                  isPlaying: _isPlaying,
-                  toggleAudio: _toggleAudio,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
+                  const SizedBox(height: 10),
 
-            // Phone number and info.
+                  // Time.
 
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CallIcon(contactNumber: phoneNumber),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: RichText(
-                    text: TextSpan(
-                      style: DefaultTextStyle.of(context).style.copyWith(
-                            fontSize: 13,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Time: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Expanded(
+                        child: Text(
+                          appointmentTime,
+                          // Ensure the text is wrapped to the next line if it's too long.
+
+                          softWrap: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Location.
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Where: ',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      Expanded(
+                        child: SelectableText.rich(
+                          addressLink(appointmentLocation, context,
+                              fontSize: 14),
+                          maxLines: 2,
+                          style: const TextStyle(height: 1.2),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Clinic bus info.
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Expanded(
+                        child: SelectableText.rich(
+                          TextSpan(
+                            text: 'Clinic Bus: ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: '',
+                                style: TextStyle(fontWeight: FontWeight.normal),
+                              ),
+                            ],
                           ),
-                      children: [
-                        TextSpan(
-                          text: 'Call $phoneNumber ',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        const TextSpan(
-                          text: '(only during office hours) ',
-                          style: TextStyle(fontStyle: FontStyle.italic),
-                        ),
-                        const TextSpan(
-                          text: 'to change or request transport.',
-                        ),
-                      ],
-                    ),
+                      ),
+                      touchFingerOval(
+                        'Call the Clinic reception for more\ninformation about transport services.',
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+
+                  // Transport help section.
+
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: SelectableText.rich(
+                          TextSpan(
+                            text: 'Need help with transport?',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                      AudioWithTooltip(
+                        isPlaying: _isPlaying,
+                        toggleAudio: _toggleAudio,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Phone number and info.
+
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CallIcon(contactNumber: phoneNumber),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            style: DefaultTextStyle.of(context).style.copyWith(
+                                  fontSize: 13,
+                                ),
+                            children: [
+                              TextSpan(
+                                text: 'Call $phoneNumber ',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              const TextSpan(
+                                text: '(only during office hours) ',
+                                style: TextStyle(fontStyle: FontStyle.italic),
+                              ),
+                              const TextSpan(
+                                text: 'to change or request transport.',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
