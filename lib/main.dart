@@ -28,11 +28,15 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:window_manager/window_manager.dart';
 
+import 'package:healthpod/theme/app_theme.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
+import 'package:healthpod/widgets/theme_toggle.dart';
+
+// Theme mode provider to manage light/dark theme state
+final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 
 void main() async {
   // This is the main entry point for the app. The [async] is required because
@@ -90,20 +94,32 @@ void main() async {
 // the App. For SolidPod we wrap the `Home()` widget within the `SolidLogin()`
 // widget so we start with a login screen, though this is optional.
 
-class HealthPod extends StatelessWidget {
+class HealthPod extends ConsumerWidget {
   const HealthPod({super.key});
 
   // This StatelessWidget is the root of our application.
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+    final theme = Theme.of(context);
+
     return MaterialApp(
       title: 'Solid Health Pod',
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       home: SelectionArea(
-        // Wrap the whole app inside a SelectionArea to ensure we get selectable
-        // text, for text that can be selected, as a default.
-
-        child: createSolidLogin(context),
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: theme.colorScheme.surface,
+            title: const Text('HealthPod'),
+            actions: const [
+              ThemeToggle(),
+            ],
+          ),
+          body: createSolidLogin(context),
+        ),
       ),
     );
   }
