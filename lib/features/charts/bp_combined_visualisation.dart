@@ -34,10 +34,10 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/constants/blood_pressure_survey.dart';
 import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/survey/data.dart';
-import 'package:healthpod/features/visualise/stat_item.dart';
 import 'package:healthpod/utils/get_month_abbrev.dart';
 import 'package:healthpod/utils/parse_numeric_input.dart';
 import 'package:healthpod/utils/url_launcher_util.dart';
+import 'package:healthpod/widgets/stat_item.dart';
 
 /// Combined blood pressure visualisation widget.
 ///
