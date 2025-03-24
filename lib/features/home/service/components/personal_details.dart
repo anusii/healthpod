@@ -53,98 +53,123 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 400,
+      constraints: const BoxConstraints(
+        maxWidth: 400,
+        minHeight: 300,
+      ),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: titleBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.8),
+            color: Colors.grey.withAlpha(80),
             spreadRadius: 3,
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Personal Identification Details',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.minHeight,
+                maxHeight: constraints.maxHeight,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Personal Identification Details',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildLabeledRow('Address:', address),
+                  const SizedBox(height: 8),
+                  _buildLabeledRow('Best Contact Phone:', bestContactPhone),
+                  const SizedBox(height: 8),
+                  _buildLabeledRow(
+                      'Alternative Contact Number:', alternativeContactNumber),
+                  const SizedBox(height: 8),
+                  _buildLabeledRow('Email:', email),
+                  const SizedBox(height: 8),
+                  _buildLabeledRow('Date of Birth:', dateOfBirth),
+                  const SizedBox(height: 8),
+                  _buildLabeledRow('Gender:', gender),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Identify as Aboriginal and/or Torres Strait Islander:',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Radio<bool>(
+                          value: true,
+                          groupValue: identifyAsIndigenous,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              identifyAsIndigenous = newValue;
+                            });
+                          },
+                        ),
+                        const Text('Yes'),
+                        const SizedBox(width: 16),
+                        Radio<bool>(
+                          value: false,
+                          groupValue: identifyAsIndigenous,
+                          onChanged: (bool? newValue) {
+                            setState(() {
+                              identifyAsIndigenous = newValue;
+                            });
+                          },
+                        ),
+                        const Text('No'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          _buildLabeledRow('Address:', address),
-          const SizedBox(height: 10),
-          _buildLabeledRow('Best Contact Phone:', bestContactPhone),
-          const SizedBox(height: 10),
-          _buildLabeledRow(
-              'Alternative Contact Number:', alternativeContactNumber),
-          const SizedBox(height: 10),
-          _buildLabeledRow('Email:', email),
-          const SizedBox(height: 10),
-          _buildLabeledRow('Date of Birth:', dateOfBirth),
-          const SizedBox(height: 8),
-          _buildLabeledRow('Gender:', gender),
-          const SizedBox(height: 16),
-          const Text(
-            'Identify as Aboriginal and/or Torres Strait Islander:',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Row(
-            children: [
-              Radio<bool>(
-                value: true,
-                groupValue: identifyAsIndigenous,
-                onChanged: (bool? newValue) {
-                  setState(() {
-                    identifyAsIndigenous = newValue;
-                  });
-                },
-              ),
-              const Text('Yes'),
-              const SizedBox(width: 16),
-              Radio<bool>(
-                value: false,
-                groupValue: identifyAsIndigenous,
-                onChanged: (bool? newValue) {
-                  setState(() {
-                    identifyAsIndigenous = newValue;
-                  });
-                },
-              ),
-              const Text('No'),
-            ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
   /// Helper method to build a row with a bold label and regular text.
-
   Widget _buildLabeledRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          // Fixed width for label column.
-
           width: 100,
           child: Text(
             '$label ',
             style: const TextStyle(
               fontWeight: FontWeight.bold,
+              fontSize: 13,
             ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(height: 1.2),
+            style: const TextStyle(
+              height: 1.2,
+              fontSize: 13,
+            ),
           ),
         ),
       ],
