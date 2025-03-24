@@ -206,7 +206,11 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Health Data, Under Your Control'),
+        title: Text(
+          _selectedIndex == 0
+              ? 'Your Health Data, Under Your Control'
+              : homeTabs[_selectedIndex]['title'],
+        ),
         backgroundColor: theme.colorScheme.surface,
         automaticallyImplyLeading: false,
         actions: [

@@ -25,29 +25,46 @@
 
 library;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Provides state management for application settings using Riverpod.
 
-// Default server URL for the Solid Pod server.
+// Initialize settings from SharedPreferences
+Future<String> _initSetting(String key, String defaultValue) async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString(key) ?? defaultValue;
+}
 
+// Provider to initialize settings
+final settingsInitializerProvider = FutureProvider<void>((ref) async {
+  final serverUrl =
+      await _initSetting('server_url', 'https://pods.dev.solidcommunity.au');
+  final username = await _initSetting('username', 'test@anu.edu.au');
+  final password = await _initSetting('password', 'SuperSecure123');
+  final secretKey = await _initSetting('secret_key', 'YourSecretKey123');
+
+  ref.read(serverURLProvider.notifier).state = serverUrl;
+  ref.read(usernameProvider.notifier).state = username;
+  ref.read(passwordProvider.notifier).state = password;
+  ref.read(secretKeyProvider.notifier).state = secretKey;
+});
+
+// Default server URL for the Solid Pod server.
 final serverURLProvider =
     StateProvider<String>((ref) => 'https://pods.dev.solidcommunity.au');
 
 // Stores the user's Solid Pod username.
-
 final usernameProvider = StateProvider<String>((ref) => '');
 
 // Stores the user's Solid Pod password.
-
 final passwordProvider = StateProvider<String>((ref) => '');
 
 // Stores the encryption secret key for secure data handling.
-
 final secretKeyProvider = StateProvider<String>((ref) => '');
 
 // Controls password visibility for password fields in the UI.
 // Uses a family provider to manage visibility state for different fields.
-
 final isPasswordVisibleProvider =
     StateProvider.autoDispose.family<bool, String>((ref, id) => false);
