@@ -30,7 +30,6 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 import 'package:healthpod/constants/appointment.dart';
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/home/service/home_utils.dart';
 import 'package:healthpod/utils/address_link.dart';
 import 'package:healthpod/utils/audio_tooltip.dart';
@@ -110,7 +109,7 @@ class _NextAppointmentState extends State<NextAppointment> {
       ),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: titleBackgroundColor,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withAlpha(80),

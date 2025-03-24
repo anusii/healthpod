@@ -27,8 +27,6 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/constants/colours.dart';
-
 /// A widget displaying the count of future medical appointments.
 ///
 /// Currently, it shows a note indicating the number of upcoming appointments.
@@ -53,7 +51,7 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
       width: 400,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: titleBackgroundColor,
+        color: Theme.of(context).colorScheme.surface,
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withValues(alpha: 0.8),

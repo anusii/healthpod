@@ -27,7 +27,6 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/table/vaccination_editor/service.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
 
@@ -112,7 +111,7 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Vaccination Records'),
-        backgroundColor: titleBackgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         actions: [
           if (!isLoading)
             Padding(

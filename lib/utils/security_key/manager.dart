@@ -38,7 +38,6 @@ import 'package:solidpod/solidpod.dart'
         getWebId,
         readPod;
 
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/home.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/security_key/view_keys.dart';
@@ -108,11 +107,15 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   /// Ensures a uniform user interface across dialogs.
 
   ButtonStyle _getButtonStyle({bool isDestructive = false}) {
+    final theme = Theme.of(context);
     return ElevatedButton.styleFrom(
-      backgroundColor: isDestructive ? Colors.red : Colors.white,
-      foregroundColor: isDestructive ? Colors.white : Colors.blue,
+      backgroundColor:
+          isDestructive ? theme.colorScheme.error : theme.colorScheme.surface,
+      foregroundColor:
+          isDestructive ? theme.colorScheme.onError : theme.colorScheme.primary,
       side: BorderSide(
-        color: isDestructive ? Colors.red : Colors.blue,
+        color:
+            isDestructive ? theme.colorScheme.error : theme.colorScheme.primary,
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -126,10 +129,12 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   /// Used to maintain a cohesive design across dialogs.
 
   InputDecoration _getInputDecoration(String label) {
+    final theme = Theme.of(context);
     return InputDecoration(
       labelText: label,
-      border: const OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
+      border: OutlineInputBorder(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        borderSide: BorderSide(color: theme.colorScheme.outline),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
@@ -317,10 +322,11 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
 
       if (context.mounted) {
         Navigator.of(context).pop();
+        final theme = Theme.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Security key set successfully'),
-            backgroundColor: Colors.green,
+            backgroundColor: theme.colorScheme.tertiary,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -342,10 +348,11 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
   /// Shows a snack bar with an error message.
 
   void _showErrorSnackBar(BuildContext context, String message) {
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red,
+        backgroundColor: theme.colorScheme.error,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
@@ -369,11 +376,11 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
     return Container(
       constraints: const BoxConstraints(maxWidth: 400),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(10),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -387,18 +394,17 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
             // Introduction to the dialog's purpose.
 
             Container(
-              color: titleBackgroundColor,
+              color: Theme.of(context).colorScheme.surface,
               padding:
                   const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-              child: const Row(
+              child: Row(
                 children: [
                   Text(
                     'Local Security Key Management',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                   ),
                 ],
               ),
@@ -418,15 +424,19 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _hasExistingKey
-                                  ? Colors.white
-                                  : Colors.grey[300],
+                                  ? Theme.of(context).colorScheme.surface
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .surfaceVariant,
                               foregroundColor: _hasExistingKey
-                                  ? Colors.blue
-                                  : Colors.grey[600],
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
                               side: BorderSide(
                                 color: _hasExistingKey
-                                    ? Colors.blue
-                                    : Colors.grey[400]!,
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.outline,
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -445,9 +455,12 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                           height: 44,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.blue,
-                              side: const BorderSide(color: Colors.blue),
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.surface,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              side: BorderSide(
+                                  color: Theme.of(context).colorScheme.primary),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -465,9 +478,12 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                             height: 44,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.red,
-                                side: const BorderSide(color: Colors.red),
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.surface,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.error,
+                                side: BorderSide(
+                                    color: Theme.of(context).colorScheme.error),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -610,7 +626,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
           } else {
             return Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16),
               ),
               padding: const EdgeInsets.all(24.0),

@@ -30,7 +30,6 @@ import 'package:flutter/material.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/create_interactive_text.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/handle_logout.dart';
@@ -58,6 +57,7 @@ class Footer extends StatelessWidget {
   }
 
   Widget buildServerInteractiveText(String serverUri, BuildContext context) {
+    final theme = Theme.of(context);
     return MarkdownTooltip(
       message: '''
 
@@ -72,13 +72,20 @@ class Footer extends StatelessWidget {
         context: context,
         text: serverUri,
         onTap: () => _launchUrl(serverUri),
-        style: TextStyle(fontSize: 14, color: Colors.blue),
+        style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.primary,
+            ) ??
+            const TextStyle(
+              fontSize: 14,
+              color: Colors.blue,
+            ),
       ),
     );
   }
 
   Widget buildLoginStatusInteractiveText(
       String loginStatus, BuildContext context) {
+    final theme = Theme.of(context);
     final tooltipMessage = webId == null
         ? '''
 
@@ -117,16 +124,22 @@ class Footer extends StatelessWidget {
             );
           }
         },
-        style: TextStyle(
-          fontSize: 14,
-          color: webId == null ? Colors.red : Colors.green,
-        ),
+        style: theme.textTheme.bodyMedium?.copyWith(
+              color: webId == null
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.tertiary,
+            ) ??
+            TextStyle(
+              fontSize: 14,
+              color: webId == null ? Colors.red : Colors.green,
+            ),
       ),
     );
   }
 
   Widget buildSecurityKeyStatusInteractiveText(
       String securityKeyStatus, BuildContext context) {
+    final theme = Theme.of(context);
     return MarkdownTooltip(
       message: '''
 
@@ -146,23 +159,29 @@ class Footer extends StatelessWidget {
         text: securityKeyStatus,
         onTap: () => showDialog(
           context: context,
-          barrierColor: Colors.black12, // Makes the background more transparent
+          barrierColor: theme.colorScheme.onSurface.withOpacity(0.12),
           builder: (BuildContext context) => SecurityKeyManager(
             onKeyStatusChanged: onKeyStatusChanged,
           ),
         ),
-        style: TextStyle(
-          fontSize: 14,
-          color: isKeySaved ? Colors.green : Colors.red,
-        ),
+        style: theme.textTheme.bodyMedium?.copyWith(
+              color: isKeySaved
+                  ? theme.colorScheme.tertiary
+                  : theme.colorScheme.error,
+            ) ??
+            TextStyle(
+              fontSize: 14,
+              color: isKeySaved ? Colors.green : Colors.red,
+            ),
       ),
     );
   }
 
   Widget _buildNarrowLayout(String serverUri, String loginStatus,
       Color loginStatusColor, String securityKeyStatus, BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: titleBackgroundColor,
+      color: theme.colorScheme.surface,
       height: 90.0,
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Center(
@@ -183,8 +202,9 @@ class Footer extends StatelessWidget {
 
   Widget _buildMediumLayout(String serverUri, String loginStatus,
       Color loginStatusColor, String securityKeyStatus, BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: titleBackgroundColor,
+      color: theme.colorScheme.surface,
       height: 70.0,
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Center(
@@ -213,8 +233,9 @@ class Footer extends StatelessWidget {
 
   Widget _buildWideLayout(String serverUri, String loginStatus,
       Color loginStatusColor, String securityKeyStatus, BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      color: titleBackgroundColor,
+      color: theme.colorScheme.surface,
       height: 50.0,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
@@ -242,10 +263,12 @@ class Footer extends StatelessWidget {
     // publicly visible page of the user's Pod. Thus strip the final `profile`
     // not eh final `/profile`.
 
+    final theme = Theme.of(context);
     final serverUrl = webId?.split('profile')[0] ?? 'Not connected';
 
     final loginStatus = webId == null ? "Not Logged In" : "Logged In";
-    final loginStatusColor = webId == null ? Colors.red : Colors.green;
+    final loginStatusColor =
+        webId == null ? theme.colorScheme.error : theme.colorScheme.tertiary;
     final securityKeyStatus =
         isKeySaved ? "Security Key: Saved" : "Security Key: Not Saved";
 
