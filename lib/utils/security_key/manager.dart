@@ -380,7 +380,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.onSurface,
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -427,7 +427,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                                   ? Theme.of(context).colorScheme.surface
                                   : Theme.of(context)
                                       .colorScheme
-                                      .surfaceVariant,
+                                      .surfaceContainerHighest,
                               foregroundColor: _hasExistingKey
                                   ? Theme.of(context).colorScheme.primary
                                   : Theme.of(context)

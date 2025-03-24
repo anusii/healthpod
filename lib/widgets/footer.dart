@@ -159,7 +159,7 @@ class Footer extends StatelessWidget {
         text: securityKeyStatus,
         onTap: () => showDialog(
           context: context,
-          barrierColor: theme.colorScheme.onSurface.withOpacity(0.12),
+          barrierColor: theme.colorScheme.onSurface,
           builder: (BuildContext context) => SecurityKeyManager(
             onKeyStatusChanged: onKeyStatusChanged,
           ),
