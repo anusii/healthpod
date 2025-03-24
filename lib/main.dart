@@ -36,7 +36,7 @@ import 'package:healthpod/utils/is_desktop.dart';
 import 'package:healthpod/widgets/theme_toggle.dart';
 
 // Theme mode provider to manage light/dark theme state
-final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
+final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
 
 void main() async {
   // This is the main entry point for the app. The [async] is required because
