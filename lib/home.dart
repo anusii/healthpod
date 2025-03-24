@@ -29,11 +29,11 @@ import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/charts/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
+import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/features/update/tab.dart';
 import 'package:healthpod/settings/dialog.dart';
@@ -62,7 +62,7 @@ final List<Map<String, dynamic>> homeTabs = [
   {
     'title': 'Diary',
     'icon': Icons.calendar_today,
-    'color': Colors.blue,
+    'color': null,
     'message': '''
 
     Here you will be able to access and manage your
@@ -119,13 +119,14 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Resources',
     'icon': Icons.library_books,
     'color': Colors.blue,
-    'message': '''
+    'content': const ResourcesTab(),
+    'tooltip': '''
 
-    Here you will be able to access a range of resources
-    to help you manage your health. This includes links to
-    external websites, articles, and other useful information.
+    Access a comprehensive collection of health resources including:
+    - Health information and guides
+    - External trusted resources
+    - Useful health calculators and tools
     ''',
-    'dialogTitle': 'Coming Soon - Resources',
   },
 ];
 
@@ -201,10 +202,12 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Health Data, Under Your Control'),
-        backgroundColor: titleBackgroundColor,
+        backgroundColor: theme.colorScheme.surface,
         automaticallyImplyLeading: false,
         actions: [
           MarkdownTooltip(
@@ -214,9 +217,9 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
             ''',
             child: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.settings,
-                color: Colors.blue,
+                color: theme.colorScheme.primary,
               ),
               onPressed: () => showDialog(
                 context: context,
@@ -232,9 +235,9 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
             ''',
             child: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.logout,
-                color: Colors.blue,
+                color: theme.colorScheme.primary,
               ),
               onPressed: () => handleLogout(context),
             ),
@@ -252,36 +255,31 @@ class HealthPodHomeState extends State<HealthPodHome> {
               onPressed: () {
                 showAbout(context);
               },
-              icon: const Icon(
+              icon: Icon(
                 Icons.info,
-                color: Colors.blue,
+                color: theme.colorScheme.primary,
               ),
             ),
           ),
         ],
       ),
-      backgroundColor: titleBackgroundColor,
+      backgroundColor: theme.colorScheme.surface,
       body: Column(
         children: [
-          Divider(height: 1, color: Colors.grey[350]),
+          Divider(height: 1, color: theme.dividerColor),
           Expanded(
             child: Row(
               children: [
                 ScrollConfiguration(
-                  // Disable scrollbars for a cleaner look.
-
                   behavior: ScrollConfiguration.of(context)
                       .copyWith(scrollbars: false),
                   child: SingleChildScrollView(
-                    // Allow scrolling of navigation rail when it overflows.
-
                     child: SizedBox(
-                      // Set height to match screen height.
                       height: MediaQuery.of(context).size.height,
                       child: Container(
-                        color: titleBackgroundColor,
+                        color: theme.colorScheme.surface,
                         child: NavigationRail(
-                          backgroundColor: titleBackgroundColor,
+                          backgroundColor: theme.colorScheme.surface,
                           selectedIndex: _selectedIndex,
                           onDestinationSelected: (int index) async {
                             setState(() {
@@ -290,8 +288,6 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
                             final tab = homeTabs[index];
 
-                            // Handle different types of navigation based on tab properties.
-
                             if (tab.containsKey('message')) {
                               alert(
                                   context, tab['message'], tab['dialogTitle']);
@@ -299,19 +295,19 @@ class HealthPodHomeState extends State<HealthPodHome> {
                               await tab['action'](context);
                             }
                           },
-                          // Show both icons and labels for all destinations.
                           labelType: NavigationRailLabelType.all,
                           destinations: homeTabs.map((tab) {
-                            // Use a custom tooltip if provided. Otherwise,
-                            // default to the tab title.
-
                             final tooltipMessage =
                                 tab['tooltip'] ?? tab['message'];
 
                             return NavigationRailDestination(
                               icon: MarkdownTooltip(
                                 message: tooltipMessage,
-                                child: Icon(tab['icon'], color: tab['color']),
+                                child: Icon(
+                                  tab['icon'],
+                                  color:
+                                      tab['color'] ?? theme.colorScheme.primary,
+                                ),
                               ),
                               label: Text(
                                 tab['title'],
@@ -321,22 +317,18 @@ class HealthPodHomeState extends State<HealthPodHome> {
                                   const EdgeInsets.symmetric(vertical: 0.0),
                             );
                           }).toList(),
-                          // Style for selected tab label.
-
-                          selectedLabelTextStyle: const TextStyle(
-                            color: Colors.deepPurple,
+                          selectedLabelTextStyle: TextStyle(
+                            color: theme.colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
-                          // Style for unselected tab labels.
-
-                          unselectedLabelTextStyle:
-                              TextStyle(color: Colors.grey[500]),
+                          unselectedLabelTextStyle: TextStyle(
+                              color: theme.colorScheme.onSurfaceVariant),
                         ),
                       ),
                     ),
                   ),
                 ),
-                const VerticalDivider(),
+                VerticalDivider(color: theme.dividerColor),
                 Expanded(
                   child:
                       homeTabs[_selectedIndex]['content'] ?? const HomePage(),
@@ -344,18 +336,16 @@ class HealthPodHomeState extends State<HealthPodHome> {
               ],
             ),
           ),
-          Divider(height: 1, color: Colors.grey[350]),
+          Divider(height: 1, color: theme.dividerColor),
         ],
       ),
       bottomNavigationBar: BottomAppBar(
         height: getFooterHeight(context),
-        color: titleBackgroundColor,
+        color: theme.colorScheme.surface,
         child: SizedBox(
           child: Footer(
             webId: _webId,
             isKeySaved: _isKeySaved,
-            // Callback to update key status.
-
             onKeyStatusChanged: _updateKeyStatus,
           ),
         ),
