@@ -25,6 +25,13 @@
 
 library;
 
+// TODO(github/issue): We are currently using a local copy of the solidpod package
+// because the solidAuthenticate function is not exposed in the public API. This
+// function is essential for implementing auto-login with saved credentials, as it
+// handles the authentication flow with the Solid server, including token management
+// and WebID retrieval. Once the solidpod package exposes this functionality in its
+// public API, we should update to use the published package version instead.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
