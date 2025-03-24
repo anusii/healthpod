@@ -35,10 +35,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/feature.dart';
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/features/file/service/models/file_state.dart';
+import 'package:healthpod/features/vaccination/exporter.dart';
+import 'package:healthpod/features/vaccination/importer.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
@@ -360,11 +363,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     state = state.copyWith(showPreview: !state.showPreview);
   }
 
-  /// Handles the import of BP  CSV files and conversion to individual JSON files.
+  /// Handles the import of BP or Vaccination data from CSV format.
 
-  Future<void> handleCsvImport(BuildContext context) async {
-    if (state.importInProgress) return;
-
+  Future<void> handleCsvImport(BuildContext context,
+      {bool isVaccination = false}) async {
     try {
       state = state.copyWith(importInProgress: true);
 
@@ -378,29 +380,41 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         if (file.path != null) {
           if (!context.mounted) return;
 
-          final success = await BPImporter.importFromCsv(
-            file.path!,
-            state.currentPath ?? basePath,
-            context,
-          );
+          bool success;
+          final feature =
+              isVaccination ? Feature.vaccination : Feature.bloodPressure;
 
-          if (context.mounted) {
-            if (success) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                      'Blood pressure data imported and converted successfully'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            }
+          if (isVaccination) {
+            success = await VaccinationImporter.importCsv(
+              file.path!,
+              state.currentPath ?? basePath,
+              context,
+            );
+          } else {
+            success = await BPImporter.importCsv(
+              file.path!,
+              state.currentPath ?? basePath,
+              context,
+            );
+          }
+
+          if (context.mounted && success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    '${feature.displayName} data imported and converted successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
           }
         }
       }
     } catch (e) {
       if (context.mounted) {
-        showAlert(
-            context, 'Failed to import Blood pressure data: ${e.toString()}');
+        final feature =
+            isVaccination ? Feature.vaccination : Feature.bloodPressure;
+        showAlert(context,
+            'Failed to import ${feature.displayName} data: ${e.toString()}');
       }
     } finally {
       if (context.mounted) {
@@ -409,42 +423,62 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     }
   }
 
-  /// Handles the export of BP data to CSV format.
+  /// Handles the export of BP or Vaccination data to CSV format.
 
-  Future<void> handleCsvExport(BuildContext context) async {
+  Future<void> handleCsvExport(BuildContext context,
+      {bool isVaccination = false}) async {
     try {
       state = state.copyWith(exportInProgress: true);
 
+      final feature =
+          isVaccination ? Feature.vaccination : Feature.bloodPressure;
+      final fileName =
+          isVaccination ? 'vaccination_data.csv' : 'blood_pressure_data.csv';
+
       final String? outputFile = await FilePicker.platform.saveFile(
-        dialogTitle: 'Save Blood pressure data as CSV:',
-        fileName: 'blood_pressure_data.csv',
+        dialogTitle: 'Save ${feature.displayName} data as CSV:',
+        fileName: fileName,
       );
 
       if (outputFile != null) {
         if (!context.mounted) return;
 
-        final success = await BPExporter.exportToCsv(
-          outputFile,
-          state.currentPath ?? basePath,
-          context,
-        );
+        bool success;
+
+        if (isVaccination) {
+          success = await VaccinationExporter.exportCsv(
+            outputFile,
+            state.currentPath ?? basePath,
+            context,
+          );
+        } else {
+          success = await BPExporter.exportCsv(
+            outputFile,
+            state.currentPath ?? basePath,
+            context,
+          );
+        }
 
         if (context.mounted) {
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Blood pressure data exported successfully'),
+              SnackBar(
+                content:
+                    Text('${feature.displayName} data exported successfully'),
                 backgroundColor: Colors.green,
               ),
             );
           } else {
-            showAlert(context, 'Failed to export Blood pressure data');
+            showAlert(context, 'Failed to export ${feature.displayName} data');
           }
         }
       }
     } catch (e) {
       if (context.mounted) {
-        showAlert(context, 'Export error: ${e.toString()}');
+        final feature =
+            isVaccination ? Feature.vaccination : Feature.bloodPressure;
+        showAlert(context,
+            'Failed to export ${feature.displayName} data: ${e.toString()}');
       }
     } finally {
       if (context.mounted) {
@@ -454,7 +488,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
   }
 }
 
-/// The provider instance for file service operations
+/// The provider instance for file service operations.
 
 final fileServiceProvider =
     StateNotifierProvider<FileServiceNotifier, FileState>((ref) {
