@@ -33,8 +33,8 @@ library;
 // public API, we should update to use the published package version instead.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:solidpod/solidpod.dart';
 // ignore: implementation_imports
