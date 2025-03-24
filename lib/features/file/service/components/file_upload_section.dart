@@ -31,8 +31,8 @@ import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as path;
 import 'package:markdown_tooltip/markdown_tooltip.dart';
+import 'package:path/path.dart' as path;
 
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
 import 'package:healthpod/utils/is_text_file.dart';
@@ -222,8 +222,11 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
             Expanded(
               child: MarkdownTooltip(
-                message:
-                    '**Upload**: Tap here to upload a file to your Solid Health Pod.',
+                message: '''
+
+                **Upload**: Tap here to upload a file to your Solid Health Pod.
+                    
+                ''',
                 child: ElevatedButton.icon(
                   onPressed: state.uploadInProgress
                       ? null
@@ -321,8 +324,11 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         if (state.uploadFile != null) ...[
           const SizedBox(height: 12),
           MarkdownTooltip(
-            message:
-                '**Preview File**: Tap here to preview the recently uploaded file.',
+            message: '''
+
+            **Preview File**: Tap here to preview the recently uploaded file.
+
+            ''',
             child: TextButton.icon(
               onPressed: state.uploadInProgress
                   ? null
