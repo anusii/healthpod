@@ -29,15 +29,15 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:healthpod/providers/settings.dart';
 import 'package:healthpod/theme/app_theme.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
 import 'package:healthpod/widgets/theme_toggle.dart';
-import 'package:healthpod/providers/settings.dart';
 
-// Theme mode provider to manage light/dark theme state
+// Theme mode provider to manage light/dark theme state.
+
 final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
 
 void main() async {
@@ -105,7 +105,8 @@ class HealthPod extends ConsumerWidget {
     final themeMode = ref.watch(themeProvider);
     final theme = Theme.of(context);
 
-    // Initialize settings
+    // Initialise settings.
+
     ref.watch(settingsInitializerProvider);
 
     return MaterialApp(
@@ -115,6 +116,13 @@ class HealthPod extends ConsumerWidget {
       themeMode: themeMode,
       home: SelectionArea(
         child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: theme.colorScheme.surface,
+            title: const Text('HealthPod'),
+            actions: const [
+              ThemeToggle(),
+            ],
+          ),
           body: createSolidLogin(context),
         ),
       ),

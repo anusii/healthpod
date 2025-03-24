@@ -30,6 +30,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:solidpod/solidpod.dart';
+// ignore: implementation_imports
 import 'package:solidpod/src/solid/authenticate.dart' show solidAuthenticate;
 
 import 'package:healthpod/home.dart';
@@ -56,6 +57,7 @@ import 'package:healthpod/utils/platform/helper.dart';
 /// The file also includes a helper class for storing WebIDs during testing sessions.
 
 /// Global navigator key for managing navigation state.
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// Helper class for storing WebID during integration tests
@@ -63,6 +65,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 /// Provides a static storage mechanism for the WebID extracted during
 /// automated WebView authentication flows. This is specifically used
 /// in integration testing scenarios.
+
 class SolidLoginTestHelper {
   static String? extractedWebId;
 }
@@ -77,8 +80,10 @@ class SolidLoginTestHelper {
 ///
 /// Returns:
 ///   A Widget configured for the appropriate authentication mode
+
 Widget createSolidLogin(BuildContext context) {
   // Determine if running in integration test mode.
+
   final bool isIntegrationTest = PlatformHelper.isIntegrationTest();
   debugPrint("🔥 INTEGRATION_TEST: $isIntegrationTest");
 
@@ -98,6 +103,7 @@ Widget createSolidLogin(BuildContext context) {
 
             // Automated login flow:
             // Step 1: Initial navigation to login page.
+
             if (url.toString() == "https://pods.dev.solidcommunity.au/") {
               debugPrint("🔄 Redirecting to login page...");
               await controller.loadUrl(
@@ -110,6 +116,7 @@ Widget createSolidLogin(BuildContext context) {
             }
 
             // Step 2: Credential injection on login page.
+
             if (url.toString().contains("/.account/login/password")) {
               debugPrint("✍️ Injecting login credentials...");
               await controller.evaluateJavascript(source: """
@@ -128,6 +135,7 @@ Widget createSolidLogin(BuildContext context) {
             }
 
             // Step 3: Handle OAuth consent screen if present.
+
             if (url.toString().contains("/account/oidc/consent")) {
               debugPrint("🔍 Detected consent screen, clicking 'Yes'...");
               await controller.evaluateJavascript(source: """
@@ -141,6 +149,7 @@ Widget createSolidLogin(BuildContext context) {
             }
 
             // Step 4: Extract WebID from account page.
+
             if (url.toString().contains("/.account/account")) {
               debugPrint(
                   "✅ Login detected at /.account/account/, waiting a bit for DOM...");
@@ -169,7 +178,8 @@ Widget createSolidLogin(BuildContext context) {
       ),
     );
   } else {
-    // Production mode: Use standard SolidLogin widget with saved credentials
+    // Production mode: Use standard SolidLogin widget with saved credentials.
+
     debugPrint("❌ Using external browser for login");
 
     return Consumer(
@@ -183,7 +193,8 @@ Widget createSolidLogin(BuildContext context) {
         debugPrint("👤 Username present: ${username.isNotEmpty}");
         debugPrint("🔑 Password present: ${password.isNotEmpty}");
 
-        // If we have saved credentials, try auto-login
+        // If we have saved credentials, try auto-login.
+
         if (username.isNotEmpty && password.isNotEmpty) {
           debugPrint("✨ Attempting auto-login with saved credentials");
           return FutureBuilder(
@@ -205,7 +216,8 @@ Widget createSolidLogin(BuildContext context) {
 
               if (snapshot.hasError) {
                 debugPrint("❌ Auto-login failed: ${snapshot.error}");
-                // Fall back to normal login screen
+                // Fall back to normal login screen.
+
                 return SolidLogin(
                   required: false,
                   title: 'HEALTH POD',
@@ -226,7 +238,8 @@ Widget createSolidLogin(BuildContext context) {
                 return const HealthPodHome();
               }
 
-              // If auto-login failed, show normal login screen
+              // If auto-login failed, show normal login screen.
+
               debugPrint("⚠️ Auto-login failed, showing login screen");
               return SolidLogin(
                 required: false,
@@ -245,7 +258,8 @@ Widget createSolidLogin(BuildContext context) {
         }
 
         debugPrint("ℹ️ No saved credentials found, showing login screen");
-        // If no saved credentials, show normal login screen
+        // If no saved credentials, show normal login screen.
+
         return SolidLogin(
           required: false,
           title: 'HEALTH POD',

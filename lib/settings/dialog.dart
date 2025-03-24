@@ -52,17 +52,20 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
     _loadSettings();
   }
 
-  // Save settings to SharedPreferences whenever they change
+  // Save settings to SharedPreferences whenever they change.
+
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
 
-    // Get current values from providers
+    // Get current values from providers.
+
     final serverUrl = ref.read(serverURLProvider);
     final username = ref.read(usernameProvider);
     final password = ref.read(passwordProvider);
     final secretKey = ref.read(secretKeyProvider);
 
-    // Save to SharedPreferences
+    // Save to SharedPreferences.
+
     await prefs.setString('server_url', serverUrl);
     await prefs.setString('username', username);
     await prefs.setString('password', password);
@@ -93,8 +96,10 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
     final Size size = MediaQuery.of(context).size;
 
     // Add reset function to handle clearing settings.
+
     void resetSettings() async {
       // Clear SharedPreferences.
+
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('server_url');
       await prefs.remove('username');
@@ -102,16 +107,19 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
       await prefs.remove('secret_key');
 
       // Reset all providers to default values.
+
       ref.invalidate(serverURLProvider);
       ref.invalidate(usernameProvider);
       ref.invalidate(passwordProvider);
       ref.invalidate(secretKeyProvider);
 
-      // Load default values
+      // Load default values.
+
       await _loadSettings();
     }
 
-    // Watch providers to trigger save on changes
+    // Watch providers to trigger save on changes.
+
     ref.listen(serverURLProvider, (previous, next) => _saveSettings());
     ref.listen(usernameProvider, (previous, next) => _saveSettings());
     ref.listen(passwordProvider, (previous, next) => _saveSettings());
@@ -232,7 +240,8 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         children: [
                           ElevatedButton(
                             onPressed: () async {
-                              // Show confirmation dialog before clearing
+                              // Show confirmation dialog before clearing.
+
                               await showConstrainedConfirmationDialog(
                                 context: context,
                                 title: 'Clear Settings',
@@ -252,7 +261,8 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                                   ref.read(secretKeyProvider.notifier).state =
                                       '';
 
-                                  // Save empty values to persist the clear
+                                  // Save empty values to persist the clear.
+
                                   await _saveSettings();
                                 },
                               );
@@ -269,6 +279,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                           ElevatedButton(
                             onPressed: () async {
                               // Show confirmation dialog before resetting.
+
                               await showConstrainedConfirmationDialog(
                                 context: context,
                                 title: 'Reset Settings',
