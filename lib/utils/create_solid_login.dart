@@ -42,8 +42,8 @@ import 'package:solidpod/src/solid/authenticate.dart' show solidAuthenticate;
 
 import 'package:healthpod/home.dart';
 import 'package:healthpod/providers/settings.dart';
-import 'package:healthpod/utils/platform/helper.dart';
 import 'package:healthpod/services/chrome_login_service.dart';
+import 'package:healthpod/utils/platform/helper.dart';
 
 /// Solid POD Authentication Widget Creator
 ///
