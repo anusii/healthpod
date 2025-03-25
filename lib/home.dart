@@ -26,15 +26,15 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/features/resources/tab.dart';
-import 'package:version_widget/version_widget.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
+import 'package:version_widget/version_widget.dart';
 
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/charts/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
+import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/features/update/tab.dart';
 import 'package:healthpod/settings/dialog.dart';
@@ -211,11 +211,15 @@ class HealthPodHomeState extends State<HealthPodHome> {
         backgroundColor: theme.colorScheme.surface,
         automaticallyImplyLeading: false,
         actions: [
-          // Add version widget
+          // Add version widget.
+
           MarkdownTooltip(
             message: '''
-            **Version Information**
+
+            **Version Information** 
             Shows the current version of HealthPod.
+            Tap here to view the changelog.
+
             ''',
             child: const VersionWidget(
               changelogUrl:
@@ -223,7 +227,6 @@ class HealthPodHomeState extends State<HealthPodHome> {
               showDate: true,
             ),
           ),
-          const SizedBox(width: 8),
           MarkdownTooltip(
             message: '''
             **Settings:** Tap here to view and manage your HealthPod account settings.
