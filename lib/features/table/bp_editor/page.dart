@@ -29,7 +29,6 @@ import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/features/bp/obs/service.dart';
 import 'package:healthpod/features/bp/obs/widgets/display_row.dart';
@@ -494,7 +493,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Blood Pressure Observations'),
-        backgroundColor: titleBackgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         actions: [
           if (!isLoading)
             Padding(
@@ -523,10 +522,13 @@ class _BPEditorPageState extends State<BPEditorPage> {
                     onPressed: _addNewObservation,
                     child: isNarrowScreen
                         ? const Icon(Icons.add_circle)
-                        : const Row(
+                        : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.add_circle),
+                              Icon(Icons.add_circle,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer),
                               SizedBox(width: 8),
                               Text('Add New Reading'),
                             ],

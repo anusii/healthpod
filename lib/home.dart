@@ -53,6 +53,8 @@ import 'package:healthpod/widgets/home_page.dart';
 /// information, and options to log out or view information about the app.
 
 // Define the [NavigationRail] tabs for the home page.
+// Color is set to null to use the default color from the theme.
+
 final List<Map<String, dynamic>> homeTabs = [
   {
     'title': 'Home',
@@ -76,7 +78,7 @@ final List<Map<String, dynamic>> homeTabs = [
   {
     'title': 'Update',
     'icon': Icons.assignment,
-    'color': Colors.blue,
+    'color': null,
     'content': const SurveyTab(),
     'tooltip': '''
 
@@ -87,7 +89,7 @@ final List<Map<String, dynamic>> homeTabs = [
   {
     'title': 'Charts',
     'icon': Icons.show_chart,
-    'color': Colors.blue,
+    'color': null,
     'content': const ChartTab(),
     'tooltip':
         'Visualize your Blood Pressure trends and other health metrics with interactive charts.Vaccination timeline charts are also available.',
@@ -95,7 +97,7 @@ final List<Map<String, dynamic>> homeTabs = [
   {
     'title': 'Table',
     'icon': Icons.table_chart,
-    'color': Colors.blue,
+    'color': null,
     'content': const TableTab(),
     'tooltip':
         'View and manage your Blood Pressure and Vaccination records in a detailed table view.',
@@ -103,7 +105,7 @@ final List<Map<String, dynamic>> homeTabs = [
   {
     'title': 'Files',
     'icon': Icons.folder,
-    'color': Colors.blue,
+    'color': null,
     'content': const FileService(),
     'tooltip': '''
 
@@ -119,7 +121,7 @@ final List<Map<String, dynamic>> homeTabs = [
   {
     'title': 'Resources',
     'icon': Icons.library_books,
-    'color': Colors.blue,
+    'color': null,
     'content': const ResourcesTab(),
     'tooltip': '''
 
@@ -334,18 +336,17 @@ class HealthPodHomeState extends State<HealthPodHome> {
                               ),
                               label: Text(
                                 tab['title'],
-                                style: const TextStyle(fontSize: 16),
+                                style: theme.textTheme.bodyLarge,
                               ),
                               padding:
                                   const EdgeInsets.symmetric(vertical: 0.0),
                             );
                           }).toList(),
-                          selectedLabelTextStyle: TextStyle(
+                          selectedLabelTextStyle:
+                              theme.textTheme.labelLarge?.copyWith(
                             color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.bold,
                           ),
-                          unselectedLabelTextStyle: TextStyle(
-                              color: theme.colorScheme.onSurfaceVariant),
+                          unselectedLabelTextStyle: theme.textTheme.bodyMedium,
                         ),
                       ),
                     ),

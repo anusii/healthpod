@@ -1,6 +1,6 @@
 /// Settings dialog/popup for the health data app.
 ///
-// Time-stamp: <Friday 2025-02-21 16:58:42 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-03-26 09:54:58 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -145,8 +145,14 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         provider: serverURLProvider,
                         tooltip: '''
 
-                        **Server URL Setting**
-                        Enter the URL of your Solid Pod server.
+                        **Server URL:** Enter the URL of your Solid Pod server
+                        here. The server is where you have registered for a Pod
+                        and can be any server supporting the Solid protocol. An
+                        available demo server is
+                        [https://pods.solidcommunity.au](https://pods.solidcommunity.au),
+                        but any Solid server will do.  The default is
+                        **currently** our development server
+                        [https://pods.dev.solidcommunity.au](https://pods.dev.solidcommunity.au)
 
                         ''',
                       ),
@@ -157,8 +163,10 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         provider: usernameProvider,
                         tooltip: '''
 
-                        **Username Setting**
-                        Enter your Solid Pod username.
+                        **Username:** This is your Solid Pod username that is
+                        added to the **Server URL** to construct your WebID for
+                        logging in to your Pod on the selected server. The
+                        default is empty.
 
                         ''',
                       ),
@@ -170,8 +178,14 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         isPassword: true,
                         tooltip: '''
 
-                        **Password Setting**
-                        Enter your Solid Pod password.
+                        **Password:** This is the password you supplied when
+                        creating your Solid Pod on a Solid server. Generally we
+                        recommend that you do not store your password in this
+                        field as it will be stored on this device as it could be
+                        compromised any spy app that is installed on your
+                        device. However, if you are comfortable that there is no
+                        such spyware on your device then storing your password
+                        is a conveinence. The default is empty.
 
                         ''',
                       ),
@@ -183,8 +197,14 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         isPassword: true,
                         tooltip: '''
 
-                        **Secret Key Setting**
-                        Enter your encryption secret key.
+                        **Secret Key:** In addition to securing access to your
+                        Pod on a remote server (through your username and
+                        password that this app need not be aware of) we have
+                        added encryption of your data on the server. This
+                        protects your data from any disclosure on the remote
+                        server. The secret encryption key should only be known
+                        to you and as a conveince can be saved locally on your
+                        device through this field. The default is empty.
 
                         ''',
                       ),
@@ -197,7 +217,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                             context: context,
                             title: 'Reset Settings',
                             message:
-                                'Are you sure you want to reset all settings to default?',
+                                'Are you sure you want to reset all settings to their defaults?',
                             confirmText: 'Reset',
                             confirmColor: Colors.red,
                             maxHeight: 100,
@@ -208,7 +228,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                           backgroundColor: Colors.red[50],
                         ),
                         child: const Text(
-                          'Reset to Default',
+                          'Reset Settings',
                           style: TextStyle(color: Colors.red),
                         ),
                       ),

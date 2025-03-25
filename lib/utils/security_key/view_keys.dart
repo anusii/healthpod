@@ -27,7 +27,6 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/utils/rdf.dart' show getEncKeyContent;
 
 /// A widget to show the user all the encryption keys stored in their Solid Pod.
@@ -66,7 +65,7 @@ class _ViewKeysState extends State<ViewKeys> {
         key: _scaffoldKey,
         appBar: AppBar(
           title: Text(widget.title),
-          backgroundColor: titleBackgroundColor,
+          backgroundColor: Theme.of(context).colorScheme.surface,
         ),
         body: loadedScreen(widget.keyInfo));
   }

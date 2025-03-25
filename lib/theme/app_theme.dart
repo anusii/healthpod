@@ -52,27 +52,33 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
         onSurfaceVariant: AppColors.textSecondary,
         outline: AppColors.cardBorder,
+        shadow: AppColors.textPrimary.withValues(alpha: 0.1),
       ),
       textTheme: TextTheme(
         headlineLarge: TextStyle(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w600,
+          letterSpacing: -0.5,
         ),
         headlineMedium: TextStyle(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w500,
+          letterSpacing: -0.25,
         ),
         bodyLarge: TextStyle(
           color: AppColors.textPrimary,
           fontSize: 16,
+          letterSpacing: 0.15,
         ),
         bodyMedium: TextStyle(
           color: AppColors.textSecondary,
           fontSize: 14,
+          letterSpacing: 0.25,
         ),
         labelLarge: TextStyle(
           color: AppColors.textPrimary,
           fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
         ),
       ),
       iconTheme: IconThemeData(
@@ -90,13 +96,15 @@ class AppTheme {
           color: AppColors.textPrimary,
           fontSize: 20,
           fontWeight: FontWeight.w500,
+          letterSpacing: 0.15,
         ),
       ),
       cardTheme: CardTheme(
         color: AppColors.cardBackground,
-        elevation: 1,
+        elevation: 2,
+        shadowColor: AppColors.textPrimary.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
           side: BorderSide(
             color: AppColors.cardBorder,
             width: 1,
@@ -106,6 +114,7 @@ class AppTheme {
       dividerTheme: DividerThemeData(
         color: AppColors.cardBorder,
         thickness: 1,
+        space: 1,
       ),
     );
   }
