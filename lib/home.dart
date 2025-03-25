@@ -218,7 +218,9 @@ class HealthPodHomeState extends State<HealthPodHome> {
             Shows the current version of HealthPod.
             ''',
             child: const VersionWidget(
-              version: '1.0.0',
+              changelogUrl:
+                  'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
+              showDate: true,
             ),
           ),
           const SizedBox(width: 8),
