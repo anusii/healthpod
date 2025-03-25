@@ -1,6 +1,6 @@
 /// Get question icon.
 ///
-/// Copyright (C) 2024, Software Innovation Institute, ANU.
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -35,6 +35,7 @@ import 'package:healthpod/constants/health_data_type.dart';
 /// - Mood icon for categorical data related to feelings.
 /// - Notes icon for text-based data.
 /// - Checklist icon for general categorical data.
+/// - Calendar icon for date inputs.
 /// - Help outline icon for unclassified types.
 
 IconData getQuestionIcon(HealthDataType type, String question) {
@@ -49,15 +50,29 @@ IconData getQuestionIcon(HealthDataType type, String question) {
       return Icons.monitor_heart;
     }
     return Icons.numbers;
+  } else if (type == HealthDataType.categorical) {
+    if (lowerQuestion.contains('feeling')) {
+      return Icons.mood;
+    }
+    return Icons.checklist;
+  } else if (type == HealthDataType.text) {
+    if (lowerQuestion.contains('which vaccine did you receive')) {
+      return Icons.vaccines;
+    } else if (lowerQuestion.contains('where did you receive the vaccine')) {
+      return Icons.local_hospital;
+    } else if (lowerQuestion.contains('healthcare professional name')) {
+      return Icons.person;
+    } else if (lowerQuestion.contains('cost of vaccination')) {
+      return Icons.attach_money;
+    } else if (lowerQuestion.contains('any additional notes')) {
+      return Icons.notes;
+    }
+    return Icons.notes;
+  } else if (type == HealthDataType.date) {
+    if (lowerQuestion.contains('when did you receive the vaccination')) {
+      return Icons.calendar_month;
+    }
+    return Icons.calendar_today;
   }
-
-  if (type == HealthDataType.categorical && lowerQuestion.contains('feeling')) {
-    return Icons.mood;
-  }
-
-  return switch (type) {
-    HealthDataType.text => Icons.notes,
-    HealthDataType.categorical => Icons.checklist,
-    _ => Icons.help_outline,
-  };
+  return Icons.help_outline;
 }

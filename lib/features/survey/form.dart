@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/features/survey/form_state.dart';
 import 'package:healthpod/features/survey/input_fields/categorical_input.dart';
+import 'package:healthpod/features/survey/input_fields/date_input.dart';
 import 'package:healthpod/features/survey/input_fields/number_input.dart';
 import 'package:healthpod/features/survey/input_fields/text_input.dart';
 import 'package:healthpod/features/survey/question.dart';
@@ -126,6 +127,11 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
           index: index,
           controller: _formController,
         ),
+      HealthDataType.date => HealthSurveyDateInput(
+          question: question,
+          index: index,
+          controller: _formController,
+        ),
     };
   }
 
@@ -172,54 +178,34 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
 
   /// Builds a row of questions to optimize layout based on screen width.
 
-  Widget _buildQuestionRow(int startIndex, int optimalCount) {
-    final rowItems = <Widget>[];
-
-    for (var j = 0;
-        j < optimalCount && startIndex + j < widget.questions.length;
-        j++) {
-      rowItems.add(
-        FocusTraversalOrder(
-          order: NumericFocusOrder(startIndex + j + 1.0),
-          child: Padding(
-            padding: EdgeInsets.only(
-              right: j < optimalCount - 1 ? 16.0 : 0,
-            ),
-            child: _buildQuestionWidget(
-              widget.questions[startIndex + j],
-              startIndex + j,
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: rowItems.map((item) => Expanded(child: item)).toList(),
-      ),
+  Widget _buildQuestionRow(int startIndex, int count) {
+    final rowQuestions = widget.questions.skip(startIndex).take(count).toList();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: rowQuestions
+          .map((q) => Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _buildQuestionWidget(
+                    q, startIndex + rowQuestions.indexOf(q)),
+              ))
+          .toList(),
     );
   }
 
-  /// Builds the submit button for the survey form.
+  /// Builds the submit button for the form.
 
   Widget _buildSubmitButton() {
     return Center(
-      child: FocusTraversalOrder(
-        order: NumericFocusOrder(widget.questions.length + 1.0),
-        child: SizedBox(
-          width: 200,
-          child: ElevatedButton.icon(
-            onPressed: _formController.submitForm,
-            icon: const Icon(Icons.send),
-            label: Text(widget.submitButtonText),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+      child: SizedBox(
+        width: 200,
+        child: ElevatedButton.icon(
+          onPressed: _formController.submitForm,
+          icon: const Icon(Icons.send),
+          label: Text(widget.submitButtonText),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
           ),
         ),

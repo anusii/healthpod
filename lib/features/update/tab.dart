@@ -39,7 +39,7 @@ final List<Map<String, dynamic>> surveyPanels = [
   },
   {
     'title': 'Vaccinations',
-    'widget': const VaccinationSurvey(),
+    'widget': VaccinationSurvey(),
   },
 ];
 
