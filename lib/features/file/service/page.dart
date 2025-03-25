@@ -29,7 +29,6 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/file/service/components/components.dart';
 
 /// The file service page that provides file management functionality.
@@ -45,7 +44,7 @@ class FileService extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('File Management'),
-        backgroundColor: titleBackgroundColor,
+        backgroundColor: Theme.of(context).colorScheme.surface,
       ),
       body: const Padding(
         padding: EdgeInsets.all(16.0),

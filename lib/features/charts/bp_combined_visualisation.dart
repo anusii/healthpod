@@ -32,7 +32,6 @@ import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/blood_pressure_survey.dart';
-import 'package:healthpod/constants/colours.dart';
 import 'package:healthpod/features/survey/data.dart';
 import 'package:healthpod/features/visualise/stat_item.dart';
 import 'package:healthpod/utils/get_month_abbrev.dart';
@@ -64,11 +63,18 @@ class BPCombinedVisualisation extends StatefulWidget {
 class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
   List<Map<String, dynamic>> _surveyData = [];
   bool _isLoading = true;
+  late ThemeData theme;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    theme = Theme.of(context);
   }
 
   Future<void> _loadData() async {
@@ -178,7 +184,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       Container(
         height: 40,
         width: 1,
-        color: Colors.grey[300],
+        color: theme.dividerColor,
       ),
       StatItem(
         label: 'Min',
@@ -188,7 +194,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       Container(
         height: 40,
         width: 1,
-        color: Colors.grey[300],
+        color: theme.dividerColor,
       ),
       StatItem(
         label: 'Max',
@@ -238,14 +244,14 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                     const SizedBox(width: 8),
                     Icon(
                       Icons.info_outline,
-                      color: Colors.grey[600],
+                      color: theme.colorScheme.onSurfaceVariant,
                       size: 20,
                     ),
                   ]),
                 ),
               ],
             ),
-            backgroundColor: titleBackgroundColor,
+            backgroundColor: theme.colorScheme.surface,
             actions: [
               // MarkdownTooltip explaining BP Classification ranges.
 
@@ -271,7 +277,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                   ''',
                   child: Icon(
                     Icons.monitor_heart_outlined,
-                    color: Colors.blue,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),
@@ -287,7 +293,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                     * Blood pressure can vary throughout the day due to activity, stress, or other factors.
 
-                    * A single high reading doesn’t necessarily mean you have hypertension.
+                    * A single high reading doesn't necessarily mean you have hypertension.
 
                     * Consistent high readings should be discussed with your healthcare professional.
 
@@ -304,7 +310,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                   ''',
                   child: Icon(
                     Icons.health_and_safety_outlined,
-                    color: Colors.green,
+                    color: theme.colorScheme.tertiary,
                   ),
                 ),
               ),
@@ -318,7 +324,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                   child: IconButton(
                     icon: Icon(
                       Icons.open_in_new,
-                      color: Colors.red,
+                      color: theme.colorScheme.error,
                     ),
                     onPressed: () => UrlLauncherUtil.launchAHA(context),
                   ),
@@ -347,15 +353,14 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                         HorizontalLine(
                           y: 180,
-                          color: Colors.red,
+                          color: theme.colorScheme.error,
                           strokeWidth: 2,
                           dashArray: [5, 5],
                           label: HorizontalLineLabel(
                             show: true,
-                            style: TextStyle(
-                              color: Colors.red,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.error,
                               fontWeight: FontWeight.bold,
-                              fontSize: 12,
                             ),
                             alignment: Alignment.topRight,
                             labelResolver: (line) => 'Danger',
@@ -369,7 +374,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                         HorizontalLine(
                           y: 120,
-                          color: const Color(0xFF9F70FF),
+                          color: theme.colorScheme.primary,
                           strokeWidth: 1.5,
                           dashArray: [5, 5],
                           label: HorizontalLineLabel(
@@ -384,7 +389,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                         HorizontalLine(
                           y: 80,
-                          color: const Color(0xFF00BD9D),
+                          color: theme.colorScheme.secondary,
                           strokeWidth: 1.5,
                           dashArray: [5, 5],
                           label: HorizontalLineLabel(
@@ -400,7 +405,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                       touchTooltipData: LineTouchTooltipData(
                         tooltipRoundedRadius: 8,
                         tooltipBorder: BorderSide(
-                          color: Colors.grey[600]!,
+                          color: theme.colorScheme.onSurfaceVariant,
                           width: 1,
                         ),
                         tooltipPadding: const EdgeInsets.symmetric(
@@ -494,14 +499,14 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                       verticalInterval: 1,
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: Colors.grey[300],
+                          color: theme.dividerColor,
                           strokeWidth: 0.5,
                           dashArray: [5, 5],
                         );
                       },
                       getDrawingVerticalLine: (value) {
                         return FlLine(
-                          color: Colors.grey[300],
+                          color: theme.dividerColor,
                           strokeWidth: 0.5,
                           dashArray: [5, 5],
                         );
@@ -546,9 +551,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                                   ''',
                                   child: Text(
                                     '${date.day} ${getMonthAbbrev(date.month)}${showYear ? " '${(date.year % 100).toString().padLeft(2, '0')}" : ""}',
-                                    style: TextStyle(
-                                      color: Colors.grey[800],
-                                      fontSize: 12,
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: theme.colorScheme.onSurface,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -571,8 +575,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                               padding: const EdgeInsets.only(right: 8.0),
                               child: Text(
                                 value.toInt().toString(),
-                                style: TextStyle(
-                                  color: Colors.grey[800],
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.onSurface,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -596,7 +600,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                     borderData: FlBorderData(
                       show: true,
-                      border: Border.all(color: Colors.grey[300]!),
+                      border: Border.all(color: theme.dividerColor),
                     ),
 
                     /// Chart value range configuration.
@@ -614,17 +618,16 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                       LineChartBarData(
                         spots: _getSystolicData(),
                         isCurved: true,
-                        color: const Color(0xFF9F70FF), // Bright purple.
+                        color: theme.colorScheme.primary,
                         barWidth: 3,
                         dotData: FlDotData(
                           show: true,
                           getDotPainter: (spot, percent, barData, index) {
                             return FlDotCirclePainter(
                               radius: 6,
-                              color: Colors.white,
+                              color: theme.colorScheme.surface,
                               strokeWidth: 3,
-                              strokeColor:
-                                  Theme.of(context).colorScheme.primary,
+                              strokeColor: theme.colorScheme.primary,
                             );
                           },
                         ),
@@ -635,17 +638,16 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                       LineChartBarData(
                         spots: _getDiastolicData(),
                         isCurved: true,
-                        color: const Color(0xFF00BD9D), // Turquoise/mint.
+                        color: theme.colorScheme.secondary,
                         barWidth: 3,
                         dotData: FlDotData(
                           show: true,
                           getDotPainter: (spot, percent, barData, index) {
                             return FlDotCirclePainter(
                               radius: 6,
-                              color: Colors.white,
+                              color: theme.colorScheme.surface,
                               strokeWidth: 3,
-                              strokeColor:
-                                  Theme.of(context).colorScheme.secondary,
+                              strokeColor: theme.colorScheme.secondary,
                             );
                           },
                         ),
@@ -665,7 +667,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            color: Colors.grey[100],
+            color: theme.colorScheme.surface,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: 16.0,
@@ -690,8 +692,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                                 width: 12,
                                 height: 12,
                                 decoration: BoxDecoration(
-                                  color:
-                                      const Color(0xFF9F70FF), // Bright purple.
+                                  color: theme.colorScheme.primary,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -728,7 +729,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                                       fit: BoxFit.scaleDown,
                                       child: Icon(
                                         Icons.info_outline,
-                                        color: Colors.grey[600],
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
                                         size: 16,
                                       ),
                                     ),
@@ -753,8 +755,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                                 width: 12,
                                 height: 12,
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                      0xFF00BD9D), // Turquoise/mint.
+                                  color: theme.colorScheme.secondary,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -783,7 +784,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                                           .scaleDown, // Scales down to fit available space.
                                       child: Icon(
                                         Icons.info_outline,
-                                        color: Colors.grey[600],
+                                        color:
+                                            theme.colorScheme.onSurfaceVariant,
                                         size: 16,
                                       ),
                                     ),
