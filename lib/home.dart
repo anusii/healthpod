@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Wednesday 2025-03-26 10:21:36 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-03-26 10:26:49 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -216,9 +216,10 @@ class HealthPodHomeState extends State<HealthPodHome> {
           MarkdownTooltip(
             message: '''
 
-            **Version Information**
-            Shows the current version of HealthPod.
-            Tap here to view the changelog.
+            **Version:** Here you can see the current version of the HealthPod
+            app. If the version is out of date then the text will be red. You
+            can tap on the version to view the change log file to see if it is
+            worth updating your version.
 
             ''',
             child: const VersionWidget(
@@ -232,7 +233,10 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
           MarkdownTooltip(
             message: '''
-            **Settings:** Tap here to view and manage your HealthPod account settings.
+
+            **Settings:** Tap here to view and manage your HealthPod account
+              settings.
+
             ''',
             child: IconButton(
               icon: Icon(
@@ -249,7 +253,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
             message: '''
 
             **Logout:** Tap here to securely log out of your HealthPod account.
-            This will clear your current session and return you to the login screen.
+            This will clear your current session and return you to the login
+            screen.
 
             ''',
             child: IconButton(
