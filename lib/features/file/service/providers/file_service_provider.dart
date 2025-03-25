@@ -137,9 +137,9 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('File uploaded successfully'),
-              backgroundColor: Colors.green,
+              backgroundColor: Theme.of(context).colorScheme.tertiary,
             ),
           );
           // Call the refresh callback to update the browser.
@@ -222,9 +222,9 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('File downloaded successfully'),
-            backgroundColor: Colors.green,
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
           ),
         );
       }
@@ -325,9 +325,9 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text('File deleted successfully'),
-              backgroundColor: Colors.green,
+              backgroundColor: Theme.of(context).colorScheme.tertiary,
             ),
           );
 
@@ -403,7 +403,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               SnackBar(
                 content: Text(
                     '${feature.displayName} data imported and converted successfully'),
-                backgroundColor: Colors.green,
+                backgroundColor: Theme.of(context).colorScheme.tertiary,
               ),
             );
           }
@@ -465,7 +465,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               SnackBar(
                 content:
                     Text('${feature.displayName} data exported successfully'),
-                backgroundColor: Colors.green,
+                backgroundColor: Theme.of(context).colorScheme.tertiary,
               ),
             );
           } else {

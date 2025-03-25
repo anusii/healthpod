@@ -27,8 +27,6 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/constants/colours.dart';
-
 /// A widget that displays detailed personal identification information clearly and concisely.
 ///
 /// This widget allows users to verify and update their personal details easily.
@@ -59,10 +57,10 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       ),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: titleBackgroundColor,
+        color: Theme.of(context).cardTheme.color,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withAlpha(80),
+            color: Theme.of(context).colorScheme.shadow,
             spreadRadius: 3,
             blurRadius: 4,
             offset: const Offset(0, 1),

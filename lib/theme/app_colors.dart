@@ -32,56 +32,47 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   /// Brand Colours.
-  /// darkBlue.
+  /// Rich navy blue - more vibrant primary.
+  static const primary = Color(0xFF0A4D8C);
 
-  static const primary = Color(0xFF07579A);
+  /// Warm gold - slightly desaturated.
+  static const secondary = Color(0xFFD4A76A);
 
-  /// anuGold.
-
-  static const secondary = Color(0xFFBE830E);
-
-  /// darkGreen
-  static const tertiary = Color(0xFF40A351);
+  /// Fresh teal - replaces dark green for a more modern look.
+  static const tertiary = Color(0xFF20B2AA);
 
   /// Semantic Colours.
-  /// Darker green for better contrast.
+  /// Emerald green for success.
+  static const success = Color(0xFF2ECC71);
 
-  static const success = Color(0xFF2D6A4F);
+  /// Crimson for errors.
+  static const error = Color(0xFFE74C3C);
 
-  /// Red for errors.
-  static const error = Color(0xFFC72C41);
+  /// Warm orange for warnings.
+  static const warning = Color(0xFFE67E22);
 
-  /// Copper for warnings.
+  /// Azure blue for info.
+  static const info = Color(0xFF3498DB);
 
-  static const warning = Color(0xFFBE4E0E);
+  /// Warm neutral palette - more refined gradients.
+  static const background = Color(0xFFFAF6F0);
+  static const surface = Color(0xFFFFFBF7);
+  static const surfaceVariant = Color(0xFFF7E8D8);
 
-  /// Darker blue for better contrast.
-
-  static const info = Color(0xFF0A558C);
-
-  /// Warm neutral palette.
-  static const background = Color(0xFFF5F2EE);
-  static const surface = Color(0xFFFAF7F2);
-  static const surfaceVariant = Color(0xFFF0E4D7);
-
-  /// Text Colours.
-
-  static const textPrimary = Color(0xFF2C2C2C);
-  static const textSecondary = Color(0xFF4A4A4A);
-  static const textTertiary = Color(0xFF6B6B6B);
+  /// Text Colours - improved contrast.
+  static const textPrimary = Color(0xFF1A1A1A);
+  static const textSecondary = Color(0xFF404040);
+  static const textTertiary = Color(0xFF666666);
 
   /// Navigation Colours.
-
   static const navSelected = primary;
-  static const navUnselected = Color(0xFF6B5E5E);
+  static const navUnselected = Color(0xFF8C8C8C);
 
   /// Additional Colours.
-
-  static const lightGreen = Color(0xFF4CAF50);
+  static const lightGreen = Color(0xFF7CB342);
   static const iconDefault = Colors.white;
 
-  /// Card Colours.
-
-  static const cardBackground = Color(0xFFF0E4D7);
-  static const cardBorder = Color(0xFFE6D5C5);
+  /// Card Colours - more subtle.
+  static const cardBackground = Color(0xFFFAF6F0);
+  static const cardBorder = Color(0xFFE8E0D8);
 }

@@ -29,8 +29,6 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/appointment.dart';
 
-import 'package:healthpod/constants/colours.dart';
-
 /// A widget that displays the user's avatar, name, patient ID,
 /// and a notification bell with the number of notifications.
 ///
@@ -47,14 +45,16 @@ class AvatarName extends StatefulWidget {
 class _AvatarNameState extends State<AvatarName> {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: 400,
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: titleBackgroundColor,
+        color: theme.cardTheme.color,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.8),
+            color: theme.colorScheme.shadow,
             spreadRadius: 3,
             blurRadius: 4,
             offset: const Offset(0, 1),
@@ -65,7 +65,6 @@ class _AvatarNameState extends State<AvatarName> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // User avatar with lock icon indicator.
-
           Stack(
             clipBehavior: Clip.none,
             children: [
@@ -75,19 +74,18 @@ class _AvatarNameState extends State<AvatarName> {
                     AssetImage('assets/images/sample_avatar_image.png'),
               ),
               // Positioned lock icon at bottom-right.
-
               Positioned(
                 bottom: -2,
                 right: -2,
                 child: Container(
                   padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(
-                    color: Colors.orange,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.tertiary,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.lock,
-                    color: Colors.white,
+                    color: theme.colorScheme.onTertiary,
                     size: 16,
                   ),
                 ),
@@ -103,14 +101,15 @@ class _AvatarNameState extends State<AvatarName> {
             children: [
               Text(
                 userName,
-                style: const TextStyle(
-                  fontSize: 16,
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
                 'Patient ID: $patientID',
-                style: TextStyle(color: Colors.grey[700]),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -118,32 +117,29 @@ class _AvatarNameState extends State<AvatarName> {
           const SizedBox(width: 12),
 
           // Notification bell with notification count badge.
-
           Stack(
             clipBehavior: Clip.none,
             children: [
-              const Icon(
+              Icon(
                 Icons.notifications,
                 size: 28,
-                color: Colors.black54,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
               // Show notification count badge only if notifications exist.
-
               if (notificationCount > 0)
                 Positioned(
                   right: -2,
                   top: -2,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.error,
                       shape: BoxShape.circle,
                     ),
                     child: Text(
                       '$notificationCount',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onError,
                       ),
                     ),
                   ),

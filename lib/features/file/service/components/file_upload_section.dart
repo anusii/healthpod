@@ -246,7 +246,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                             }
                           }
                         },
-                  icon: const Icon(Icons.file_upload),
+                  icon: Icon(Icons.file_upload,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer),
                   label: const Text('Upload'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
