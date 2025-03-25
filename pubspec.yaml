@@ -54,7 +54,6 @@ dependencies:
   pdf: ^3.11.3
   printing: ^5.14.2
   webdriver: ^3.0.3
-  selenium_webdriver: ^3.0.1
 
 dev_dependencies:
 
