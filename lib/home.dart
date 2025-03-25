@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Sunday 2025-03-09 11:50:04 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-03-26 10:21:36 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -216,7 +216,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
           MarkdownTooltip(
             message: '''
 
-            **Version Information** 
+            **Version Information**
             Shows the current version of HealthPod.
             Tap here to view the changelog.
 
@@ -227,6 +227,9 @@ class HealthPodHomeState extends State<HealthPodHome> {
               showDate: true,
             ),
           ),
+
+          const SizedBox(width: 50),
+
           MarkdownTooltip(
             message: '''
             **Settings:** Tap here to view and manage your HealthPod account settings.
