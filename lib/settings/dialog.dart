@@ -251,7 +251,8 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                                 confirmColor: Colors.grey,
                                 maxHeight: 100,
                                 onConfirm: () async {
-                                  // Clear all providers
+                                  // Clear all providers.
+
                                   ref.read(serverURLProvider.notifier).state =
                                       '';
                                   ref.read(usernameProvider.notifier).state =

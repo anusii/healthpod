@@ -60,4 +60,3 @@ The grid items include:
 
 + A LLM model runs over the whole contents of the Pod to then allow me
   to interact with the data collection.
-
