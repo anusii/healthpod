@@ -109,10 +109,10 @@ class _NextAppointmentState extends State<NextAppointment> {
       ),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).cardTheme.color,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withAlpha(80),
+            color: Theme.of(context).colorScheme.shadow,
             spreadRadius: 3,
             blurRadius: 4,
             offset: const Offset(0, 1),

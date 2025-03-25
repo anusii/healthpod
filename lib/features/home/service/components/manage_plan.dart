@@ -53,10 +53,10 @@ class _ManagePlanState extends State<ManagePlan> {
       width: 400,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: Theme.of(context).cardTheme.color,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.8),
+            color: Theme.of(context).colorScheme.shadow,
             spreadRadius: 3,
             blurRadius: 4,
             offset: const Offset(0, 1),

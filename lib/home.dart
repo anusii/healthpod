@@ -265,7 +265,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
           ),
         ],
       ),
-      backgroundColor: theme.colorScheme.surface,
+      backgroundColor: theme.colorScheme.background,
       body: Column(
         children: [
           Divider(height: 1, color: theme.dividerColor),
@@ -279,9 +279,9 @@ class HealthPodHomeState extends State<HealthPodHome> {
                     child: SizedBox(
                       height: MediaQuery.of(context).size.height,
                       child: Container(
-                        color: theme.colorScheme.surface,
+                        color: theme.colorScheme.background,
                         child: NavigationRail(
-                          backgroundColor: theme.colorScheme.surface,
+                          backgroundColor: theme.colorScheme.background,
                           selectedIndex: _selectedIndex,
                           onDestinationSelected: (int index) async {
                             setState(() {

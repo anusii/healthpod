@@ -51,10 +51,10 @@ class _AvatarNameState extends State<AvatarName> {
       width: 400,
       padding: const EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.cardTheme.color,
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.onSurface,
+            color: theme.colorScheme.shadow,
             spreadRadius: 3,
             blurRadius: 4,
             offset: const Offset(0, 1),
