@@ -31,6 +31,7 @@ import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:path/path.dart' as path;
 
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
@@ -220,35 +221,42 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
             // Main upload button.
 
             Expanded(
-              child: ElevatedButton.icon(
-                onPressed: state.uploadInProgress
-                    ? null
-                    : () async {
-                        final result = await FilePicker.platform.pickFiles();
-                        if (result != null && result.files.isNotEmpty) {
-                          final file = result.files.first;
-                          if (file.path != null) {
-                            ref
-                                .read(fileServiceProvider.notifier)
-                                .setUploadFile(file.path);
-                            await handlePreview(file.path!);
-                            if (!context.mounted) return;
-                            await ref
-                                .read(fileServiceProvider.notifier)
-                                .handleUpload(context);
+              child: MarkdownTooltip(
+                message: '''
+
+                **Upload**: Tap here to upload a file to your Solid Health Pod.
+                    
+                ''',
+                child: ElevatedButton.icon(
+                  onPressed: state.uploadInProgress
+                      ? null
+                      : () async {
+                          final result = await FilePicker.platform.pickFiles();
+                          if (result != null && result.files.isNotEmpty) {
+                            final file = result.files.first;
+                            if (file.path != null) {
+                              ref
+                                  .read(fileServiceProvider.notifier)
+                                  .setUploadFile(file.path);
+                              await handlePreview(file.path!);
+                              if (!context.mounted) return;
+                              await ref
+                                  .read(fileServiceProvider.notifier)
+                                  .handleUpload(context);
+                            }
                           }
-                        }
-                      },
-                icon: const Icon(Icons.file_upload),
-                label: const Text('Upload'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor:
-                      Theme.of(context).colorScheme.primaryContainer,
-                  foregroundColor:
-                      Theme.of(context).colorScheme.onPrimaryContainer,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                        },
+                  icon: const Icon(Icons.file_upload),
+                  label: const Text('Upload'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onPrimaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
               ),
@@ -315,16 +323,23 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
         if (state.uploadFile != null) ...[
           const SizedBox(height: 12),
-          TextButton.icon(
-            onPressed: state.uploadInProgress
-                ? null
-                : () => handlePreview(state.uploadFile!),
-            icon: const Icon(Icons.preview),
-            label: const Text('Preview File'),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+          MarkdownTooltip(
+            message: '''
+
+            **Preview File**: Tap here to preview the recently uploaded file.
+
+            ''',
+            child: TextButton.icon(
+              onPressed: state.uploadInProgress
+                  ? null
+                  : () => handlePreview(state.uploadFile!),
+              icon: const Icon(Icons.preview),
+              label: const Text('Preview File'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ),
