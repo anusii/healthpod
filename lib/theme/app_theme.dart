@@ -52,7 +52,7 @@ class AppTheme {
         onSurface: AppColors.textPrimary,
         onSurfaceVariant: AppColors.textSecondary,
         outline: AppColors.cardBorder,
-        shadow: AppColors.textPrimary.withOpacity(0.1),
+        shadow: AppColors.textPrimary.withValues(alpha: 0.1),
       ),
       textTheme: TextTheme(
         headlineLarge: TextStyle(
@@ -102,7 +102,7 @@ class AppTheme {
       cardTheme: CardTheme(
         color: AppColors.cardBackground,
         elevation: 2,
-        shadowColor: AppColors.textPrimary.withOpacity(0.1),
+        shadowColor: AppColors.textPrimary.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(
