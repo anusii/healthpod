@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:webdriver/sync_io.dart';
 
+import 'package:webdriver/sync_io.dart';
 
 /// A service class that handles automated login using ChromeDriver.
 
