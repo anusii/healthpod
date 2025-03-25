@@ -43,6 +43,7 @@ import 'package:solidpod/src/solid/authenticate.dart' show solidAuthenticate;
 import 'package:healthpod/home.dart';
 import 'package:healthpod/providers/settings.dart';
 import 'package:healthpod/utils/platform/helper.dart';
+import 'package:healthpod/services/chrome_login_service.dart';
 
 /// Solid POD Authentication Widget Creator
 ///
@@ -89,8 +90,6 @@ class SolidLoginTestHelper {
 ///   A Widget configured for the appropriate authentication mode
 
 Widget createSolidLogin(BuildContext context) {
-  // Determine if running in integration test mode.
-
   final bool isIntegrationTest = PlatformHelper.isIntegrationTest();
   debugPrint("🔥 INTEGRATION_TEST: $isIntegrationTest");
 
@@ -185,8 +184,6 @@ Widget createSolidLogin(BuildContext context) {
       ),
     );
   } else {
-    // Production mode: Use standard SolidLogin widget with saved credentials.
-
     debugPrint("❌ Using external browser for login");
 
     return Consumer(
@@ -205,7 +202,7 @@ Widget createSolidLogin(BuildContext context) {
         if (username.isNotEmpty && password.isNotEmpty) {
           debugPrint("✨ Attempting auto-login with saved credentials");
           return FutureBuilder(
-            future: solidAuthenticate(serverUrl, context),
+            future: _performAutoLogin(serverUrl, username, password, context),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 debugPrint("⏳ Auto-login in progress...");
@@ -225,22 +222,10 @@ Widget createSolidLogin(BuildContext context) {
                 debugPrint("❌ Auto-login failed: ${snapshot.error}");
                 // Fall back to normal login screen.
 
-                return SolidLogin(
-                  required: false,
-                  title: 'HEALTH POD',
-                  appDirectory: 'healthpod',
-                  webID: serverUrl.isNotEmpty
-                      ? serverUrl
-                      : 'https://pods.dev.solidcommunity.au',
-                  image: const AssetImage('assets/images/healthpod_image.png'),
-                  logo: const AssetImage('assets/images/healthpod_icon.png'),
-                  link:
-                      'https://github.com/anusii/healthpod/blob/main/README.md',
-                  child: const HealthPodHome(),
-                );
+                return _buildNormalLogin(serverUrl);
               }
 
-              if (snapshot.hasData && snapshot.data != null) {
+              if (snapshot.hasData && snapshot.data == true) {
                 debugPrint("✅ Auto-login successful!");
                 return const HealthPodHome();
               }
@@ -248,38 +233,58 @@ Widget createSolidLogin(BuildContext context) {
               // If auto-login failed, show normal login screen.
 
               debugPrint("⚠️ Auto-login failed, showing login screen");
-              return SolidLogin(
-                required: false,
-                title: 'HEALTH POD',
-                appDirectory: 'healthpod',
-                webID: serverUrl.isNotEmpty
-                    ? serverUrl
-                    : 'https://pods.dev.solidcommunity.au',
-                image: const AssetImage('assets/images/healthpod_image.png'),
-                logo: const AssetImage('assets/images/healthpod_icon.png'),
-                link: 'https://github.com/anusii/healthpod/blob/main/README.md',
-                child: const HealthPodHome(),
-              );
+              return _buildNormalLogin(serverUrl);
             },
           );
         }
 
         debugPrint("ℹ️ No saved credentials found, showing login screen");
-        // If no saved credentials, show normal login screen.
-
-        return SolidLogin(
-          required: false,
-          title: 'HEALTH POD',
-          appDirectory: 'healthpod',
-          webID: serverUrl.isNotEmpty
-              ? serverUrl
-              : 'https://pods.dev.solidcommunity.au',
-          image: const AssetImage('assets/images/healthpod_image.png'),
-          logo: const AssetImage('assets/images/healthpod_icon.png'),
-          link: 'https://github.com/anusii/healthpod/blob/main/README.md',
-          child: const HealthPodHome(),
-        );
+        return _buildNormalLogin(serverUrl);
       },
     );
   }
+}
+
+/// Perform automated login using ChromeDriver.
+
+Future<bool> _performAutoLogin(
+  String serverUrl,
+  String username,
+  String password,
+  BuildContext context,
+) async {
+  try {
+    final loginService = ChromeLoginService.instance;
+    await loginService.initialize();
+
+    final webId = await loginService.login(serverUrl, username, password);
+    if (webId != null) {
+      if (context.mounted) {
+        final result = await solidAuthenticate(webId, context);
+        return result != null;
+      }
+    }
+    return false;
+  } catch (e) {
+    debugPrint("❌ Auto-login error: $e");
+    return false;
+  } finally {
+    await ChromeLoginService.instance.dispose();
+  }
+}
+
+/// Build the normal login widget.
+
+Widget _buildNormalLogin(String serverUrl) {
+  return SolidLogin(
+    required: false,
+    title: 'HEALTH POD',
+    appDirectory: 'healthpod',
+    webID:
+        serverUrl.isNotEmpty ? serverUrl : 'https://pods.dev.solidcommunity.au',
+    image: const AssetImage('assets/images/healthpod_image.png'),
+    logo: const AssetImage('assets/images/healthpod_icon.png'),
+    link: 'https://github.com/anusii/healthpod/blob/main/README.md',
+    child: const HealthPodHome(),
+  );
 }

@@ -208,7 +208,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
       appBar: AppBar(
         title: Text(
           _selectedIndex == 0
-              ? 'Your Health Data, Under Your Control'
+              ? homeTabs[_selectedIndex]['title']
               : homeTabs[_selectedIndex]['title'],
         ),
         backgroundColor: theme.colorScheme.surface,

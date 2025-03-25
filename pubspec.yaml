@@ -53,6 +53,8 @@ dependencies:
   badges: ^3.1.2
   pdf: ^3.11.3
   printing: ^5.14.2
+  webdriver: ^3.0.3
+  selenium_webdriver: ^3.0.1
 
 dev_dependencies:
 
@@ -70,7 +72,6 @@ dev_dependencies:
     git:
       url: https://github.com/anusii/import-order-lint.git
       ref: main
-  webdriver: 3.0.4
 
 dependency_overrides:
 
