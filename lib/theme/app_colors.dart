@@ -55,9 +55,9 @@ class AppColors {
   static const info = Color(0xFF3498DB);
 
   /// Warm neutral palette - more refined gradients.
-  static const background = Color(0xFFF8F5F2);
-  static const surface = Color(0xFFFFFFFF);
-  static const surfaceVariant = Color(0xFFF5EBE0);
+  static const background = Color(0xFFFAF6F0);
+  static const surface = Color(0xFFFFFBF7);
+  static const surfaceVariant = Color(0xFFF7E8D8);
 
   /// Text Colours - improved contrast.
   static const textPrimary = Color(0xFF1A1A1A);
