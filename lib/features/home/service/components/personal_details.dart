@@ -99,43 +99,6 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   _buildLabeledRow('Date of Birth:', dateOfBirth),
                   const SizedBox(height: 8),
                   _buildLabeledRow('Gender:', gender),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Identify as Aboriginal and/or Torres Strait Islander:',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                  ),
-                  Flexible(
-                    fit: FlexFit.loose,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Radio<bool>(
-                          value: true,
-                          groupValue: identifyAsIndigenous,
-                          onChanged: (bool? newValue) {
-                            setState(() {
-                              identifyAsIndigenous = newValue;
-                            });
-                          },
-                        ),
-                        const Text('Yes'),
-                        const SizedBox(width: 16),
-                        Radio<bool>(
-                          value: false,
-                          groupValue: identifyAsIndigenous,
-                          onChanged: (bool? newValue) {
-                            setState(() {
-                              identifyAsIndigenous = newValue;
-                            });
-                          },
-                        ),
-                        const Text('No'),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
