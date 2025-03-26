@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Sunday 2025-03-09 11:50:04 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-03-26 10:26:49 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
+import 'package:version_widget/version_widget.dart';
 
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
@@ -216,10 +217,31 @@ class HealthPodHomeState extends State<HealthPodHome> {
         backgroundColor: theme.colorScheme.surface,
         automaticallyImplyLeading: false,
         actions: [
+          // Add version widget.
+
           MarkdownTooltip(
             message: '''
 
-            **Settings:** Tap here to view and manage your HealthPod account settings.
+            **Version:** Here you can see the current version of the HealthPod
+            app. If the version is out of date then the text will be red. You
+            can tap on the version to view the change log file to see if it is
+            worth updating your version.
+
+            ''',
+            child: const VersionWidget(
+              changelogUrl:
+                  'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
+              showDate: true,
+            ),
+          ),
+
+          const SizedBox(width: 50),
+
+          MarkdownTooltip(
+            message: '''
+
+            **Settings:** Tap here to view and manage your HealthPod account
+              settings.
 
             ''',
             child: IconButton(
@@ -237,7 +259,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
             message: '''
 
             **Logout:** Tap here to securely log out of your HealthPod account.
-            This will clear your current session and return you to the login screen.
+            This will clear your current session and return you to the login
+            screen.
 
             ''',
             child: IconButton(

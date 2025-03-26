@@ -102,6 +102,8 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('server_url');
+      // leave username, password and secret key here for now.
+
       await prefs.remove('username');
       await prefs.remove('password');
       await prefs.remove('secret_key');

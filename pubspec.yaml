@@ -1,7 +1,7 @@
 name: healthpod
 description: "Secure storage of Health and Medical Records in your Solid Pod."
 publish_to: "none"
-version: 0.0.9+3
+version: 0.1.0+3
 
 environment:
   sdk: ">=3.2.3 <4.0.0"
@@ -54,6 +54,10 @@ dependencies:
   pdf: ^3.11.3
   printing: ^5.14.2
   webdriver: ^3.0.3
+  version_widget:
+    git:
+      url: https://github.com/anusii/version_widget.git
+  
 
 dev_dependencies:
 

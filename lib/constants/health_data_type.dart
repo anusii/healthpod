@@ -31,4 +31,5 @@ enum HealthDataType {
   text,
   number,
   categorical,
+  date,
 }
