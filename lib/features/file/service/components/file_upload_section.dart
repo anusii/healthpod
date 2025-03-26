@@ -26,6 +26,7 @@
 library;
 
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
@@ -33,6 +34,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:path/path.dart' as path;
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'package:printing/printing.dart';
 
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
 import 'package:healthpod/utils/is_text_file.dart';
@@ -146,6 +149,79 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         ],
       ),
     );
+  }
+
+  Future<void> handlePdfToJson(File file) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Read PDF file
+      final bytes = await file.readAsBytes();
+      final PdfDocument pdf = PdfDocument(inputBytes: bytes);
+
+      // Extract text from all pages
+      String text = '';
+      for (var i = 0; i < pdf.pages.count; i++) {
+        text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
+      }
+
+      // Structure the data
+      final List<String> lines = text.split('\n');
+      final Map<String, dynamic> jsonData = {
+        'metadata': {
+          'filename': file.path.split('/').last,
+          'pageCount': pdf.pages.count,
+          'processedDate': DateTime.now().toIso8601String(),
+        },
+        'content': {
+          'rawText': text,
+          'structuredLines': lines
+              .map((line) => {
+                    'text': line.trim(),
+                    'length': line.length,
+                  })
+              .toList(),
+        }
+      };
+
+      // Close loading dialog
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      // Save JSON file
+      if (context.mounted) {
+        final jsonString = jsonEncode(jsonData);
+        final jsonFile = File('${file.path}.json');
+        await jsonFile.writeAsString(jsonString);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('JSON file saved as ${jsonFile.path}'),
+            action: SnackBarAction(
+              label: 'View',
+              onPressed: () => handlePreview(jsonFile.path),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error converting PDF to JSON: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -326,9 +402,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           const SizedBox(height: 12),
           MarkdownTooltip(
             message: '''
-
             **Preview File**: Tap here to preview the recently uploaded file.
-
             ''',
             child: TextButton.icon(
               onPressed: state.uploadInProgress
@@ -336,6 +410,26 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                   : () => handlePreview(state.uploadFile!),
               icon: const Icon(Icons.preview),
               label: const Text('Preview File'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          MarkdownTooltip(
+            message: '''
+            **Convert to JSON**: Tap here to convert the PDF file to JSON format.
+            This will extract text from the PDF and structure it as JSON data.
+            ''',
+            child: TextButton.icon(
+              onPressed: state.uploadInProgress
+                  ? null
+                  : () => handlePdfToJson(File(state.uploadFile!)),
+              icon: const Icon(Icons.code),
+              label: const Text('Convert to JSON'),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
