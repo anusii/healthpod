@@ -62,6 +62,7 @@ void showAbout(BuildContext context, {String? webId}) async {
                   }
                 },
                 data: '''
+
 **A Health and Medical Record Manager.**
 
 HealthPod is an app for managing your health data and medical records, keeping
