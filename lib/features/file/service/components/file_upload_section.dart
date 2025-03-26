@@ -255,6 +255,48 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
             ),
             actions: [
               TextButton(
+                onPressed: () {
+                  // Extract text content from structuredLines
+                  if (jsonData['content']?['structuredLines'] != null) {
+                    final List<dynamic> lines =
+                        jsonData['content']['structuredLines'];
+                    final List<String> texts =
+                        lines.map((line) => line['text'] as String).toList();
+                    final extractedText = texts.join('\n');
+
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Row(
+                          children: [
+                            Icon(Icons.text_snippet),
+                            SizedBox(width: 8),
+                            Text('Extracted Text'),
+                          ],
+                        ),
+                        content: SizedBox(
+                          width: double.maxFinite,
+                          height: 800,
+                          child: SingleChildScrollView(
+                            child: SelectableText(
+                              extractedText,
+                              style: const TextStyle(fontFamily: 'monospace'),
+                            ),
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Extract Info'),
+              ),
+              TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('Close'),
               ),
