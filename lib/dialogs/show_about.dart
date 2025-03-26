@@ -26,10 +26,10 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:solidpod/solidpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void showAbout(BuildContext context, {String? webId}) async {
   final appInfo = await getAppNameVersion();
@@ -63,9 +63,9 @@ void showAbout(BuildContext context, {String? webId}) async {
                 },
                 data: '''
 
-**A Health and Medical Record Manager.**
+                **A Health and Medical Record Manager.**
 
-HealthPod is an app for managing your health data and medical records, keeping
+                HealthPod is an app for managing your health data and medical records, keeping
 all data stored in your personal online dataset (Pod). Medical documents as well
 as a health diary can be maintained.
 
