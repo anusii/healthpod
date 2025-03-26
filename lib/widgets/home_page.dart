@@ -32,22 +32,24 @@ import 'package:healthpod/features/home/service/components/components.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  Widget _buildHeader() {
-    return const Text(
+  Widget _buildHeader(BuildContext context) {
+    return Text(
       'Your Personal Health Data Management System',
-      style: TextStyle(fontSize: 20, color: Colors.grey),
+      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
       textAlign: TextAlign.center,
     );
   }
 
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Center(
           child: Column(
             children: [
-              _buildHeader(),
+              _buildHeader(context),
               const SizedBox(height: 16),
               const AvatarName(),
               const SizedBox(height: 16),
@@ -93,13 +95,13 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopLayout(double maxWidth) {
+  Widget _buildDesktopLayout(BuildContext context, double maxWidth) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            _buildHeader(),
+            _buildHeader(context),
             const SizedBox(height: 16),
             GridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -121,13 +123,14 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.surface,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return constraints.maxWidth < 800
-              ? _buildMobileLayout()
-              : _buildDesktopLayout(constraints.maxWidth);
+              ? _buildMobileLayout(context)
+              : _buildDesktopLayout(context, constraints.maxWidth);
         },
       ),
     );

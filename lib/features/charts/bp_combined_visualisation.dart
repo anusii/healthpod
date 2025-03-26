@@ -344,7 +344,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                 padding: const EdgeInsets.all(16.0),
                 child: LineChart(
                   LineChartData(
-                    backgroundColor: Colors.white,
+                    backgroundColor: theme.colorScheme.surface,
                     extraLinesData: ExtraLinesData(
                       horizontalLines: [
                         /// Danger systolic threshold line (180 mmHg).
@@ -374,7 +374,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                         HorizontalLine(
                           y: 120,
-                          color: theme.colorScheme.primary,
+                          color:
+                              theme.colorScheme.primary.withValues(alpha: 0.7),
                           strokeWidth: 1.5,
                           dashArray: [5, 5],
                           label: HorizontalLineLabel(
@@ -389,7 +390,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                         HorizontalLine(
                           y: 80,
-                          color: theme.colorScheme.secondary,
+                          color: theme.colorScheme.secondary
+                              .withValues(alpha: 0.7),
                           strokeWidth: 1.5,
                           dashArray: [5, 5],
                           label: HorizontalLineLabel(
@@ -404,8 +406,10 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                     lineTouchData: LineTouchData(
                       touchTooltipData: LineTouchTooltipData(
                         tooltipRoundedRadius: 8,
+                        getTooltipColor: (touchedSpots) =>
+                            theme.colorScheme.surfaceContainerHighest,
                         tooltipBorder: BorderSide(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: theme.colorScheme.outline,
                           width: 1,
                         ),
                         tooltipPadding: const EdgeInsets.symmetric(
@@ -474,8 +478,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                             return LineTooltipItem(
                               tooltipContent,
-                              const TextStyle(
-                                color: Colors.white,
+                              TextStyle(
+                                color: theme.colorScheme.onSurfaceVariant,
                                 fontWeight: FontWeight.w500,
                                 fontSize: 13,
                                 height: 1.8,
@@ -499,14 +503,16 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                       verticalInterval: 1,
                       getDrawingHorizontalLine: (value) {
                         return FlLine(
-                          color: theme.dividerColor,
+                          color:
+                              theme.colorScheme.outline.withValues(alpha: 0.3),
                           strokeWidth: 0.5,
                           dashArray: [5, 5],
                         );
                       },
                       getDrawingVerticalLine: (value) {
                         return FlLine(
-                          color: theme.dividerColor,
+                          color:
+                              theme.colorScheme.outline.withValues(alpha: 0.3),
                           strokeWidth: 0.5,
                           dashArray: [5, 5],
                         );

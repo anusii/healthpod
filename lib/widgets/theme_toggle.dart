@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:healthpod/main.dart';
+import 'package:healthpod/providers/theme_provider.dart';
 
 /// A widget that allows users to toggle between light and dark themes.
 
@@ -40,16 +40,16 @@ class ThemeToggle extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeProvider);
     final isDarkMode = themeMode == ThemeMode.dark;
+    final theme = Theme.of(context);
 
     return IconButton(
       icon: Icon(
         isDarkMode ? Icons.light_mode : Icons.dark_mode,
-        color: Theme.of(context).iconTheme.color,
+        color: theme.colorScheme.primary,
       ),
       tooltip: isDarkMode ? 'Switch to light mode' : 'Switch to dark mode',
       onPressed: () {
-        ref.read(themeProvider.notifier).state =
-            isDarkMode ? ThemeMode.light : ThemeMode.dark;
+        ref.read(themeProvider.notifier).toggleTheme();
       },
     );
   }
