@@ -224,6 +224,57 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
     }
   }
 
+  Future<void> handleJsonPreview(String filePath) async {
+    try {
+      final file = File(filePath);
+      final content = await file.readAsString();
+      final jsonData = jsonDecode(content);
+      final formattedJson =
+          const JsonEncoder.withIndent('  ').convert(jsonData);
+
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.analytics),
+                const SizedBox(width: 8),
+                Text(path.basename(filePath)),
+              ],
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 1000,
+              child: SingleChildScrollView(
+                child: SelectableText(
+                  formattedJson,
+                  style: const TextStyle(fontFamily: 'monospace'),
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('JSON preview error: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error reading JSON file: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(fileServiceProvider);
@@ -430,6 +481,36 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                   : () => handlePdfToJson(File(state.uploadFile!)),
               icon: const Icon(Icons.code),
               label: const Text('Convert to JSON'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          MarkdownTooltip(
+            message: '''
+            **Visualize JSON**: Tap here to select and visualize a JSON file from your local machine.
+            ''',
+            child: TextButton.icon(
+              onPressed: state.uploadInProgress
+                  ? null
+                  : () async {
+                      final result = await FilePicker.platform.pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['json'],
+                      );
+                      if (result != null && result.files.isNotEmpty) {
+                        final file = result.files.first;
+                        if (file.path != null) {
+                          await handleJsonPreview(file.path!);
+                        }
+                      }
+                    },
+              icon: const Icon(Icons.analytics),
+              label: const Text('Visualize JSON'),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
