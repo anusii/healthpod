@@ -489,6 +489,56 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           ],
         ),
 
+        // MarkdownTooltip(
+        //   message: '''
+        //     **Convert to JSON**: Tap here to convert the PDF file to JSON format.
+        //     This will extract text from the PDF and structure it as JSON data.
+        //     ''',
+        //   child: TextButton.icon(
+        //     onPressed: state.uploadInProgress
+        //         ? null
+        //         : () => handlePdfToJson(File(state.uploadFile!)),
+        //     icon: const Icon(Icons.code),
+        //     label: const Text('Convert to JSON'),
+        //     style: TextButton.styleFrom(
+        //       padding: const EdgeInsets.symmetric(vertical: 12),
+        //       shape: RoundedRectangleBorder(
+        //         borderRadius: BorderRadius.circular(8),
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        const SizedBox(width: 8),
+        MarkdownTooltip(
+          message: '''
+            **Visualize JSON**: Tap here to select and visualize a JSON file from your local machine.
+            ''',
+          child: TextButton.icon(
+            onPressed: state.uploadInProgress
+                ? null
+                : () async {
+                    final result = await FilePicker.platform.pickFiles(
+                      type: FileType.custom,
+                      allowedExtensions: ['json'],
+                    );
+                    if (result != null && result.files.isNotEmpty) {
+                      final file = result.files.first;
+                      if (file.path != null) {
+                        await handleJsonPreview(file.path!);
+                      }
+                    }
+                  },
+            icon: const Icon(Icons.analytics),
+            label: const Text('Visualize JSON'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ),
+
         // Preview button.
 
         if (state.uploadFile != null) ...[
@@ -531,36 +581,36 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          MarkdownTooltip(
-            message: '''
-            **Visualize JSON**: Tap here to select and visualize a JSON file from your local machine.
-            ''',
-            child: TextButton.icon(
-              onPressed: state.uploadInProgress
-                  ? null
-                  : () async {
-                      final result = await FilePicker.platform.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ['json'],
-                      );
-                      if (result != null && result.files.isNotEmpty) {
-                        final file = result.files.first;
-                        if (file.path != null) {
-                          await handleJsonPreview(file.path!);
-                        }
-                      }
-                    },
-              icon: const Icon(Icons.analytics),
-              label: const Text('Visualize JSON'),
-              style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ),
+          // const SizedBox(width: 8),
+          // MarkdownTooltip(
+          //   message: '''
+          //   **Visualize JSON**: Tap here to select and visualize a JSON file from your local machine.
+          //   ''',
+          //   child: TextButton.icon(
+          //     onPressed: state.uploadInProgress
+          //         ? null
+          //         : () async {
+          //             final result = await FilePicker.platform.pickFiles(
+          //               type: FileType.custom,
+          //               allowedExtensions: ['json'],
+          //             );
+          //             if (result != null && result.files.isNotEmpty) {
+          //               final file = result.files.first;
+          //               if (file.path != null) {
+          //                 await handleJsonPreview(file.path!);
+          //               }
+          //             }
+          //           },
+          //     icon: const Icon(Icons.analytics),
+          //     label: const Text('Visualize JSON'),
+          //     style: TextButton.styleFrom(
+          //       padding: const EdgeInsets.symmetric(vertical: 12),
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(8),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ],
     );
