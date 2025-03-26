@@ -3,8 +3,8 @@
 Recorded here are the high level changes for the HealthPod app.
 
 Guide: Each version update is recorded here with a short user-oriented
-description of the update. Updates in the 0.0.n series are heading
-toward a 0.1 release.
+description of the update. Updates in the 0.1.n series are heading
+toward a 0.2 release.
 
 Binaries to download latest version:
 [**GNU/Linux**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
@@ -13,8 +13,11 @@ Binaries to download latest version:
 
 Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
-## 0.1 LATEST UPDATES
+## 0.2 LATEST UPDATES
 
+## 0.1 Initial usable release.
+
++ Ready for beta release [0.1.0 20250326 gjw]
 + Deploy navigator [0.0.9 20250218 kev]
 + Refine and add import order lint [0.0.8 20250207 atangster]
 + Refine SURVEY and FILES features [0.0.7 20250120 atangster]
