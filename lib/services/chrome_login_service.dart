@@ -64,35 +64,79 @@ class ChromeLoginService {
       debugPrint('🌐 Navigating to: $serverUrl/.account/login/password/');
       _driver!.get('$serverUrl/.account/login/password/');
 
-      // Add a small delay to ensure page loads.
+      // Add a delay to ensure page loads.
 
       await Future.delayed(const Duration(seconds: 2));
 
       debugPrint('🔍 Current URL: ${_driver!.currentUrl}');
+
+      // Check if we're already on the account page (already logged in).
+
+      if (_driver!.currentUrl.contains('/.account/account')) {
+        debugPrint('✅ Already logged in, extracting WebID');
+        return await _extractWebId();
+      }
+
+      // Check if we're on the login page.
+
+      if (!_driver!.currentUrl.contains('/.account/login/password')) {
+        debugPrint('❌ Not on login page, current URL: ${_driver!.currentUrl}');
+        return null;
+      }
+
       debugPrint('🔎 Looking for login form elements...');
 
-      // Wait for form elements to be present.
+      // Wait and retry strategy for finding elements.
 
-      final emailInput = _driver!.findElement(
-        const By.cssSelector('input[name="email"]'),
-      );
-      debugPrint('✅ Found email input');
+      WebElement? emailInput;
+      WebElement? passwordInput;
+      WebElement? submitButton;
 
-      final passwordInput = _driver!.findElement(
-        const By.cssSelector('input[name="password"]'),
-      );
-      debugPrint('✅ Found password input');
+      for (var i = 0; i < 3; i++) {
+        try {
+          emailInput = _driver!.findElement(
+            const By.cssSelector('input[name="email"]'),
+          );
+          passwordInput = _driver!.findElement(
+            const By.cssSelector('input[name="password"]'),
+          );
+          submitButton = _driver!.findElement(
+            const By.cssSelector('button[type="submit"]'),
+          );
+          break;
+        } catch (e) {
+          if (i == 2) {
+            debugPrint('❌ Failed to find login form elements after retries');
+            return null;
+          }
+          await Future.delayed(const Duration(seconds: 1));
+        }
+      }
 
-      final submitButton = _driver!.findElement(
-        const By.cssSelector('button[type="submit"]'),
-      );
-      debugPrint('✅ Found submit button');
+      if (emailInput == null || passwordInput == null || submitButton == null) {
+        debugPrint('❌ Login form elements not found');
+        return null;
+      }
 
-      // Fill in credentials.
-
+      debugPrint('✅ Found all login form elements');
       debugPrint('📝 Filling in credentials...');
-      emailInput.sendKeys(username);
-      passwordInput.sendKeys(password);
+
+      // Clear existing values and fill in credentials.
+
+      try {
+        await Future.wait([
+          Future(() => emailInput!.clear()),
+          Future(() => passwordInput!.clear()),
+        ]);
+
+        await Future.wait([
+          Future(() => emailInput!.sendKeys(username)),
+          Future(() => passwordInput!.sendKeys(password)),
+        ]);
+      } catch (e) {
+        debugPrint('❌ Error filling in credentials: $e');
+        return null;
+      }
 
       // Check "remember me" if present.
 
@@ -113,9 +157,21 @@ class ChromeLoginService {
       debugPrint('🚀 Submitting login form...');
       submitButton.click();
 
-      // Wait for navigation.
+      // Wait for navigation with timeout.
 
-      await Future.delayed(const Duration(seconds: 3));
+      var timeout = 10;
+      while (timeout > 0 &&
+          _driver!.currentUrl.contains('/.account/login/password')) {
+        await Future.delayed(const Duration(seconds: 1));
+        timeout--;
+      }
+
+      if (timeout == 0) {
+        debugPrint(
+            '❌ Login timeout - page did not change after form submission');
+        return null;
+      }
+
       debugPrint('📍 Post-login URL: ${_driver!.currentUrl}');
 
       // Handle consent page if it appears.
