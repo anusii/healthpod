@@ -116,7 +116,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
         notes: 'Annual booster',
       ),
       VaccinationRecord(
-        date: DateTime(2024, 2, 15),
+        date: DateTime(2023, 12, 1),
         name: 'Flu Shot',
         provider: 'Community Clinic',
         professional: 'Nurse Johnson',
@@ -124,30 +124,44 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
         notes: 'Seasonal vaccination',
       ),
       VaccinationRecord(
-        date: DateTime(2023, 12, 1),
+        date: DateTime(2023, 6, 15),
         name: 'Hepatitis B',
         provider: 'University Hospital',
         professional: 'Dr. Garcia',
         cost: '\$75.00',
         notes: 'Final dose in series',
       ),
-      // More sample records.
-
       VaccinationRecord(
-        date: DateTime(2023, 9, 15),
+        date: DateTime(2023, 3, 1),
         name: 'Tetanus Booster',
+        provider: 'City Medical Center',
+        professional: 'Dr. Smith',
+        cost: '\$35.00',
+        notes: '10-year booster',
       ),
       VaccinationRecord(
-        date: DateTime(2023, 6, 1),
+        date: DateTime(2022, 12, 15),
         name: 'MMR Vaccine',
+        provider: 'Community Clinic',
+        professional: 'Nurse Johnson',
+        cost: '\$30.00',
+        notes: 'Adult booster',
       ),
       VaccinationRecord(
-        date: DateTime(2023, 3, 15),
+        date: DateTime(2022, 6, 1),
         name: 'COVID-19 Second Dose',
+        provider: 'University Hospital',
+        professional: 'Dr. Garcia',
+        cost: '\$0.00',
+        notes: 'Government funded',
       ),
       VaccinationRecord(
         date: DateTime(2021, 3, 15),
         name: 'COVID-19 First Dose',
+        provider: 'City Medical Center',
+        professional: 'Dr. Smith',
+        cost: '\$0.00',
+        notes: 'Government funded',
       ),
     ];
   }
@@ -242,13 +256,20 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                         }
 
                         // Get appropriate emoji based on vaccination type.
-
                         String emoji = '';
                         final nameLower = record.name.toLowerCase();
                         if (nameLower.contains('flu')) {
                           emoji = '💉';
                         } else if (nameLower.contains('covid')) {
                           emoji = '🦠';
+                        } else if (nameLower.contains('hepatitis')) {
+                          emoji = '🫁';
+                        } else if (nameLower.contains('tetanus')) {
+                          emoji = '🔒';
+                        } else if (nameLower.contains('mmr')) {
+                          emoji = '🦠';
+                        } else {
+                          emoji = '💊'; // Default emoji for other vaccinations
                         }
 
                         return TimelineTile(
