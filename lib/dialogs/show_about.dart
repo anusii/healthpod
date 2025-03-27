@@ -28,8 +28,8 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_markdown/flutter_markdown.dart';
-
 import 'package:solidpod/solidpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void showAbout(BuildContext context, {String? webId}) async {
   final appInfo = await getAppNameVersion();
@@ -48,14 +48,21 @@ void showAbout(BuildContext context, {String? webId}) async {
       children: [
         SizedBox(
           // Limit the width of the about dialog box.
-
           width: 300,
-
           child: Column(
             children: [
-              const MarkdownBody(
+              MarkdownBody(
                 selectable: true,
+                onTapLink: (text, href, title) async {
+                  if (href != null) {
+                    final uri = Uri.parse(href);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
+                    }
+                  }
+                },
                 data: '''
+
 **A Health and Medical Record Manager.**
 
 HealthPod is an app for managing your health data and medical records, keeping
