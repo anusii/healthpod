@@ -52,6 +52,26 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
     _loadSettings();
   }
 
+  // Save settings to SharedPreferences whenever they change.
+
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    // Get current values from providers.
+
+    final serverUrl = ref.read(serverURLProvider);
+    final email = ref.read(emailProvider);
+    final password = ref.read(passwordProvider);
+    final secretKey = ref.read(secretKeyProvider);
+
+    // Save to SharedPreferences.
+
+    await prefs.setString('server_url', serverUrl);
+    await prefs.setString('email', email);
+    await prefs.setString('password', password);
+    await prefs.setString('secret_key', secretKey);
+  }
+
   // Loads previously saved settings from local storage.
 
   Future<void> _loadSettings() async {
@@ -61,12 +81,12 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
 
     ref.read(serverURLProvider.notifier).state =
         prefs.getString('server_url') ?? 'https://pods.dev.solidcommunity.au';
-    ref.read(usernameProvider.notifier).state =
-        prefs.getString('username') ?? '';
+    ref.read(emailProvider.notifier).state =
+        prefs.getString('email') ?? 'test@anu.edu.au';
     ref.read(passwordProvider.notifier).state =
-        prefs.getString('password') ?? '';
+        prefs.getString('password') ?? 'SuperSecure123';
     ref.read(secretKeyProvider.notifier).state =
-        prefs.getString('secret_key') ?? '';
+        prefs.getString('secret_key') ?? 'YourSecretKey123';
   }
 
   // Builds the settings dialog UI with a white container and drop shadow.
@@ -75,26 +95,37 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
 
-    // Add reset function to handle clearing only server URL.
+    // Add reset function to handle clearing settings.
 
     void resetSettings() async {
       // Clear SharedPreferences.
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('server_url');
-      // leave username, password and secret key here for now.
+      // leave email, password and secret key here for now.
 
-      await prefs.remove('username');
+      await prefs.remove('email');
       await prefs.remove('password');
       await prefs.remove('secret_key');
 
       // Reset all providers to default values.
 
       ref.invalidate(serverURLProvider);
-      ref.invalidate(usernameProvider);
+      ref.invalidate(emailProvider);
       ref.invalidate(passwordProvider);
       ref.invalidate(secretKeyProvider);
+
+      // Load default values.
+
+      await _loadSettings();
     }
+
+    // Watch providers to trigger save on changes.
+
+    ref.listen(serverURLProvider, (previous, next) => _saveSettings());
+    ref.listen(emailProvider, (previous, next) => _saveSettings());
+    ref.listen(passwordProvider, (previous, next) => _saveSettings());
+    ref.listen(secretKeyProvider, (previous, next) => _saveSettings());
 
     return Material(
       color: Colors.transparent,
@@ -142,7 +173,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                       const Divider(),
                       SettingField(
                         label: 'Server URL',
-                        hint: 'Enter server URL',
+                        hint: 'https://pods.dev.solidcommunity.au',
                         provider: serverURLProvider,
                         tooltip: '''
 
@@ -154,27 +185,37 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         but any Solid server will do.  The default is
                         **currently** our development server
                         [https://pods.dev.solidcommunity.au](https://pods.dev.solidcommunity.au)
+                        **Server URL Setting**
+                        Enter the URL of your Solid Pod server.
+                        Default: https://pods.dev.solidcommunity.au
+
+                        This is the server where your health data will be stored.
+                        Make sure to use a trusted Solid Pod provider.
 
                         ''',
                       ),
                       const SizedBox(height: 16),
                       SettingField(
-                        label: 'Username',
-                        hint: 'Enter username',
-                        provider: usernameProvider,
+                        label: 'Email',
+                        hint: 'test@anu.edu.au',
+                        provider: emailProvider,
                         tooltip: '''
 
-                        **Username:** This is your Solid Pod username that is
-                        added to the **Server URL** to construct your WebID for
-                        logging in to your Pod on the selected server. The
-                        default is empty.
+                        **Email Setting**
+                        Enter your Solid Pod email address.
+                        Default: test@anu.edu.au
+
+                        This is your login email for the Solid Pod server.
+                        It must be a valid email address containing an @ symbol.
+                        This email is added to the **Server URL** to construct your WebID for
+                        logging in to your Pod on the selected server.
 
                         ''',
                       ),
                       const SizedBox(height: 16),
                       SettingField(
                         label: 'Password',
-                        hint: 'Enter password',
+                        hint: 'SuperSecure123',
                         provider: passwordProvider,
                         isPassword: true,
                         tooltip: '''
@@ -193,7 +234,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                       const SizedBox(height: 16),
                       SettingField(
                         label: 'Secret Key',
-                        hint: 'Enter secret key',
+                        hint: 'YourSecretKey123',
                         provider: secretKeyProvider,
                         isPassword: true,
                         tooltip: '''
@@ -210,28 +251,71 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         ''',
                       ),
                       const SizedBox(height: 32),
-                      ElevatedButton(
-                        onPressed: () async {
-                          // Show confirmation dialog before resetting.
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              // Show confirmation dialog before clearing.
 
-                          await showConstrainedConfirmationDialog(
-                            context: context,
-                            title: 'Reset Settings',
-                            message:
-                                'Are you sure you want to reset all settings to their defaults?',
-                            confirmText: 'Reset',
-                            confirmColor: Colors.red,
-                            maxHeight: 100,
-                            onConfirm: resetSettings,
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[50],
-                        ),
-                        child: const Text(
-                          'Reset Settings',
-                          style: TextStyle(color: Colors.red),
-                        ),
+                              await showConstrainedConfirmationDialog(
+                                context: context,
+                                title: 'Clear Settings',
+                                message:
+                                    'Are you sure you want to clear all settings?',
+                                confirmText: 'Clear',
+                                confirmColor: Colors.grey,
+                                maxHeight: 100,
+                                onConfirm: () async {
+                                  // Clear all providers.
+
+                                  ref.read(serverURLProvider.notifier).state =
+                                      '';
+                                  ref.read(emailProvider.notifier).state = '';
+                                  ref.read(passwordProvider.notifier).state =
+                                      '';
+                                  ref.read(secretKeyProvider.notifier).state =
+                                      '';
+
+                                  // Save empty values to persist the clear.
+
+                                  await _saveSettings();
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.grey[50],
+                            ),
+                            child: const Text(
+                              'Clear All',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          ElevatedButton(
+                            onPressed: () async {
+                              // Show confirmation dialog before resetting.
+
+                              await showConstrainedConfirmationDialog(
+                                context: context,
+                                title: 'Reset Settings',
+                                message:
+                                    'Are you sure you want to reset all settings to default?',
+                                confirmText: 'Reset',
+                                confirmColor: Colors.red,
+                                maxHeight: 100,
+                                onConfirm: resetSettings,
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red[50],
+                            ),
+                            child: const Text(
+                              'Reset to Default',
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

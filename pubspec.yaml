@@ -53,6 +53,7 @@ dependencies:
   badges: ^3.1.2
   pdf: ^3.11.3
   printing: ^5.14.2
+  webdriver: ^3.0.3
   version_widget:
     git:
       url: https://github.com/anusii/version_widget.git
@@ -74,7 +75,6 @@ dev_dependencies:
     git:
       url: https://github.com/anusii/import-order-lint.git
       ref: main
-  webdriver: 3.0.4
 
 dependency_overrides:
 

@@ -30,12 +30,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'package:healthpod/providers/settings.dart';
 import 'package:healthpod/theme/app_theme.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
 import 'package:healthpod/widgets/theme_toggle.dart';
 
-// Theme mode provider to manage light/dark theme state
+// Theme mode provider to manage light/dark theme state.
+
 final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
 
 void main() async {
@@ -43,15 +45,14 @@ void main() async {
   // we asynchronously [await] the window manager below. Often, `main()` will
   // simply include just [runApp].
 
+  // Ensure Flutter bindings are initialized for async operations
+  WidgetsFlutterBinding.ensureInitialized();
+
   if (isDesktop(PlatformWrapper())) {
-    // Suport [windowManager] options for the desktop. We do this here before
+    // Support [windowManager] options for the desktop. We do this here before
     // running the app. If there is no [windowManager] options we probably don't
     // need this whole section.
 
-    // Ensure things are set up properly since we haven't yet initialised the
-    // app with [runApp].
-
-    WidgetsFlutterBinding.ensureInitialized();
     await windowManager.ensureInitialized();
 
     const windowOptions = WindowOptions(
@@ -103,6 +104,10 @@ class HealthPod extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeProvider);
     final theme = Theme.of(context);
+
+    // Initialise settings.
+
+    ref.watch(settingsInitializerProvider);
 
     return MaterialApp(
       title: 'Solid Health Pod',
