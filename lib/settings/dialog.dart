@@ -60,14 +60,14 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
     // Get current values from providers.
 
     final serverUrl = ref.read(serverURLProvider);
-    final username = ref.read(usernameProvider);
+    final email = ref.read(emailProvider);
     final password = ref.read(passwordProvider);
     final secretKey = ref.read(secretKeyProvider);
 
     // Save to SharedPreferences.
 
     await prefs.setString('server_url', serverUrl);
-    await prefs.setString('username', username);
+    await prefs.setString('email', email);
     await prefs.setString('password', password);
     await prefs.setString('secret_key', secretKey);
   }
@@ -81,8 +81,8 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
 
     ref.read(serverURLProvider.notifier).state =
         prefs.getString('server_url') ?? 'https://pods.dev.solidcommunity.au';
-    ref.read(usernameProvider.notifier).state =
-        prefs.getString('username') ?? 'test@anu.edu.au';
+    ref.read(emailProvider.notifier).state =
+        prefs.getString('email') ?? 'test@anu.edu.au';
     ref.read(passwordProvider.notifier).state =
         prefs.getString('password') ?? 'SuperSecure123';
     ref.read(secretKeyProvider.notifier).state =
@@ -102,16 +102,16 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('server_url');
-      // leave username, password and secret key here for now.
+      // leave email, password and secret key here for now.
 
-      await prefs.remove('username');
+      await prefs.remove('email');
       await prefs.remove('password');
       await prefs.remove('secret_key');
 
       // Reset all providers to default values.
 
       ref.invalidate(serverURLProvider);
-      ref.invalidate(usernameProvider);
+      ref.invalidate(emailProvider);
       ref.invalidate(passwordProvider);
       ref.invalidate(secretKeyProvider);
 
@@ -123,7 +123,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
     // Watch providers to trigger save on changes.
 
     ref.listen(serverURLProvider, (previous, next) => _saveSettings());
-    ref.listen(usernameProvider, (previous, next) => _saveSettings());
+    ref.listen(emailProvider, (previous, next) => _saveSettings());
     ref.listen(passwordProvider, (previous, next) => _saveSettings());
     ref.listen(secretKeyProvider, (previous, next) => _saveSettings());
 
@@ -196,21 +196,19 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                       ),
                       const SizedBox(height: 16),
                       SettingField(
-                        label: 'Username',
+                        label: 'Email',
                         hint: 'test@anu.edu.au',
-                        provider: usernameProvider,
+                        provider: emailProvider,
                         tooltip: '''
 
-                        **Username Setting**
-                        Enter your Solid Pod username/email.
+                        **Email Setting**
+                        Enter your Solid Pod email address.
                         Default: test@anu.edu.au
 
-                        This is your login username for the Solid Pod server.
-                        It should be a valid email address.
-                        **Username:** This is your Solid Pod username that is
-                        added to the **Server URL** to construct your WebID for
-                        logging in to your Pod on the selected server. The
-                        default is empty.
+                        This is your login email for the Solid Pod server.
+                        It must be a valid email address containing an @ symbol.
+                        This email is added to the **Server URL** to construct your WebID for
+                        logging in to your Pod on the selected server.
 
                         ''',
                       ),
@@ -273,8 +271,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
 
                                   ref.read(serverURLProvider.notifier).state =
                                       '';
-                                  ref.read(usernameProvider.notifier).state =
-                                      '';
+                                  ref.read(emailProvider.notifier).state = '';
                                   ref.read(passwordProvider.notifier).state =
                                       '';
                                   ref.read(secretKeyProvider.notifier).state =

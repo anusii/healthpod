@@ -189,20 +189,20 @@ Widget createSolidLogin(BuildContext context) {
     return Consumer(
       builder: (context, ref, child) {
         final serverUrl = ref.watch(serverURLProvider);
-        final username = ref.watch(usernameProvider);
+        final email = ref.watch(emailProvider);
         final password = ref.watch(passwordProvider);
 
         debugPrint("🔍 Checking saved credentials...");
         debugPrint("📡 Server URL: $serverUrl");
-        debugPrint("👤 Username present: ${username.isNotEmpty}");
+        debugPrint("👤 Email present: ${email.isNotEmpty}");
         debugPrint("🔑 Password present: ${password.isNotEmpty}");
 
         // If we have saved credentials, try auto-login.
 
-        if (username.isNotEmpty && password.isNotEmpty) {
+        if (email.isNotEmpty && password.isNotEmpty) {
           debugPrint("✨ Attempting auto-login with saved credentials");
           return FutureBuilder(
-            future: _performAutoLogin(serverUrl, username, password, context),
+            future: _performAutoLogin(serverUrl, email, password, context),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 debugPrint("⏳ Auto-login in progress...");

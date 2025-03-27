@@ -43,12 +43,12 @@ Future<String> _initSetting(String key, String defaultValue) async {
 final settingsInitializerProvider = FutureProvider<void>((ref) async {
   final serverUrl =
       await _initSetting('server_url', 'https://pods.dev.solidcommunity.au');
-  final username = await _initSetting('username', 'test@anu.edu.au');
+  final email = await _initSetting('email', 'test@anu.edu.au');
   final password = await _initSetting('password', 'SuperSecure123');
   final secretKey = await _initSetting('secret_key', 'YourSecretKey123');
 
   ref.read(serverURLProvider.notifier).state = serverUrl;
-  ref.read(usernameProvider.notifier).state = username;
+  ref.read(emailProvider.notifier).state = email;
   ref.read(passwordProvider.notifier).state = password;
   ref.read(secretKeyProvider.notifier).state = secretKey;
 });
@@ -58,9 +58,9 @@ final settingsInitializerProvider = FutureProvider<void>((ref) async {
 final serverURLProvider =
     StateProvider<String>((ref) => 'https://pods.dev.solidcommunity.au');
 
-// Stores the user's Solid Pod username.
+// Stores the user's Solid Pod email.
 
-final usernameProvider = StateProvider<String>((ref) => '');
+final emailProvider = StateProvider<String>((ref) => '');
 
 // Stores the user's Solid Pod password.
 
