@@ -57,14 +57,14 @@ dependencies:
   version_widget:
     git:
       url: https://github.com/anusii/version_widget.git
-  
+
 
 dev_dependencies:
 
   dart_code_metrics:
     git:
       url: https://github.com/anusii/dart-code-metrics.git
-      ref: dev
+      ref: main
 
   flutter_test:
     sdk: flutter
