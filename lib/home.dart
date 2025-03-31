@@ -45,6 +45,7 @@ import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/widgets/footer.dart';
 import 'package:healthpod/widgets/home_page.dart';
+import 'package:healthpod/widgets/theme_toggle.dart';
 
 /// The home screen for the HealthPod app.
 ///
@@ -236,6 +237,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
           ),
 
           const SizedBox(width: 50),
+
+          const ThemeToggle(),
 
           MarkdownTooltip(
             message: '''
