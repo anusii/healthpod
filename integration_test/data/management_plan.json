@@ -1,0 +1,19 @@
+{
+  "timestamp": "2024-01-01T00:00:00Z",
+  "plan": {
+    "doctor": {
+      "name": "Dr. Smith",
+      "image": "assets/images/sample_doctor_image.png"
+    },
+    "items": [
+      {
+        "id": 1,
+        "instruction": "Continue all current medications."
+      },
+      {
+        "id": 2,
+        "instruction": "Continue healthy eating and regular exercise."
+      }
+    ]
+  }
+} 

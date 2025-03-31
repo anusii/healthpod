@@ -1,0 +1,15 @@
+{
+  "timestamp": "2024-01-01T00:00:00Z",
+  "appointments": [
+    {
+      "date": "2024-03-13",
+      "dayOfWeek": "Monday",
+      "time": "14:30",
+      "location": "Gurriny Yealamucka",
+      "clinicBus": true,
+      "transportPhone": "(07) 4226 4100",
+      "transportOfficeHours": true,
+      "status": "upcoming"
+    }
+  ]
+} 
