@@ -48,10 +48,12 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
     onProgressChange.call(true);
 
     // Check current resources.
+
     final dirUrl = await getDirUrl(basePath);
     final resources = await getResourcesInContainer(dirUrl);
 
     // Check if exists as directory.
+
     bool existsAsDir = resources.subDirs.contains(featureName);
     if (existsAsDir) {
       debugPrint('Feature folder $featureName already exists as directory');
@@ -60,6 +62,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
     }
 
     // Check if exists as file and delete if necessary.
+
     bool existsAsFile = resources.files.contains(featureName);
     if (existsAsFile) {
       debugPrint(
@@ -67,6 +70,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
       if (!context.mounted) return SolidFunctionCallStatus.fail;
 
       // Full path for deletion needs to include healthpod/data.
+
       await deleteFile(
         '$basePath/$featureName',
       );
@@ -78,6 +82,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
     }
 
     // Create the feature folder structure.
+
     final result = await writePod(
       '$featureName/.init',
       '',
@@ -90,30 +95,17 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
     if (result == SolidFunctionCallStatus.success && createInitFile) {
       String initContent;
 
-      // Profile-specific initialization
-      if (featureName == 'profile') {
-        initContent = '''
-{
-  "timestamp": "${DateTime.now().toIso8601String()}",
-  "data": {
-    "address": "",
-    "bestContactPhone": "",
-    "alternativeContactNumber": "",
-    "email": "",
-    "dateOfBirth": "",
-    "gender": "",
-    "identifyAsIndigenous": false
-  }
-}''';
-      } else {
-        // Default initialization for other features
-        initContent = '''
-{
-  "feature": "$featureName",
-  "created": "${DateTime.now().toIso8601String()}",
-  "version": "1.0"
-}''';
-      }
+      // Initialisation content for all features.
+
+      initContent = '''
+
+          {
+            "feature": "$featureName",
+            "created": "${DateTime.now().toIso8601String()}",
+            "version": "1.0"
+          }
+
+          ''';
 
       if (!context.mounted) return result;
 
