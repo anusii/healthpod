@@ -25,12 +25,24 @@
 
 library;
 
+// TODO(github/issue): We are currently using a local copy of the solidpod package
+// because the solidAuthenticate function is not exposed in the public API. This
+// function is essential for implementing auto-login with saved credentials, as it
+// handles the authentication flow with the Solid server, including token management
+// and WebID retrieval. Once the solidpod package exposes this functionality in its
+// public API, we should update to use the published package version instead.
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solidpod/solidpod.dart';
+// ignore: implementation_imports
+import 'package:solidpod/src/solid/authenticate.dart' show solidAuthenticate;
 
 import 'package:healthpod/home.dart';
+import 'package:healthpod/providers/settings.dart';
+import 'package:healthpod/services/chrome_login_service.dart';
 import 'package:healthpod/utils/platform/helper.dart';
 
 /// Solid POD Authentication Widget Creator
@@ -78,10 +90,7 @@ class SolidLoginTestHelper {
 ///   A Widget configured for the appropriate authentication mode
 
 Widget createSolidLogin(BuildContext context) {
-  // Determine if running in integration test mode.
-
   final bool isIntegrationTest = PlatformHelper.isIntegrationTest();
-
   debugPrint("🔥 INTEGRATION_TEST: $isIntegrationTest");
 
   if (isIntegrationTest) {
@@ -91,8 +100,6 @@ Widget createSolidLogin(BuildContext context) {
       home: Scaffold(
         appBar: AppBar(title: const Text("Solid Login - WebView Mode")),
         body: InAppWebView(
-          // Configure initial POD server URL.
-
           initialUrlRequest: URLRequest(
             url: WebUri("https://pods.dev.solidcommunity.au/"),
           ),
@@ -101,7 +108,6 @@ Widget createSolidLogin(BuildContext context) {
             debugPrint("🌍 WebView Loaded: $url");
 
             // Automated login flow:
-
             // Step 1: Initial navigation to login page.
 
             if (url.toString() == "https://pods.dev.solidcommunity.au/") {
@@ -120,7 +126,6 @@ Widget createSolidLogin(BuildContext context) {
             if (url.toString().contains("/.account/login/password")) {
               debugPrint("✍️ Injecting login credentials...");
               await controller.evaluateJavascript(source: """
-
                 let emailInput = document.querySelector('input[name="email"]');
                 let passwordInput = document.querySelector('input[name="password"]');
                 let loginButton = document.querySelector('button[type="submit"]');
@@ -132,7 +137,6 @@ Widget createSolidLogin(BuildContext context) {
                     loginButton.click();
                   }, 2000);
                 }
-
               """);
             }
 
@@ -141,42 +145,32 @@ Widget createSolidLogin(BuildContext context) {
             if (url.toString().contains("/account/oidc/consent")) {
               debugPrint("🔍 Detected consent screen, clicking 'Yes'...");
               await controller.evaluateJavascript(source: """
-
                 let yesButton = document.querySelector("button#authorize");
                 if (yesButton) {
                   setTimeout(() => {
                     yesButton.click();
                   }, 2000);
                 }
-
               """);
             }
 
             // Step 4: Extract WebID from account page.
+
             if (url.toString().contains("/.account/account")) {
               debugPrint(
                   "✅ Login detected at /.account/account/, waiting a bit for DOM...");
-
-              // Allow time for DOM to fully render.
-
               await Future.delayed(const Duration(seconds: 3));
-
-              // Extract WebID using JavaScript DOM manipulation.
 
               final extractedWebId =
                   await controller.evaluateJavascript(source: """
-
-                    (function() {
-                      const anchor = document.querySelector('#webIdEntries li a');
-                      if (anchor) {
-                        return anchor.href;
-                      }
-                      return '';
-                    })();
-
-                  """) as String;
-
-              // Store or log the extracted WebID.
+                (function() {
+                  const anchor = document.querySelector('#webIdEntries li a');
+                  if (anchor) {
+                    return anchor.href;
+                  }
+                  return '';
+                })();
+              """) as String;
 
               if (extractedWebId.isNotEmpty) {
                 debugPrint("🔑 Extracted WebID from HTML: $extractedWebId");
@@ -184,38 +178,113 @@ Widget createSolidLogin(BuildContext context) {
               } else {
                 debugPrint("❌ Could not find WebID under #webIdEntries li a!");
               }
-
-              // Note: Intentionally not navigating away to preserve WebView state.
             }
           },
         ),
       ),
     );
   } else {
-    // Production mode: Use standard SolidLogin widget.
-
     debugPrint("❌ Using external browser for login");
-    return const SolidLogin(
-      // If the app has functionality that does not require access to Pod
-      // data then [required] can be `false`. If the user connects to their
-      // Pod then their session information will be saved to save having to
-      // log in everytime. The login token and the security key are (optionally)
-      // cached so that the login information is not required every time.
-      //
-      // In this demo app we allow the CONTINUE button so as to demonstrate
-      // the use of [SolidLoginPopup] during the app session. If we want to
-      // save the data to the Pod or view data from the Pod, then if the
-      // user did not log in during startup we can call [SolidLoginPopup] to
-      // establish the connection at that time.
 
-      required: false, // Allow app functionality without Pod access.
-      title: 'HEALTH POD',
-      appDirectory: 'healthpod',
-      webID: 'https://pods.dev.solidcommunity.au', // Set default server to dev.
-      image: AssetImage('assets/images/healthpod_image.png'),
-      logo: AssetImage('assets/images/healthpod_icon.png'),
-      link: 'https://github.com/anusii/healthpod/blob/main/README.md',
-      child: HealthPodHome(),
+    return Consumer(
+      builder: (context, ref, child) {
+        final serverUrl = ref.watch(serverURLProvider);
+        final email = ref.watch(emailProvider);
+        final password = ref.watch(passwordProvider);
+
+        debugPrint("🔍 Checking saved credentials...");
+        debugPrint("📡 Server URL: $serverUrl");
+        debugPrint("👤 Email present: ${email.isNotEmpty}");
+        debugPrint("🔑 Password present: ${password.isNotEmpty}");
+
+        // If we have saved credentials, try auto-login.
+
+        if (email.isNotEmpty && password.isNotEmpty) {
+          debugPrint("✨ Attempting auto-login with saved credentials");
+          return FutureBuilder(
+            future: _performAutoLogin(serverUrl, email, password, context),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                debugPrint("⏳ Auto-login in progress...");
+                return const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Logging in with saved credentials...'),
+                    ],
+                  ),
+                );
+              }
+
+              if (snapshot.hasError) {
+                debugPrint("❌ Auto-login failed: ${snapshot.error}");
+                // Fall back to normal login screen.
+
+                return _buildNormalLogin(serverUrl);
+              }
+
+              if (snapshot.hasData && snapshot.data == true) {
+                debugPrint("✅ Auto-login successful!");
+                return const HealthPodHome();
+              }
+
+              // If auto-login failed, show normal login screen.
+
+              debugPrint("⚠️ Auto-login failed, showing login screen");
+              return _buildNormalLogin(serverUrl);
+            },
+          );
+        }
+
+        debugPrint("ℹ️ No saved credentials found, showing login screen");
+        return _buildNormalLogin(serverUrl);
+      },
     );
   }
+}
+
+/// Perform automated login using ChromeDriver.
+
+Future<bool> _performAutoLogin(
+  String serverUrl,
+  String username,
+  String password,
+  BuildContext context,
+) async {
+  try {
+    final loginService = ChromeLoginService.instance;
+    await loginService.initialize();
+
+    final webId = await loginService.login(serverUrl, username, password);
+    if (webId != null) {
+      if (context.mounted) {
+        final result = await solidAuthenticate(webId, context);
+        return result != null;
+      }
+    }
+    return false;
+  } catch (e) {
+    debugPrint("❌ Auto-login error: $e");
+    return false;
+  } finally {
+    await ChromeLoginService.instance.dispose();
+  }
+}
+
+/// Build the normal login widget.
+
+Widget _buildNormalLogin(String serverUrl) {
+  return SolidLogin(
+    required: false,
+    title: 'HEALTH POD',
+    appDirectory: 'healthpod',
+    webID:
+        serverUrl.isNotEmpty ? serverUrl : 'https://pods.dev.solidcommunity.au',
+    image: const AssetImage('assets/images/healthpod_image.png'),
+    logo: const AssetImage('assets/images/healthpod_icon.png'),
+    link: 'https://github.com/anusii/healthpod/blob/main/README.md',
+    child: const HealthPodHome(),
+  );
 }
