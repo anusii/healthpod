@@ -319,8 +319,14 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
               Padding(
                 padding: const EdgeInsets.only(left: 4.0, right: 8.0),
-                child: Tooltip(
-                  message: 'Visit American Heart Association',
+                child: MarkdownTooltip(
+                  message: '''
+
+                  **American Heart Association**
+                  
+                  Click to visit [AHA's website](https://www.heart.org) for expert guidance on heart health and blood pressure management.
+
+                  ''',
                   child: IconButton(
                     icon: Icon(
                       Icons.open_in_new,

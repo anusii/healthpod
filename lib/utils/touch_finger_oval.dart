@@ -27,18 +27,16 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:markdown_tooltip/markdown_tooltip.dart';
+
 Widget touchFingerOval(String messageText) {
   return ClipOval(
     child: Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: null,
-        child: Tooltip(
+        child: MarkdownTooltip(
           message: messageText,
-          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
-          margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
-          textStyle: plotTextStyleTooltip,
-          showDuration: Duration(seconds: messageText.length > 200 ? 8 : 4),
           child: Icon(Icons.touch_app, color: Colors.green, size: 28),
         ),
       ),
