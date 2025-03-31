@@ -70,7 +70,7 @@ dev_dependencies:
     sdk: flutter
 
   ubuntu_lints: ^0.4.0
-  custom_lint: 0.6.10
+  custom_lint: 0.7.0
   import_order_lint:
     git:
       url: https://github.com/anusii/import-order-lint.git
