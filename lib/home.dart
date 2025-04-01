@@ -69,14 +69,14 @@ final List<Map<String, dynamic>> homeTabs = [
     'icon': Icons.calendar_today,
     'color': null,
     'content': const DiaryTab(),
-    'message': '''
+    'tooltip': '''
 
     Here you will be able to access and manage your
     appointments. You can enter historic information, update
     when you recieve a new appointment, and download
     appointments from other sources.
+    
     ''',
-    'dialogTitle': 'Coming Soon - Appointment',
   },
   {
     'title': 'Update',
