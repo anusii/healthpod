@@ -37,7 +37,7 @@ import 'package:healthpod/features/diary/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
 import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
-import 'package:healthpod/features/survey/tab.dart';
+import 'package:healthpod/features/update/tab.dart';
 import 'package:healthpod/settings/dialog.dart';
 import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
