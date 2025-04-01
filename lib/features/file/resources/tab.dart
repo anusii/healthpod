@@ -24,9 +24,8 @@
 library;
 
 import 'package:flutter/material.dart';
-
-import 'package:healthpod/features/file/resources/card.dart';
-import 'package:healthpod/features/file/resources/service/resource_service.dart';
+import 'package:healthpod/features/resources/card.dart';
+import 'package:healthpod/features/resources/service/resource_service.dart';
 
 /// A tab widget that displays health resources organised by category.
 
