@@ -35,7 +35,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:path/path.dart' as path;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
-import 'package:printing/printing.dart';
 
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
 import 'package:healthpod/utils/is_text_file.dart';
@@ -152,31 +151,32 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
   }
 
   Future<void> handlePdfToJson(File file) async {
+    // Store context before async operations
+    final currentContext = context;
+
     try {
-      // Show loading dialog while processing.
+      // Show loading dialog while processing
+      if (currentContext.mounted) {
+        showDialog(
+          context: currentContext,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
 
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-
-      // Read PDF file.
-
+      // Read PDF file
       final bytes = await file.readAsBytes();
       final PdfDocument pdf = PdfDocument(inputBytes: bytes);
 
-      // Extract text from all pages.
-
+      // Extract text from all pages
       String text = '';
       for (var i = 0; i < pdf.pages.count; i++) {
         text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
       }
 
-      // Structure the data to match kt_pathology.json format.
-
+      // Structure the data to match kt_pathology.json format
       final List<String> lines = text.split('\n');
       final Map<String, dynamic> jsonData = {
         'metadata': {
@@ -195,42 +195,40 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         }
       };
 
-      // Close loading dialog.
-
-      if (context.mounted) {
-        Navigator.pop(context);
+      // Close loading dialog
+      if (currentContext.mounted) {
+        Navigator.pop(currentContext);
       }
 
-      // Save JSON file in integration_test/data folder.
-
-      if (context.mounted) {
+      // Save JSON file in integration_test/data folder
+      if (currentContext.mounted) {
         final jsonString = jsonEncode(jsonData);
         final jsonFileName = '${path.basenameWithoutExtension(file.path)}.json';
         final jsonFilePath =
             path.join('integration_test', 'data', jsonFileName);
         final jsonFile = File(jsonFilePath);
 
-        // Create directory if it doesn't exist.
-
+        // Create directory if it doesn't exist
         await jsonFile.parent.create(recursive: true);
         await jsonFile.writeAsString(jsonString);
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('JSON file saved as $jsonFilePath'),
-            action: SnackBarAction(
-              label: 'View',
-              onPressed: () => handleJsonPreview(jsonFilePath),
+        if (currentContext.mounted) {
+          ScaffoldMessenger.of(currentContext).showSnackBar(
+            SnackBar(
+              content: Text('JSON file saved as $jsonFilePath'),
+              action: SnackBarAction(
+                label: 'View',
+                onPressed: () => handleJsonPreview(jsonFilePath),
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
     } catch (e) {
-      // Handle errors and display error message.
-
-      if (context.mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
+      // Handle errors and display error message
+      if (currentContext.mounted) {
+        Navigator.pop(currentContext);
+        ScaffoldMessenger.of(currentContext).showSnackBar(
           SnackBar(
             content: Text('Error converting PDF to JSON: $e'),
             backgroundColor: Colors.red,
@@ -241,6 +239,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
   }
 
   Future<void> handleJsonPreview(String filePath) async {
+    final currentContext = context;
     try {
       final file = File(filePath);
       final content = await file.readAsString();
@@ -248,9 +247,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
       final formattedJson =
           const JsonEncoder.withIndent('  ').convert(jsonData);
 
-      if (context.mounted) {
+      if (currentContext.mounted) {
         showDialog(
-          context: context,
+          context: currentContext,
           builder: (context) => AlertDialog(
             title: Row(
               children: [
@@ -272,7 +271,6 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
             actions: [
               TextButton(
                 onPressed: () {
-                  // Extract text content from structuredLines
                   if (jsonData['content']?['structuredLines'] != null) {
                     final List<dynamic> lines =
                         jsonData['content']['structuredLines'];
@@ -281,7 +279,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                     final extractedText = texts.join('\n');
 
                     showDialog(
-                      context: context,
+                      context: currentContext,
                       builder: (context) => AlertDialog(
                         title: const Row(
                           children: [
@@ -302,7 +300,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                         ),
                         actions: [
                           TextButton(
-                            onPressed: () => Navigator.pop(context),
+                            onPressed: () => Navigator.pop(currentContext),
                             child: const Text('Close'),
                           ),
                         ],
@@ -313,7 +311,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 child: const Text('Extract Info'),
               ),
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(currentContext),
                 child: const Text('Close'),
               ),
             ],
@@ -322,8 +320,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
       }
     } catch (e) {
       debugPrint('JSON preview error: $e');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+      if (currentContext.mounted) {
+        ScaffoldMessenger.of(currentContext).showSnackBar(
           SnackBar(
             content: Text('Error reading JSON file: $e'),
             backgroundColor: Colors.red,
@@ -568,7 +566,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
             **Convert to JSON**: Tap here to convert the PDF file to JSON format.
             This will extract text from the PDF and structure it as JSON data.
-            
+
             ''',
             child: TextButton.icon(
               onPressed: state.uploadInProgress
