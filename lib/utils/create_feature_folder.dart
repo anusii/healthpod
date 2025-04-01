@@ -34,7 +34,7 @@ import 'package:healthpod/constants/paths.dart';
 /// Creates a feature folder in POD with initialisation file.
 ///
 /// Returns a [Future<SolidFunctionCallStatus>] indicating the creation result.
-/// The [featureName] parameter specifies which feature folder to create (e.g. 'bp').
+/// The [featureName] parameter specifies which feature folder to create (e.g. 'profile').
 /// If [createInitFile] is true, creates an initialisation file in the folder.
 
 Future<SolidFunctionCallStatus> createFeatureFolder({
@@ -92,14 +92,20 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
     );
 
     // If folder creation was successful and initialization file is requested.
-
     if (result == SolidFunctionCallStatus.success && createInitFile) {
-      final initContent = '''
-{
-  "feature": "$featureName",
-  "created": "${DateTime.now().toIso8601String()}",
-  "version": "1.0"
-}''';
+      String initContent;
+
+      // Initialisation content for all features.
+
+      initContent = '''
+
+          {
+            "feature": "$featureName",
+            "created": "${DateTime.now().toIso8601String()}",
+            "version": "1.0"
+          }
+
+          ''';
 
       if (!context.mounted) return result;
 
