@@ -29,19 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 
-class Appointment {
-  final DateTime date;
-  final String title;
-  final String description;
-  final bool isPast;
-
-  Appointment({
-    required this.date,
-    required this.title,
-    required this.description,
-    required this.isPast,
-  });
-}
+import 'models/appointment.dart';
 
 class DiaryTab extends StatefulWidget {
   const DiaryTab({super.key});
