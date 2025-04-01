@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:healthpod/features/diary/tab.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:version_widget/version_widget.dart';
@@ -67,14 +68,7 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Diary',
     'icon': Icons.calendar_today,
     'color': null,
-    'message': '''
-
-    Here you will be able to access and manage your
-    appointments. You can enter historic information, update
-    when you recieve a new appointment, and download
-    appointments from other sources.
-    ''',
-    'dialogTitle': 'Coming Soon - Appointment',
+    'content': const DiaryTab(),
   },
   {
     'title': 'Update',
