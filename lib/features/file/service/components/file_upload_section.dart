@@ -171,7 +171,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
       }
 
-      // Structure the data
+      // Structure the data to match kt_pathology.json format
       final List<String> lines = text.split('\n');
       final Map<String, dynamic> jsonData = {
         'metadata': {
@@ -195,18 +195,24 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         Navigator.pop(context);
       }
 
-      // Save JSON file
+      // Save JSON file in integration_test/data folder
       if (context.mounted) {
         final jsonString = jsonEncode(jsonData);
-        final jsonFile = File('${file.path}.json');
+        final jsonFileName = '${path.basenameWithoutExtension(file.path)}.json';
+        final jsonFilePath =
+            path.join('integration_test', 'data', jsonFileName);
+        final jsonFile = File(jsonFilePath);
+
+        // Create directory if it doesn't exist
+        await jsonFile.parent.create(recursive: true);
         await jsonFile.writeAsString(jsonString);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('JSON file saved as ${jsonFile.path}'),
+            content: Text('JSON file saved as $jsonFilePath'),
             action: SnackBarAction(
               label: 'View',
-              onPressed: () => handlePreview(jsonFile.path),
+              onPressed: () => handleJsonPreview(jsonFilePath),
             ),
           ),
         );
