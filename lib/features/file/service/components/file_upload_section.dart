@@ -151,11 +151,13 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
   }
 
   Future<void> handlePdfToJson(File file) async {
-    // Store context before async operations
+    // Store context before async operations.
+
     final currentContext = context;
 
     try {
-      // Show loading dialog while processing
+      // Show loading dialog while processing.
+
       if (currentContext.mounted) {
         showDialog(
           context: currentContext,
@@ -166,17 +168,20 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         );
       }
 
-      // Read PDF file
+      // Read PDF file.
+
       final bytes = await file.readAsBytes();
       final PdfDocument pdf = PdfDocument(inputBytes: bytes);
 
-      // Extract text from all pages
+      // Extract text from all pages.
+
       String text = '';
       for (var i = 0; i < pdf.pages.count; i++) {
         text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
       }
 
-      // Structure the data to match kt_pathology.json format
+      // Structure the data to match kt_pathology.json format.
+
       final List<String> lines = text.split('\n');
       final Map<String, dynamic> jsonData = {
         'metadata': {
@@ -195,12 +200,14 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         }
       };
 
-      // Close loading dialog
+      // Close loading dialog.
+
       if (currentContext.mounted) {
         Navigator.pop(currentContext);
       }
 
-      // Save JSON file in integration_test/data folder
+      // Save JSON file in integration_test/data folder.
+
       if (currentContext.mounted) {
         final jsonString = jsonEncode(jsonData);
         final jsonFileName = '${path.basenameWithoutExtension(file.path)}.json';
@@ -208,7 +215,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
             path.join('integration_test', 'data', jsonFileName);
         final jsonFile = File(jsonFilePath);
 
-        // Create directory if it doesn't exist
+        // Create directory if it doesn't exist.
+
         await jsonFile.parent.create(recursive: true);
         await jsonFile.writeAsString(jsonString);
 
@@ -225,7 +233,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         }
       }
     } catch (e) {
-      // Handle errors and display error message
+      // Handle errors and display error message.
+
       if (currentContext.mounted) {
         Navigator.pop(currentContext);
         ScaffoldMessenger.of(currentContext).showSnackBar(
