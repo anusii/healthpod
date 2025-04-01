@@ -153,6 +153,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
   Future<void> handlePdfToJson(File file) async {
     try {
+      // Show loading dialog while processing.
+
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -161,17 +163,20 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         ),
       );
 
-      // Read PDF file
+      // Read PDF file.
+
       final bytes = await file.readAsBytes();
       final PdfDocument pdf = PdfDocument(inputBytes: bytes);
 
-      // Extract text from all pages
+      // Extract text from all pages.
+
       String text = '';
       for (var i = 0; i < pdf.pages.count; i++) {
         text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
       }
 
-      // Structure the data to match kt_pathology.json format
+      // Structure the data to match kt_pathology.json format.
+
       final List<String> lines = text.split('\n');
       final Map<String, dynamic> jsonData = {
         'metadata': {
@@ -190,12 +195,14 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         }
       };
 
-      // Close loading dialog
+      // Close loading dialog.
+
       if (context.mounted) {
         Navigator.pop(context);
       }
 
-      // Save JSON file in integration_test/data folder
+      // Save JSON file in integration_test/data folder.
+
       if (context.mounted) {
         final jsonString = jsonEncode(jsonData);
         final jsonFileName = '${path.basenameWithoutExtension(file.path)}.json';
@@ -203,7 +210,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
             path.join('integration_test', 'data', jsonFileName);
         final jsonFile = File(jsonFilePath);
 
-        // Create directory if it doesn't exist
+        // Create directory if it doesn't exist.
+
         await jsonFile.parent.create(recursive: true);
         await jsonFile.writeAsString(jsonString);
 
@@ -218,6 +226,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         );
       }
     } catch (e) {
+      // Handle errors and display error message.
+
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -495,30 +505,13 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           ],
         ),
 
-        // MarkdownTooltip(
-        //   message: '''
-        //     **Convert to JSON**: Tap here to convert the PDF file to JSON format.
-        //     This will extract text from the PDF and structure it as JSON data.
-        //     ''',
-        //   child: TextButton.icon(
-        //     onPressed: state.uploadInProgress
-        //         ? null
-        //         : () => handlePdfToJson(File(state.uploadFile!)),
-        //     icon: const Icon(Icons.code),
-        //     label: const Text('Convert to JSON'),
-        //     style: TextButton.styleFrom(
-        //       padding: const EdgeInsets.symmetric(vertical: 12),
-        //       shape: RoundedRectangleBorder(
-        //         borderRadius: BorderRadius.circular(8),
-        //       ),
-        //     ),
-        //   ),
-        // ),
         const SizedBox(width: 8),
         MarkdownTooltip(
           message: '''
-            **Visualize JSON**: Tap here to select and visualize a JSON file from your local machine.
-            ''',
+
+          **Visualize JSON**: Tap here to select and visualize a JSON file from your local machine.
+
+          ''',
           child: TextButton.icon(
             onPressed: state.uploadInProgress
                 ? null
@@ -551,7 +544,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           const SizedBox(height: 12),
           MarkdownTooltip(
             message: '''
+
             **Preview File**: Tap here to preview the recently uploaded file.
+
             ''',
             child: TextButton.icon(
               onPressed: state.uploadInProgress
@@ -570,8 +565,10 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           const SizedBox(width: 8),
           MarkdownTooltip(
             message: '''
+
             **Convert to JSON**: Tap here to convert the PDF file to JSON format.
             This will extract text from the PDF and structure it as JSON data.
+            
             ''',
             child: TextButton.icon(
               onPressed: state.uploadInProgress
@@ -587,36 +584,6 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
               ),
             ),
           ),
-          // const SizedBox(width: 8),
-          // MarkdownTooltip(
-          //   message: '''
-          //   **Visualize JSON**: Tap here to select and visualize a JSON file from your local machine.
-          //   ''',
-          //   child: TextButton.icon(
-          //     onPressed: state.uploadInProgress
-          //         ? null
-          //         : () async {
-          //             final result = await FilePicker.platform.pickFiles(
-          //               type: FileType.custom,
-          //               allowedExtensions: ['json'],
-          //             );
-          //             if (result != null && result.files.isNotEmpty) {
-          //               final file = result.files.first;
-          //               if (file.path != null) {
-          //                 await handleJsonPreview(file.path!);
-          //               }
-          //             }
-          //           },
-          //     icon: const Icon(Icons.analytics),
-          //     label: const Text('Visualize JSON'),
-          //     style: TextButton.styleFrom(
-          //       padding: const EdgeInsets.symmetric(vertical: 12),
-          //       shape: RoundedRectangleBorder(
-          //         borderRadius: BorderRadius.circular(8),
-          //       ),
-          //     ),
-          //   ),
-          // ),
         ],
       ],
     );
