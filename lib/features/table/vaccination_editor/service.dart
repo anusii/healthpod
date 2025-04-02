@@ -71,9 +71,20 @@ class VaccinationEditorService {
 
       try {
         final data = json.decode(content.toString());
+        // Convert null values to empty strings in the responses map
+        if (data['responses'] != null) {
+          final responses = data['responses'] as Map<String, dynamic>;
+          responses.forEach((key, value) {
+            if (value == null) {
+              responses[key] = '';
+            }
+          });
+        }
         loadedObservations.add(VaccinationObservation.fromJson(data));
       } catch (e) {
         debugPrint('Error parsing file $file: $e');
+        // Continue with next file instead of stopping
+        continue;
       }
     }
 
