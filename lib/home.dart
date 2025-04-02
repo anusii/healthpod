@@ -163,8 +163,11 @@ final List<Map<String, dynamic>> homeTabs = [
     **Profile:** Tap here to view and manage your profile information, including:
     
     - Personal details
+
     - Identity information
+
     - Management plan
+    
     - Appointments overview
 
     ''',
@@ -245,7 +248,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
   void _handleTabChange(int index) {
     setState(() {
       _selectedIndex = index;
-      // Reset profile edit mode when switching away from profile tab
+      // Reset profile edit mode when switching away from profile tab.
+
       if (index != 7) {
         _profileEditMode = false;
       }

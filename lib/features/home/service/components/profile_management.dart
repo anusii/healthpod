@@ -26,10 +26,12 @@
 library;
 
 import 'package:flutter/material.dart';
+
 import 'package:healthpod/features/home/service/components/avatar_name.dart';
 import 'package:healthpod/features/home/service/components/personal_details.dart';
 
 /// A profile management widget that displays and allows editing of user identity and personal details.
+
 class ProfileManagement extends StatefulWidget {
   final bool initialEditMode;
 
@@ -81,13 +83,15 @@ class _ProfileManagementState extends State<ProfileManagement> {
               ],
             ),
             const SizedBox(height: 24),
-            // Identity Section
+            // Identity Section.
+
             _buildSection(
               title: 'Identity',
               child: AvatarName(isEditing: _isEditing),
             ),
             const SizedBox(height: 24),
-            // Personal Details Section
+            // Personal Details Section.
+
             _buildSection(
               title: 'Personal Details',
               child: PersonalDetails(isEditing: _isEditing),
@@ -110,7 +114,7 @@ class _ProfileManagementState extends State<ProfileManagement> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
