@@ -144,7 +144,7 @@ class FileOperations {
       final resources = await getResourcesInContainer(dirUrl);
       return resources.files.where((f) => f.endsWith('.enc.ttl')).length;
     } catch (e) {
-      debugPrint('Error counting files in directory: $e');
+      // debugPrint('Error counting files in directory: $e');
       return 0;
     }
   }

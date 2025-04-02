@@ -82,9 +82,6 @@ class VaccinationData {
 
       final resources = await getResourcesInContainer(dirUrl);
 
-      debugPrint('SubDirs: |${resources.subDirs.join('|')}|');
-      debugPrint('Files  : |${resources.files.join('|')}|');
-
       /// Process each file in the directory.
 
       for (var fileName in resources.files) {
@@ -113,7 +110,7 @@ class VaccinationData {
 
             final data = json.decode(result.toString());
             podData.add(data);
-            debugPrint('Vaccination data loaded: ${data['timestamp']}');
+            // debugPrint('Vaccination data loaded: ${data['timestamp']}');
           } catch (e) {
             debugPrint('Error parsing vaccination file $fileName: $e');
             debugPrint('Content: $result');

@@ -112,7 +112,6 @@ abstract class HealthDataImporterBase {
     try {
       // Start processing the CSV file by reading its contents.
 
-      debugPrint('Starting CSV processing');
       final file = File(filePath);
       final String content = await file.readAsString();
 

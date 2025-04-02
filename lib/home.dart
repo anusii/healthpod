@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Wednesday 2025-03-26 10:26:49 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-04-02 16:14:46 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -62,7 +62,11 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Home',
     'icon': Icons.home,
     'color': null,
-    'tooltip': 'Return to your main HealthPod overview and dashboard.',
+    'tooltip': '''
+
+    **Home:** Tap here to view your HealthPod overview and dashboard.
+
+    ''',
   },
   {
     'title': 'Diary',
@@ -71,11 +75,10 @@ final List<Map<String, dynamic>> homeTabs = [
     'content': const DiaryTab(),
     'tooltip': '''
 
-    Here you will be able to access and manage your
-    appointments. You can enter historic information, update
-    when you recieve a new appointment, and download
-    appointments from other sources.
-    
+    **Diary:** Tap here to access and manage your appointments. You can enter
+    historic information, update the calendar when you recieve a new
+    appointment, and load appointments from other sources into your calendar.
+
     ''',
   },
   {
@@ -85,8 +88,9 @@ final List<Map<String, dynamic>> homeTabs = [
     'content': const SurveyTab(),
     'tooltip': '''
 
-    Log your Blood Pressure (systolic, diastolic, heart rate),
-    how you are feeling, and vaccination records.
+    **Update:** Tap here to enter new data, including observations of your Blood
+    Pressure (systolic, diastolic, heart rate), and vaccinations.
+
     ''',
   },
   {
@@ -94,16 +98,25 @@ final List<Map<String, dynamic>> homeTabs = [
     'icon': Icons.show_chart,
     'color': null,
     'content': const ChartTab(),
-    'tooltip':
-        'Visualize your Blood Pressure trends and other health metrics with interactive charts.Vaccination timeline charts are also available.',
+    'tooltip': '''
+
+    **Charts:** Tap here to visualise your blood pressure observations, showing
+      any trends over time, as well as other health metrics. Your vaccination
+      timeline charts are also available.
+
+    ''',
   },
   {
     'title': 'Table',
     'icon': Icons.table_chart,
     'color': null,
     'content': const TableTab(),
-    'tooltip':
-        'View and manage your Blood Pressure and Vaccination records in a detailed table view.',
+    'tooltip': '''
+
+    **Table:** Tap here to view and manage your saved health data through a
+    detailed table view.
+
+    ''',
   },
   {
     'title': 'Files',
@@ -112,13 +125,14 @@ final List<Map<String, dynamic>> homeTabs = [
     'content': const FileService(),
     'tooltip': '''
 
-    Tap here to access file management features.
-    This allows you to:
+    **Files:** Tap here to access file management features.  This is a great
+    place to initially load the Health Data Wallet into your Pod. You can:
 
           - Browse your POD storage
           - Upload files to your POD
           - Download files from your POD
           - Delete files from your POD
+
     ''',
   },
   {
@@ -128,10 +142,13 @@ final List<Map<String, dynamic>> homeTabs = [
     'content': const ResourcesTab(),
     'tooltip': '''
 
-    Access a comprehensive collection of health resources including:
+    **Resources:** Tap here to access a comprehensive collection of health
+    resources including:
+
     - Health information and guides
     - External trusted resources
     - Useful health calculators and tools
+
     ''',
   },
 ];
@@ -176,7 +193,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
             }
           },
           onComplete: () {
-            debugPrint('Feature folder initialization complete');
+            // debugPrint('Feature folder initialization complete');
           },
         );
       }

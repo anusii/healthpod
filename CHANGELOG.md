@@ -17,6 +17,7 @@ Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
 ## 0.1 Initial usable release.
 
++ HOME: Concept dashboard and vaccinations [0.1.1 20250402 misc]
 + Ready for beta release [0.1.0 20250326 gjw]
 + Deploy navigator [0.0.9 20250218 kev]
 + Refine and add import order lint [0.0.8 20250207 atangster]

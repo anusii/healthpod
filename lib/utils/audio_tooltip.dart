@@ -27,6 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:markdown_tooltip/markdown_tooltip.dart';
+
 import 'package:healthpod/constants/colours.dart';
 
 /// The widget creates an icon that represents a audio and provides a tooltip
@@ -51,9 +53,14 @@ class AudioWithTooltip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: 'Click here to understand more',
-      showDuration: Duration(seconds: 2),
+    return MarkdownTooltip(
+      message: '''
+
+      **Audio Guide**
+      
+      Click here to understand more about this feature through an audio guide.
+
+      ''',
       child: IconButton(
         icon: Icon(
           Icons.audiotrack_rounded,
