@@ -161,13 +161,13 @@ final List<Map<String, dynamic>> homeTabs = [
     'tooltip': '''
 
     **Profile:** Tap here to view and manage your profile information, including:
-    
+
     - Personal details
 
     - Identity information
 
     - Management plan
-    
+
     - Appointments overview
 
     ''',

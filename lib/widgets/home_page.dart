@@ -30,11 +30,11 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/features/home/service/components/components.dart';
 
 class HomePage extends StatelessWidget {
-  final VoidCallback? onNavigateToProfile;
+  final VoidCallback onNavigateToProfile;
 
   const HomePage({
     super.key,
-    this.onNavigateToProfile,
+    required this.onNavigateToProfile,
   });
 
   Widget _buildHeader(BuildContext context) {
