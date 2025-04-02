@@ -64,8 +64,6 @@ class Logger {
     // Output formatted message to console.
     // ignore_for_file: avoid_print
 
-    print(formattedMessage);
-
     // Append to log file if file logging is enabled.
 
     if (logToFile) {

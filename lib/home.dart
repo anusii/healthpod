@@ -174,7 +174,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
             }
           },
           onComplete: () {
-            debugPrint('Feature folder initialization complete');
+            // debugPrint('Feature folder initialization complete');
           },
         );
       }

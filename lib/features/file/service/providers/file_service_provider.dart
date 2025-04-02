@@ -111,7 +111,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           ? remoteFileName
           : '${subPath.startsWith("/") ? subPath.substring(1) : subPath}/$remoteFileName';
 
-      debugPrint('Upload path: $uploadPath');
+      // debugPrint('Upload path: $uploadPath');
 
       if (!context.mounted) return;
 
@@ -188,7 +188,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           ? '$baseDir/${state.remoteFileName}'
           : '${state.currentPath}/${state.remoteFileName}';
 
-      debugPrint('Attempting to download from path: $relativePath');
+      // debugPrint('Attempting to download from path: $relativePath');
 
       if (!context.mounted) return;
 
@@ -280,7 +280,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           ? '$baseDir/${state.remoteFileName}'
           : '${state.currentPath}/${state.remoteFileName}';
 
-      debugPrint('Attempting to delete file at path: $filePath');
+      // debugPrint('Attempting to delete file at path: $filePath');
 
       if (!context.mounted) return;
 
@@ -290,7 +290,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       try {
         await deleteFile(filePath);
         mainFileDeleted = true;
-        debugPrint('Successfully deleted main file: $filePath');
+        // debugPrint('Successfully deleted main file: $filePath');
       } catch (e) {
         debugPrint('Error deleting main file: $e');
         // Only rethrow if it's not a 404 error.
@@ -308,7 +308,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       if (mainFileDeleted) {
         try {
           await deleteFile('$filePath.acl');
-          debugPrint('Successfully deleted ACL file');
+          // debugPrint('Successfully deleted ACL file');
         } catch (e) {
           // ACL files are optional and may not exist.
 
