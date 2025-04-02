@@ -1,6 +1,6 @@
 /// Vaccination editor page main entry point.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-04-02 16:23:49 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU.
 ///
@@ -170,7 +170,13 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Please go to Update page to submit your first vaccination record.',
+                  '''
+
+                  No data saved yet. The **Update** tab can be used to enter a
+                  vaccination record. Or the **Files** tab can be used to import
+                  a spreadsheet of your vaccinations.
+
+                  ''',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
