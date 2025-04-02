@@ -17,12 +17,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audioplayers: ^6.2.0
-  intl: ^0.20.2
-  shared_preferences: ^2.5.2
+  audioplayers: ^5.2.1
+  intl: ^0.19.0
+  shared_preferences: ^2.2.2
   timeline_tile: ^2.0.0
-
-  file_picker: ^8.1.7
+  file_picker: ^6.1.1
+  pdf: ^3.10.7
+  syncfusion_flutter_pdf: ^24.2.9  # For PDF text extraction
   flutter_launcher_icons: ^0.14.2
   flutter_markdown: ^0.7.3
   markdown_tooltip: ^0.0.2
@@ -51,13 +52,11 @@ dependencies:
   flutter_riverpod: ^2.4.9
   riverpod: ^2.6.1
   badges: ^3.1.2
-  pdf: ^3.11.3
   printing: ^5.14.2
   webdriver: ^3.0.3
   version_widget:
     git:
       url: https://github.com/anusii/version_widget.git
-  table_calendar: ^3.0.9
   
 
 dev_dependencies:
@@ -71,7 +70,7 @@ dev_dependencies:
     sdk: flutter
 
   ubuntu_lints: ^0.4.0
-  custom_lint: 0.7.0
+  custom_lint: 0.6.10
   import_order_lint:
     git:
       url: https://github.com/anusii/import-order-lint.git
