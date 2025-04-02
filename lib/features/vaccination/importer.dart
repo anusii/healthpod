@@ -75,38 +75,42 @@ class VaccinationImporter extends HealthDataImporterBase {
     Map<String, dynamic> responses,
     int rowIndex,
   ) {
+    // Convert null or empty values to empty string
+    final processedValue = value.trim();
+
     switch (header) {
       case String h
           when h == VaccinationSurveyConstants.fieldVaccineName.toLowerCase():
-        if (value.isEmpty) {
+        if (processedValue.isEmpty) {
           debugPrint('Row $rowIndex: Missing required vaccine name');
           return false;
         }
-        responses[VaccinationSurveyConstants.fieldVaccineName] = value;
+        responses[VaccinationSurveyConstants.fieldVaccineName] = processedValue;
         return true;
 
       case String h
           when h == VaccinationSurveyConstants.fieldProvider.toLowerCase():
-        if (value.isEmpty) {
+        if (processedValue.isEmpty) {
           debugPrint('Row $rowIndex: Missing required provider');
           return false;
         }
-        responses[VaccinationSurveyConstants.fieldProvider] = value;
+        responses[VaccinationSurveyConstants.fieldProvider] = processedValue;
         return true;
 
       case String h
           when h == VaccinationSurveyConstants.fieldProfessional.toLowerCase():
-        responses[VaccinationSurveyConstants.fieldProfessional] = value;
+        responses[VaccinationSurveyConstants.fieldProfessional] =
+            processedValue;
         return true;
 
       case String h
           when h == VaccinationSurveyConstants.fieldCost.toLowerCase():
-        responses[VaccinationSurveyConstants.fieldCost] = value;
+        responses[VaccinationSurveyConstants.fieldCost] = processedValue;
         return true;
 
       case String h
           when h == VaccinationSurveyConstants.fieldNotes.toLowerCase():
-        responses[VaccinationSurveyConstants.fieldNotes] = value;
+        responses[VaccinationSurveyConstants.fieldNotes] = processedValue;
         return true;
 
       default:

@@ -205,7 +205,6 @@ abstract class HealthDataImporterBase {
             final value = row[j].toString().trim();
 
             // Handle timestamp field specially
-
             if (header == timestampField.toLowerCase()) {
               if (value.isEmpty) {
                 hasRequiredFields = false;
@@ -226,18 +225,15 @@ abstract class HealthDataImporterBase {
             }
 
             // Process other fields using the implementation-specific method
-
             final fieldProcessed = processField(header, value, responses, i);
             if (!fieldProcessed && lowerRequiredColumns.contains(header)) {
               hasRequiredFields = false;
             }
           }
 
-          // Skip rows with missing required fields.
-
-          if (!hasRequiredFields) {
-            debugPrint(
-                'Skipping row $i due to missing or invalid required fields');
+          // Skip only if timestamp is missing or invalid
+          if (timestamp.isEmpty) {
+            debugPrint('Skipping row $i due to missing or invalid timestamp');
             continue;
           }
 
