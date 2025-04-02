@@ -36,13 +36,32 @@ import 'package:healthpod/constants/appointment.dart';
 /// to provide quick identification and notifications status.
 
 class AvatarName extends StatefulWidget {
-  const AvatarName({super.key});
+  final bool isEditing;
+
+  const AvatarName({
+    super.key,
+    this.isEditing = false,
+  });
 
   @override
   State<AvatarName> createState() => _AvatarNameState();
 }
 
 class _AvatarNameState extends State<AvatarName> {
+  late TextEditingController _nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: userName);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -99,12 +118,24 @@ class _AvatarNameState extends State<AvatarName> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                userName,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              widget.isEditing
+                  ? SizedBox(
+                      width: 200,
+                      child: TextField(
+                        controller: _nameController,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        ),
+                      ),
+                    )
+                  : Text(
+                      _nameController.text,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
               Text(
                 'Patient ID: $patientID',
                 style: theme.textTheme.bodyMedium?.copyWith(

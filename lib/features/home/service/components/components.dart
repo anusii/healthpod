@@ -34,3 +34,4 @@ export 'manage_plan.dart';
 export 'next_appointment.dart';
 export 'number_appointments.dart';
 export 'personal_details.dart';
+export 'profile_management.dart';
