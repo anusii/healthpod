@@ -55,6 +55,7 @@ dependencies:
   version_widget:
     git:
       url: https://github.com/anusii/version_widget.git
+  table_calendar: ^3.2.0
 
 
 dev_dependencies:
