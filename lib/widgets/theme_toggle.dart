@@ -26,8 +26,8 @@
 library;
 
 import 'package:flutter/material.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/providers/theme_provider.dart';
 
@@ -42,15 +42,27 @@ class ThemeToggle extends ConsumerWidget {
     final isDarkMode = themeMode == ThemeMode.dark;
     final theme = Theme.of(context);
 
-    return IconButton(
-      icon: Icon(
-        isDarkMode ? Icons.light_mode : Icons.dark_mode,
-        color: theme.colorScheme.primary,
+    return MarkdownTooltip(
+      message: isDarkMode
+          ? '''
+      
+      **Light Mode:** Tap here to switch to light mode for a brighter interface.
+      
+      '''
+          : '''
+      
+      **Dark Mode:** Tap here to switch to dark mode for reduced eye strain.
+      
+      ''',
+      child: IconButton(
+        icon: Icon(
+          isDarkMode ? Icons.light_mode : Icons.dark_mode,
+          color: theme.colorScheme.primary,
+        ),
+        onPressed: () {
+          ref.read(themeProvider.notifier).toggleTheme();
+        },
       ),
-      tooltip: isDarkMode ? 'Switch to light mode' : 'Switch to dark mode',
-      onPressed: () {
-        ref.read(themeProvider.notifier).toggleTheme();
-      },
     );
   }
 }

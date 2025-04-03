@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 /// A path bar widget that displays the current directory path and provides
 /// navigation controls.
@@ -95,12 +96,18 @@ class PathBar extends StatelessWidget {
 
               if (pathHistory.length > 1)
                 IconButton(
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: Theme.of(context).colorScheme.primary,
+                  icon: MarkdownTooltip(
+                    message: '''
+                    
+                    **Navigate Up:** Tap here to go back to the parent directory.
+                    
+                    ''',
+                    child: Icon(
+                      Icons.arrow_back,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
                   onPressed: onNavigateUp,
-                  tooltip: 'Go up',
                   style: IconButton.styleFrom(
                     backgroundColor:
                         Theme.of(context).colorScheme.primary.withAlpha(10),
@@ -128,12 +135,18 @@ class PathBar extends StatelessWidget {
               // Refresh button to update the current directory.
 
               IconButton(
-                icon: Icon(
-                  Icons.refresh,
-                  color: Theme.of(context).colorScheme.primary,
+                icon: MarkdownTooltip(
+                  message: '''
+                  
+                  **Refresh:** Tap here to reload the current directory contents.
+                  
+                  ''',
+                  child: Icon(
+                    Icons.refresh,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                 ),
                 onPressed: onRefresh,
-                tooltip: 'Refresh',
                 style: IconButton.styleFrom(
                   backgroundColor:
                       Theme.of(context).colorScheme.primary.withAlpha(10),

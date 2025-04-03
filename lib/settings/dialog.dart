@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/providers/settings.dart';
 import 'package:healthpod/utils/constrained_dialog.dart';
@@ -254,65 +255,81 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          ElevatedButton(
-                            onPressed: () async {
-                              // Show confirmation dialog before clearing.
+                          MarkdownTooltip(
+                            message: '''
+                            
+                            **Clear All Settings:** Tap here to remove all saved settings.
+                            This will clear all fields but won't affect your Pod data.
+                            
+                            ''',
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                // Show confirmation dialog before clearing.
 
-                              await showConstrainedConfirmationDialog(
-                                context: context,
-                                title: 'Clear Settings',
-                                message:
-                                    'Are you sure you want to clear all settings?',
-                                confirmText: 'Clear',
-                                confirmColor: Colors.grey,
-                                maxHeight: 100,
-                                onConfirm: () async {
-                                  // Clear all providers.
+                                await showConstrainedConfirmationDialog(
+                                  context: context,
+                                  title: 'Clear Settings',
+                                  message:
+                                      'Are you sure you want to clear all settings?',
+                                  confirmText: 'Clear',
+                                  confirmColor: Colors.grey,
+                                  maxHeight: 100,
+                                  onConfirm: () async {
+                                    // Clear all providers.
 
-                                  ref.read(serverURLProvider.notifier).state =
-                                      '';
-                                  ref.read(emailProvider.notifier).state = '';
-                                  ref.read(passwordProvider.notifier).state =
-                                      '';
-                                  ref.read(secretKeyProvider.notifier).state =
-                                      '';
+                                    ref.read(serverURLProvider.notifier).state =
+                                        '';
+                                    ref.read(emailProvider.notifier).state = '';
+                                    ref.read(passwordProvider.notifier).state =
+                                        '';
+                                    ref.read(secretKeyProvider.notifier).state =
+                                        '';
 
-                                  // Save empty values to persist the clear.
+                                    // Save empty values to persist the clear.
 
-                                  await _saveSettings();
-                                },
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey[50],
-                            ),
-                            child: const Text(
-                              'Clear All',
-                              style: TextStyle(color: Colors.grey),
+                                    await _saveSettings();
+                                  },
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.grey[50],
+                              ),
+                              child: const Text(
+                                'Clear All',
+                                style: TextStyle(color: Colors.grey),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 16),
-                          ElevatedButton(
-                            onPressed: () async {
-                              // Show confirmation dialog before resetting.
+                          MarkdownTooltip(
+                            message: '''
+                            
+                            **Reset to Default:** Tap here to restore all settings to their default values.
+                            This will reset all fields to their original configuration.
+                            
+                            ''',
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                // Show confirmation dialog before resetting.
 
-                              await showConstrainedConfirmationDialog(
-                                context: context,
-                                title: 'Reset Settings',
-                                message:
-                                    'Are you sure you want to reset all settings to default?',
-                                confirmText: 'Reset',
-                                confirmColor: Colors.red,
-                                maxHeight: 100,
-                                onConfirm: resetSettings,
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red[50],
-                            ),
-                            child: const Text(
-                              'Reset to Default',
-                              style: TextStyle(color: Colors.red),
+                                await showConstrainedConfirmationDialog(
+                                  context: context,
+                                  title: 'Reset Settings',
+                                  message:
+                                      'Are you sure you want to reset all settings to default?',
+                                  confirmText: 'Reset',
+                                  confirmColor: Colors.red,
+                                  maxHeight: 100,
+                                  onConfirm: resetSettings,
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red[50],
+                              ),
+                              child: const Text(
+                                'Reset to Default',
+                                style: TextStyle(color: Colors.red),
+                              ),
                             ),
                           ),
                         ],
@@ -326,9 +343,15 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
               top: 16,
               right: 16,
               child: IconButton(
-                icon: const Icon(Icons.close),
+                icon: MarkdownTooltip(
+                  message: '''
+                  
+                  **Close:** Tap here to close the settings dialog.
+                  
+                  ''',
+                  child: const Icon(Icons.close),
+                ),
                 onPressed: () => Navigator.of(context).pop(),
-                tooltip: 'Close',
               ),
             ),
           ],

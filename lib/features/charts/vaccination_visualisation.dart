@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/features/charts/models/vaccination_record.dart';
 import 'package:healthpod/features/charts/utils/vaccination_dialog_utils.dart';
@@ -212,9 +213,15 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.refresh),
+                    icon: MarkdownTooltip(
+                      message: '''
+                      
+                      **Refresh:** Tap here to reload your vaccination history data.
+                      
+                      ''',
+                      child: const Icon(Icons.refresh),
+                    ),
                     onPressed: _loadData,
-                    tooltip: 'Refresh data',
                   ),
                 ],
               ),
