@@ -81,7 +81,7 @@ class AppColors {
 
   /// Text Colours - improved contrast.
 
-  static const textPrimary = Color(0xFF1A1A1A);
+  static const textPrimary = Color(0xFF000000);
   static const textPrimaryDark = Color(0xFFFFFFFF);
 
   static const textSecondary = Color(0xFF404040);
@@ -125,4 +125,10 @@ class AppColors {
   static const tooltipBackgroundDark = Color(0xFF424242);
   static const tooltipText = Color(0xFFFFFFFF);
   static const tooltipTextDark = Color(0xFFFFFFFF);
+
+  /// Title text colors - high contrast.
+  static const titleTextLight =
+      Color(0xFF0A4D8C); // Same as primary for brand consistency
+  static const titleTextDark =
+      Color(0xFFFFFFFF); // Pure white for maximum contrast
 }
