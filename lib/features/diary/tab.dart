@@ -101,10 +101,6 @@ class _DiaryTabState extends State<DiaryTab> {
     });
   }
 
-  void _onPageChanged(DateTime focusedDay) {
-    _focusedDay = focusedDay;
-  }
-
   void _addAppointment() {
     showDialog(
       context: context,
