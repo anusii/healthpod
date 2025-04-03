@@ -127,8 +127,9 @@ class AppColors {
   static const tooltipTextDark = Color(0xFFFFFFFF);
 
   /// Title text colors - high contrast.
+
   static const titleTextLight =
-      Color(0xFF0A4D8C); // Same as primary for brand consistency
+      Color(0xFF0A4D8C); 
   static const titleTextDark =
-      Color(0xFFFFFFFF); // Pure white for maximum contrast
+      Color(0xFFFFFFFF); 
 }
