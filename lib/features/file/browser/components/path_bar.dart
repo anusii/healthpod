@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 /// A path bar widget that displays the current directory path and provides

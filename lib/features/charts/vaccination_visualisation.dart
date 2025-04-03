@@ -27,8 +27,8 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
-import 'package:timeline_tile/timeline_tile.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
+import 'package:timeline_tile/timeline_tile.dart';
 
 import 'package:healthpod/features/charts/models/vaccination_record.dart';
 import 'package:healthpod/features/charts/utils/vaccination_dialog_utils.dart';
