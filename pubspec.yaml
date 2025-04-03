@@ -29,8 +29,9 @@ dependencies:
   path: ^1.9.0
   rdflib: ^0.2.9
   solidpod:
-    url: https://github.com/atangster/solidpod.git
-    ref: dev
+    git:
+      url: https://github.com/atangster/solidpod.git
+      ref: dev
   universal_io: ^2.2.2
   window_manager: ^0.4.3
   build_runner: ^2.4.14
