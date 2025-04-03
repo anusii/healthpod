@@ -17,13 +17,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audioplayers: ^5.2.1
-  intl: ^0.19.0
-  shared_preferences: ^2.2.2
+  audioplayers: ^6.2.0
+  intl: ^0.20.2
+  shared_preferences: ^2.5.2
   timeline_tile: ^2.0.0
-  file_picker: ^6.1.1
-  pdf: ^3.10.7
-  syncfusion_flutter_pdf: ^24.2.9  # For PDF text extraction
+  file_picker: ^8.1.7
   flutter_launcher_icons: ^0.14.2
   flutter_markdown: ^0.7.3
   markdown_tooltip: ^0.0.2
