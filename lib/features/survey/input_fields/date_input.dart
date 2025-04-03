@@ -85,7 +85,7 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
   Widget build(BuildContext context) {
     final selectedDate =
         widget.controller.responses[widget.question.fieldName]?.toString();
-    String formattedDate = 'Select a date';
+    String formattedDate = 'Not Selected';
 
     if (selectedDate != null) {
       try {
@@ -96,7 +96,7 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
             int.parse(dateParts[1]),
             int.parse(dateParts[2]),
           );
-          formattedDate = DateFormat('MMMM dd, yyyy').format(date);
+          formattedDate = DateFormat('dd MMMM yyyy').format(date);
         }
       } catch (e) {
         debugPrint('Error formatting date: $e');
@@ -114,14 +114,6 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
             children: [
               ListTile(
                 title: Text(widget.question.question),
-                subtitle: Text(
-                  formattedDate,
-                  style: TextStyle(
-                    color: selectedDate != null
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
                 trailing: Icon(
                   Icons.calendar_today,
                   color: selectedDate != null
@@ -144,7 +136,7 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Selected: ${DateFormat('MMMM dd, yyyy').format(DateTime(
+                        'Selected: ${DateFormat('dd MMMM yyyy').format(DateTime(
                           int.parse(selectedDate.split('-')[0]),
                           int.parse(selectedDate.split('-')[1]),
                           int.parse(selectedDate.split('-')[2]),
