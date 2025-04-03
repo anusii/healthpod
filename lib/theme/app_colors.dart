@@ -128,8 +128,6 @@ class AppColors {
 
   /// Title text colors - high contrast.
 
-  static const titleTextLight =
-      Color(0xFF0A4D8C); 
-  static const titleTextDark =
-      Color(0xFFFFFFFF); 
+  static const titleTextLight = Color(0xFF0A4D8C);
+  static const titleTextDark = Color(0xFFFFFFFF);
 }
