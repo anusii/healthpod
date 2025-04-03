@@ -278,7 +278,6 @@ Future<bool> _performAutoLogin(
 Widget _buildNormalLogin(String serverUrl) {
   return Builder(
     builder: (context) {
-      final theme = Theme.of(context);
       return SolidLogin(
         required: false,
         title: 'HEALTH POD',
