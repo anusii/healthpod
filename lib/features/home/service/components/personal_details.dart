@@ -223,7 +223,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   }
 
   /// Helper method to build a row with a bold label and regular text or input field.
-  
+
   Widget _buildLabeledRow(String label, Widget value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
