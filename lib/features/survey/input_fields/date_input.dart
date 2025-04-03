@@ -97,10 +97,11 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
             int.parse(dateParts[2]),
           );
           formattedDate = DateFormat('dd MMMM yyyy').format(date);
+          formattedDate = 'Selected: $formattedDate';
         }
       } catch (e) {
         debugPrint('Error formatting date: $e');
-        formattedDate = selectedDate; // Fallback to raw date if parsing fails.
+        formattedDate = selectedDate;
       }
     }
 
@@ -115,41 +116,37 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
               ListTile(
                 title: Text(widget.question.question),
                 trailing: Icon(
-                  Icons.calendar_today,
+                  selectedDate != null
+                      ? Icons.calendar_today
+                      : Icons.calendar_today_outlined,
                   color: selectedDate != null
                       ? Theme.of(context).colorScheme.primary
-                      : null,
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
                 onTap: () => _selectDate(context),
               ),
-              if (selectedDate != null) ...[
-                const Divider(height: 1),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.check_circle_outline,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 16,
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      ' $formattedDate',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 14,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Selected: ${DateFormat('dd MMMM yyyy').format(DateTime(
-                          int.parse(selectedDate.split('-')[0]),
-                          int.parse(selectedDate.split('-')[1]),
-                          int.parse(selectedDate.split('-')[2]),
-                        ))}',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ],
           ),
         ),
