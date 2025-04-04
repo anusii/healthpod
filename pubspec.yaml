@@ -57,6 +57,7 @@ dependencies:
   version_widget:
     git:
       url: https://github.com/anusii/version_widget.git
+      
 
 
 dev_dependencies:
