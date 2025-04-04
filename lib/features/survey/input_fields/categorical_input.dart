@@ -171,26 +171,26 @@ class _HealthSurveyCategoricalInputState
 
   Widget _buildOption(BuildContext context, FormFieldState<String> field,
       String option, int optionIndex) {
+    final theme = Theme.of(context);
     final isSelected = field.value == option;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
-        // Highlight border when option is selected.
-
         border: Border.all(
-          color:
-              isSelected ? Theme.of(context).primaryColor : Colors.transparent,
-          width: isSelected ? 1 : 0,
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.outline,
+          width: isSelected ? 2 : 1,
         ),
       ),
       child: Focus(
         focusNode: _optionFocusNodes[optionIndex],
         onKeyEvent: (node, event) {
           if (event is KeyDownEvent) {
-            // Keep arrow keys for “within” navigation of the radio group.
+            // Keep arrow keys for "within" navigation of the radio group.
 
             if (event.logicalKey == LogicalKeyboardKey.arrowDown ||
                 event.logicalKey == LogicalKeyboardKey.arrowRight) {
@@ -229,15 +229,15 @@ class _HealthSurveyCategoricalInputState
                     groupValue: field.value,
                     onChanged: (value) =>
                         _selectOption(field, value!, optionIndex),
-                    // Skip the radio button itself in tab order to avoid double-tabbing.
-
                     focusNode: FocusNode(skipTraversal: true),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       option,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ],

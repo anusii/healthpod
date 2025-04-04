@@ -150,9 +150,6 @@ class BPEditorService {
       final dirUrl = await getDirUrl(podDirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
-      debugPrint('SubDirs: |${resources.subDirs.join(', ')}|');
-      debugPrint('Files  : |${resources.files.join(', ')}|');
-
       // Try with the current format (T separator).
 
       final filename = _filenameFromTimestamp(observation.timestamp);

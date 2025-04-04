@@ -119,78 +119,118 @@ class AppTheme {
     );
   }
 
-  /// Dark theme configuration
+  /// Dark theme configuration.
+
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
-      primaryColor: AppColors.primary,
-      scaffoldBackgroundColor: const Color(0xFF121212),
+      primaryColor: AppColors.primaryDark,
+      scaffoldBackgroundColor: AppColors.backgroundDark,
       colorScheme: ColorScheme.dark(
-        primary: AppColors.primary,
-        secondary: AppColors.secondary,
-        tertiary: AppColors.tertiary,
-        error: AppColors.error,
-        surface: const Color(0xFF1E1E1E),
-        surfaceContainerHighest: const Color(0xFF2D2D2D),
-        onPrimary: AppColors.iconDefault,
-        onSecondary: AppColors.iconDefault,
-        onSurface: Colors.white,
-        onSurfaceVariant: const Color(0xFFBBBBBB),
-        outline: const Color(0xFF3D3D3D),
+        primary: AppColors.primaryDark,
+        secondary: AppColors.secondaryDark,
+        tertiary: AppColors.tertiaryDark,
+        error: AppColors.errorDark,
+        surface: AppColors.surfaceDark,
+        surfaceContainerHighest: AppColors.surfaceVariantDark,
+        onPrimary: AppColors.iconDefaultDark,
+        onSecondary: AppColors.iconDefaultDark,
+        onSurface: AppColors.textPrimaryDark,
+        onSurfaceVariant: AppColors.textSecondaryDark,
+        outline: AppColors.cardBorderDark,
+        shadow: AppColors.textPrimaryDark.withValues(alpha: 0.2),
       ),
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         headlineLarge: TextStyle(
-          color: Colors.white,
+          color: AppColors.textPrimaryDark,
           fontWeight: FontWeight.w600,
+          letterSpacing: -0.5,
         ),
         headlineMedium: TextStyle(
-          color: Colors.white,
+          color: AppColors.textPrimaryDark,
           fontWeight: FontWeight.w500,
+          letterSpacing: -0.25,
         ),
         bodyLarge: TextStyle(
-          color: Colors.white,
+          color: AppColors.textPrimaryDark,
           fontSize: 16,
+          letterSpacing: 0.15,
         ),
         bodyMedium: TextStyle(
-          color: Color(0xFFBBBBBB),
+          color: AppColors.textSecondaryDark,
           fontSize: 14,
+          letterSpacing: 0.25,
         ),
         labelLarge: TextStyle(
-          color: Colors.white,
+          color: AppColors.textPrimaryDark,
           fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
         ),
       ),
-      iconTheme: const IconThemeData(
-        color: Color(0xFFBBBBBB),
+      iconTheme: IconThemeData(
+        color: AppColors.navUnselectedDark,
         size: 24,
       ),
       appBarTheme: AppBarTheme(
-        backgroundColor: const Color(0xFF1E1E1E),
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surfaceDark,
+        foregroundColor: AppColors.textPrimaryDark,
         elevation: 0,
         iconTheme: IconThemeData(
-          color: AppColors.primary,
+          color: AppColors.primaryDark,
         ),
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
+        titleTextStyle: TextStyle(
+          color: AppColors.textPrimaryDark,
           fontSize: 20,
           fontWeight: FontWeight.w500,
+          letterSpacing: 0.15,
         ),
       ),
       cardTheme: CardTheme(
-        color: const Color(0xFF2D2D2D),
+        color: AppColors.cardBackgroundDark,
         elevation: 1,
+        shadowColor: AppColors.textPrimaryDark.withValues(alpha: 0.2),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: const BorderSide(
-            color: Color(0xFF3D3D3D),
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: AppColors.cardBorderDark,
             width: 1,
           ),
         ),
       ),
-      dividerTheme: const DividerThemeData(
-        color: Color(0xFF3D3D3D),
+      dividerTheme: DividerThemeData(
+        color: AppColors.cardBorderDark,
         thickness: 1,
+        space: 1,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        fillColor: AppColors.inputBackgroundDark,
+        filled: true,
+        border: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.inputBorderDark),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.inputBorderDark),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.primaryDark),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        labelStyle: TextStyle(color: AppColors.textPrimaryDark),
+        hintStyle: TextStyle(color: AppColors.textSecondaryDark),
+        prefixStyle: TextStyle(color: AppColors.textPrimaryDark),
+        suffixStyle: TextStyle(color: AppColors.textPrimaryDark),
+      ),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: AppColors.tooltipBackgroundDark,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        textStyle: TextStyle(
+          color: AppColors.tooltipTextDark,
+          fontSize: 14,
+        ),
       ),
     );
   }

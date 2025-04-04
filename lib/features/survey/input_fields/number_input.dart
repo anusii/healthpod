@@ -59,11 +59,13 @@ class HealthSurveyNumberInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return TextFormField(
       // Sets focus for this input field.
 
       focusNode: controller.focusNodes[index][0],
       keyboardType: TextInputType.number,
+      style: theme.textTheme.bodyLarge,
       decoration: InputDecoration(
         hintText: 'Enter value',
         // Displays unit if applicable.
@@ -73,7 +75,7 @@ class HealthSurveyNumberInput extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         filled: true,
-        fillColor: Colors.grey[50],
+        fillColor: theme.colorScheme.surface,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       ),

@@ -31,14 +31,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:healthpod/providers/settings.dart';
+import 'package:healthpod/providers/theme_provider.dart';
 import 'package:healthpod/theme/app_theme.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
-import 'package:healthpod/widgets/theme_toggle.dart';
-
-// Theme mode provider to manage light/dark theme state.
-
-final themeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
 
 void main() async {
   // This is the main entry point for the app. The [async] is required because
@@ -95,15 +91,29 @@ void main() async {
 // the App. For SolidPod we wrap the `Home()` widget within the `SolidLogin()`
 // widget so we start with a login screen, though this is optional.
 
-class HealthPod extends ConsumerWidget {
+class HealthPod extends ConsumerStatefulWidget {
   const HealthPod({super.key});
 
-  // This StatelessWidget is the root of our application.
+  @override
+  ConsumerState<HealthPod> createState() => _HealthPodState();
+}
+
+class _HealthPodState extends ConsumerState<HealthPod> {
+  Widget? _loginWidget;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _loginWidget = createSolidLogin(context);
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
-    final theme = Theme.of(context);
 
     // Initialise settings.
 
@@ -115,16 +125,7 @@ class HealthPod extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       home: SelectionArea(
-        child: Scaffold(
-          appBar: AppBar(
-            backgroundColor: theme.colorScheme.surface,
-            title: const Text('HealthPod'),
-            actions: const [
-              ThemeToggle(),
-            ],
-          ),
-          body: createSolidLogin(context),
-        ),
+        child: _loginWidget ?? createSolidLogin(context),
       ),
     );
   }

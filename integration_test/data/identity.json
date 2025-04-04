@@ -1,0 +1,12 @@
+{
+  "timestamp": "2024-01-01T00:00:00Z",
+  "identity": {
+    "name": "Riley Breugel",
+    "patientId": "p43623",
+    "avatar": "assets/images/sample_avatar_image.png",
+    "notifications": {
+      "count": 1,
+      "enabled": true
+    }
+  }
+} 

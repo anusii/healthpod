@@ -1,7 +1,7 @@
 name: healthpod
 description: "Secure storage of Health and Medical Records in your Solid Pod."
 publish_to: "none"
-version: 0.1.0+3
+version: 0.1.1+3
 
 environment:
   sdk: ">=3.2.3 <4.0.0"
@@ -57,14 +57,15 @@ dependencies:
   version_widget:
     git:
       url: https://github.com/anusii/version_widget.git
-  
+      
+
 
 dev_dependencies:
 
   dart_code_metrics:
     git:
       url: https://github.com/anusii/dart-code-metrics.git
-      ref: dev
+      ref: main
 
   flutter_test:
     sdk: flutter

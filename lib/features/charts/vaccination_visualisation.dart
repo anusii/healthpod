@@ -26,6 +26,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_markdown/flutter_markdown.dart';
+
 import 'package:intl/intl.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 
@@ -204,11 +206,13 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Vaccination History',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  MarkdownBody(
+                    data: 'Vaccination History',
+                    styleSheet: MarkdownStyleSheet(
+                      p: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -220,12 +224,16 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
               ),
               const SizedBox(height: 16),
               sortedRecords.isEmpty
-                  ? const Center(
+                  ? Center(
                       child: Padding(
-                        padding: EdgeInsets.all(32.0),
-                        child: Text(
-                          'No vaccination records found',
-                          style: TextStyle(fontSize: 16),
+                        padding: const EdgeInsets.all(32.0),
+                        child: MarkdownBody(
+                          data: 'No vaccination records found',
+                          styleSheet: MarkdownStyleSheet(
+                            p: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
                         ),
                       ),
                     )

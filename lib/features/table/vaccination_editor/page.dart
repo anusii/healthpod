@@ -1,6 +1,6 @@
 /// Vaccination editor page main entry point.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-04-02 16:23:49 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU.
 ///
@@ -26,6 +26,8 @@
 library;
 
 import 'package:flutter/material.dart';
+
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:healthpod/features/table/vaccination_editor/service.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
@@ -169,19 +171,27 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                   color: Colors.blue,
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Please go to Update page to submit your first vaccination record.',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                MarkdownBody(
+                  data:
+                      'Please go to Update page to submit your first vaccination record.',
+                  styleSheet: MarkdownStyleSheet(
+                    p: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'Error details: $error',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+                MarkdownBody(
+                  data: '**Error details:** $error',
+                  styleSheet: MarkdownStyleSheet(
+                    p: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                    strong: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],

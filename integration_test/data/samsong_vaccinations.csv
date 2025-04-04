@@ -1,10 +1,11 @@
-date,what,details,provider,professional,total,covered,mycost,notes
-2020-01-15,vaccination,Boostrix: Diptheria + Tetanus + Pertussis (Whooping Cough),Some Clinic,Nurse,0.00,0.00,0.00,
-2023-07-24,vaccination,Covid-19 Booster Phizer Bivalent,Some Clinic,Nurse,0.00,0.00,0.00,
-2023-06-23,vaccination,Covid-19 Booster Pfizer Comirnaty Biv ba.4-5,,,,,,
-2023-04-21,vaccination,Influenza Fluquadri,,,,,,
-2022-07-14,vaccination,Covid-19 Pfizer Comirnaty,,,,,,
-2022-05-06,vaccination,Influenza Afluria Quad,,,,,,
-2022-01-18,vaccination,Covid-19 Booster Astrazeneca Vaxzevria,,,,,,
-2021-08-27,vaccination,Covid-19 2nd Dose Astrazeneca Vaxzevria,,,,,,
-2021-06-03,vaccination,Covid-19 1st Dose Astrazeneca Vaxzevria,,,,,,
+date,vaccine,provider,professional,cost,notes
+2020-04-02,Influenza Flucelvax Quad,ANU Pharmacy,Pharmacist,0,ANU Funded
+2020-01-15,Boostrix: Diptheria + Tetanus + Pertussis (Whooping Cough),Some Clinic,Nurse,0,
+2023-07-24,Covid-19 Booster Phizer Bivalent,Some Clinic,Nurse,0,
+2023-06-23,Covid-19 Booster Pfizer Comirnaty Biv ba.4-5,,,,
+2023-04-21,Influenza Fluquadri,,,,
+2022-07-14,Covid-19 Pfizer Comirnaty,,,,
+2022-05-06,Influenza Afluria Quad,,,,
+2022-01-18,Covid-19 Booster Astrazeneca Vaxzevria,,,,
+2021-08-27,Covid-19 2nd Dose Astrazeneca Vaxzevria,,,,
+2021-06-03,Covid-19 1st Dose Astrazeneca Vaxzevria,,,,

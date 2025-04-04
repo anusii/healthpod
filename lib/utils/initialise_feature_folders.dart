@@ -33,8 +33,9 @@ import 'package:healthpod/utils/create_feature_folder.dart';
 /// Initialises required feature folders in the user's POD.
 ///
 /// This function checks for the existence of essential feature folders and creates
-/// them if they don't exist. Currently handles 'bp' and 'pathology' folders.
-/// Returns a [Future<void>] that completes when all folders are verified/created.
+/// them if they don't exist. Currently handles 'profile', 'blood_pressure', 'pathology',
+/// and 'vaccination' folders. Returns a [Future<void>] that completes when all folders
+/// are verified/created.
 ///
 /// Parameters:
 /// - [context]: The BuildContext for showing progress indicators and error messages
@@ -50,16 +51,18 @@ Future<void> initialiseFeatureFolders({
     onProgress.call(true);
 
     // List of required feature folders.
-
-    final requiredFolders = ['blood_pressure', 'pathology'];
+    final requiredFolders = [
+      'profile',
+      'blood_pressure',
+      'pathology',
+      'vaccination',
+    ];
 
     // Check current resources.
-
     final dirUrl = await getDirUrl(basePath);
     final resources = await getResourcesInContainer(dirUrl);
 
     // Create each missing folder.
-
     for (final folder in requiredFolders) {
       if (!resources.subDirs.contains(folder)) {
         if (!context.mounted) return;
@@ -69,7 +72,6 @@ Future<void> initialiseFeatureFolders({
           context: context,
           onProgressChange: (inProgress) {
             // Only propagate progress changes if the callback is provided.
-
             onProgress.call(inProgress);
           },
           onSuccess: () {
