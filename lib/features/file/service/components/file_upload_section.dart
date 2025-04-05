@@ -124,11 +124,17 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.close, size: 20),
+                  icon: MarkdownTooltip(
+                    message: '''
+                    
+                    **Close Preview:** Tap here to close the file preview panel.
+                    
+                    ''',
+                    child: const Icon(Icons.close, size: 20),
+                  ),
                   onPressed: () => setState(() => showPreview = false),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  tooltip: 'Close preview',
                 ),
               ],
             ),
