@@ -25,10 +25,7 @@ dependencies:
   file_picker: ^8.1.7
   flutter_launcher_icons: ^0.14.2
   flutter_markdown: ^0.7.3
-  markdown_tooltip:
-    git:
-      url: https://github.com/atangster/markdown_tooltip.git
-      ref: dev
+  markdown_tooltip: ^0.0.7
   path: ^1.9.0
   rdflib: ^0.2.9
   solidpod:
