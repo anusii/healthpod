@@ -186,6 +186,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
   bool _isKeySaved = false;
   int _selectedIndex = 0;
   bool _profileEditMode = false;
+  // Key to force rebuilds when profile is updated
+  final GlobalKey<State> _homePageKey = GlobalKey<State>();
 
   @override
   void initState() {
@@ -270,6 +272,19 @@ class HealthPodHomeState extends State<HealthPodHome> {
       _profileEditMode = true;
     });
   }
+  
+  /// Handles profile data updates and refreshes necessary components
+  void _handleProfileUpdated() {
+    // Force rebuild of the HomePage if we're on it
+    if (_selectedIndex == 0) {
+      setState(() {
+        // The key will force a rebuild of HomePage
+        if (_homePageKey.currentState != null) {
+          (_homePageKey.currentState as dynamic).setState(() {});
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -277,11 +292,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _selectedIndex == 0
-              ? homeTabs[_selectedIndex]['title']
-              : homeTabs[_selectedIndex]['title'],
-        ),
+        title: Text(homeTabs[_selectedIndex]['title']),
         backgroundColor: theme.colorScheme.surface,
         automaticallyImplyLeading: false,
         actions: [
@@ -417,10 +428,14 @@ class HealthPodHomeState extends State<HealthPodHome> {
                 Expanded(
                   child: homeTabs[_selectedIndex]['content'] ??
                       (_selectedIndex == 7
-                          ? ProfileManagement(initialEditMode: _profileEditMode)
+                          ? ProfileManagement(
+                              initialEditMode: _profileEditMode,
+                              onProfileUpdated: _handleProfileUpdated,
+                            )
                           : HomePage(
-                              onNavigateToProfile:
-                                  _navigateToProfileInEditMode)),
+                              key: _homePageKey,
+                              onNavigateToProfile: _navigateToProfileInEditMode,
+                            )),
                 ),
               ],
             ),

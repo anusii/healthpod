@@ -23,12 +23,15 @@
 
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/constants/profile.dart';
+import 'package:healthpod/utils/fetch_profile_data.dart';
 import 'package:healthpod/utils/save_response_pod.dart';
 
 /// Initialises profile data in POD with blank values if it doesn't exist.
@@ -51,12 +54,10 @@ Future<void> initialiseProfileData({
     onProgress.call(true);
 
     // Check if any profile file exists.
-
     final dirUrl = await getDirUrl('$basePath/profile');
     final resources = await getResourcesInContainer(dirUrl);
 
     // Look for any file that starts with 'profile_' and ends with '.json.enc.ttl'.
-
     final hasProfileFile = resources.files.any((file) =>
         file.startsWith('profile_') && file.endsWith('.json.enc.ttl'));
 
@@ -64,7 +65,6 @@ Future<void> initialiseProfileData({
       if (!context.mounted) return;
 
       // Save blank profile data.
-
       await saveResponseToPod(
         context: context,
         responses: defaultProfileData['data'],
@@ -76,7 +76,10 @@ Future<void> initialiseProfileData({
       debugPrint(
           '✅ Successfully created profile_{timestamp}.json with blank values');
     } else {
-      debugPrint('ℹ️ Profile data already exists, skipping initialisation');
+      // Even if profile exists, check if it has all required fields
+      if (context.mounted) {
+        await _validateAndUpdateProfile(context);
+      }
     }
 
     onComplete.call();
@@ -84,5 +87,40 @@ Future<void> initialiseProfileData({
     debugPrint('❌ Error initializing profile data: $e');
   } finally {
     onProgress.call(false);
+  }
+}
+
+/// Validates the existing profile and updates it if missing fields are found
+Future<void> _validateAndUpdateProfile(BuildContext context) async {
+  try {
+    // Fetch the current profile data
+    final existingData = await fetchProfileData(context);
+    bool needsUpdate = false;
+    
+    // Create a map with all required fields from default profile
+    final Map<String, dynamic> updatedData = {};
+    
+    // Check each field and use existing value if present, otherwise use default
+    for (final key in defaultProfileData['data'].keys) {
+      if (!existingData.containsKey(key) || existingData[key] == null) {
+        updatedData[key] = defaultProfileData['data'][key];
+        needsUpdate = true;
+      } else {
+        updatedData[key] = existingData[key];
+      }
+    }
+    
+    // Only save if updates are needed
+    if (needsUpdate && context.mounted) {
+      await saveResponseToPod(
+        context: context,
+        responses: updatedData,
+        podPath: '/profile',
+        filePrefix: 'profile',
+      );
+      debugPrint('✅ Updated profile with missing fields');
+    }
+  } catch (e) {
+    debugPrint('❌ Error validating profile data: $e');
   }
 }
