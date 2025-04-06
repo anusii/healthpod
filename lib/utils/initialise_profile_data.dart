@@ -23,8 +23,6 @@
 
 library;
 
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
@@ -76,7 +74,8 @@ Future<void> initialiseProfileData({
       debugPrint(
           '✅ Successfully created profile_{timestamp}.json with blank values');
     } else {
-      // Even if profile exists, check if it has all required fields
+      // Even if profile exists, check if it has all required fields.
+
       if (context.mounted) {
         await _validateAndUpdateProfile(context);
       }
@@ -90,17 +89,21 @@ Future<void> initialiseProfileData({
   }
 }
 
-/// Validates the existing profile and updates it if missing fields are found
+/// Validates the existing profile and updates it if missing fields are found.
+
 Future<void> _validateAndUpdateProfile(BuildContext context) async {
   try {
-    // Fetch the current profile data
+    // Fetch the current profile data.
+
     final existingData = await fetchProfileData(context);
     bool needsUpdate = false;
-    
-    // Create a map with all required fields from default profile
+
+    // Create a map with all required fields from default profile.
+
     final Map<String, dynamic> updatedData = {};
-    
-    // Check each field and use existing value if present, otherwise use default
+
+    // Check each field and use existing value if present, otherwise use default.
+
     for (final key in defaultProfileData['data'].keys) {
       if (!existingData.containsKey(key) || existingData[key] == null) {
         updatedData[key] = defaultProfileData['data'][key];
@@ -109,8 +112,9 @@ Future<void> _validateAndUpdateProfile(BuildContext context) async {
         updatedData[key] = existingData[key];
       }
     }
-    
-    // Only save if updates are needed
+
+    // Only save if updates are needed.
+
     if (needsUpdate && context.mounted) {
       await saveResponseToPod(
         context: context,

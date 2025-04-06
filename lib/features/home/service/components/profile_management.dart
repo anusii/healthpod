@@ -48,14 +48,15 @@ class ProfileManagement extends StatefulWidget {
 
 class _ProfileManagementState extends State<ProfileManagement> {
   late bool _isEditing;
-  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
     super.initState();
     _isEditing = widget.initialEditMode;
   }
-  
+
   void _handleProfileDataChanged() {
     if (widget.onProfileUpdated != null) {
       widget.onProfileUpdated!();
@@ -131,7 +132,7 @@ class _ProfileManagementState extends State<ProfileManagement> {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),

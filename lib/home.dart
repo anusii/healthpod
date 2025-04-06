@@ -186,7 +186,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
   bool _isKeySaved = false;
   int _selectedIndex = 0;
   bool _profileEditMode = false;
-  // Key to force rebuilds when profile is updated
+  // Key to force rebuilds when profile is updated.
+
   final GlobalKey<State> _homePageKey = GlobalKey<State>();
 
   @override
@@ -272,13 +273,16 @@ class HealthPodHomeState extends State<HealthPodHome> {
       _profileEditMode = true;
     });
   }
-  
-  /// Handles profile data updates and refreshes necessary components
+
+  /// Handles profile data updates and refreshes necessary components.
+
   void _handleProfileUpdated() {
-    // Force rebuild of the HomePage if we're on it
+    // Force rebuild of the HomePage if we're on it.
+
     if (_selectedIndex == 0) {
       setState(() {
-        // The key will force a rebuild of HomePage
+        // The key will force a rebuild of HomePage.
+
         if (_homePageKey.currentState != null) {
           (_homePageKey.currentState as dynamic).setState(() {});
         }

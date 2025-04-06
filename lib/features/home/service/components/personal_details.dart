@@ -59,54 +59,59 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   late TextEditingController _emailController;
   late TextEditingController _dateOfBirthController;
   late TextEditingController _genderController;
-  
+
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    // Initialize with empty values, will update after fetching
+    // Initialise with empty values, will update after fetching.
+
     _addressController = TextEditingController();
     _bestContactPhoneController = TextEditingController();
     _alternativeContactNumberController = TextEditingController();
     _emailController = TextEditingController();
     _dateOfBirthController = TextEditingController();
     _genderController = TextEditingController();
-    
+
     _loadProfileData();
   }
-  
-  /// Loads profile data from POD and updates controllers
+
+  /// Loads profile data from POD and updates controllers.
+
   Future<void> _loadProfileData() async {
     setState(() {
       _isLoading = true;
     });
-    
+
     try {
       final profileData = await fetchProfileData(context);
-      
+
       setState(() {
         _addressController.text = profileData['address'] ?? '';
-        _bestContactPhoneController.text = profileData['bestContactPhone'] ?? '';
-        _alternativeContactNumberController.text = profileData['alternativeContactNumber'] ?? '';
+        _bestContactPhoneController.text =
+            profileData['bestContactPhone'] ?? '';
+        _alternativeContactNumberController.text =
+            profileData['alternativeContactNumber'] ?? '';
         _emailController.text = profileData['email'] ?? '';
         _dateOfBirthController.text = profileData['dateOfBirth'] ?? '';
         _genderController.text = profileData['gender'] ?? '';
       });
     } catch (e) {
       debugPrint('Error loading profile data: $e');
-      // Show error to user if needed
+      // Show error to user if needed.
     } finally {
       setState(() {
         _isLoading = false;
       });
     }
   }
-  
-  /// Saves updated profile data to POD
+
+  /// Saves updated profile data to POD.
+
   Future<void> _saveProfileData() async {
     if (!widget.isEditing) return;
-    
+
     try {
       final updatedData = {
         'address': _addressController.text,
@@ -115,20 +120,20 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         'email': _emailController.text,
         'dateOfBirth': _dateOfBirthController.text,
         'gender': _genderController.text,
-        'identifyAsIndigenous': false, // Maintain this field from original data
+        'identifyAsIndigenous': false,
       };
-      
+
       await saveResponseToPod(
         context: context,
         responses: updatedData,
         podPath: '/profile',
         filePrefix: 'profile',
       );
-      
+
       if (widget.onDataChanged != null) {
         widget.onDataChanged!();
       }
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully')),
@@ -154,12 +159,13 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     _genderController.dispose();
     super.dispose();
   }
-  
+
   @override
   void didUpdateWidget(PersonalDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
-    // If we're exiting edit mode, save the data
+
+    // If we're exiting edit mode, save the data.
+
     if (oldWidget.isEditing && !widget.isEditing) {
       _saveProfileData();
     }
@@ -249,7 +255,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                           'Alternative Contact Number:',
                           widget.isEditing
                               ? TextField(
-                                  controller: _alternativeContactNumberController,
+                                  controller:
+                                      _alternativeContactNumberController,
                                   decoration: const InputDecoration(
                                     border: OutlineInputBorder(),
                                     contentPadding: EdgeInsets.symmetric(

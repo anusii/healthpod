@@ -36,19 +36,22 @@ class HomePage extends StatefulWidget {
     super.key,
     required this.onNavigateToProfile,
   });
-  
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  // Key to force rebuild of the PersonalDetails widget
+  // Key to force rebuild of the PersonalDetails widget.
+
   final GlobalKey _personalDetailsKey = GlobalKey();
-  
-  // Force rebuild of the PersonalDetails widget
+
+  // Force rebuild of the PersonalDetails widget.
+
   void _refreshPersonalDetails() {
     setState(() {
-      // Updating the key will force a rebuild
+      // Updating the key will force a rebuild.
+
       _personalDetailsKey.currentState?.setState(() {});
     });
   }

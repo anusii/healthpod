@@ -42,54 +42,62 @@ import 'package:healthpod/constants/profile.dart';
 
 Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
   try {
-    // Get the directory URL for the profile folder
+    // Get the directory URL for the profile folder.
+
     final dirUrl = await getDirUrl('$basePath/profile');
     final resources = await getResourcesInContainer(dirUrl);
-    
-    // Look for profile files
+
+    // Look for profile files.
+
     final profileFiles = resources.files
-        .where((file) => file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
+        .where((file) =>
+            file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
         .toList();
-    
+
     if (profileFiles.isEmpty) {
       debugPrint('No profile files found. Using default profile data.');
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
-    
-    // Sort files by name to get the most recent one (assuming timestamp in filename)
+
+    // Sort files by name to get the most recent one (assuming timestamp in filename).
+
     profileFiles.sort((a, b) => b.compareTo(a));
     final latestProfileFile = profileFiles.first;
-    
-    // Read the file contents
+
+    // Read the file contents.
+
     if (!context.mounted) {
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
-    
+
     final fileContent = await readPod(
       '$basePath/profile/$latestProfileFile',
       context,
       const Text('Reading profile data'),
     );
-    
+
     if (fileContent == null || fileContent.isEmpty) {
       debugPrint('Failed to read profile data. Using default profile data.');
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
-    
-    // Parse the JSON data
+
+    // Parse the JSON data.
+
     final Map<String, dynamic> jsonData = jsonDecode(fileContent);
-    
-    // Check for responses key (profile data might be stored under 'responses')
+
+    // Check for responses key (profile data might be stored under 'responses').
+
     if (jsonData.containsKey('responses')) {
       return jsonData['responses'] as Map<String, dynamic>;
     } else if (jsonData.containsKey('data')) {
       return jsonData['data'] as Map<String, dynamic>;
     }
-    
+
     return jsonData;
   } catch (e) {
     debugPrint('Error fetching profile data: $e');
-    // Return default profile data in case of error
+    // Return default profile data in case of error.
+
     return defaultProfileData['data'] as Map<String, dynamic>;
   }
-} 
+}
