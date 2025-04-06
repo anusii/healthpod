@@ -35,6 +35,7 @@ import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/charts/tab.dart';
 import 'package:healthpod/features/diary/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
+import 'package:healthpod/features/home/service/components/profile_management.dart';
 import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/features/update/tab.dart';
@@ -146,8 +147,29 @@ final List<Map<String, dynamic>> homeTabs = [
     resources including:
 
     - Health information and guides
+
     - External trusted resources
+    
     - Useful health calculators and tools
+
+    ''',
+  },
+  {
+    'title': 'Profile',
+    'icon': Icons.person,
+    'color': null,
+    'content': null,
+    'tooltip': '''
+
+    **Profile:** Tap here to view and manage your profile information, including:
+
+    - Personal details
+
+    - Identity information
+
+    - Management plan
+
+    - Appointments overview
 
     ''',
   },
@@ -164,6 +186,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
   int _selectedIndex = 0;
+  bool _profileEditMode = false;
 
   @override
   void initState() {
@@ -220,6 +243,32 @@ class HealthPodHomeState extends State<HealthPodHome> {
   void _updateKeyStatus(bool status) {
     setState(() {
       _isKeySaved = status;
+    });
+  }
+
+  void _handleTabChange(int index) {
+    setState(() {
+      _selectedIndex = index;
+      // Reset profile edit mode when switching away from profile tab.
+
+      if (index != 7) {
+        _profileEditMode = false;
+      }
+    });
+
+    final tab = homeTabs[index];
+
+    if (tab.containsKey('message')) {
+      alert(context, tab['message'], tab['dialogTitle']);
+    } else if (tab.containsKey('action')) {
+      tab['action'](context);
+    }
+  }
+
+  void _navigateToProfileInEditMode() {
+    setState(() {
+      _selectedIndex = 7; // Profile tab index
+      _profileEditMode = true;
     });
   }
 
@@ -332,20 +381,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
                         child: NavigationRail(
                           backgroundColor: theme.colorScheme.surface,
                           selectedIndex: _selectedIndex,
-                          onDestinationSelected: (int index) async {
-                            setState(() {
-                              _selectedIndex = index;
-                            });
-
-                            final tab = homeTabs[index];
-
-                            if (tab.containsKey('message')) {
-                              alert(
-                                  context, tab['message'], tab['dialogTitle']);
-                            } else if (tab.containsKey('action')) {
-                              await tab['action'](context);
-                            }
-                          },
+                          onDestinationSelected: _handleTabChange,
                           labelType: NavigationRailLabelType.all,
                           destinations: homeTabs.map((tab) {
                             final tooltipMessage =
@@ -380,8 +416,12 @@ class HealthPodHomeState extends State<HealthPodHome> {
                 ),
                 VerticalDivider(color: theme.dividerColor),
                 Expanded(
-                  child:
-                      homeTabs[_selectedIndex]['content'] ?? const HomePage(),
+                  child: homeTabs[_selectedIndex]['content'] ??
+                      (_selectedIndex == 7
+                          ? ProfileManagement(initialEditMode: _profileEditMode)
+                          : HomePage(
+                              onNavigateToProfile:
+                                  _navigateToProfileInEditMode)),
                 ),
               ],
             ),

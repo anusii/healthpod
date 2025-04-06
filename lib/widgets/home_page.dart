@@ -30,7 +30,12 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/features/home/service/components/components.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final VoidCallback onNavigateToProfile;
+
+  const HomePage({
+    super.key,
+    required this.onNavigateToProfile,
+  });
 
   Widget _buildHeader(BuildContext context) {
     return Text(
@@ -57,7 +62,10 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 16),
               const ManagePlan(),
               const SizedBox(height: 16),
-              const PersonalDetails(),
+              PersonalDetails(
+                showEditButton: true,
+                onEditPressed: onNavigateToProfile,
+              ),
               const SizedBox(height: 16),
               const NumberAppointments(),
             ],
@@ -83,9 +91,14 @@ class HomePage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [NextAppointment()],
       ),
-      const Column(
+      Column(
         mainAxisSize: MainAxisSize.min,
-        children: [PersonalDetails()],
+        children: [
+          PersonalDetails(
+            showEditButton: true,
+            onEditPressed: onNavigateToProfile,
+          ),
+        ],
       ),
     ];
 

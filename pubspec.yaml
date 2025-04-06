@@ -24,7 +24,7 @@ dependencies:
   file_picker: ^8.1.7
   flutter_launcher_icons: ^0.14.2
   flutter_markdown: ^0.7.3
-  markdown_tooltip: ^0.0.2
+  markdown_tooltip: ^0.0.7
   path: ^1.9.0
   rdflib: ^0.2.9
   solidpod:
@@ -70,7 +70,7 @@ dev_dependencies:
     sdk: flutter
 
   ubuntu_lints: ^0.4.0
-  custom_lint: 0.7.0
+  custom_lint: ^0.7.0
   import_order_lint:
     git:
       url: https://github.com/anusii/import-order-lint.git
@@ -84,6 +84,9 @@ dependency_overrides:
   # removed.
 
   file: ^7.0.0 # Use only if necessary
+  
+  # Add analyzer override to resolve version conflicts
+  analyzer: ^6.6.0
 
   # TODO 20240710 gjw solid-auth DEPENDS ON intl-0.19.0
   #

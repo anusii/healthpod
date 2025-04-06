@@ -32,21 +32,53 @@ import 'package:flutter/material.dart';
 /// This widget allows users to verify and update their personal details easily.
 
 class PersonalDetails extends StatefulWidget {
-  const PersonalDetails({super.key});
+  final bool isEditing;
+  final bool showEditButton;
+  final VoidCallback? onEditPressed;
+
+  const PersonalDetails({
+    super.key,
+    this.isEditing = false,
+    this.showEditButton = false,
+    this.onEditPressed,
+  });
 
   @override
   State<PersonalDetails> createState() => _PersonalDetailsState();
 }
 
 class _PersonalDetailsState extends State<PersonalDetails> {
-  final String address = '14 Example Street, Yarrabah QLD';
-  final String bestContactPhone = '0400 123 456';
-  final String alternativeContactNumber = '(07) 3333 3333';
-  final String email = 'riley-breugel@yarrabah.net';
-  final String dateOfBirth = '1970-07-24';
-  final String gender = 'Female';
+  late TextEditingController _addressController;
+  late TextEditingController _bestContactPhoneController;
+  late TextEditingController _alternativeContactNumberController;
+  late TextEditingController _emailController;
+  late TextEditingController _dateOfBirthController;
+  late TextEditingController _genderController;
 
-  bool? identifyAsIndigenous = false;
+  @override
+  void initState() {
+    super.initState();
+    _addressController =
+        TextEditingController(text: '14 Example Street, Yarrabah QLD');
+    _bestContactPhoneController = TextEditingController(text: '0400 123 456');
+    _alternativeContactNumberController =
+        TextEditingController(text: '(07) 3333 3333');
+    _emailController =
+        TextEditingController(text: 'riley-breugel@yarrabah.net');
+    _dateOfBirthController = TextEditingController(text: '1970-07-24');
+    _genderController = TextEditingController(text: 'Female');
+  }
+
+  @override
+  void dispose() {
+    _addressController.dispose();
+    _bestContactPhoneController.dispose();
+    _alternativeContactNumberController.dispose();
+    _emailController.dispose();
+    _dateOfBirthController.dispose();
+    _genderController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,26 +111,108 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'Personal Identification Details',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Personal Identification Details',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (widget.showEditButton)
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: widget.onEditPressed,
+                          tooltip: 'Edit Profile',
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  _buildLabeledRow('Address:', address),
-                  const SizedBox(height: 8),
-                  _buildLabeledRow('Best Contact Phone:', bestContactPhone),
+                  _buildLabeledRow(
+                    'Address:',
+                    widget.isEditing
+                        ? TextField(
+                            controller: _addressController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                            ),
+                          )
+                        : Text(_addressController.text),
+                  ),
                   const SizedBox(height: 8),
                   _buildLabeledRow(
-                      'Alternative Contact Number:', alternativeContactNumber),
+                    'Best Contact Phone:',
+                    widget.isEditing
+                        ? TextField(
+                            controller: _bestContactPhoneController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                            ),
+                          )
+                        : Text(_bestContactPhoneController.text),
+                  ),
                   const SizedBox(height: 8),
-                  _buildLabeledRow('Email:', email),
+                  _buildLabeledRow(
+                    'Alternative Contact Number:',
+                    widget.isEditing
+                        ? TextField(
+                            controller: _alternativeContactNumberController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                            ),
+                          )
+                        : Text(_alternativeContactNumberController.text),
+                  ),
                   const SizedBox(height: 8),
-                  _buildLabeledRow('Date of Birth:', dateOfBirth),
+                  _buildLabeledRow(
+                    'Email:',
+                    widget.isEditing
+                        ? TextField(
+                            controller: _emailController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                            ),
+                          )
+                        : Text(_emailController.text),
+                  ),
                   const SizedBox(height: 8),
-                  _buildLabeledRow('Gender:', gender),
+                  _buildLabeledRow(
+                    'Date of Birth:',
+                    widget.isEditing
+                        ? TextField(
+                            controller: _dateOfBirthController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                            ),
+                          )
+                        : Text(_dateOfBirthController.text),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildLabeledRow(
+                    'Gender:',
+                    widget.isEditing
+                        ? TextField(
+                            controller: _genderController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                            ),
+                          )
+                        : Text(_genderController.text),
+                  ),
                 ],
               ),
             ),
@@ -108,8 +222,9 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     );
   }
 
-  /// Helper method to build a row with a bold label and regular text.
-  Widget _buildLabeledRow(String label, String value) {
+  /// Helper method to build a row with a bold label and regular text or input field.
+
+  Widget _buildLabeledRow(String label, Widget value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -125,13 +240,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
           ),
         ),
         Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              height: 1.2,
-              fontSize: 13,
-            ),
-          ),
+          child: value,
         ),
       ],
     );
