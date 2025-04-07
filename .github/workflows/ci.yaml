@@ -58,30 +58,32 @@ jobs:
       - run: markdownlint assets/markdown
         # -p .markdownlintignore -c .markdownlint.yaml
 
-  # siidcm:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: subosito/flutter-action@v2
-  #       with:
-  #         channel: 'stable'
-  #         flutter-version: ${{env.FLUTTER_VERSION}}
-  #     - run: flutter pub get
-  #     - run: dart run dart_code_metrics:metrics check-unnecessary-nullable --disable-sunset-warning lib
-  #     # 20250110 gjw Remove the unused-code check since it seems to
-  #     # give spurious errors even though locally we don't see the
-  #     # same:
-  #     #
-  #     # lib/features/file/service.dart:
-  #     #     ⚠ unused class FileService
-  #     #       at /home/runner/work/healthpod/healthpod/lib/features/file/service.dart:33:1
-  #     #     ⚠ unused class _FileServiceState
-  #     #       at /home/runner/work/healthpod/healthpod/lib/features/file/service.dart:40:1
-  #     #
-  #     # - run: dart run dart_code_metrics:metrics check-unused-code --disable-sunset-warning lib
-  #     - run: dart run dart_code_metrics:metrics check-unused-files --disable-sunset-warning lib
-  #     - run: dart run dart_code_metrics:metrics analyze --disable-sunset-warning --fatal-style lib --reporter=console
-  #     - run: find lib -type f -name '*.dart' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
+  file_checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: ${{env.FLUTTER_VERSION}}
+      - run: flutter pub get
+      # 20250408 gjw Migrating away from dart code metrics
+      #
+      # - run: dart run dart_code_metrics:metrics check-unnecessary-nullable --disable-sunset-warning lib
+      # 20250110 gjw Remove the unused-code check since it seems to
+      # give spurious errors even though locally we don't see the
+      # same:
+      #
+      # lib/features/file/service.dart:
+      #     ⚠ unused class FileService
+      #       at /home/runner/work/healthpod/healthpod/lib/features/file/service.dart:33:1
+      #     ⚠ unused class _FileServiceState
+      #       at /home/runner/work/healthpod/healthpod/lib/features/file/service.dart:40:1
+      #
+      # - run: dart run dart_code_metrics:metrics check-unused-code --disable-sunset-warning lib
+      # - run: dart run dart_code_metrics:metrics check-unused-files --disable-sunset-warning lib
+      # - run: dart run dart_code_metrics:metrics analyze --disable-sunset-warning --fatal-style lib --reporter=console
+      - run: find lib -type f -name '*.dart' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
 
   build:
     runs-on: ubuntu-latest
