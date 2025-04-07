@@ -76,7 +76,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       const Text('Reading profile data'),
     );
 
-    if (fileContent == null || fileContent.isEmpty) {
+    if (fileContent.isEmpty) {
       debugPrint('Failed to read profile data. Using default profile data.');
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
