@@ -126,7 +126,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       );
 
       state = state.copyWith(
-        uploadDone: result == SolidFunctionCallStatus.success,
+        uploadDone: result == SolidFunctionCallStatus.success.toString(),
         uploadInProgress: false,
         remoteFileName: remoteFileName,
         cleanFileName: cleanFileName,
@@ -207,8 +207,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
       if (!context.mounted) return;
 
-      if (fileContent == SolidFunctionCallStatus.fail ||
-          fileContent == SolidFunctionCallStatus.notLoggedIn) {
+      if (fileContent == SolidFunctionCallStatus.fail.toString() ||
+          fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
         throw Exception(
             'Download failed - please check your connection and permissions');
       }

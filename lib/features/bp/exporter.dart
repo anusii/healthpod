@@ -125,8 +125,8 @@ class BPExporter extends HealthDataExporterBase {
             const Text('Reading Blood pressure data'),
           );
 
-          if (content == SolidFunctionCallStatus.fail ||
-              content == SolidFunctionCallStatus.notLoggedIn) {
+          if (content == SolidFunctionCallStatus.fail.toString() ||
+              content == SolidFunctionCallStatus.notLoggedIn.toString()) {
             continue;
           }
 
