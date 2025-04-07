@@ -103,8 +103,8 @@ class VaccinationData {
 
         /// Handle the response based on its type.
 
-        if (result != SolidFunctionCallStatus.fail &&
-            result != SolidFunctionCallStatus.notLoggedIn) {
+        if (result != SolidFunctionCallStatus.fail.toString() &&
+            result != SolidFunctionCallStatus.notLoggedIn.toString()) {
           try {
             /// Parse the JSON string result.
 

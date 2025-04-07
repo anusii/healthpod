@@ -63,9 +63,8 @@ class BPEditorService {
         context,
         const Text('Loading file'),
       );
-      if (content == null ||
-          content == SolidFunctionCallStatus.fail ||
-          content == SolidFunctionCallStatus.notLoggedIn) {
+      if (content == SolidFunctionCallStatus.fail.toString() ||
+          content == SolidFunctionCallStatus.notLoggedIn.toString()) {
         continue;
       }
 
