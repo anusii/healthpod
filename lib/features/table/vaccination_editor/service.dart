@@ -63,8 +63,7 @@ class VaccinationEditorService {
         context,
         const Text('Loading file'),
       );
-      if (content == null ||
-          content == SolidFunctionCallStatus.fail.toString() ||
+      if (content == SolidFunctionCallStatus.fail.toString() ||
           content == SolidFunctionCallStatus.notLoggedIn.toString()) {
         continue;
       }

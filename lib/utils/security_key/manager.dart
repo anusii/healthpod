@@ -192,13 +192,15 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
 
       // If key retrieval is successful, navigate to key display screen.
 
-      if (![SolidFunctionCallStatus.notLoggedIn.toString(), SolidFunctionCallStatus.fail.toString()]
-          .contains(fileContent)) {
+      if (![
+        SolidFunctionCallStatus.notLoggedIn.toString(),
+        SolidFunctionCallStatus.fail.toString()
+      ].contains(fileContent)) {
         await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ViewKeys(
-              keyInfo: fileContent!,
+              keyInfo: fileContent,
               title: title,
             ),
           ),
