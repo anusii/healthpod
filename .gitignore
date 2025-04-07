@@ -52,6 +52,10 @@ ignore
 .swiftpm/
 migrate_working_dir/
 
+# Submodules
+/markdown_tooltip/
+/solidpod/
+
 # IntelliJ related
 *.iml
 *.ipr

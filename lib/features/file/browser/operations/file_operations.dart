@@ -86,8 +86,8 @@ class FileOperations {
 
       // Add valid files to the processed list.
 
-      if (metadata != SolidFunctionCallStatus.fail &&
-          metadata != SolidFunctionCallStatus.notLoggedIn) {
+      if (metadata != SolidFunctionCallStatus.fail.toString() &&
+          metadata != SolidFunctionCallStatus.notLoggedIn.toString()) {
         processedFiles.add(FileItem(
           name: fileName,
           path: relativePath,

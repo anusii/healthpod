@@ -10,7 +10,7 @@ on:
     types: [opened, reopened, synchronize]
 
 env:
-  FLUTTER_VERSION: '3.27.0'
+  FLUTTER_VERSION: '3.29.0'
 
 jobs:
 
@@ -58,7 +58,7 @@ jobs:
       - run: markdownlint assets/markdown
         # -p .markdownlintignore -c .markdownlint.yaml
 
-  siidcm:
+  file_checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +67,9 @@ jobs:
           channel: 'stable'
           flutter-version: ${{env.FLUTTER_VERSION}}
       - run: flutter pub get
-      - run: dart run dart_code_metrics:metrics check-unnecessary-nullable --disable-sunset-warning lib
+      # 20250408 gjw Migrating away from dart code metrics
+      #
+      # - run: dart run dart_code_metrics:metrics check-unnecessary-nullable --disable-sunset-warning lib
       # 20250110 gjw Remove the unused-code check since it seems to
       # give spurious errors even though locally we don't see the
       # same:
@@ -79,8 +81,8 @@ jobs:
       #       at /home/runner/work/healthpod/healthpod/lib/features/file/service.dart:40:1
       #
       # - run: dart run dart_code_metrics:metrics check-unused-code --disable-sunset-warning lib
-      - run: dart run dart_code_metrics:metrics check-unused-files --disable-sunset-warning lib
-      - run: dart run dart_code_metrics:metrics analyze --disable-sunset-warning --fatal-style lib --reporter=console
+      # - run: dart run dart_code_metrics:metrics check-unused-files --disable-sunset-warning lib
+      # - run: dart run dart_code_metrics:metrics analyze --disable-sunset-warning --fatal-style lib --reporter=console
       - run: find lib -type f -name '*.dart' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
 
   build:
