@@ -46,7 +46,7 @@ dependencies:
   integration_test:
     sdk: flutter
   flutter_inappwebview: ^6.1.5
-  test: ^1.25.15
+  test: ^1.24.9
   process_run: ^1.2.2+1
   logger: ^2.5.0
   flutter_riverpod: ^2.4.9
@@ -76,6 +76,7 @@ dev_dependencies:
     git:
       url: https://github.com/anusii/import-order-lint.git
       ref: main
+      version: ^0.0.1
 
 dependency_overrides:
 
@@ -87,7 +88,7 @@ dependency_overrides:
   file: ^7.0.0 # Use only if necessary
   
   # Add analyzer override to resolve version conflicts
-  # analyzer: ^6.6.0
+  analyzer: ^6.6.0
 
   # TODO 20240710 gjw solid-auth DEPENDS ON intl-0.19.0
   #
