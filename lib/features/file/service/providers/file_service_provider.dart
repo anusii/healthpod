@@ -126,7 +126,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       );
 
       state = state.copyWith(
-        uploadDone: result == SolidFunctionCallStatus.success.toString(),
+        uploadDone: result == SolidFunctionCallStatus.success,
         uploadInProgress: false,
         remoteFileName: remoteFileName,
         cleanFileName: cleanFileName,
