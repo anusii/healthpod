@@ -123,8 +123,8 @@ abstract class HealthDataExporterBase {
 
           // Skip file if read operation failed.
 
-          if (content == SolidFunctionCallStatus.fail ||
-              content == SolidFunctionCallStatus.notLoggedIn) {
+          if (content == SolidFunctionCallStatus.fail.toString() ||
+              content == SolidFunctionCallStatus.notLoggedIn.toString()) {
             continue;
           }
 
