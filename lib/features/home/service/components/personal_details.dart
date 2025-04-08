@@ -1,17 +1,41 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:convert'; // Correct import for JSON encoding
-import 'dart:io';
+/// Personal details card widget.
+//
+// Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
+//
+/// Copyright (C) 2025, Software Innovation Institute, ANU
+///
+/// Licensed under the GNU General Public License, Version 3 (the "License");
+///
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://www.gnu.org/licenses/>.
+///
+/// Authors: Zheyuan Xu
 
-import 'package:healthpod/constants/paths.dart';
-import 'package:healthpod/utils/construct_pod_path.dart';
-import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
-import 'package:healthpod/utils/fetch_profile_data.dart';
-import 'package:healthpod/utils/format_timestamp_for_filename.dart';
-import 'package:healthpod/utils/upload_json_to_pod.dart';
+library;
+
+import 'package:flutter/material.dart';
+
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/utils/construct_pod_path.dart';
+import 'package:healthpod/utils/fetch_profile_data.dart';
+import 'package:healthpod/utils/upload_json_to_pod.dart';
+
+
 /// A widget that displays and allows editing of personal identification information.
+
 class PersonalDetails extends StatefulWidget {
   final bool isEditing;
   final bool showEditButton;
@@ -90,7 +114,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   Future<void> _saveProfileData() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Check if any data has actually changed
+    // Check if any data has actually changed.
+
     if (!_hasDataChanged()) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -117,17 +142,20 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         'identifyAsIndigenous': _profileData['identifyAsIndigenous'] ?? false,
       };
 
-      // Clean up existing profile files before saving a new one
+      // Clean up existing profile files before saving a new one.
+      
       await _deleteExistingProfileFiles();
 
-      // Try to use the uploadJsonToPod method which is known to work with other components
+      // Try to use the uploadJsonToPod method which is known to work with other components.
+
       final result = await _saveProfileDataUsingUploadUtil(updatedData);
 
       if (result != SolidFunctionCallStatus.success) {
         throw Exception('Failed to save profile data: $result');
       }
 
-      // Update local profile data
+      // Update local profile data.
+
       _profileData = updatedData;
       widget.onDataChanged();
 
@@ -151,23 +179,26 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   }
 
   /// Saves the profile data using the uploadJsonToPod utility which handles file creation
-  /// and proper encryption consistently
+  /// and proper encryption consistently.
+  
   Future<SolidFunctionCallStatus> _saveProfileDataUsingUploadUtil(
       Map<String, dynamic> updatedData) async {
     debugPrint("Saving profile using uploadJsonToPod utility...");
 
     try {
-      // Create a proper JSON structure with timestamp and data
+      // Create a proper JSON structure with timestamp and data.
+
       final jsonData = {
         'timestamp': DateTime.now().toIso8601String(),
         'data': updatedData,
       };
 
-      // Use uploadJsonToPod which is used by other components successfully
+      // Use uploadJsonToPod which is used by other components successfully.
+
       final result = await uploadJsonToPod(
         data: jsonData,
         targetPath:
-            'profile', // This gets added to the base path automatically in uploadJsonToPod
+            'profile', 
         fileNamePrefix: 'profile',
         context: context,
         onSuccess: () {
@@ -175,7 +206,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         },
       );
 
-      // Double-check by logging the directory contents after saving
+      // Double-check by logging the directory contents after saving.
+
       if (result == SolidFunctionCallStatus.success) {
         try {
           final dirUrl = await getDirUrl(constructPodPath('profile', ''));
@@ -194,7 +226,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     }
   }
 
-  /// Check if any data has changed compared to the original profile data
+  /// Check if any data has changed compared to the original profile data.
+  
   bool _hasDataChanged() {
     return _addressController.text.trim() != (_profileData['address'] ?? '') ||
         _bestContactPhoneController.text.trim() !=
@@ -209,10 +242,12 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
   /// Deletes existing profile files before saving a new one to prevent duplication.
   /// Keeps track of the most recent file (if any) for persistence purposes.
+  
   Future<void> _deleteExistingProfileFiles() async {
     try {
-      // Get all files in the profile directory
-      // Note: constructPodPath already includes basePath
+      // Get all files in the profile directory.
+      // Note: constructPodPath already includes basePath.
+
       final dirUrl = await getDirUrl(constructPodPath('profile', ''));
       debugPrint(
           'Looking for profile files to delete in: ${constructPodPath('profile', '')}');
@@ -220,7 +255,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       final resources = await getResourcesInContainer(dirUrl);
       debugPrint('Files in profile directory: ${resources.files}');
 
-      // Find all profile files
+      // Find all profile files.
+
       final profileFiles = resources.files
           .where((file) =>
               file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
@@ -231,10 +267,12 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         return;
       }
 
-      // Sort to find the most recent one (we'll keep the metadata from this)
+      // Sort to find the most recent one (we'll keep the metadata from this).
+
       profileFiles.sort((a, b) => b.compareTo(a));
 
-      // Delete all profile files - we'll create a new one with the current data
+      // Delete all profile files - we'll create a new one with the current data.
+
       int deletedCount = 0;
       for (final file in profileFiles) {
         try {
@@ -250,7 +288,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       debugPrint('Successfully deleted $deletedCount profile files');
     } catch (e) {
       debugPrint('Error cleaning up profile files: $e');
-      // Don't rethrow - we want to continue with saving even if cleanup fails
+      // Don't rethrow - we want to continue with saving even if cleanup fails.
+
     }
   }
 
@@ -270,14 +309,17 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     super.didUpdateWidget(oldWidget);
 
     // If we're exiting edit mode, save the data.
+
     if (oldWidget.isEditing && !widget.isEditing) {
       _saveProfileData();
     }
   }
 
-  // Show edit dialog for editing personal details
+  // Show edit dialog for editing personal details.
+
   Future<void> _showEditDialog() async {
-    // Create temporary controllers with current values
+    // Create temporary controllers with current values.
+
     final tempAddressController =
         TextEditingController(text: _addressController.text);
     final tempBestContactPhoneController =
@@ -430,7 +472,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       },
     );
 
-    // If user confirmed saving, update the main controllers and save data
+    // If user confirmed saving, update the main controllers and save data.
+
     if (result == true) {
       setState(() {
         _addressController.text = tempAddressController.text;
@@ -445,7 +488,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       await _saveProfileData();
     }
 
-    // Dispose temporary controllers after they are no longer needed
+    // Dispose temporary controllers after they are no longer needed.
+
     tempAddressController.dispose();
     tempBestContactPhoneController.dispose();
     tempAlternativeContactNumberController.dispose();
@@ -454,10 +498,11 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     tempGenderController.dispose();
   }
 
-  /// Parse a date string or return a default date
+  /// Parse a date string or return a default date.
+  
   DateTime _parseDateOrDefault(String dateStr) {
     try {
-      // Try to parse the date in format YYYY-MM-DD
+      // Try to parse the date in format YYYY-MM-DD.
       final parts = dateStr.split('-');
       if (parts.length == 3) {
         return DateTime(
@@ -466,15 +511,19 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     } catch (e) {
       debugPrint('Error parsing date: $e');
     }
-    // Return a default date (30 years ago)
+    // Return a default date (30 years ago).
+
     return DateTime.now().subtract(const Duration(days: 365 * 30));
   }
 
-  /// Format a date as YYYY-MM-DD
+  /// Format a date as YYYY-MM-DD.
+  
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
+  /// Validate an email address.
+  
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) return null; // Make email optional
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
@@ -482,12 +531,16 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     return null;
   }
 
+  /// Validate a phone number.
+
   String? _validatePhone(String? value) {
     if (value == null || value.isEmpty) return null; // Make phone optional
     final phoneRegex = RegExp(r'^\+?[0-9]{10,14}$');
     if (!phoneRegex.hasMatch(value)) return 'Enter a valid phone number';
     return null;
   }
+
+  /// Validate a required field.
 
   String? _validateRequired(String? value) {
     return value == null || value.trim().isEmpty
@@ -570,7 +623,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
           if (_isLoading || _isSaving)
             Positioned.fill(
               child: Container(
-                color: Theme.of(context).cardTheme.color?.withOpacity(0.7),
+                color: Theme.of(context).cardTheme.color?.withValues(alpha: 0.7),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -607,7 +660,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   color: Theme.of(context)
                       .colorScheme
                       .onSurfaceVariant
-                      .withOpacity(0.2),
+                      .withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -619,7 +672,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   color: Theme.of(context)
                       .colorScheme
                       .onSurfaceVariant
-                      .withOpacity(0.1),
+                      .withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -630,7 +683,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     );
   }
 
-  /// Helper method to build a data row for display mode
+  /// Helper method to build a data row for display mode.
+  
   Widget _buildDataRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -653,7 +707,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   ? Theme.of(context)
                       .colorScheme
                       .onSurfaceVariant
-                      .withOpacity(0.5)
+                      .withValues(alpha: 0.5)
                   : Theme.of(context).colorScheme.onSurface,
             ),
           ),
@@ -662,44 +716,4 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     );
   }
 
-  /// Helper method to build an editable row with validation - keeping for reference
-  Widget _buildEditableRow(
-    String label,
-    TextEditingController controller, {
-    String? Function(String?)? validator,
-    TextInputType? keyboardType,
-    required bool isEditing,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            '$label ',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
-          ),
-        ),
-        Expanded(
-          child: isEditing
-              ? TextFormField(
-                  controller: controller,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                  ),
-                  validator: validator,
-                  keyboardType: keyboardType,
-                )
-              : Text(controller.text),
-        ),
-      ],
-    );
-  }
 }
