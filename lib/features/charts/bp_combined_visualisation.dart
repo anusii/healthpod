@@ -459,7 +459,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                             // Build tooltip content.
 
                             final pressureType =
-                                isSystolic ? "Systolic" : "Diastolic";
+                                isSystolic ? 'Systolic' : 'Diastolic';
                             final pressureValue = parseNumericInput(spot.y);
 
                             // Create formatted content lines.

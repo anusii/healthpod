@@ -192,7 +192,7 @@ class FileListItem extends StatelessWidget {
                           showDialog(
                             context: context,
                             builder: (dialogContext) => AlertDialog(
-                              title: const Text("File Preview"),
+                              title: const Text('File Preview'),
                               content: SizedBox(
                                 width: double.maxFinite,
                                 height: 500,
@@ -208,7 +208,7 @@ class FileListItem extends StatelessWidget {
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(dialogContext),
-                                  child: const Text("Close"),
+                                  child: const Text('Close'),
                                 ),
                               ],
                             ),

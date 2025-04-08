@@ -76,15 +76,15 @@ class _CallIconState extends State<CallIcon> {
     showDialog(
       context: localContext,
       builder: (dialogContext) => AlertDialog(
-        title: const Text("Confirm Call"),
-        content: const Text("Are you sure you want to call the clinic?"),
+        title: const Text('Confirm Call'),
+        content: const Text('Are you sure you want to call the clinic?'),
         actions: <Widget>[
           ElevatedButton(
-            child: const Text("Cancel"),
+            child: const Text('Cancel'),
             onPressed: () => Navigator.of(dialogContext).pop(),
           ),
           ElevatedButton(
-            child: const Text("Yes"),
+            child: const Text('Yes'),
             onPressed: () async {
               Navigator.of(dialogContext).pop();
               await _initiatePhoneCall(localContext);
