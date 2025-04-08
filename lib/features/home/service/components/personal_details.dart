@@ -33,7 +33,6 @@ import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/fetch_profile_data.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
 
-
 /// A widget that displays and allows editing of personal identification information.
 
 class PersonalDetails extends StatefulWidget {
@@ -143,7 +142,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       };
 
       // Clean up existing profile files before saving a new one.
-      
+
       await _deleteExistingProfileFiles();
 
       // Try to use the uploadJsonToPod method which is known to work with other components.
@@ -180,7 +179,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
   /// Saves the profile data using the uploadJsonToPod utility which handles file creation
   /// and proper encryption consistently.
-  
+
   Future<SolidFunctionCallStatus> _saveProfileDataUsingUploadUtil(
       Map<String, dynamic> updatedData) async {
     debugPrint("Saving profile using uploadJsonToPod utility...");
@@ -197,8 +196,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
       final result = await uploadJsonToPod(
         data: jsonData,
-        targetPath:
-            'profile', 
+        targetPath: 'profile',
         fileNamePrefix: 'profile',
         context: context,
         onSuccess: () {
@@ -227,7 +225,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   }
 
   /// Check if any data has changed compared to the original profile data.
-  
+
   bool _hasDataChanged() {
     return _addressController.text.trim() != (_profileData['address'] ?? '') ||
         _bestContactPhoneController.text.trim() !=
@@ -242,7 +240,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
   /// Deletes existing profile files before saving a new one to prevent duplication.
   /// Keeps track of the most recent file (if any) for persistence purposes.
-  
+
   Future<void> _deleteExistingProfileFiles() async {
     try {
       // Get all files in the profile directory.
@@ -289,7 +287,6 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     } catch (e) {
       debugPrint('Error cleaning up profile files: $e');
       // Don't rethrow - we want to continue with saving even if cleanup fails.
-
     }
   }
 
@@ -499,7 +496,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   }
 
   /// Parse a date string or return a default date.
-  
+
   DateTime _parseDateOrDefault(String dateStr) {
     try {
       // Try to parse the date in format YYYY-MM-DD.
@@ -517,13 +514,13 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   }
 
   /// Format a date as YYYY-MM-DD.
-  
+
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
   /// Validate an email address.
-  
+
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) return null; // Make email optional
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
@@ -623,7 +620,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
           if (_isLoading || _isSaving)
             Positioned.fill(
               child: Container(
-                color: Theme.of(context).cardTheme.color?.withValues(alpha: 0.7),
+                color:
+                    Theme.of(context).cardTheme.color?.withValues(alpha: 0.7),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -684,7 +682,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   }
 
   /// Helper method to build a data row for display mode.
-  
+
   Widget _buildDataRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -715,5 +713,4 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       ],
     );
   }
-
 }
