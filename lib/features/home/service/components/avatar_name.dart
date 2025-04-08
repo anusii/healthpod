@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/appointment.dart';
 
-/// A widget that displays the user's avatar, name, patient ID,
+/// A widget that displays the user's avatar, name,
 /// and a notification bell with the number of notifications.
 ///
 /// This widget is typically used at the top of a user dashboard
@@ -114,7 +114,7 @@ class _AvatarNameState extends State<AvatarName> {
 
           const SizedBox(width: 12),
 
-          // User's name and patient ID.
+          // User's name only.
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -136,12 +136,6 @@ class _AvatarNameState extends State<AvatarName> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-              Text(
-                'Patient ID: $patientID',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
             ],
           ),
 
