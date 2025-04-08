@@ -37,15 +37,15 @@ import 'package:healthpod/utils/save_response_pod.dart';
 class PersonalDetails extends StatefulWidget {
   final bool isEditing;
   final bool showEditButton;
-  final VoidCallback? onEditPressed;
-  final VoidCallback? onDataChanged;
+  final VoidCallback onEditPressed;
+  final VoidCallback onDataChanged;
 
   const PersonalDetails({
     super.key,
     this.isEditing = false,
     this.showEditButton = false,
-    this.onEditPressed,
-    this.onDataChanged,
+    required this.onEditPressed,
+    required this.onDataChanged,
   });
 
   @override
@@ -130,9 +130,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         filePrefix: 'profile',
       );
 
-      if (widget.onDataChanged != null) {
-        widget.onDataChanged!();
-      }
+      widget.onDataChanged();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

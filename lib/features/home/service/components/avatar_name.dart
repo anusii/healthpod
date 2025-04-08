@@ -75,7 +75,7 @@ class _AvatarNameState extends State<AvatarName> {
       });
     } catch (e) {
       setState(() {
-        _patientName = userName; // Fallback to constant on error
+        _patientName = userName;
         _nameController = TextEditingController(text: _patientName);
         _isLoading = false;
       });
@@ -112,6 +112,7 @@ class _AvatarNameState extends State<AvatarName> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // User avatar with lock icon indicator.
+
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -121,6 +122,7 @@ class _AvatarNameState extends State<AvatarName> {
                           AssetImage('assets/images/sample_avatar_image.png'),
                     ),
                     // Positioned lock icon at bottom-right.
+
                     Positioned(
                       bottom: -2,
                       right: -2,
@@ -143,6 +145,7 @@ class _AvatarNameState extends State<AvatarName> {
                 const SizedBox(width: 12),
 
                 // User's name only.
+
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -170,6 +173,7 @@ class _AvatarNameState extends State<AvatarName> {
                 const SizedBox(width: 12),
 
                 // Notification bell with notification count badge.
+
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -179,6 +183,7 @@ class _AvatarNameState extends State<AvatarName> {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                     // Show notification count badge only if notifications exist.
+
                     if (notificationCount > 0)
                       Positioned(
                         right: -2,
