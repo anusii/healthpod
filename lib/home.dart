@@ -34,7 +34,6 @@ import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/charts/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
-import 'package:healthpod/features/home/service/components/profile_management.dart';
 import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/features/update/tab.dart';
@@ -153,25 +152,6 @@ final List<Map<String, dynamic>> homeTabs = [
 
     ''',
   },
-  {
-    'title': 'Profile',
-    'icon': Icons.person,
-    'color': null,
-    'content': null,
-    'tooltip': '''
-
-    **Profile:** Tap here to view and manage your profile information, including:
-
-    - Personal details
-
-    - Identity information
-
-    - Management plan
-
-    - Appointments overview
-
-    ''',
-  },
 ];
 
 class HealthPodHome extends StatefulWidget {
@@ -185,7 +165,6 @@ class HealthPodHomeState extends State<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
   int _selectedIndex = 0;
-  bool _profileEditMode = false;
   // Key to force rebuilds when profile is updated.
 
   final GlobalKey<State> _homePageKey = GlobalKey<State>();
@@ -251,11 +230,6 @@ class HealthPodHomeState extends State<HealthPodHome> {
   void _handleTabChange(int index) {
     setState(() {
       _selectedIndex = index;
-      // Reset profile edit mode when switching away from profile tab.
-
-      if (index != 7) {
-        _profileEditMode = false;
-      }
     });
 
     final tab = homeTabs[index];
@@ -264,29 +238,6 @@ class HealthPodHomeState extends State<HealthPodHome> {
       alert(context, tab['message'], tab['dialogTitle']);
     } else if (tab.containsKey('action')) {
       tab['action'](context);
-    }
-  }
-
-  void _navigateToProfileInEditMode() {
-    setState(() {
-      _selectedIndex = 7; // Profile tab index
-      _profileEditMode = true;
-    });
-  }
-
-  /// Handles profile data updates and refreshes necessary components.
-
-  void _handleProfileUpdated() {
-    // Force rebuild of the HomePage if we're on it.
-
-    if (_selectedIndex == 0) {
-      setState(() {
-        // The key will force a rebuild of HomePage.
-
-        if (_homePageKey.currentState != null) {
-          (_homePageKey.currentState as dynamic).setState(() {});
-        }
-      });
     }
   }
 
@@ -431,15 +382,10 @@ class HealthPodHomeState extends State<HealthPodHome> {
                 VerticalDivider(color: theme.dividerColor),
                 Expanded(
                   child: homeTabs[_selectedIndex]['content'] ??
-                      (_selectedIndex == 7
-                          ? ProfileManagement(
-                              initialEditMode: _profileEditMode,
-                              onProfileUpdated: _handleProfileUpdated,
-                            )
-                          : HomePage(
-                              key: _homePageKey,
-                              onNavigateToProfile: _navigateToProfileInEditMode,
-                            )),
+                      HomePage(
+                          key: _homePageKey,
+                          onNavigateToProfile: () {},
+                      ),
                 ),
               ],
             ),

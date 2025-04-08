@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/appointment.dart';
+import 'package:healthpod/utils/fetch_profile_data.dart';
 
 /// A widget that displays the user's avatar, name,
 /// and a notification bell with the number of notifications.
@@ -49,11 +50,36 @@ class AvatarName extends StatefulWidget {
 
 class _AvatarNameState extends State<AvatarName> {
   late TextEditingController _nameController;
+  String _patientName = '';
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: userName);
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final profileData = await fetchProfileData(context);
+      final name = profileData['patientName'] as String? ?? '';
+      
+      setState(() {
+        _patientName = name.isNotEmpty ? name : '';
+        _nameController = TextEditingController(text: _patientName);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _patientName = userName; // Fallback to constant on error
+        _nameController = TextEditingController(text: _patientName);
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -80,99 +106,101 @@ class _AvatarNameState extends State<AvatarName> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // User avatar with lock icon indicator.
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              const CircleAvatar(
-                radius: 24,
-                backgroundImage:
-                    AssetImage('assets/images/sample_avatar_image.png'),
-              ),
-              // Positioned lock icon at bottom-right.
-              Positioned(
-                bottom: -2,
-                right: -2,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.tertiary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.lock,
-                    color: theme.colorScheme.onTertiary,
-                    size: 16,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(width: 12),
-
-          // User's name only.
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              widget.isEditing
-                  ? SizedBox(
-                      width: 200,
-                      child: TextField(
-                        controller: _nameController,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // User avatar with lock icon indicator.
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const CircleAvatar(
+                      radius: 24,
+                      backgroundImage:
+                          AssetImage('assets/images/sample_avatar_image.png'),
+                    ),
+                    // Positioned lock icon at bottom-right.
+                    Positioned(
+                      bottom: -2,
+                      right: -2,
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.tertiary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.lock,
+                          color: theme.colorScheme.onTertiary,
+                          size: 16,
                         ),
                       ),
-                    )
-                  : Text(
-                      _nameController.text,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
                     ),
-            ],
-          ),
-
-          const SizedBox(width: 12),
-
-          // Notification bell with notification count badge.
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(
-                Icons.notifications,
-                size: 28,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              // Show notification count badge only if notifications exist.
-              if (notificationCount > 0)
-                Positioned(
-                  right: -2,
-                  top: -2,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.error,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      '$notificationCount',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onError,
-                      ),
-                    ),
-                  ),
+                  ],
                 ),
-            ],
-          ),
-        ],
-      ),
+
+                const SizedBox(width: 12),
+
+                // User's name only.
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    widget.isEditing
+                        ? SizedBox(
+                            width: 200,
+                            child: TextField(
+                              controller: _nameController,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              ),
+                            ),
+                          )
+                        : Text(
+                            _nameController.text,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ],
+                ),
+
+                const SizedBox(width: 12),
+
+                // Notification bell with notification count badge.
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(
+                      Icons.notifications,
+                      size: 28,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    // Show notification count badge only if notifications exist.
+                    if (notificationCount > 0)
+                      Positioned(
+                        right: -2,
+                        top: -2,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.error,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            '$notificationCount',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onError,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
     );
   }
 }
