@@ -50,7 +50,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
         "Looking for profile data in: ${constructPodPath('profile', '')}");
 
     final resources = await getResourcesInContainer(dirUrl);
-    debugPrint("Profile dir contents: ${resources.files}");
+    debugPrint('Profile dir contents: ${resources.files}');
 
     // Look for profile files.
 
@@ -68,7 +68,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
     profileFiles.sort((a, b) => b.compareTo(a));
     final latestProfileFile = profileFiles.first;
-    debugPrint("Found latest profile file: $latestProfileFile");
+    debugPrint('Found latest profile file: $latestProfileFile');
 
     // Read the file contents.
 
@@ -84,7 +84,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       const Text('Reading profile data'),
     );
 
-    if (fileContent is! String || fileContent.isEmpty) {
+    if (fileContent.isEmpty) {
       debugPrint('Failed to read profile data. Using default profile data.');
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
