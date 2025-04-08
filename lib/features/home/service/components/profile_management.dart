@@ -34,12 +34,12 @@ import 'package:healthpod/features/home/service/components/personal_details.dart
 
 class ProfileManagement extends StatefulWidget {
   final bool initialEditMode;
-  final VoidCallback? onProfileUpdated;
+  final VoidCallback onProfileUpdated;
 
   const ProfileManagement({
     super.key,
     this.initialEditMode = false,
-    this.onProfileUpdated,
+    required this.onProfileUpdated,
   });
 
   @override
@@ -58,9 +58,7 @@ class _ProfileManagementState extends State<ProfileManagement> {
   }
 
   void _handleProfileDataChanged() {
-    if (widget.onProfileUpdated != null) {
-      widget.onProfileUpdated!();
-    }
+    widget.onProfileUpdated();
   }
 
   @override
@@ -110,6 +108,7 @@ class _ProfileManagementState extends State<ProfileManagement> {
                   child: PersonalDetails(
                     isEditing: _isEditing,
                     onDataChanged: _handleProfileDataChanged,
+                    onEditPressed: () {},
                   ),
                 ),
               ],
