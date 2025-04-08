@@ -44,12 +44,12 @@ class VaccinationSurveyConstants {
 
   /// Question texts (for UI only).
 
-  static const String date = "When did you receive the vaccination?";
-  static const String vaccine = "Which vaccine did you receive?";
-  static const String provider = "Where did you receive the vaccine?";
-  static const String professional = "Healthcare professional name";
-  static const String cost = "Cost of vaccination";
-  static const String notes = "Any additional notes?";
+  static const String date = 'When did you receive the vaccination?';
+  static const String vaccine = 'Which vaccine did you receive?';
+  static const String provider = 'Where did you receive the vaccine?';
+  static const String professional = 'Healthcare professional name';
+  static const String cost = 'Cost of vaccination';
+  static const String notes = 'Any additional notes?';
 
   /// The list of questions used in the vaccination survey.
   /// Each question includes type validation and required status.

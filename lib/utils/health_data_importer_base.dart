@@ -195,7 +195,7 @@ abstract class HealthDataImporterBase {
 
           // Initialize timestamp and validation flag.
 
-          String timestamp = "";
+          String timestamp = '';
           bool hasRequiredFields = true;
 
           // Process each column in the current row.

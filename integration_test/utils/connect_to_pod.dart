@@ -76,16 +76,16 @@ void main() {
 
   // Log the test environment configuration.
 
-  debugPrint("🌍 INTEGRATION_TEST: $isIntegrationTest");
-  ("🔍 isIntegrationTest: $isIntegrationTest");
+  debugPrint('🌍 INTEGRATION_TEST: $isIntegrationTest');
+  ('🔍 isIntegrationTest: $isIntegrationTest');
 
   // Execute appropriate test suite based on mode.
 
   if (isIntegrationTest) {
-    debugPrint("🌍 Running in WebView mode...");
+    debugPrint('🌍 Running in WebView mode...');
     connectToPodWebView();
   } else {
-    debugPrint("🌍 Running in external browser mode...");
+    debugPrint('🌍 Running in external browser mode...');
     connectToPod();
   }
 }
@@ -211,7 +211,7 @@ void connectToPodWebView() {
       // Verify WebView presence.
 
       expect(find.byType(InAppWebView), findsOneWidget);
-      debugPrint("✅ WebView found, waiting for login to complete...");
+      debugPrint('✅ WebView found, waiting for login to complete...');
 
       // Attempt WebID extraction with retry logic.
 
@@ -220,8 +220,8 @@ void connectToPodWebView() {
       String? webId;
 
       while (webId == null && remaining > 0) {
-        debugPrint("🔄 Checking for extracted WebID... "
-            "Attempt ${maxRetries - remaining + 1}/$maxRetries");
+        debugPrint('🔄 Checking for extracted WebID... '
+            'Attempt ${maxRetries - remaining + 1}/$maxRetries');
 
         // Allow time for login process and JS injection.
 
@@ -235,10 +235,10 @@ void connectToPodWebView() {
       // Validate WebID extraction results.
 
       if (webId != null && webId.isNotEmpty) {
-        debugPrint("✅ WebID retrieved from page: $webId");
+        debugPrint('✅ WebID retrieved from page: $webId');
       } else {
         debugPrint(
-            "❌ WebID could not be retrieved after $maxRetries attempts!");
+            '❌ WebID could not be retrieved after $maxRetries attempts!');
         fail('Unable to fetch WebID from HTML.');
       }
     });
