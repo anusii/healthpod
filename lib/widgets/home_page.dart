@@ -84,7 +84,7 @@ class _HomePageState extends State<HomePage> {
               PersonalDetails(
                 key: _personalDetailsKey,
                 showEditButton: true,
-                onEditPressed: widget.onNavigateToProfile,
+                onEditPressed: () {},
                 onDataChanged: _refreshPersonalDetails,
               ),
               const SizedBox(height: 16),
@@ -112,16 +112,18 @@ class _HomePageState extends State<HomePage> {
         mainAxisSize: MainAxisSize.min,
         children: [NextAppointment()],
       ),
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          PersonalDetails(
-            key: _personalDetailsKey,
-            showEditButton: true,
-            onEditPressed: widget.onNavigateToProfile,
-            onDataChanged: _refreshPersonalDetails,
-          ),
-        ],
+      SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PersonalDetails(
+              key: _personalDetailsKey,
+              showEditButton: true,
+              onEditPressed: () {},
+              onDataChanged: _refreshPersonalDetails,
+            ),
+          ],
+        ),
       ),
     ];
 
