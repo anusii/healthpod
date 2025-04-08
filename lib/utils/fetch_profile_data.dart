@@ -44,7 +44,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
   try {
     // Get the directory URL for the profile folder.
     // Note: constructPodPath already includes basePath in its implementation.
-  
+
     final dirUrl = await getDirUrl(constructPodPath('profile', ''));
     debugPrint(
         "Looking for profile data in: ${constructPodPath('profile', '')}");
@@ -150,7 +150,8 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       debugPrint('Error parsing profile data JSON: $e');
       // Try to extract just the data part if the whole file can't be parsed.
 
-      final dataMatch = RegExp(r'"data":\s*(\{[^}]+\})').firstMatch(fileContent);
+      final dataMatch =
+          RegExp(r'"data":\s*(\{[^}]+\})').firstMatch(fileContent);
       if (dataMatch != null && dataMatch.group(1) != null) {
         try {
           return jsonDecode('{${dataMatch.group(1)}}') as Map<String, dynamic>;
