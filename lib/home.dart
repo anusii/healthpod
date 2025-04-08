@@ -383,8 +383,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
                 Expanded(
                   child: homeTabs[_selectedIndex]['content'] ??
                       HomePage(
-                          key: _homePageKey,
-                          onNavigateToProfile: () {},
+                        key: _homePageKey,
+                        onNavigateToProfile: () {},
                       ),
                 ),
               ],

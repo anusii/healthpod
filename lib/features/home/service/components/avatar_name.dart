@@ -67,7 +67,7 @@ class _AvatarNameState extends State<AvatarName> {
     try {
       final profileData = await fetchProfileData(context);
       final name = profileData['patientName'] as String? ?? '';
-      
+
       setState(() {
         _patientName = name.isNotEmpty ? name : '';
         _nameController = TextEditingController(text: _patientName);
@@ -153,8 +153,8 @@ class _AvatarNameState extends State<AvatarName> {
                               controller: _nameController,
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
-                                contentPadding:
-                                    EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
                               ),
                             ),
                           )
