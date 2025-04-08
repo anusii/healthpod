@@ -182,7 +182,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
   Future<SolidFunctionCallStatus> _saveProfileDataUsingUploadUtil(
       Map<String, dynamic> updatedData) async {
-    debugPrint("Saving profile using uploadJsonToPod utility...");
+    debugPrint('Saving profile using uploadJsonToPod utility...');
 
     try {
       // Create a proper JSON structure with timestamp and data.
@@ -200,7 +200,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         fileNamePrefix: 'profile',
         context: context,
         onSuccess: () {
-          debugPrint("Successfully uploaded profile data");
+          debugPrint('Successfully uploaded profile data');
         },
       );
 
@@ -211,15 +211,15 @@ class _PersonalDetailsState extends State<PersonalDetails> {
           final dirUrl = await getDirUrl(constructPodPath('profile', ''));
           final resources = await getResourcesInContainer(dirUrl);
           debugPrint(
-              "After save - Files in profile directory: ${resources.files}");
+              'After save - Files in profile directory: ${resources.files}');
         } catch (e) {
-          debugPrint("Error checking directory after save: $e");
+          debugPrint('Error checking directory after save: $e');
         }
       }
 
       return result;
     } catch (e) {
-      debugPrint("Error saving profile: $e");
+      debugPrint('Error saving profile: $e');
       return SolidFunctionCallStatus.fail;
     }
   }
