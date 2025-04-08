@@ -1,4 +1,4 @@
-/// Integration test for the Solid pod connection.
+/// Integration test suite for Solid Pod authentication flow for Linux.
 //
 // Time-stamp: <Sunday 2025-01-26 08:55:54 +1100 Graham Williams>
 //
@@ -25,70 +25,156 @@
 
 library;
 
-import 'dart:async';
+import 'package:test/test.dart';
+import 'package:webdriver/async_io.dart';
+import 'package:webdriver/support/async.dart';
 
-import 'package:flutter/material.dart';
-
-import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
-
+import 'utils/chrome_driver_process.dart';
+import 'utils/logger.dart';
 import 'utils/test_config.dart';
-import 'utils/test_webview.dart';
 
-/// Main integration test for Solid Pod authentication.
+/// Integration test suite for Solid Pod authentication flow.
 ///
-/// This test verifies the entire authentication flow:
-/// 1. Launches the WebView
-/// 2. Navigates through login and consent pages
-/// 3. Extracts the user's WebID
-/// 4. Validates the extracted WebID
+/// This test suite automates the authentication process for a Solid Pod,
+/// verifying that users can successfully:
+/// - Launch a headless Chrome browser
+/// - Navigate to the login page
+/// - Input credentials
+/// - Handle consent pages if present
+/// - Reach the account dashboard
+///
+/// The suite uses Chrome WebDriver for browser automation and includes
+/// proper setup/teardown of browser instances.
+///
+/// Requirements:
+/// - Chrome browser installed
+/// - Valid Solid Pod credentials configured in TestConfig
+/// - ChromeDriver matching Chrome version
+/// - Network access to Pod server
 
 void main() {
-  // Initialises the integration test binding.
+  // Reference to the ChromeDriver process that will be started/stopped.
 
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  ChromeDriverProcess? chromeDriver;
 
-  group('Pod Connection Tests:', () {
-    testWidgets('WebView login test', (tester) async {
-      // Completer to handle asynchronous WebID extraction.
+  // Reference to WebDriver instance for browser control.
 
-      final webIdCompleter = Completer<String>();
+  WebDriver? driver;
 
-      // Build the test widget.
+  setUp(() async {
+    try {
+      // Initialise and start ChromeDriver process.
 
-      await tester.pumpWidget(MaterialApp(
-        home: Scaffold(
-          body: TestWebView(
-            // Callback to complete the WebID when extracted.
+      chromeDriver = ChromeDriverProcess();
+      await chromeDriver!.start();
 
-            onWebIdExtracted: (webId) {
-              if (webId != null && !webIdCompleter.isCompleted) {
-                webIdCompleter.complete(webId);
-              }
-            },
-          ),
-        ),
-      ));
+      // Configure Chrome capabilities for headless testing.
 
-      debugPrint('✅ Test widget built');
-      await tester.pumpAndSettle();
+      final capabilities = {
+        Capabilities.chromeOptions: {
+          'args': [
+            '--no-sandbox', // Required for running in containers.
+            '--headless', // Run browser in headless mode.
+            '--disable-gpu', // Recommended for headless mode.
+            '--disable-dev-shm-usage' // Prevent crashes in containers.
+          ]
+        }
+      };
+
+      // Create WebDriver instance with configured capabilities.
+
+      driver = await createDriver(
+          uri: Uri.parse('http://localhost:${TestConfig.chromeDriverPort}'),
+          desired: capabilities);
+      Logger.info('✅ WebDriver initialized successfully');
+    } catch (e, stackTrace) {
+      // Log any setup failures and ensure cleanup.
+
+      Logger.error('❌ Setup failed: $e');
+      Logger.error('📜 Stack trace: $stackTrace');
+      if (chromeDriver != null) await chromeDriver!.stop();
+      rethrow;
+    }
+  });
+
+  tearDown(() async {
+    // Clean up WebDriver session if it exists.
+    if (driver != null) {
+      try {
+        await driver!.quit();
+      } catch (e) {
+        Logger.error('⚠️ Error quitting WebDriver: $e');
+      }
+    }
+
+    // Stop ChromeDriver process if it exists.
+
+    if (chromeDriver != null) {
+      await chromeDriver!.stop();
+    }
+  });
+
+  test('🔐 Solid Pod Authentication Test', () async {
+    try {
+      // Verify WebDriver is properly initialised.
+
+      if (driver == null) {
+        fail('❌ WebDriver not initialized');
+      }
+
+      // Navigate to the login page.
+
+      await driver!.get(TestConfig.podServer + TestConfig.loginPath);
+      Logger.info('🌐 Navigated to login page');
+
+      // Fill in login credentials.
+
+      var emailInput = await driver!.findElement(const By.name('email'));
+      await emailInput.sendKeys(TestConfig.testEmail);
+      Logger.info('✉️ Filled email input');
+
+      var passwordInput = await driver!.findElement(const By.name('password'));
+      await passwordInput.sendKeys(TestConfig.testPassword);
+      Logger.info('🔑 Filled password input');
+
+      // Submit login form.
+
+      var loginButton = await driver!
+          .findElement(const By.cssSelector('button[type="submit"]'));
+      await loginButton.click();
+      Logger.info('🚀 Submitted login form');
+
+      // Handle consent page if it appears.
 
       try {
-        // Wait for WebID extraction with a timeout.
-
-        final webId = await webIdCompleter.future.timeout(TestConfig.timeout);
-
-        // Validate the extracted WebID.
-
-        expect(webId, isNotNull);
-        expect(webId.startsWith(TestConfig.podServer), isTrue);
-        debugPrint('✅ Test completed successfully');
-      } on TimeoutException {
-        // Handle test timeout.
-
-        debugPrint('❌ Test timed out waiting for WebID');
-        fail('Authentication timed out');
+        await waitFor(() async {
+          var consentButton =
+              await driver!.findElement(const By.id('consent-btn'));
+          await consentButton.click();
+          return true;
+        }, timeout: const Duration(seconds: 5));
+        Logger.info('🛑 Handled consent page');
+      } catch (e) {
+        Logger.warn('✔️ No consent page found or already consented');
       }
-    });
+
+      // Verify successful navigation to account page.
+
+      await waitFor(() async {
+        final currentUrl = await driver!.currentUrl;
+        Logger.info('🌍 Current URL: $currentUrl');
+        return currentUrl.contains('/.account/account');
+      }, timeout: TestConfig.timeout);
+      Logger.info('🎉 Reached account page');
+
+      Logger.info(
+          '✅ Successfully authenticated and navigated to the account page!');
+    } catch (e, stackTrace) {
+      // Log any test failures with stack trace.
+
+      Logger.error('❌ Test failed: $e');
+      Logger.error('📜 Stack trace: $stackTrace');
+      fail('❌ Test failed: ${e.toString()}');
+    }
   });
 }
