@@ -156,14 +156,10 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
     );
   }
 
-  Future<void> handlePdfToJson(File file) async {
-    // Store context before async operations.
-
+  Future<void> convertPDFToJsonUpload(File file) async {
     final currentContext = context;
-
     try {
-      // Show loading dialog while processing.
-
+      // Show loading dialog while processing
       if (currentContext.mounted) {
         showDialog(
           context: currentContext,
@@ -174,20 +170,17 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         );
       }
 
-      // Read PDF file.
-
+      // Read PDF file
       final bytes = await file.readAsBytes();
       final PdfDocument pdf = PdfDocument(inputBytes: bytes);
 
-      // Extract text from all pages.
-
+      // Extract text from all pages
       String text = '';
       for (var i = 0; i < pdf.pages.count; i++) {
         text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
       }
 
-      // Structure the data to match kt_pathology.json format.
-
+      // Structure the data to match kt_pathology.json format
       final List<String> lines = text.split('\n');
       final Map<String, dynamic> jsonData = {
         'metadata': {
@@ -206,412 +199,211 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         }
       };
 
-      // Close loading dialog.
-
+      // Close loading dialog
       if (currentContext.mounted) {
         Navigator.pop(currentContext);
       }
 
-      // Save JSON file in integration_test/data folder.
+      // Extract final structured data
+      final Map<String, dynamic> finalJson = {
+        'timestamp': '',
+        'clinical_note': '',
+        'referrer': '',
+        'clinic': '',
+        'laboratory': '4Cyte Pathology',
+        'pathologist': '',
+        'sodium': 0.0,
+        'potassium': 0.0,
+        'chloride': 0.0,
+        'bicarbonate': 0.0,
+        'anion_gap': 0.0,
+        'urea': 0.0,
+        'creatinine': 0.0,
+        'egfr': 0.0,
+        'total_protien': 0.0,
+        'globulin': 0.0,
+        'albumin': 0.0,
+        'bilirubin_total': 0.0,
+        'alk_phosphatase': 0.0,
+        'gamma_gt': 0.0,
+        'alt': 0.0,
+        'ast': 0.0,
+      };
 
-      if (currentContext.mounted) {
-        final jsonString = jsonEncode(jsonData);
-        final jsonFileName = '${path.basenameWithoutExtension(file.path)}.json';
-        final jsonFilePath =
-            path.join('integration_test', 'data', jsonFileName);
-        final jsonFile = File(jsonFilePath);
+      // Parse the extracted text
+      for (var line in lines) {
+        line = line.trim();
+        if (line.isEmpty) continue;
 
-        // Create directory if it doesn't exist.
+        // Extract timestamp
+        if (line.contains('Collected:')) {
+          final dateTime = line.split('Collected:')[1].trim();
+          final parts = dateTime.split(' ');
+          if (parts.length == 2) {
+            final date = parts[0].split('/');
+            if (date.length == 3) {
+              final year = date[2];
+              final month = date[1].padLeft(2, '0');
+              final day = date[0].padLeft(2, '0');
+              final time = parts[1];
+              finalJson['timestamp'] = '$year-$month-$day $time';
+            }
+          }
+        }
 
-        await jsonFile.parent.create(recursive: true);
-        await jsonFile.writeAsString(jsonString);
+        // Extract clinical note
+        if (line.contains('Clinical Notes:')) {
+          finalJson['clinical_note'] = line.split('Clinical Notes:')[1].trim();
+        }
 
-        if (currentContext.mounted) {
-          ScaffoldMessenger.of(currentContext).showSnackBar(
-            SnackBar(
-              content: Text('JSON file saved as $jsonFilePath'),
-              action: SnackBarAction(
-                label: 'View',
-                onPressed: () => handleJsonPreview(jsonFilePath),
-              ),
-            ),
-          );
+        // Extract referrer
+        if (line.startsWith('Dr ')) {
+          finalJson['referrer'] = line;
+        }
+
+        // Extract clinic address
+        if (line.contains('Medical Centre')) {
+          finalJson['clinic'] = line;
+        }
+
+        // Extract pathologist
+        if (line.contains('Pathologist:')) {
+          finalJson['pathologist'] = line.split('Pathologist:')[1].trim();
+        }
+
+        // Extract test results
+        if (line.contains('Sodium')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['sodium'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Potassium')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['potassium'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Chloride')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['chloride'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Bicarbonate')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['bicarbonate'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Anion Gap')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['anion_gap'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Urea')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['urea'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Creatinine')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['creatinine'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('eGFR')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['egfr'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Total Protein')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['total_protien'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Globulin')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['globulin'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Albumin')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['albumin'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Bilirubin Total')) {
+          final nextLine = lines[lines.indexOf(line) + 1].trim();
+          finalJson['bilirubin_total'] = double.tryParse(nextLine) ?? 0.0;
+        } else if (line.contains('Alk. Phosphatase')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['alk_phosphatase'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Gamma GT')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['gamma_gt'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('ALT')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['alt'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('AST')) {
+          final nextLine = lines[lines.indexOf(line) + 1].trim();
+          finalJson['ast'] = double.tryParse(nextLine) ?? 0.0;
         }
       }
-    } catch (e) {
-      // Handle errors and display error message.
 
+      // Create a temporary file for the final JSON
+      final tempDir = await Directory.systemTemp.createTemp();
+      final jsonFile = File(
+          '${tempDir.path}/${path.basenameWithoutExtension(file.path)}_final.json');
+      await jsonFile
+          .writeAsString(const JsonEncoder.withIndent('  ').convert(finalJson));
+
+      // Upload both files to POD
+      if (currentContext.mounted) {
+        // First upload the PDF
+        ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
+        await ref
+            .read(fileServiceProvider.notifier)
+            .handleUpload(currentContext);
+
+        // Then upload the JSON
+        ref.read(fileServiceProvider.notifier).setUploadFile(jsonFile.path);
+        await ref
+            .read(fileServiceProvider.notifier)
+            .handleUpload(currentContext);
+
+        // Clean up temporary file
+        await jsonFile.delete();
+        await tempDir.delete();
+
+        // Show success message
+        ScaffoldMessenger.of(currentContext).showSnackBar(
+          const SnackBar(
+            content: Text('PDF and JSON files uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
       if (currentContext.mounted) {
         Navigator.pop(currentContext);
         ScaffoldMessenger.of(currentContext).showSnackBar(
           SnackBar(
-            content: Text('Error converting PDF to JSON: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> handleJsonPreview(String filePath) async {
-    final currentContext = context;
-    try {
-      final file = File(filePath);
-      final content = await file.readAsString();
-      final jsonData = jsonDecode(content);
-      final formattedJson =
-          const JsonEncoder.withIndent('  ').convert(jsonData);
-
-      if (currentContext.mounted) {
-        showDialog(
-          context: currentContext,
-          builder: (context) => AlertDialog(
-            title: Row(
-              children: [
-                const Icon(Icons.analytics),
-                const SizedBox(width: 8),
-                Text(path.basename(filePath)),
-              ],
-            ),
-            content: SizedBox(
-              width: double.maxFinite,
-              height: 1000,
-              child: SingleChildScrollView(
-                child: SelectableText(
-                  formattedJson,
-                  style: const TextStyle(fontFamily: 'monospace'),
-                ),
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  if (jsonData['content']?['structuredLines'] != null) {
-                    final List<dynamic> lines =
-                        jsonData['content']['structuredLines'];
-                    final List<String> texts =
-                        lines.map((line) => line['text'] as String).toList();
-                    final extractedText = texts.join('\n');
-
-                    showDialog(
-                      context: currentContext,
-                      builder: (context) => AlertDialog(
-                        title: const Row(
-                          children: [
-                            Icon(Icons.text_snippet),
-                            SizedBox(width: 8),
-                            Text('Extracted Text'),
-                          ],
-                        ),
-                        content: SizedBox(
-                          width: double.maxFinite,
-                          height: 800,
-                          child: SingleChildScrollView(
-                            child: SelectableText(
-                              extractedText,
-                              style: const TextStyle(fontFamily: 'monospace'),
-                            ),
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              final Map<String, dynamic> finalJson = {
-                                'timestamp': '',
-                                'clinical_note': '',
-                                'referrer': '',
-                                'clinic': '',
-                                'laboratory': '4Cyte Pathology',
-                                'pathologist': '',
-                                'sodium': 0.0,
-                                'potassium': 0.0,
-                                'chloride': 0.0,
-                                'bicarbonate': 0.0,
-                                'anion_gap': 0.0,
-                                'urea': 0.0,
-                                'creatinine': 0.0,
-                                'egfr': 0.0,
-                                'total_protien': 0.0,
-                                'globulin': 0.0,
-                                'albumin': 0.0,
-                                'bilirubin_total': 0.0,
-                                'alk_phosphatase': 0.0,
-                                'gamma_gt': 0.0,
-                                'alt': 0.0,
-                                'ast': 0.0,
-                              };
-
-                              // Parse the extracted text
-                              final lines = extractedText.split('\n');
-                              for (var line in lines) {
-                                line = line.trim();
-                                if (line.isEmpty) continue;
-
-                                // Extract timestamp
-                                if (line.contains('Collected:')) {
-                                  final dateTime =
-                                      line.split('Collected:')[1].trim();
-                                  final parts = dateTime.split(' ');
-                                  if (parts.length == 2) {
-                                    final date = parts[0].split('/');
-                                    if (date.length == 3) {
-                                      final year = date[2];
-                                      final month = date[1].padLeft(2, '0');
-                                      final day = date[0].padLeft(2, '0');
-                                      final time = parts[1];
-                                      finalJson['timestamp'] =
-                                          '$year-$month-$day $time';
-                                    }
-                                  }
-                                }
-
-                                // Extract clinical note
-                                if (line.contains('Clinical Notes:')) {
-                                  finalJson['clinical_note'] =
-                                      line.split('Clinical Notes:')[1].trim();
-                                }
-
-                                // Extract referrer
-                                if (line.startsWith('Dr ')) {
-                                  finalJson['referrer'] = line;
-                                }
-
-                                // Extract clinic address
-                                if (line.contains('Medical Centre')) {
-                                  finalJson['clinic'] = line;
-                                }
-
-                                // Extract pathologist
-                                if (line.contains('Pathologist:')) {
-                                  finalJson['pathologist'] =
-                                      line.split('Pathologist:')[1].trim();
-                                }
-
-                                // Extract test results
-                                if (line.contains('Sodium')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['sodium'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Potassium')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['potassium'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Chloride')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['chloride'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Bicarbonate')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['bicarbonate'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Anion Gap')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['anion_gap'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Urea')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['urea'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Creatinine')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['creatinine'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('eGFR')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['egfr'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Total Protein')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['total_protien'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Globulin')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['globulin'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Albumin')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['albumin'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Bilirubin Total')) {
-                                  // Look for the value on the next line
-                                  final nextLine =
-                                      lines[lines.indexOf(line) + 1].trim();
-                                  finalJson['bilirubin_total'] =
-                                      double.tryParse(nextLine) ?? 0.0;
-                                } else if (line.contains('Alk. Phosphatase')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['alk_phosphatase'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('Gamma GT')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['gamma_gt'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('ALT')) {
-                                  final parts = line
-                                      .split(RegExp(r'\s+'))
-                                      .where((s) => s.isNotEmpty)
-                                      .toList();
-                                  if (parts.length >= 2) {
-                                    finalJson['alt'] =
-                                        double.tryParse(parts[1]) ?? 0.0;
-                                  }
-                                } else if (line.contains('AST')) {
-                                  // Look for the value on the next line
-                                  final nextLine =
-                                      lines[lines.indexOf(line) + 1].trim();
-                                  finalJson['ast'] =
-                                      double.tryParse(nextLine) ?? 0.0;
-                                }
-                              }
-
-                              showDialog(
-                                context: currentContext,
-                                builder: (context) => AlertDialog(
-                                  title: const Row(
-                                    children: [
-                                      Icon(Icons.analytics),
-                                      SizedBox(width: 8),
-                                      Text('Final JSON'),
-                                    ],
-                                  ),
-                                  content: SizedBox(
-                                    width: double.maxFinite,
-                                    height: 800,
-                                    child: SingleChildScrollView(
-                                      child: SelectableText(
-                                        const JsonEncoder.withIndent('  ')
-                                            .convert(finalJson),
-                                        style: const TextStyle(
-                                            fontFamily: 'monospace'),
-                                      ),
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () async {
-                                        final result =
-                                            await FilePicker.platform.saveFile(
-                                          dialogTitle: 'Save Final JSON',
-                                          fileName:
-                                              '${path.basenameWithoutExtension(filePath)}_final.json',
-                                        );
-                                        if (result != null) {
-                                          final file = File(result);
-                                          await file.writeAsString(
-                                            const JsonEncoder.withIndent('  ')
-                                                .convert(finalJson),
-                                          );
-                                          if (currentContext.mounted) {
-                                            ScaffoldMessenger.of(currentContext)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                    'JSON saved to ${file.path}'),
-                                                backgroundColor: Colors.green,
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      },
-                                      child: const Text('Save Final JSON'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () =>
-                                          Navigator.pop(currentContext),
-                                      child: const Text('Close'),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                            child: const Text('Extract Final Info'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                },
-                child: const Text('Extract Info'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(currentContext),
-                child: const Text('Close'),
-              ),
-            ],
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint('JSON preview error: $e');
-      if (currentContext.mounted) {
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          SnackBar(
-            content: Text('Error reading JSON file: $e'),
+            content: Text('Error processing PDF: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -706,14 +498,18 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                           if (result != null && result.files.isNotEmpty) {
                             final file = result.files.first;
                             if (file.path != null) {
-                              ref
-                                  .read(fileServiceProvider.notifier)
-                                  .setUploadFile(file.path);
-                              await handlePreview(file.path!);
-                              if (!context.mounted) return;
-                              await ref
-                                  .read(fileServiceProvider.notifier)
-                                  .handleUpload(context);
+                              if (file.extension?.toLowerCase() == 'pdf') {
+                                await convertPDFToJsonUpload(File(file.path!));
+                              } else {
+                                ref
+                                    .read(fileServiceProvider.notifier)
+                                    .setUploadFile(file.path);
+                                await handlePreview(file.path!);
+                                if (!context.mounted) return;
+                                await ref
+                                    .read(fileServiceProvider.notifier)
+                                    .handleUpload(context);
+                              }
                             }
                           }
                         },
@@ -809,7 +605,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                     if (result != null && result.files.isNotEmpty) {
                       final file = result.files.first;
                       if (file.path != null) {
-                        await handleJsonPreview(file.path!);
+                        await handlePreview(file.path!);
                       }
                     }
                   },
@@ -852,14 +648,14 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           MarkdownTooltip(
             message: '''
 
-            **Convert to JSON**: Tap here to convert the PDF file to JSON format.
-            This will extract text from the PDF and structure it as JSON data.
+            **Convert to JSON**: Tap here to convert the PDF file to JSON format and upload both files.
+            This will extract text from the PDF, structure it as JSON data, and upload both files to your POD.
 
             ''',
             child: TextButton.icon(
               onPressed: state.uploadInProgress
                   ? null
-                  : () => handlePdfToJson(File(state.uploadFile!)),
+                  : () => convertPDFToJsonUpload(File(state.uploadFile!)),
               icon: const Icon(Icons.code),
               label: const Text('Convert to JSON'),
               style: TextButton.styleFrom(
