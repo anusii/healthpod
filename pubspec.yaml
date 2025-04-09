@@ -45,7 +45,7 @@ dependencies:
   riverpod: ^2.6.1
   shared_preferences: ^2.5.2
   syncfusion_flutter_pdf: ^24.1.41
-  test: ^1.24.9
+  test: ^1.25.15
   timeline_tile: ^2.0.0
   universal_io: ^2.2.2
   url_launcher: ^6.3.1
@@ -81,7 +81,7 @@ dependency_overrides:
   # file: ^7.0.0 # Use only if necessary
 
   # Add analyzer override to resolve version conflicts
-  analyzer: ^6.6.0
+  # analyzer: ^6.6.0
 
   # TODO 20240710 gjw solid-auth DEPENDS ON intl-0.19.0
   #
