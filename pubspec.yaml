@@ -44,6 +44,7 @@ dependencies:
   rdflib: ^0.2.9
   riverpod: ^2.6.1
   shared_preferences: ^2.5.2
+  syncfusion_flutter_pdf: ^24.1.41
   test: ^1.25.15
   timeline_tile: ^2.0.0
   universal_io: ^2.2.2
@@ -71,6 +72,8 @@ dev_dependencies:
       ref: main
 
   ubuntu_lints: ^0.4.0
+
+
 
 
 dependency_overrides:
