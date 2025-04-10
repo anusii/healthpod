@@ -27,39 +27,47 @@ class DiaryService {
   /// Load all appointments from the diary directory.
   static Future<List<Appointment>> loadAppointments(
       BuildContext context) async {
-    final podDirPath = getFeaturePath(feature);
-    final dirUrl = await getDirUrl(podDirPath);
-    final resources = await getResourcesInContainer(dirUrl);
+    try {
+      final podDirPath = getFeaturePath(feature);
+      final dirUrl = await getDirUrl(podDirPath);
+      final resources = await getResourcesInContainer(dirUrl);
 
-    final List<Appointment> appointments = [];
+      final List<Appointment> appointments = [];
 
-    for (final file in resources.files) {
-      if (file.endsWith('.enc.ttl')) {
-        final filePath = getFeaturePath(feature, file);
-        final content = await readPod(
-          filePath,
-          context,
-          const Text('Loading appointment'),
-        );
+      for (final file in resources.files) {
+        if (file.endsWith('.enc.ttl')) {
+          final filePath = getFeaturePath(feature, file);
+          final content = await readPod(
+            filePath,
+            context,
+            const Text('Loading appointment'),
+          );
 
-        if (content != SolidFunctionCallStatus.fail.toString() &&
-            content != SolidFunctionCallStatus.notLoggedIn.toString()) {
-          try {
-            final data = jsonDecode(content.toString());
-            appointments.add(Appointment(
-              date: DateTime.parse(data['date']),
-              title: data['title'],
-              description: data['description'],
-              isPast: DateTime.parse(data['date']).isBefore(DateTime.now()),
-            ));
-          } catch (e) {
-            debugPrint('Error parsing appointment file: $e');
+          if (content != SolidFunctionCallStatus.fail.toString() &&
+              content != SolidFunctionCallStatus.notLoggedIn.toString()) {
+            try {
+              final data = jsonDecode(content.toString());
+              // Check if the data is in the responses format
+              final appointmentData = data['responses'] ?? data;
+              appointments.add(Appointment(
+                date: DateTime.parse(appointmentData['date']),
+                title: appointmentData['title'],
+                description: appointmentData['description'],
+                isPast: DateTime.parse(appointmentData['date'])
+                    .isBefore(DateTime.now()),
+              ));
+            } catch (e) {
+              debugPrint('Error parsing appointment file $file: $e');
+            }
           }
         }
       }
-    }
 
-    return appointments;
+      return appointments;
+    } catch (e) {
+      debugPrint('Error loading appointments: $e');
+      return [];
+    }
   }
 
   /// Save an appointment to the POD.
