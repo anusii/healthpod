@@ -157,54 +157,37 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
   }
 
   Future<void> convertPDFToJsonUpload(File file) async {
-    final currentContext = context;
     try {
-      // Show loading dialog while processing
-      if (currentContext.mounted) {
-        showDialog(
-          context: currentContext,
-          barrierDismissible: false,
-          builder: (context) => const Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      }
+      // Show loading dialog while processing.
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
 
-      // Read PDF file
+      // Read PDF file.
       final bytes = await file.readAsBytes();
+      if (!mounted) return;
       final PdfDocument pdf = PdfDocument(inputBytes: bytes);
 
-      // Extract text from all pages
+      // Extract text from all pages.
       String text = '';
       for (var i = 0; i < pdf.pages.count; i++) {
         text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
       }
 
-      // Structure the data to match kt_pathology.json format
+      // Structure the data to match kt_pathology.json format.
       final List<String> lines = text.split('\n');
-      final Map<String, dynamic> jsonData = {
-        'metadata': {
-          'filename': file.path.split('/').last,
-          'pageCount': pdf.pages.count,
-          'processedDate': DateTime.now().toIso8601String(),
-        },
-        'content': {
-          'rawText': text,
-          'structuredLines': lines
-              .map((line) => {
-                    'text': line.trim(),
-                    'length': line.length,
-                  })
-              .toList(),
-        }
-      };
 
-      // Close loading dialog
-      if (currentContext.mounted) {
-        Navigator.pop(currentContext);
-      }
+      // Close loading dialog.
+      if (!mounted) return;
+      Navigator.pop(context);
 
-      // Extract final structured data
+      // Extract final structured data.
+
       final Map<String, dynamic> finalJson = {
         'timestamp': '',
         'clinical_note': '',
@@ -230,12 +213,14 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         'ast': 0.0,
       };
 
-      // Parse the extracted text
+      // Parse the extracted text.
+
       for (var line in lines) {
         line = line.trim();
         if (line.isEmpty) continue;
 
-        // Extract timestamp
+        // Extract timestamp.
+
         if (line.contains('Collected:')) {
           final dateTime = line.split('Collected:')[1].trim();
           final parts = dateTime.split(' ');
@@ -251,27 +236,32 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           }
         }
 
-        // Extract clinical note
+        // Extract clinical note.
+
         if (line.contains('Clinical Notes:')) {
           finalJson['clinical_note'] = line.split('Clinical Notes:')[1].trim();
         }
 
-        // Extract referrer
+        // Extract referrer.
+
         if (line.startsWith('Dr ')) {
           finalJson['referrer'] = line;
         }
 
-        // Extract clinic address
+        // Extract clinic address.
+
         if (line.contains('Medical Centre')) {
           finalJson['clinic'] = line;
         }
 
-        // Extract pathologist
+        // Extract pathologist.
+
         if (line.contains('Pathologist:')) {
           finalJson['pathologist'] = line.split('Pathologist:')[1].trim();
         }
 
-        // Extract test results
+        // Extract test results.
+
         if (line.contains('Sodium')) {
           final parts =
               line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
@@ -364,50 +354,57 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           finalJson['ast'] = double.tryParse(nextLine) ?? 0.0;
         }
       }
+      // Create a temporary file for the final JSON.
 
-      // Create a temporary file for the final JSON
       final tempDir = await Directory.systemTemp.createTemp();
+      if (!mounted) return;
+
+      // Create a file with a name based on the original PDF.
+
       final jsonFile = File(
           '${tempDir.path}/${path.basenameWithoutExtension(file.path)}_final.json');
       await jsonFile
           .writeAsString(const JsonEncoder.withIndent('  ').convert(finalJson));
 
-      // Upload both files to POD
-      if (currentContext.mounted) {
-        // First upload the PDF
-        ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
-        await ref
-            .read(fileServiceProvider.notifier)
-            .handleUpload(currentContext);
+      // Upload both files to POD.
 
-        // Then upload the JSON
-        ref.read(fileServiceProvider.notifier).setUploadFile(jsonFile.path);
-        await ref
-            .read(fileServiceProvider.notifier)
-            .handleUpload(currentContext);
+      if (!mounted) return;
 
-        // Clean up temporary file
-        await jsonFile.delete();
-        await tempDir.delete();
+      // First upload the PDF.
 
-        // Show success message
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          const SnackBar(
-            content: Text('PDF and JSON files uploaded successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
+      await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      if (!mounted) return;
+
+      // Then upload the JSON.
+
+      ref.read(fileServiceProvider.notifier).setUploadFile(jsonFile.path);
+      await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      if (!mounted) return;
+
+      // Clean up temporary file.
+
+      await jsonFile.delete();
+      await tempDir.delete();
+
+      // Show success message.
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('PDF and JSON files uploaded successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (e) {
-      if (currentContext.mounted) {
-        Navigator.pop(currentContext);
-        ScaffoldMessenger.of(currentContext).showSnackBar(
-          SnackBar(
-            content: Text('Error processing PDF: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error processing PDF: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
