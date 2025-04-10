@@ -47,8 +47,8 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
   void Function(bool)? onProgressChange,
   void Function()? onSuccess,
 }) async {
-  late Directory tempDir;
-  late File tempFile;
+  Directory? tempDir;
+  File? tempFile;
 
   try {
     // Create temp file with JSON content.
@@ -85,8 +85,8 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
     // Clean up temp files.
 
     try {
-      if (tempFile.existsSync()) await tempFile.delete();
-      if (tempDir.existsSync()) await tempDir.delete();
+      if (tempFile != null && tempFile.existsSync()) await tempFile.delete();
+      if (tempDir != null && tempDir.existsSync()) await tempDir.delete();
     } catch (e) {
       debugPrint('Error cleaning up temp files: $e');
     }
