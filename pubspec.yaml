@@ -51,6 +51,7 @@ dependencies:
   url_launcher: ^6.3.1
   webdriver: ^3.0.3
   window_manager: ^0.4.3
+  table_calendar: ^3.0.9
 
   solidpod:
     git:
