@@ -64,22 +64,7 @@ class DiaryService {
   static Future<bool> saveAppointment(
       BuildContext context, Appointment appointment) async {
     try {
-      // Ensure the diary directory exists
       final podDirPath = getFeaturePath(feature);
-      final dirUrl = await getDirUrl(podDirPath);
-      final resources = await getResourcesInContainer(dirUrl);
-
-      if (!resources.subDirs.contains(feature)) {
-        // Create the diary directory if it doesn't exist
-        await writePod(
-          '$podDirPath/.init',
-          '',
-          context,
-          const Text('Creating diary directory'),
-          encrypted: false,
-        );
-      }
-
       final fileName =
           'appointment_${appointment.date.toIso8601String()}.json.enc.ttl';
       final filePath = '$podDirPath/$fileName';
