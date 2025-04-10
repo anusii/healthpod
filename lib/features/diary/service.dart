@@ -33,7 +33,7 @@ class DiaryService {
 
     for (final file in resources.files) {
       if (file.endsWith('.enc.ttl')) {
-        final filePath = '$podDirPath/$file';
+        final filePath = getFeaturePath(feature, file);
         final content = await readPod(
           filePath,
           context,
@@ -72,7 +72,7 @@ class DiaryService {
       if (!resources.subDirs.contains(feature)) {
         // Create the diary directory if it doesn't exist
         await writePod(
-          '$podDirPath/.init',
+          getFeaturePath(feature, '.init'),
           '',
           context,
           const Text('Creating diary directory'),
@@ -82,7 +82,7 @@ class DiaryService {
 
       final fileName =
           'appointment_${appointment.date.toIso8601String()}.json.enc.ttl';
-      final filePath = '$podDirPath/$fileName';
+      final filePath = getFeaturePath(feature, fileName);
 
       final data = {
         'date': appointment.date.toIso8601String(),
@@ -109,10 +109,9 @@ class DiaryService {
   static Future<bool> deleteAppointment(
       BuildContext context, Appointment appointment) async {
     try {
-      final podDirPath = getFeaturePath(feature);
       final fileName =
           'appointment_${appointment.date.toIso8601String()}.json.enc.ttl';
-      final filePath = '$podDirPath/$fileName';
+      final filePath = getFeaturePath(feature, fileName);
 
       await deleteFile(filePath);
       return true;
