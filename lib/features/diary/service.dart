@@ -18,6 +18,7 @@ import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/diary/models/appointment.dart';
 import 'package:healthpod/utils/create_feature_folder.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
+import 'package:healthpod/utils/save_response_pod.dart';
 
 /// Service for managing diary appointments in the POD.
 class DiaryService {
@@ -34,7 +35,7 @@ class DiaryService {
 
     for (final file in resources.files) {
       if (file.endsWith('.enc.ttl')) {
-        final filePath = '$feature/$file';
+        final filePath = getFeaturePath(feature, file);
         final content = await readPod(
           filePath,
           context,
@@ -65,47 +66,20 @@ class DiaryService {
   static Future<bool> saveAppointment(
       BuildContext context, Appointment appointment) async {
     try {
-      // Ensure the diary directory exists
-      final podDirPath = getFeaturePath(feature);
-      final dirUrl = await getDirUrl(podDirPath);
-      final resources = await getResourcesInContainer(dirUrl);
-
-      if (!resources.subDirs.contains(feature)) {
-        // Create the diary directory if it doesn't exist
-        final result = await createFeatureFolder(
-          featureName: feature,
-          context: context,
-          onProgressChange: (inProgress) {},
-          onSuccess: () {
-            debugPrint('Successfully created diary directory');
-          },
-        );
-
-        if (result != SolidFunctionCallStatus.success) {
-          debugPrint('Failed to create diary directory');
-          return false;
-        }
-      }
-
-      final fileName =
-          'appointment_${appointment.date.toIso8601String()}.json.enc.ttl';
-      final filePath = '$feature/$fileName';
-
       final data = {
         'date': appointment.date.toIso8601String(),
         'title': appointment.title,
         'description': appointment.description,
       };
 
-      final result = await writePod(
-        filePath,
-        jsonEncode(data),
-        context,
-        const Text('Saving appointment'),
-        encrypted: true,
+      await saveResponseToPod(
+        context: context,
+        responses: data,
+        podPath: '/$feature',
+        filePrefix: 'appointment',
       );
 
-      return result == SolidFunctionCallStatus.success;
+      return true;
     } catch (e) {
       debugPrint('Error saving appointment: $e');
       return false;
@@ -118,7 +92,7 @@ class DiaryService {
     try {
       final fileName =
           'appointment_${appointment.date.toIso8601String()}.json.enc.ttl';
-      final filePath = '$feature/$fileName';
+      final filePath = getFeaturePath(feature, fileName);
 
       await deleteFile(filePath);
       return true;
