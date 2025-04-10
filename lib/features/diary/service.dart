@@ -98,12 +98,40 @@ class DiaryService {
   static Future<bool> deleteAppointment(
       BuildContext context, Appointment appointment) async {
     try {
-      final fileName =
-          'appointment_${appointment.date.toIso8601String()}.json.enc.ttl';
-      final filePath = getFeaturePath(feature, fileName);
+      final podDirPath = getFeaturePath(feature);
+      final dirUrl = await getDirUrl(podDirPath);
+      final resources = await getResourcesInContainer(dirUrl);
 
-      await deleteFile(filePath);
-      return true;
+      // Find the file that matches the appointment
+      for (final file in resources.files) {
+        if (file.endsWith('.enc.ttl')) {
+          final filePath = getFeaturePath(feature, file);
+          final content = await readPod(
+            filePath,
+            context,
+            const Text('Loading appointment for deletion'),
+          );
+
+          if (content != SolidFunctionCallStatus.fail.toString() &&
+              content != SolidFunctionCallStatus.notLoggedIn.toString()) {
+            try {
+              final data = jsonDecode(content.toString());
+              final appointmentData = data['responses'] ?? data;
+              final fileDate = DateTime.parse(appointmentData['date']);
+
+              if (fileDate.isAtSameMomentAs(appointment.date)) {
+                await deleteFile(filePath);
+                return true;
+              }
+            } catch (e) {
+              debugPrint('Error parsing appointment file $file: $e');
+            }
+          }
+        }
+      }
+
+      debugPrint('No matching appointment file found for deletion');
+      return false;
     } catch (e) {
       debugPrint('Error deleting appointment: $e');
       return false;
