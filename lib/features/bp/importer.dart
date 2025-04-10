@@ -55,8 +55,8 @@ class BPImporter extends HealthDataImporterBase {
       BPCSVFields.fieldSystolic: 0,
       BPCSVFields.fieldDiastolic: 0,
       BPCSVFields.fieldHeartRate: 0,
-      BPCSVFields.fieldFeeling: "",
-      BPCSVFields.fieldNotes: "",
+      BPCSVFields.fieldFeeling: '',
+      BPCSVFields.fieldNotes: '',
     };
   }
 

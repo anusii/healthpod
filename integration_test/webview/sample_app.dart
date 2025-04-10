@@ -58,7 +58,7 @@ class WebViewSampleApp extends StatelessWidget {
       home: Scaffold(
         // Creates an app bar with the title "InAppWebView Test".
 
-        appBar: AppBar(title: const Text("InAppWebView Test")),
+        appBar: AppBar(title: const Text('InAppWebView Test')),
 
         // Sets main content area to our web view screen.
 
@@ -92,7 +92,7 @@ class _WebViewSampleAppScreenState extends State<WebViewSampleAppScreen> {
       // Sets the initial URL to load in the web view.
 
       initialUrlRequest:
-          URLRequest(url: WebUri("https://pods.dev.solidcommunity.au")),
+          URLRequest(url: WebUri('https://pods.dev.solidcommunity.au')),
 
       // Configure initial settings for the web view.
 
@@ -114,7 +114,7 @@ class _WebViewSampleAppScreenState extends State<WebViewSampleAppScreen> {
       // Prints the loaded URL for debugging purposes.
 
       onLoadStop: (controller, url) {
-        debugPrint("WebView Finished Loading: $url");
+        debugPrint('WebView Finished Loading: $url');
       },
     );
   }
