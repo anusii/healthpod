@@ -1,6 +1,6 @@
 /// Appointment data model for the health data app.
 ///
-// Time-stamp: <Wednesday 2025-03-26 10:26:49 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-04-10 11:47:48 +1000 Graham Williams>
 ///
 /// Copyright (C) 2025, Software Innovation Institute, ANU.
 ///
@@ -29,6 +29,7 @@ library;
 ///
 /// This class contains information about an appointment including its date,
 /// title, description, and whether it's in the past or future.
+
 class Appointment {
   /// The date and time of the appointment.
 

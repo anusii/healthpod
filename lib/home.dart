@@ -35,7 +35,6 @@ import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/charts/tab.dart';
 import 'package:healthpod/features/diary/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
-import 'package:healthpod/features/home/service/components/profile_management.dart';
 import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/features/update/tab.dart';
@@ -154,25 +153,6 @@ final List<Map<String, dynamic>> homeTabs = [
 
     ''',
   },
-  {
-    'title': 'Profile',
-    'icon': Icons.person,
-    'color': null,
-    'content': null,
-    'tooltip': '''
-
-    **Profile:** Tap here to view and manage your profile information, including:
-
-    - Personal details
-
-    - Identity information
-
-    - Management plan
-
-    - Appointments overview
-
-    ''',
-  },
 ];
 
 class HealthPodHome extends StatefulWidget {
@@ -186,7 +166,9 @@ class HealthPodHomeState extends State<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
   int _selectedIndex = 0;
-  bool _profileEditMode = false;
+  // Key to force rebuilds when profile is updated.
+
+  final GlobalKey<State> _homePageKey = GlobalKey<State>();
 
   @override
   void initState() {
@@ -249,11 +231,6 @@ class HealthPodHomeState extends State<HealthPodHome> {
   void _handleTabChange(int index) {
     setState(() {
       _selectedIndex = index;
-      // Reset profile edit mode when switching away from profile tab.
-
-      if (index != 7) {
-        _profileEditMode = false;
-      }
     });
 
     final tab = homeTabs[index];
@@ -265,24 +242,13 @@ class HealthPodHomeState extends State<HealthPodHome> {
     }
   }
 
-  void _navigateToProfileInEditMode() {
-    setState(() {
-      _selectedIndex = 7; // Profile tab index
-      _profileEditMode = true;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _selectedIndex == 0
-              ? homeTabs[_selectedIndex]['title']
-              : homeTabs[_selectedIndex]['title'],
-        ),
+        title: Text(homeTabs[_selectedIndex]['title']),
         backgroundColor: theme.colorScheme.surface,
         automaticallyImplyLeading: false,
         actions: [
@@ -417,11 +383,10 @@ class HealthPodHomeState extends State<HealthPodHome> {
                 VerticalDivider(color: theme.dividerColor),
                 Expanded(
                   child: homeTabs[_selectedIndex]['content'] ??
-                      (_selectedIndex == 7
-                          ? ProfileManagement(initialEditMode: _profileEditMode)
-                          : HomePage(
-                              onNavigateToProfile:
-                                  _navigateToProfileInEditMode)),
+                      HomePage(
+                        key: _homePageKey,
+                        onNavigateToProfile: () {},
+                      ),
                 ),
               ],
             ),
