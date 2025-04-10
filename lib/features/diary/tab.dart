@@ -31,6 +31,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'models/appointment.dart';
+import 'service.dart';
 import 'widgets/appointment_dialog.dart';
 
 class DiaryTab extends StatefulWidget {
@@ -54,25 +55,13 @@ class _DiaryTabState extends State<DiaryTab> {
     _loadAppointments();
   }
 
-  void _loadAppointments() {
-    // TODO: Load appointments from storage
-    // For now, add some sample appointments
-    final now = DateTime.now();
-    _appointments.addAll([
-      Appointment(
-        date: now.subtract(const Duration(days: 1)),
-        title: 'Past Appointment',
-        description: 'This is a past appointment',
-        isPast: true,
-      ),
-      Appointment(
-        date: now.add(const Duration(days: 1)),
-        title: 'Future Appointment',
-        description: 'This is a future appointment',
-        isPast: false,
-      ),
-    ]);
-    _updateEvents();
+  Future<void> _loadAppointments() async {
+    final appointments = await DiaryService.loadAppointments(context);
+    setState(() {
+      _appointments.clear();
+      _appointments.addAll(appointments);
+      _updateEvents();
+    });
   }
 
   void _updateEvents() {
@@ -105,19 +94,25 @@ class _DiaryTabState extends State<DiaryTab> {
     showDialog(
       context: context,
       builder: (context) => AppointmentDialog(
-        onSave: (title, description, date) {
-          setState(() {
-            _appointments.add(
-              Appointment(
-                date: date,
-                title: title,
-                description: description,
-                isPast: date.isBefore(DateTime.now()),
-              ),
-            );
-            _updateEvents();
-          });
-          Navigator.pop(context);
+        onSave: (title, description, date) async {
+          final appointment = Appointment(
+            date: date,
+            title: title,
+            description: description,
+            isPast: date.isBefore(DateTime.now()),
+          );
+
+          final success =
+              await DiaryService.saveAppointment(context, appointment);
+          if (success && mounted) {
+            setState(() {
+              _appointments.add(appointment);
+              _updateEvents();
+            });
+          }
+          if (mounted) {
+            Navigator.pop(context);
+          }
         },
       ),
     );
@@ -137,12 +132,18 @@ class _DiaryTabState extends State<DiaryTab> {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                setState(() {
-                  _appointments.remove(appointment);
-                  _updateEvents();
-                });
-                Navigator.pop(context);
+              onPressed: () async {
+                final success =
+                    await DiaryService.deleteAppointment(context, appointment);
+                if (success && mounted) {
+                  setState(() {
+                    _appointments.remove(appointment);
+                    _updateEvents();
+                  });
+                }
+                if (mounted) {
+                  Navigator.pop(context);
+                }
               },
               child: const Text('Delete'),
             ),
