@@ -34,10 +34,12 @@ import 'package:healthpod/features/home/service/components/personal_details.dart
 
 class ProfileManagement extends StatefulWidget {
   final bool initialEditMode;
+  final VoidCallback onProfileUpdated;
 
   const ProfileManagement({
     super.key,
     this.initialEditMode = false,
+    required this.onProfileUpdated,
   });
 
   @override
@@ -46,6 +48,8 @@ class ProfileManagement extends StatefulWidget {
 
 class _ProfileManagementState extends State<ProfileManagement> {
   late bool _isEditing;
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -53,50 +57,63 @@ class _ProfileManagementState extends State<ProfileManagement> {
     _isEditing = widget.initialEditMode;
   }
 
+  void _handleProfileDataChanged() {
+    widget.onProfileUpdated();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return ScaffoldMessenger(
+      key: _scaffoldKey,
+      child: Builder(
+        builder: (context) => SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Profile Management',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Profile Management',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          _isEditing = !_isEditing;
+                        });
+                      },
+                      icon: Icon(_isEditing ? Icons.save : Icons.edit),
+                      label: Text(_isEditing ? 'Save Changes' : 'Edit Profile'),
+                    ),
+                  ],
                 ),
-                TextButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _isEditing = !_isEditing;
-                    });
-                  },
-                  icon: Icon(_isEditing ? Icons.save : Icons.edit),
-                  label: Text(_isEditing ? 'Save Changes' : 'Edit Profile'),
+                const SizedBox(height: 24),
+                // Identity Section.
+
+                _buildSection(
+                  title: 'Identity',
+                  child: AvatarName(isEditing: _isEditing),
+                ),
+                const SizedBox(height: 24),
+                // Personal Details Section.
+
+                _buildSection(
+                  title: 'Personal Details',
+                  child: PersonalDetails(
+                    isEditing: _isEditing,
+                    onDataChanged: _handleProfileDataChanged,
+                    onEditPressed: () {},
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            // Identity Section.
-
-            _buildSection(
-              title: 'Identity',
-              child: AvatarName(isEditing: _isEditing),
-            ),
-            const SizedBox(height: 24),
-            // Personal Details Section.
-
-            _buildSection(
-              title: 'Personal Details',
-              child: PersonalDetails(isEditing: _isEditing),
-            ),
-          ],
+          ),
         ),
       ),
     );
