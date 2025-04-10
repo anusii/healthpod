@@ -70,8 +70,8 @@ class _AppointmentDialogState extends State<AppointmentDialog> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      firstDate: DateTime(2020, 1, 1), // Allow dates from 2020
+      lastDate: DateTime(2030, 12, 31), // Allow dates until 2030
     );
     if (picked != null) {
       setState(() {
