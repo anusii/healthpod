@@ -34,7 +34,7 @@ class DiaryService {
 
     for (final file in resources.files) {
       if (file.endsWith('.enc.ttl')) {
-        final filePath = getFeaturePath(feature, file);
+        final filePath = '$feature/$file';
         final content = await readPod(
           filePath,
           context,
@@ -89,7 +89,7 @@ class DiaryService {
 
       final fileName =
           'appointment_${appointment.date.toIso8601String()}.json.enc.ttl';
-      final filePath = getFeaturePath(feature, fileName);
+      final filePath = '$feature/$fileName';
 
       final data = {
         'date': appointment.date.toIso8601String(),
@@ -118,7 +118,7 @@ class DiaryService {
     try {
       final fileName =
           'appointment_${appointment.date.toIso8601String()}.json.enc.ttl';
-      final filePath = getFeaturePath(feature, fileName);
+      final filePath = '$feature/$fileName';
 
       await deleteFile(filePath);
       return true;
