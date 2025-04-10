@@ -16,6 +16,7 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/diary/models/appointment.dart';
+import 'package:healthpod/utils/create_feature_folder.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
 
 /// Service for managing diary appointments in the POD.
@@ -71,13 +72,19 @@ class DiaryService {
 
       if (!resources.subDirs.contains(feature)) {
         // Create the diary directory if it doesn't exist
-        await writePod(
-          getFeaturePath(feature, '.init'),
-          '',
-          context,
-          const Text('Creating diary directory'),
-          encrypted: false,
+        final result = await createFeatureFolder(
+          featureName: feature,
+          context: context,
+          onProgressChange: (inProgress) {},
+          onSuccess: () {
+            debugPrint('Successfully created diary directory');
+          },
         );
+
+        if (result != SolidFunctionCallStatus.success) {
+          debugPrint('Failed to create diary directory');
+          return false;
+        }
       }
 
       final fileName =
