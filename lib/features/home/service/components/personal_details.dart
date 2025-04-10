@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:solidpod/solidpod.dart';
 
@@ -357,27 +358,57 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   ),
                   const SizedBox(height: 12),
                   const Text('Best Contact Phone'),
-                  TextFormField(
-                    controller: tempBestContactPhoneController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  MarkdownTooltip(
+                    message: '''
+                    
+                    **Valid Phone Number Formats:**
+                    
+                    - **Australian Mobile:** +61 4XX XXX XXX or 04XX XXX XXX
+                    - **Australian Landline:** +61 X XXXX XXXX or 0X XXXX XXXX
+                    - **International:** +[country code] followed by number
+                    
+                    Spaces, dashes and parentheses are allowed.
+                    
+                    ''',
+                    child: TextFormField(
+                      controller: tempBestContactPhoneController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        hintText: 'e.g. +61 4 1234 5678 or 04 1234 5678',
+                        suffixIcon: Icon(Icons.info_outline),
+                      ),
+                      validator: _validatePhone,
+                      keyboardType: TextInputType.phone,
                     ),
-                    validator: _validatePhone,
-                    keyboardType: TextInputType.phone,
                   ),
                   const SizedBox(height: 12),
                   const Text('Alternative Contact Number'),
-                  TextFormField(
-                    controller: tempAlternativeContactNumberController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  MarkdownTooltip(
+                    message: '''
+                    
+                    **Valid Phone Number Formats:**
+                    
+                    - **Australian Mobile:** +61 4XX XXX XXX or 04XX XXX XXX
+                    - **Australian Landline:** +61 X XXXX XXXX or 0X XXXX XXXX
+                    - **International:** +[country code] followed by number
+                    
+                    Spaces, dashes and parentheses are allowed.
+                    
+                    ''',
+                    child: TextFormField(
+                      controller: tempAlternativeContactNumberController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        hintText: 'e.g. +61 4 1234 5678 or 04 1234 5678',
+                        suffixIcon: Icon(Icons.info_outline),
+                      ),
+                      validator: _validatePhone,
+                      keyboardType: TextInputType.phone,
                     ),
-                    validator: _validatePhone,
-                    keyboardType: TextInputType.phone,
                   ),
                   const SizedBox(height: 12),
                   const Text('Email'),
@@ -532,8 +563,25 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
   String? _validatePhone(String? value) {
     if (value == null || value.isEmpty) return null; // Make phone optional
-    final phoneRegex = RegExp(r'^\+?[0-9]{10,14}$');
-    if (!phoneRegex.hasMatch(value)) return 'Enter a valid phone number';
+
+    // Clean the input by removing spaces, dashes, and parentheses.
+
+    final cleanedValue = value.replaceAll(RegExp(r'[\s\-()]'), '');
+
+    // Australian mobile: +61 4XX XXX XXX or 04XX XXX XXX.
+    // Australian landline: +61 X XXXX XXXX or 0X XXXX XXXX.
+    // Allow international format with + prefix.
+
+    final australianPhoneRegex = RegExp(r'^(\+61|0)[0-9]{9,10}$');
+
+    // Also allow international numbers with country code.
+
+    final internationalPhoneRegex = RegExp(r'^\+[0-9]{10,14}$');
+
+    if (!australianPhoneRegex.hasMatch(cleanedValue) &&
+        !internationalPhoneRegex.hasMatch(cleanedValue)) {
+      return 'Enter a valid phone number (e.g. +61 4 1234 5678 or 04 1234 5678)';
+    }
     return null;
   }
 
