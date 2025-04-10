@@ -33,6 +33,7 @@ import 'package:version_widget/version_widget.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/charts/tab.dart';
+import 'package:healthpod/features/diary/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
 import 'package:healthpod/features/home/service/components/profile_management.dart';
 import 'package:healthpod/features/resources/tab.dart';
@@ -72,14 +73,14 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Diary',
     'icon': Icons.calendar_today,
     'color': null,
-    'message': '''
+    'content': const DiaryTab(),
+    'tooltip': '''
 
     **Diary:** Tap here to access and manage your appointments. You can enter
     historic information, update the calendar when you recieve a new
     appointment, and load appointments from other sources into your calendar.
 
     ''',
-    'dialogTitle': 'Coming Soon - Appointment',
   },
   {
     'title': 'Update',
