@@ -1,6 +1,6 @@
 /// Appointment dialog for the health data app.
 ///
-// Time-stamp: <Wednesday 2025-03-26 10:26:49 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-04-10 11:49:17 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -33,14 +33,17 @@ import 'package:intl/intl.dart';
 ///
 /// This widget provides a form for entering appointment details including
 /// title, description, date, and time.
+
 class AppointmentDialog extends StatefulWidget {
   /// Callback function that is called when the appointment is saved.
+
   final Function(String title, String description, DateTime date) onSave;
 
   /// Creates a new [AppointmentDialog] instance.
   ///
   /// [onSave] is the callback function that will be called when the user
   /// taps the save button with valid input.
+
   const AppointmentDialog({
     super.key,
     required this.onSave,

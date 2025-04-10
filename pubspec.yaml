@@ -46,13 +46,13 @@ dependencies:
   riverpod: ^2.6.1
   shared_preferences: ^2.5.2
   syncfusion_flutter_pdf: ^24.1.41
+  table_calendar: ^3.0.9
   test: ^1.25.15
   timeline_tile: ^2.0.0
   universal_io: ^2.2.2
   url_launcher: ^6.3.1
   webdriver: ^3.0.3
   window_manager: ^0.4.3
-  table_calendar: ^3.0.9
 
   solidpod:
     git:
@@ -104,9 +104,9 @@ flutter:
     - assets/images/
 
 # Define launcher icons for all platforms (except Linux) so icons for
-# the apps can be automatically updated.
+# the apps can be automatically updated using:
 #
-# Run `dart run flutter_launcher_icons`
+# `dart run flutter_launcher_icons`
 
 flutter_launcher_icons:
   image_path: "assets/images/healthpod_icon.png"
