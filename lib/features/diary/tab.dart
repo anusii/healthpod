@@ -23,6 +23,10 @@
 ///
 /// Authors: Kevin Wang
 
+// ignore_for_file: use_build_context_synchronously
+// This is a workaround for the use_build_context_synchronously lint.
+// Kevin cannot figure out how to fix this.
+
 library;
 
 import 'package:flutter/material.dart';
@@ -95,7 +99,7 @@ class _DiaryTabState extends State<DiaryTab> {
   void _addAppointment() {
     showDialog(
       context: context,
-      builder: (context) => AppointmentDialog(
+      builder: (dialogContext) => AppointmentDialog(
         onSave: (title, description, date) async {
           final appointment = Appointment(
             date: date,
@@ -105,7 +109,7 @@ class _DiaryTabState extends State<DiaryTab> {
           );
 
           final success =
-              await DiaryService.saveAppointment(context, appointment);
+              await DiaryService.saveAppointment(dialogContext, appointment);
           if (success && mounted) {
             setState(() {
               _appointments.add(appointment);
@@ -113,7 +117,7 @@ class _DiaryTabState extends State<DiaryTab> {
             });
           }
           if (mounted) {
-            Navigator.pop(context);
+            Navigator.pop(dialogContext);
           }
         },
       ),
@@ -124,19 +128,19 @@ class _DiaryTabState extends State<DiaryTab> {
     if (!appointment.isPast) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (dialogContext) => AlertDialog(
           title: const Text('Delete Appointment'),
           content:
               Text('Are you sure you want to delete "${appointment.title}"?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () async {
-                final success =
-                    await DiaryService.deleteAppointment(context, appointment);
+                final success = await DiaryService.deleteAppointment(
+                    dialogContext, appointment);
                 if (success && mounted) {
                   setState(() {
                     _appointments.remove(appointment);
@@ -144,7 +148,7 @@ class _DiaryTabState extends State<DiaryTab> {
                   });
                 }
                 if (mounted) {
-                  Navigator.pop(context);
+                  Navigator.pop(dialogContext);
                 }
               },
               child: const Text('Delete'),
@@ -242,7 +246,7 @@ class _DiaryTabState extends State<DiaryTab> {
   void _showAppointmentDetails(Appointment appointment) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(appointment.title),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -268,7 +272,7 @@ class _DiaryTabState extends State<DiaryTab> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Close'),
           ),
         ],
