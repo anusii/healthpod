@@ -29,8 +29,8 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/constants/profile.dart';
+import 'package:healthpod/utils/construct_pod_path.dart';
 
 /// Fetches the most recent profile data from the pod.
 ///
@@ -43,9 +43,14 @@ import 'package:healthpod/constants/profile.dart';
 Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
   try {
     // Get the directory URL for the profile folder.
+    // Note: constructPodPath already includes basePath in its implementation.
 
-    final dirUrl = await getDirUrl('$basePath/profile');
+    final dirUrl = await getDirUrl(constructPodPath('profile', ''));
+    debugPrint(
+        "Looking for profile data in: ${constructPodPath('profile', '')}");
+
     final resources = await getResourcesInContainer(dirUrl);
+    debugPrint('Profile dir contents: ${resources.files}');
 
     // Look for profile files.
 
@@ -63,6 +68,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
     profileFiles.sort((a, b) => b.compareTo(a));
     final latestProfileFile = profileFiles.first;
+    debugPrint('Found latest profile file: $latestProfileFile');
 
     // Read the file contents.
 
@@ -70,8 +76,10 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
 
+    // Use readPod with the full constructed path to the file.
+
     final fileContent = await readPod(
-      '$basePath/profile/$latestProfileFile',
+      constructPodPath('profile', latestProfileFile),
       context,
       const Text('Reading profile data'),
     );
@@ -81,23 +89,96 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
 
-    // Parse the JSON data.
+    // Print raw content for debugging.
 
-    final Map<String, dynamic> jsonData = jsonDecode(fileContent);
+    debugPrint('Raw decrypted profile data length: ${fileContent.length}');
 
-    // Check for responses key (profile data might be stored under 'responses').
+    // Try to parse the JSON data.
 
-    if (jsonData.containsKey('responses')) {
-      return jsonData['responses'] as Map<String, dynamic>;
-    } else if (jsonData.containsKey('data')) {
-      return jsonData['data'] as Map<String, dynamic>;
+    try {
+      // First check if we have Turtle format data (starts with @prefix).
+
+      if (fileContent.trim().startsWith('@prefix')) {
+        debugPrint('Detected Turtle format data instead of JSON');
+
+        // Extract data from Turtle using regex - looking for our profile properties.
+
+        Map<String, dynamic> extractedData = {};
+
+        // Extract common fields we care about.
+
+        extractedData['patientName'] =
+            _extractTurtleValue(fileContent, 'patientName');
+        extractedData['address'] = _extractTurtleValue(fileContent, 'address');
+        extractedData['bestContactPhone'] =
+            _extractTurtleValue(fileContent, 'bestContactPhone');
+        extractedData['alternativeContactNumber'] =
+            _extractTurtleValue(fileContent, 'alternativeContactNumber');
+        extractedData['email'] = _extractTurtleValue(fileContent, 'email');
+        extractedData['dateOfBirth'] =
+            _extractTurtleValue(fileContent, 'dateOfBirth');
+        extractedData['gender'] = _extractTurtleValue(fileContent, 'gender');
+
+        // Handle boolean field differently.
+
+        final indigenousMatch = RegExp(r'identifyAsIndigenous\s+"(true|false)"')
+            .firstMatch(fileContent);
+        if (indigenousMatch != null && indigenousMatch.group(1) != null) {
+          extractedData['identifyAsIndigenous'] =
+              indigenousMatch.group(1) == 'true';
+        } else {
+          extractedData['identifyAsIndigenous'] = false;
+        }
+
+        debugPrint('Extracted data from Turtle: $extractedData');
+        return extractedData;
+      }
+
+      final Map<String, dynamic> jsonData = jsonDecode(fileContent);
+      debugPrint('Successfully parsed profile JSON');
+
+      // Check for responses key (profile data might be stored under 'responses').
+
+      if (jsonData.containsKey('responses')) {
+        return jsonData['responses'] as Map<String, dynamic>;
+      } else if (jsonData.containsKey('data')) {
+        return jsonData['data'] as Map<String, dynamic>;
+      }
+
+      return jsonData;
+    } catch (e) {
+      debugPrint('Error parsing profile data JSON: $e');
+      // Try to extract just the data part if the whole file can't be parsed.
+
+      final dataMatch =
+          RegExp(r'"data":\s*(\{[^}]+\})').firstMatch(fileContent);
+      if (dataMatch != null && dataMatch.group(1) != null) {
+        try {
+          return jsonDecode('{${dataMatch.group(1)}}') as Map<String, dynamic>;
+        } catch (e2) {
+          debugPrint('Failed to extract data segment: $e2');
+        }
+      }
+
+      debugPrint('Using default profile data.');
+      return defaultProfileData['data'] as Map<String, dynamic>;
     }
-
-    return jsonData;
   } catch (e) {
     debugPrint('Error fetching profile data: $e');
     // Return default profile data in case of error.
 
     return defaultProfileData['data'] as Map<String, dynamic>;
   }
+}
+
+/// Extracts a value from Turtle format data.
+
+String _extractTurtleValue(String content, String propertyName) {
+  final regex = RegExp('$propertyName\\s+"([^"]+)"');
+  final match = regex.firstMatch(content);
+  if (match != null && match.groupCount >= 1) {
+    final value = match.group(1);
+    return value ?? '';
+  }
+  return '';
 }
