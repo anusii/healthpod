@@ -47,8 +47,8 @@ class HealthSurveyConstants {
   static const String systolicBP = "What's your systolic blood pressure?";
   static const String diastolicBP = "What's your diastolic measurement?";
   static const String heartRate = "What's your heart rate?";
-  static const String feeling = "How are you feeling?";
-  static const String notes = "Any additional notes about your health?";
+  static const String feeling = 'How are you feeling?';
+  static const String notes = 'Any additional notes about your health?';
 
   /// The list of questions used in the health survey.
   /// Each question includes type validation, units where applicable,
@@ -59,7 +59,7 @@ class HealthSurveyConstants {
       question: systolicBP,
       fieldName: fieldSystolic,
       type: HealthDataType.number,
-      unit: "mm Hg",
+      unit: 'mm Hg',
       min: 70,
       max: 200,
     ),
@@ -67,7 +67,7 @@ class HealthSurveyConstants {
       question: diastolicBP,
       fieldName: fieldDiastolic,
       type: HealthDataType.number,
-      unit: "mm Hg",
+      unit: 'mm Hg',
       min: 40,
       max: 220,
     ),
@@ -75,7 +75,7 @@ class HealthSurveyConstants {
       question: heartRate,
       fieldName: fieldHeartRate,
       type: HealthDataType.number,
-      unit: "bpm",
+      unit: 'bpm',
       min: 40,
       max: 220,
     ),
@@ -83,7 +83,7 @@ class HealthSurveyConstants {
       question: feeling,
       fieldName: fieldFeeling,
       type: HealthDataType.categorical,
-      options: ["Excellent", "Good", "Fair", "Poor"],
+      options: ['Excellent', 'Good', 'Fair', 'Poor'],
     ),
     HealthSurveyQuestion(
       question: notes,

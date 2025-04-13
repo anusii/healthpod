@@ -91,31 +91,31 @@ class SolidLoginTestHelper {
 
 Widget createSolidLogin(BuildContext context) {
   final bool isIntegrationTest = PlatformHelper.isIntegrationTest();
-  debugPrint("🔥 INTEGRATION_TEST: $isIntegrationTest");
+  debugPrint('🔥 INTEGRATION_TEST: $isIntegrationTest');
 
   if (isIntegrationTest) {
-    debugPrint("✅ Using WebView for login");
+    debugPrint('✅ Using WebView for login');
     return MaterialApp(
       navigatorKey: navigatorKey,
       home: Scaffold(
-        appBar: AppBar(title: const Text("Solid Login - WebView Mode")),
+        appBar: AppBar(title: const Text('Solid Login - WebView Mode')),
         body: InAppWebView(
           initialUrlRequest: URLRequest(
-            url: WebUri("https://pods.dev.solidcommunity.au/"),
+            url: WebUri('https://pods.dev.solidcommunity.au/'),
           ),
           initialSettings: InAppWebViewSettings(javaScriptEnabled: true),
           onLoadStop: (controller, url) async {
-            debugPrint("🌍 WebView Loaded: $url");
+            debugPrint('🌍 WebView Loaded: $url');
 
             // Automated login flow:
             // Step 1: Initial navigation to login page.
 
-            if (url.toString() == "https://pods.dev.solidcommunity.au/") {
-              debugPrint("🔄 Redirecting to login page...");
+            if (url.toString() == 'https://pods.dev.solidcommunity.au/') {
+              debugPrint('🔄 Redirecting to login page...');
               await controller.loadUrl(
                 urlRequest: URLRequest(
                   url: WebUri(
-                    "https://pods.dev.solidcommunity.au/.account/login/password/",
+                    'https://pods.dev.solidcommunity.au/.account/login/password/',
                   ),
                 ),
               );
@@ -123,8 +123,8 @@ Widget createSolidLogin(BuildContext context) {
 
             // Step 2: Credential injection on login page.
 
-            if (url.toString().contains("/.account/login/password")) {
-              debugPrint("✍️ Injecting login credentials...");
+            if (url.toString().contains('/.account/login/password')) {
+              debugPrint('✍️ Injecting login credentials...');
               await controller.evaluateJavascript(source: """
                 let emailInput = document.querySelector('input[name="email"]');
                 let passwordInput = document.querySelector('input[name="password"]');
@@ -142,23 +142,23 @@ Widget createSolidLogin(BuildContext context) {
 
             // Step 3: Handle OAuth consent screen if present.
 
-            if (url.toString().contains("/account/oidc/consent")) {
+            if (url.toString().contains('/account/oidc/consent')) {
               debugPrint("🔍 Detected consent screen, clicking 'Yes'...");
-              await controller.evaluateJavascript(source: """
+              await controller.evaluateJavascript(source: '''
                 let yesButton = document.querySelector("button#authorize");
                 if (yesButton) {
                   setTimeout(() => {
                     yesButton.click();
                   }, 2000);
                 }
-              """);
+              ''');
             }
 
             // Step 4: Extract WebID from account page.
 
-            if (url.toString().contains("/.account/account")) {
+            if (url.toString().contains('/.account/account')) {
               debugPrint(
-                  "✅ Login detected at /.account/account/, waiting a bit for DOM...");
+                  '✅ Login detected at /.account/account/, waiting a bit for DOM...');
               await Future.delayed(const Duration(seconds: 3));
 
               final extractedWebId =
@@ -173,10 +173,10 @@ Widget createSolidLogin(BuildContext context) {
               """) as String;
 
               if (extractedWebId.isNotEmpty) {
-                debugPrint("🔑 Extracted WebID from HTML: $extractedWebId");
+                debugPrint('🔑 Extracted WebID from HTML: $extractedWebId');
                 SolidLoginTestHelper.extractedWebId = extractedWebId;
               } else {
-                debugPrint("❌ Could not find WebID under #webIdEntries li a!");
+                debugPrint('❌ Could not find WebID under #webIdEntries li a!');
               }
             }
           },
@@ -184,7 +184,7 @@ Widget createSolidLogin(BuildContext context) {
       ),
     );
   } else {
-    debugPrint("❌ Using external browser for login");
+    debugPrint('❌ Using external browser for login');
 
     return Consumer(
       builder: (context, ref, child) {
@@ -192,20 +192,20 @@ Widget createSolidLogin(BuildContext context) {
         final email = ref.watch(emailProvider);
         final password = ref.watch(passwordProvider);
 
-        debugPrint("🔍 Checking saved credentials...");
-        debugPrint("📡 Server URL: $serverUrl");
-        debugPrint("👤 Email present: ${email.isNotEmpty}");
-        debugPrint("🔑 Password present: ${password.isNotEmpty}");
+        debugPrint('🔍 Checking saved credentials...');
+        debugPrint('📡 Server URL: $serverUrl');
+        debugPrint('👤 Email present: ${email.isNotEmpty}');
+        debugPrint('🔑 Password present: ${password.isNotEmpty}');
 
         // If we have saved credentials, try auto-login.
 
         if (email.isNotEmpty && password.isNotEmpty) {
-          debugPrint("✨ Attempting auto-login with saved credentials");
+          debugPrint('✨ Attempting auto-login with saved credentials');
           return FutureBuilder(
             future: _performAutoLogin(serverUrl, email, password, context),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                debugPrint("⏳ Auto-login in progress...");
+                debugPrint('⏳ Auto-login in progress...');
                 return const Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -219,26 +219,26 @@ Widget createSolidLogin(BuildContext context) {
               }
 
               if (snapshot.hasError) {
-                debugPrint("❌ Auto-login failed: ${snapshot.error}");
+                debugPrint('❌ Auto-login failed: ${snapshot.error}');
                 // Fall back to normal login screen.
 
                 return _buildNormalLogin(serverUrl);
               }
 
               if (snapshot.hasData && snapshot.data == true) {
-                debugPrint("✅ Auto-login successful!");
+                debugPrint('✅ Auto-login successful!');
                 return const HealthPodHome();
               }
 
               // If auto-login failed, show normal login screen.
 
-              debugPrint("⚠️ Auto-login failed, showing login screen");
+              debugPrint('⚠️ Auto-login failed, showing login screen');
               return _buildNormalLogin(serverUrl);
             },
           );
         }
 
-        debugPrint("ℹ️ No saved credentials found, showing login screen");
+        debugPrint('ℹ️ No saved credentials found, showing login screen');
         return _buildNormalLogin(serverUrl);
       },
     );
@@ -266,7 +266,7 @@ Future<bool> _performAutoLogin(
     }
     return false;
   } catch (e) {
-    debugPrint("❌ Auto-login error: $e");
+    debugPrint('❌ Auto-login error: $e');
     return false;
   } finally {
     await ChromeLoginService.instance.dispose();

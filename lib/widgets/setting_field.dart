@@ -121,11 +121,18 @@ class SettingField extends ConsumerWidget {
                     hintText: hint,
                     suffixIcon: isPassword
                         ? IconButton(
-                            icon: Icon(
-                              showPassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: Colors.grey,
+                            icon: MarkdownTooltip(
+                              message: '''
+                              
+                              **${showPassword ? 'Hide' : 'Show'} Password:** Tap here to ${showPassword ? 'hide' : 'show'} the password text.
+                              
+                              ''',
+                              child: Icon(
+                                showPassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: Colors.grey,
+                              ),
                             ),
                             onPressed: () {
                               ref

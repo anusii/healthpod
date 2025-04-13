@@ -25,6 +25,7 @@
 
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -33,6 +34,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:path/path.dart' as path;
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
 import 'package:healthpod/utils/is_text_file.dart';
@@ -124,11 +126,17 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 ),
                 const Spacer(),
                 IconButton(
-                  icon: const Icon(Icons.close, size: 20),
+                  icon: MarkdownTooltip(
+                    message: '''
+                    
+                    **Close Preview:** Tap here to close the file preview panel.
+                    
+                    ''',
+                    child: const Icon(Icons.close, size: 20),
+                  ),
                   onPressed: () => setState(() => showPreview = false),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  tooltip: 'Close preview',
                 ),
               ],
             ),
@@ -146,6 +154,258 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         ],
       ),
     );
+  }
+
+  Future<void> convertPDFToJsonUpload(File file) async {
+    try {
+      // Show loading dialog while processing.
+      if (!mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Read PDF file.
+      final bytes = await file.readAsBytes();
+      if (!mounted) return;
+      final PdfDocument pdf = PdfDocument(inputBytes: bytes);
+
+      // Extract text from all pages.
+      String text = '';
+      for (var i = 0; i < pdf.pages.count; i++) {
+        text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
+      }
+
+      // Structure the data to match kt_pathology.json format.
+      final List<String> lines = text.split('\n');
+
+      // Close loading dialog.
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      // Extract final structured data.
+
+      final Map<String, dynamic> finalJson = {
+        'timestamp': '',
+        'clinical_note': '',
+        'referrer': '',
+        'clinic': '',
+        'laboratory': '4Cyte Pathology',
+        'pathologist': '',
+        'sodium': 0.0,
+        'potassium': 0.0,
+        'chloride': 0.0,
+        'bicarbonate': 0.0,
+        'anion_gap': 0.0,
+        'urea': 0.0,
+        'creatinine': 0.0,
+        'egfr': 0.0,
+        'total_protien': 0.0,
+        'globulin': 0.0,
+        'albumin': 0.0,
+        'bilirubin_total': 0.0,
+        'alk_phosphatase': 0.0,
+        'gamma_gt': 0.0,
+        'alt': 0.0,
+        'ast': 0.0,
+      };
+
+      // Parse the extracted text.
+
+      for (var line in lines) {
+        line = line.trim();
+        if (line.isEmpty) continue;
+
+        // Extract timestamp.
+
+        if (line.contains('Collected:')) {
+          final dateTime = line.split('Collected:')[1].trim();
+          final parts = dateTime.split(' ');
+          if (parts.length == 2) {
+            final date = parts[0].split('/');
+            if (date.length == 3) {
+              final year = date[2];
+              final month = date[1].padLeft(2, '0');
+              final day = date[0].padLeft(2, '0');
+              final time = parts[1];
+              finalJson['timestamp'] = '$year-$month-$day $time';
+            }
+          }
+        }
+
+        // Extract clinical note.
+
+        if (line.contains('Clinical Notes:')) {
+          finalJson['clinical_note'] = line.split('Clinical Notes:')[1].trim();
+        }
+
+        // Extract referrer.
+
+        if (line.startsWith('Dr ')) {
+          finalJson['referrer'] = line;
+        }
+
+        // Extract clinic address.
+
+        if (line.contains('Medical Centre')) {
+          finalJson['clinic'] = line;
+        }
+
+        // Extract pathologist.
+
+        if (line.contains('Pathologist:')) {
+          finalJson['pathologist'] = line.split('Pathologist:')[1].trim();
+        }
+
+        // Extract test results.
+
+        if (line.contains('Sodium')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['sodium'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Potassium')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['potassium'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Chloride')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['chloride'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Bicarbonate')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['bicarbonate'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Anion Gap')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['anion_gap'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Urea')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['urea'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Creatinine')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['creatinine'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('eGFR')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['egfr'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Total Protein')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['total_protien'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Globulin')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['globulin'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Albumin')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['albumin'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Bilirubin Total')) {
+          final nextLine = lines[lines.indexOf(line) + 1].trim();
+          finalJson['bilirubin_total'] = double.tryParse(nextLine) ?? 0.0;
+        } else if (line.contains('Alk. Phosphatase')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['alk_phosphatase'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Gamma GT')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['gamma_gt'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('ALT')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['alt'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('AST')) {
+          final nextLine = lines[lines.indexOf(line) + 1].trim();
+          finalJson['ast'] = double.tryParse(nextLine) ?? 0.0;
+        }
+      }
+      // Create a temporary file for the final JSON.
+
+      final tempDir = await Directory.systemTemp.createTemp();
+      if (!mounted) return;
+
+      // Create a file with a name based on the original PDF.
+
+      final jsonFile = File(
+          '${tempDir.path}/${path.basenameWithoutExtension(file.path)}_final.json');
+      await jsonFile
+          .writeAsString(const JsonEncoder.withIndent('  ').convert(finalJson));
+
+      // Upload both files to POD.
+
+      if (!mounted) return;
+
+      // First upload the PDF.
+
+      ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
+      await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      if (!mounted) return;
+
+      // Then upload the JSON.
+
+      ref.read(fileServiceProvider.notifier).setUploadFile(jsonFile.path);
+      await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      if (!mounted) return;
+
+      // Clean up temporary file.
+
+      await jsonFile.delete();
+      await tempDir.delete();
+
+      // Show success message.
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('PDF and JSON files uploaded successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error processing PDF: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -235,14 +495,18 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                           if (result != null && result.files.isNotEmpty) {
                             final file = result.files.first;
                             if (file.path != null) {
-                              ref
-                                  .read(fileServiceProvider.notifier)
-                                  .setUploadFile(file.path);
-                              await handlePreview(file.path!);
-                              if (!context.mounted) return;
-                              await ref
-                                  .read(fileServiceProvider.notifier)
-                                  .handleUpload(context);
+                              if (file.extension?.toLowerCase() == 'pdf') {
+                                await convertPDFToJsonUpload(File(file.path!));
+                              } else {
+                                ref
+                                    .read(fileServiceProvider.notifier)
+                                    .setUploadFile(file.path);
+                                await handlePreview(file.path!);
+                                if (!context.mounted) return;
+                                await ref
+                                    .read(fileServiceProvider.notifier)
+                                    .handleUpload(context);
+                              }
                             }
                           }
                         },
@@ -320,6 +584,39 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           ],
         ),
 
+        const SizedBox(width: 8),
+        MarkdownTooltip(
+          message: '''
+
+          **Visualize JSON**: Tap here to select and visualize a JSON file from your local machine.
+
+          ''',
+          child: TextButton.icon(
+            onPressed: state.uploadInProgress
+                ? null
+                : () async {
+                    final result = await FilePicker.platform.pickFiles(
+                      type: FileType.custom,
+                      allowedExtensions: ['json'],
+                    );
+                    if (result != null && result.files.isNotEmpty) {
+                      final file = result.files.first;
+                      if (file.path != null) {
+                        await handlePreview(file.path!);
+                      }
+                    }
+                  },
+            icon: const Icon(Icons.analytics),
+            label: const Text('Visualize JSON'),
+            style: TextButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ),
+
         // Preview button.
 
         if (state.uploadFile != null) ...[
@@ -336,6 +633,28 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                   : () => handlePreview(state.uploadFile!),
               icon: const Icon(Icons.preview),
               label: const Text('Preview File'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          MarkdownTooltip(
+            message: '''
+
+            **Convert to JSON**: Tap here to convert the PDF file to JSON format and upload both files.
+            This will extract text from the PDF, structure it as JSON data, and upload both files to your POD.
+
+            ''',
+            child: TextButton.icon(
+              onPressed: state.uploadInProgress
+                  ? null
+                  : () => convertPDFToJsonUpload(File(state.uploadFile!)),
+              icon: const Icon(Icons.code),
+              label: const Text('Convert to JSON'),
               style: TextButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(

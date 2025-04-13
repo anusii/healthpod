@@ -58,8 +58,8 @@ Future<bool> fetchKeySavedStatus(context,
     // Check if the file content is valid.
 
     bool hasLocalKey = ![
-      SolidFunctionCallStatus.notLoggedIn,
-      SolidFunctionCallStatus.fail
+      SolidFunctionCallStatus.notLoggedIn.toString(),
+      SolidFunctionCallStatus.fail.toString()
     ].contains(fileContent);
 
     // Return true if the key is saved locally or in the POD.
