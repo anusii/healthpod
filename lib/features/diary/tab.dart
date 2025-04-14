@@ -246,9 +246,7 @@ class _DiaryTabState extends State<DiaryTab> {
 
   void _showAppointmentDetails(Appointment appointment) {
     final markdownContent = '''
-# ${appointment.title}
-
-**Date:** ${DateFormat('MMM dd, yyyy').format(appointment.date)}
+**Date:** ${DateFormat('dd MMM, yyyy').format(appointment.date)}
 **Time:** ${DateFormat('hh:mm a').format(appointment.date)}
 
 ## Description
@@ -261,14 +259,24 @@ ${appointment.isPast ? 'Past' : 'Upcoming'}
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              Icons.vaccines,
+              color: Theme.of(dialogContext).colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(appointment.title),
+          ],
+        ),
         content: SizedBox(
           width: double.maxFinite,
           child: MarkdownBody(
             data: markdownContent,
             styleSheet: MarkdownStyleSheet(
               h1: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              h2: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              p: const TextStyle(fontSize: 14),
+              h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              p: const TextStyle(fontSize: 20),
               strong: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
