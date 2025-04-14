@@ -30,6 +30,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -244,31 +245,33 @@ class _DiaryTabState extends State<DiaryTab> {
   }
 
   void _showAppointmentDetails(Appointment appointment) {
+    final markdownContent = '''
+# ${appointment.title}
+
+**Date:** ${DateFormat('MMM dd, yyyy').format(appointment.date)}
+**Time:** ${DateFormat('hh:mm a').format(appointment.date)}
+
+## Description
+${appointment.description}
+
+## Status
+${appointment.isPast ? 'Past' : 'Upcoming'}
+''';
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(appointment.title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Date: ${DateFormat('MMM dd, yyyy').format(appointment.date)}',
+        content: SizedBox(
+          width: double.maxFinite,
+          child: MarkdownBody(
+            data: markdownContent,
+            styleSheet: MarkdownStyleSheet(
+              h1: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              h2: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              p: const TextStyle(fontSize: 14),
+              strong: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Time: ${DateFormat('hh:mm a').format(appointment.date)}',
-            ),
-            const SizedBox(height: 8),
-            Text('Description: ${appointment.description}'),
-            const SizedBox(height: 8),
-            Text(
-              'Status: ${appointment.isPast ? 'Past' : 'Upcoming'}',
-              style: TextStyle(
-                color: appointment.isPast ? Colors.grey : Colors.green,
-              ),
-            ),
-          ],
+          ),
         ),
         actions: [
           TextButton(
