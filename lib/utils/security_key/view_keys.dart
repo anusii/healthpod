@@ -1,6 +1,6 @@
 /// A widget to view private key data in a Solid Pod.
 ///
-// Time-stamp: <Wednesday 2024-05-15 10:13:40 +1000 Graham Williams>
+// Time-stamp: <Monday 2025-04-14 13:21:20 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -27,7 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/utils/rdf.dart' show getEncKeyContent;
+import 'package:healthpod/utils/get_enc_key_content.dart';
 
 /// A widget to show the user all the encryption keys stored in their Solid Pod.
 

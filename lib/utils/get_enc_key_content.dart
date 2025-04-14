@@ -1,6 +1,6 @@
 /// Common utilities for working on RDF data.
 ///
-// Time-stamp: <Sunday 2023-12-31 16:40:28 +1100 Graham Williams>
+// Time-stamp: <Monday 2025-04-14 13:19:30 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -21,71 +21,11 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Dawei Chen
+/// Authors: Dawei Chen, Graham Williams
 
 library;
 
 import 'package:rdflib/rdflib.dart';
-
-import 'package:solidpod/solidpod.dart' show getWebId;
-
-// Namespace for keys.
-
-const String appTerms = 'https://solidcommunity.au/predicates/terms#';
-
-/// Serialise key/value pairs [keyValuePairs] in TTL format where
-///
-/// Subject: Web ID
-/// Predicate: Key
-/// Object: Value
-
-Future<String> genTTLStr(
-    List<({String key, dynamic value})> keyValuePairs) async {
-  assert(keyValuePairs.isNotEmpty);
-  assert({for (final p in keyValuePairs) p.key}.length ==
-      keyValuePairs.length); // No duplicate keys
-  final webId = await getWebId();
-  assert(webId != null);
-  final g = Graph();
-  final f = URIRef(webId!);
-  final ns = Namespace(ns: appTerms);
-
-  for (final p in keyValuePairs) {
-    g.addTripleToGroups(f, ns.withAttr(p.key), p.value);
-  }
-
-  g.serialize(abbr: 'short');
-
-  return g.serializedString;
-}
-
-/// Parse TTL string [ttlStr] and returns the key-value pairs from triples where
-///
-/// Subject: Web ID
-/// Predicate: Key
-/// Object: Value
-
-Future<List<({String key, dynamic value})>> parseTTLStr(String ttlStr) async {
-  assert(ttlStr.isNotEmpty);
-  final g = Graph();
-  g.parseTurtle(ttlStr);
-  final keys = <String>{};
-  final pairs = <({String key, dynamic value})>[];
-  final webId = await getWebId();
-  assert(webId != null);
-  String extract(String str) => str.contains('#') ? str.split('#')[1] : str;
-  for (final t in g.triples) {
-    final sub = t.sub.value as String;
-    if (sub == webId) {
-      final pre = extract(t.pre.value as String);
-      final obj = extract(t.obj.value as String);
-      assert(!keys.contains(pre));
-      keys.add(pre);
-      pairs.add((key: pre, value: obj));
-    }
-  }
-  return pairs;
-}
 
 /// Parses enc-key file information and extracts content into a map.
 ///
