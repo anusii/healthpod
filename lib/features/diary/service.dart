@@ -47,6 +47,7 @@ import 'package:healthpod/utils/save_response_pod.dart';
 class DiaryService {
   /// The feature identifier for diary functionality.
   /// This is used to construct the path where appointment files are stored.
+
   static const String feature = 'diary';
 
   /// Load all appointments from the diary directory in the POD.
