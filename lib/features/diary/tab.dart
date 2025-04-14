@@ -23,6 +23,10 @@
 ///
 /// Authors: Kevin Wang
 
+// ignore_for_file: use_build_context_synchronously
+// This is a workaround for the use_build_context_synchronously lint.
+// Kevin cannot figure out how to fix this.
+
 library;
 
 import 'package:flutter/material.dart';
@@ -31,6 +35,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'models/appointment.dart';
+import 'service.dart';
 import 'widgets/appointment_dialog.dart';
 
 class DiaryTab extends StatefulWidget {
@@ -54,25 +59,15 @@ class _DiaryTabState extends State<DiaryTab> {
     _loadAppointments();
   }
 
-  void _loadAppointments() {
-    // TODO: Load appointments from storage
-    // For now, add some sample appointments
-    final now = DateTime.now();
-    _appointments.addAll([
-      Appointment(
-        date: now.subtract(const Duration(days: 1)),
-        title: 'Past Appointment',
-        description: 'This is a past appointment',
-        isPast: true,
-      ),
-      Appointment(
-        date: now.add(const Duration(days: 1)),
-        title: 'Future Appointment',
-        description: 'This is a future appointment',
-        isPast: false,
-      ),
-    ]);
-    _updateEvents();
+  Future<void> _loadAppointments() async {
+    if (!mounted) return;
+    final appointments = await DiaryService.loadAppointments(context);
+    if (!mounted) return;
+    setState(() {
+      _appointments.clear();
+      _appointments.addAll(appointments);
+      _updateEvents();
+    });
   }
 
   void _updateEvents() {
@@ -104,20 +99,26 @@ class _DiaryTabState extends State<DiaryTab> {
   void _addAppointment() {
     showDialog(
       context: context,
-      builder: (context) => AppointmentDialog(
-        onSave: (title, description, date) {
-          setState(() {
-            _appointments.add(
-              Appointment(
-                date: date,
-                title: title,
-                description: description,
-                isPast: date.isBefore(DateTime.now()),
-              ),
-            );
-            _updateEvents();
-          });
-          Navigator.pop(context);
+      builder: (dialogContext) => AppointmentDialog(
+        onSave: (title, description, date) async {
+          final appointment = Appointment(
+            date: date,
+            title: title,
+            description: description,
+            isPast: date.isBefore(DateTime.now()),
+          );
+
+          final success =
+              await DiaryService.saveAppointment(dialogContext, appointment);
+          if (success && mounted) {
+            setState(() {
+              _appointments.add(appointment);
+              _updateEvents();
+            });
+          }
+          if (mounted) {
+            Navigator.pop(dialogContext);
+          }
         },
       ),
     );
@@ -127,22 +128,28 @@ class _DiaryTabState extends State<DiaryTab> {
     if (!appointment.isPast) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (dialogContext) => AlertDialog(
           title: const Text('Delete Appointment'),
           content:
               Text('Are you sure you want to delete "${appointment.title}"?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () {
-                setState(() {
-                  _appointments.remove(appointment);
-                  _updateEvents();
-                });
-                Navigator.pop(context);
+              onPressed: () async {
+                final success = await DiaryService.deleteAppointment(
+                    dialogContext, appointment);
+                if (success && mounted) {
+                  setState(() {
+                    _appointments.remove(appointment);
+                    _updateEvents();
+                  });
+                }
+                if (mounted) {
+                  Navigator.pop(dialogContext);
+                }
               },
               child: const Text('Delete'),
             ),
@@ -239,7 +246,7 @@ class _DiaryTabState extends State<DiaryTab> {
   void _showAppointmentDetails(Appointment appointment) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text(appointment.title),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -265,7 +272,7 @@ class _DiaryTabState extends State<DiaryTab> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Close'),
           ),
         ],
