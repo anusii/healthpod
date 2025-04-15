@@ -561,10 +561,25 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     ),
                   ),
                   if (widget.showEditButton)
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: _isLoading || _isSaving ? null : _showEditDialog,
-                      tooltip: 'Edit Details',
+                    MarkdownTooltip(
+                      message: '''
+                      
+                      **Edit Profile Details**
+                      
+                      Click to modify your personal information:
+                      
+                      - Name
+                      - Address
+                      - Contact information
+                      - Personal details
+                      
+                      Your data is securely stored in your personal pod.
+                      
+                      ''',
+                      child: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: _isLoading || _isSaving ? null : _showEditDialog,
+                      ),
                     ),
                 ],
               ),
