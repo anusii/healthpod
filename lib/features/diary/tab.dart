@@ -247,6 +247,7 @@ class _DiaryTabState extends State<DiaryTab> {
 
   void _showAppointmentDetails(Appointment appointment) {
     final markdownContent = '''
+
 **Date:** ${DateFormat('dd MMM, yyyy').format(appointment.date)}
 **Time:** ${DateFormat('hh:mm a').format(appointment.date)}
 
@@ -255,6 +256,7 @@ ${appointment.description}
 
 ## Status
 ${appointment.isPast ? 'Past' : 'Upcoming'}
+
 ''';
 
     showDialog(
