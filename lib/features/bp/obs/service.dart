@@ -29,14 +29,15 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import 'package:solidpod/solidpod.dart' show 
-    SolidFunctionCallStatus, 
-    getResourcesInContainer, 
-    getDirUrl, 
-    readPod, 
-    writePod, 
-    deleteFile,
-    getKeyFromUserIfRequired;
+import 'package:solidpod/solidpod.dart'
+    show
+        SolidFunctionCallStatus,
+        getResourcesInContainer,
+        getDirUrl,
+        readPod,
+        writePod,
+        deleteFile,
+        getKeyFromUserIfRequired;
 
 import 'package:healthpod/features/bp/obs/model.dart';
 
@@ -65,15 +66,15 @@ class BPEditorService {
       if (!context.mounted) continue;
 
       final filePath = getFeaturePath(feature, file);
-      
+
       // Prompt for security key if needed
       await getKeyFromUserIfRequired(
         context,
         const Text('Please enter your security key to access your health data'),
       );
-      
+
       if (!context.mounted) continue;
-      
+
       final content = await readPod(
         filePath,
         context,

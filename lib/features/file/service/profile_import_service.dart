@@ -75,33 +75,32 @@ class ProfileImportService {
       final validationResult = validateProfileJson(jsonData);
       if (!validationResult.isValid) {
         if (!context.mounted) return false;
-        await _showValidationErrorDialog(context, validationResult.error ?? 'Invalid profile data');
+        await _showValidationErrorDialog(
+            context, validationResult.error ?? 'Invalid profile data');
         return false;
       }
 
       // Show confirmation dialog with data preview
       if (!context.mounted) return false;
-      final shouldProceed = await _showPreviewDialog(context, validationResult.data!['data'] as Map<String, dynamic>);
+      final shouldProceed = await _showPreviewDialog(
+          context, validationResult.data!['data'] as Map<String, dynamic>);
       if (!shouldProceed) return false;
 
       // Save the profile data
       if (!context.mounted) return false;
 
       // Ensure profile data is properly typed
-      final Map<String, dynamic> profileData = Map<String, dynamic>.from(validationResult.data ?? {});
-      
-      final success = await _saveProfileData(
-        context, 
-        profileData,
-        onSuccess
-      );
+      final Map<String, dynamic> profileData =
+          Map<String, dynamic>.from(validationResult.data ?? {});
+
+      final success = await _saveProfileData(context, profileData, onSuccess);
 
       if (success) {
         if (!context.mounted) return true;
         _showSuccess(context);
         return true;
       }
-      
+
       if (!success) {
         if (!context.mounted) return false;
         _showError(context, 'Failed to save profile data');
@@ -150,7 +149,8 @@ class ProfileImportService {
   }
 
   /// Shows a validation error dialog with the given message.
-  static Future<void> _showValidationErrorDialog(BuildContext context, String message) async {
+  static Future<void> _showValidationErrorDialog(
+      BuildContext context, String message) async {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -192,9 +192,10 @@ class ProfileImportService {
     );
     return result ?? false;
   }
-  
+
   /// Shows a preview dialog with the profile data
-  static Future<bool> _showPreviewDialog(BuildContext context, Map<String, dynamic> profileData) async {
+  static Future<bool> _showPreviewDialog(
+      BuildContext context, Map<String, dynamic> profileData) async {
     // List of important fields to show in the preview
     final previewFields = [
       'patientName',
@@ -204,7 +205,7 @@ class ProfileImportService {
       'bestContactPhone',
       'address',
     ];
-    
+
     // Field display names for better readability
     final fieldDisplayNames = {
       'patientName': 'Patient Name',
@@ -215,16 +216,16 @@ class ProfileImportService {
       'address': 'Address',
       'identifyAsIndigenous': 'Identify as Indigenous',
     };
-    
+
     // Build the profile preview widgets
     List<Widget> previewItems = [];
-    
+
     for (final field in previewFields) {
       if (profileData.containsKey(field)) {
-        final displayValue = field == 'identifyAsIndigenous' 
+        final displayValue = field == 'identifyAsIndigenous'
             ? (profileData[field] ? 'Yes' : 'No')
             : '${profileData[field]}';
-            
+
         previewItems.add(
           Padding(
             padding: const EdgeInsets.only(bottom: 8.0),
@@ -250,41 +251,42 @@ class ProfileImportService {
         );
       }
     }
-    
+
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirm Profile Import'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Please review the profile data:',
-                style: TextStyle(fontWeight: FontWeight.bold),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Confirm Profile Import'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Please review the profile data:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  ...previewItems,
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Do you want to import this profile data?',
+                  ),
+                ],
               ),
-              const SizedBox(height: 16),
-              ...previewItems,
-              const SizedBox(height: 16),
-              const Text(
-                'Do you want to import this profile data?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Import'),
               ),
             ],
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Import'),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   /// Saves profile data using the upload utility
@@ -298,7 +300,7 @@ class ProfileImportService {
       void handleSuccess() {
         onSuccess();
       }
-      
+
       final result = await uploadJsonToPod(
         data: profileData,
         targetPath: 'healthpod/data/profile',
@@ -313,4 +315,4 @@ class ProfileImportService {
       return false;
     }
   }
-} 
+}

@@ -188,7 +188,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
             onSuccess: () {
               // Only refresh if still mounted
               if (!mounted) return;
-              
+
               // Show success message first before any navigation or refresh
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -196,13 +196,13 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
-              
+
               // Wrap in a microtask to ensure UI operations complete first
               Future.microtask(() {
                 if (!mounted) return;
                 // Refresh profile data after import
                 ref.read(profileProvider.notifier).refreshProfileData(context);
-                
+
                 // Refresh file browser
                 ref.read(fileServiceProvider.notifier).refreshBrowser();
               });

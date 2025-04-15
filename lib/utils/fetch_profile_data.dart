@@ -27,12 +27,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import 'package:solidpod/solidpod.dart' show 
-    SolidFunctionCallStatus, 
-    getResourcesInContainer, 
-    getDirUrl, 
-    readPod, 
-    getKeyFromUserIfRequired;
+import 'package:solidpod/solidpod.dart'
+    show
+        SolidFunctionCallStatus,
+        getResourcesInContainer,
+        getDirUrl,
+        readPod,
+        getKeyFromUserIfRequired;
 
 import 'package:healthpod/constants/profile.dart';
 import 'package:healthpod/utils/construct_pod_path.dart';
@@ -57,9 +58,8 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
     // Look for profile files with .enc.ttl extension (encrypted files).
     final profileFiles = resources.files
-        .where((file) => 
-            file.startsWith('profile_') && 
-            file.endsWith('.enc.ttl'))
+        .where(
+            (file) => file.startsWith('profile_') && file.endsWith('.enc.ttl'))
         .toList();
 
     if (profileFiles.isEmpty) {
@@ -80,17 +80,17 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     // Use readPod with the full constructed path to the file.
     final filePath = constructPodPath('profile', latestProfileFile);
     debugPrint('Reading profile data from path: $filePath');
-    
+
     // Prompt for security key if needed
     await getKeyFromUserIfRequired(
       context,
       const Text('Please enter your security key to access your profile data'),
     );
-    
+
     if (!context.mounted) {
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
-    
+
     final fileContent = await readPod(
       filePath,
       context,
@@ -98,7 +98,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     );
 
     // Check for errors or empty content
-    if (fileContent.isEmpty || 
+    if (fileContent.isEmpty ||
         fileContent == SolidFunctionCallStatus.fail.toString() ||
         fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
       debugPrint('Failed to read profile data: $fileContent');
@@ -106,27 +106,32 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     }
 
     // Log content details for debugging
-    debugPrint('Successfully read encrypted profile data (length: ${fileContent.length})');
-    
+    debugPrint(
+        'Successfully read encrypted profile data (length: ${fileContent.length})');
+
     // Try to parse the JSON directly - this should work if decryption is successful
     try {
       // Check if content appears to be TTL format instead of JSON
       if (fileContent.trim().startsWith('@prefix')) {
-        debugPrint('File appears to be in TTL format. This indicates the file is still encrypted.');
-        debugPrint('The file may be double-encrypted or the security key is incorrect.');
-        
+        debugPrint(
+            'File appears to be in TTL format. This indicates the file is still encrypted.');
+        debugPrint(
+            'The file may be double-encrypted or the security key is incorrect.');
+
         // Return default profile data since we can't decrypt the TTL format directly
         return defaultProfileData['data'] as Map<String, dynamic>;
       }
-      
+
       final Map<String, dynamic> jsonData = jsonDecode(fileContent);
-      debugPrint('Successfully parsed profile JSON with keys: ${jsonData.keys.join(', ')}');
+      debugPrint(
+          'Successfully parsed profile JSON with keys: ${jsonData.keys.join(', ')}');
 
       // Check for nested data structures
       if (jsonData.containsKey('data')) {
         debugPrint('Found data key in profile, returning data object');
         return jsonData['data'] as Map<String, dynamic>;
-      } else if (jsonData.containsKey('timestamp') && jsonData.containsKey('data')) {
+      } else if (jsonData.containsKey('timestamp') &&
+          jsonData.containsKey('data')) {
         debugPrint('Found timestamp and data keys, returning data object');
         return jsonData['data'] as Map<String, dynamic>;
       }
@@ -135,13 +140,15 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       return jsonData;
     } catch (e) {
       debugPrint('Error parsing profile JSON: $e');
-      debugPrint('Content preview: ${fileContent.substring(0, min(100, fileContent.length))}...');
-      
+      debugPrint(
+          'Content preview: ${fileContent.substring(0, min(100, fileContent.length))}...');
+
       // If content starts with @prefix, it's likely TTL format and the security key is incorrect
       if (fileContent.trim().startsWith('@prefix')) {
-        debugPrint('File appears to be in TTL format. This indicates double encryption or incorrect security key.');
+        debugPrint(
+            'File appears to be in TTL format. This indicates double encryption or incorrect security key.');
       }
-      
+
       // Return default profile data
       debugPrint('Using default profile data due to parsing error');
       return defaultProfileData['data'] as Map<String, dynamic>;
