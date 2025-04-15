@@ -49,7 +49,7 @@ import 'package:healthpod/utils/construct_pod_path.dart';
 Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
   try {
     // Get the directory URL for the profile folder.
-    
+
     final podDirPath = constructPodPath('profile', '');
     debugPrint('Looking for profile data in: $podDirPath');
 
@@ -58,7 +58,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     debugPrint('Profile dir contents: ${resources.files}');
 
     // Look for profile files with .enc.ttl extension (encrypted files).
-  
+
     final profileFiles = resources.files
         .where(
             (file) => file.startsWith('profile_') && file.endsWith('.enc.ttl'))
@@ -120,7 +120,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     // Try to parse the JSON directly - this should work if decryption is successful.
 
     try {
-      // Check if content appears to be TTL format instead of JSON. 
+      // Check if content appears to be TTL format instead of JSON.
 
       if (fileContent.trim().startsWith('@prefix')) {
         debugPrint(
@@ -149,7 +149,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       }
 
       // Return the whole object if it doesn't have the expected structure.
-      
+
       return jsonData;
     } catch (e) {
       debugPrint('Error parsing profile JSON: $e');

@@ -67,7 +67,7 @@ class BPEditorService {
       final filePath = getFeaturePath(feature, file);
 
       // Prompt for security key if needed.
-      
+
       await getKeyFromUserIfRequired(
         context,
         const Text('Please enter your security key to access your health data'),

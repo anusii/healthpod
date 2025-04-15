@@ -46,7 +46,7 @@ class ProfileState {
   });
 
   /// Constructor for initial state.
-  
+
   factory ProfileState.initial() {
     return ProfileState(
       profileData: Map<String, dynamic>.from(
@@ -57,7 +57,7 @@ class ProfileState {
   }
 
   /// Creates a copy of this state with specified values changed.
-  
+
   ProfileState copyWith({
     Map<String, dynamic>? profileData,
     bool? isLoading,
@@ -77,7 +77,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   ProfileNotifier() : super(ProfileState.initial());
 
   /// Refreshes profile data from the POD.
-  
+
   Future<void> refreshProfileData(BuildContext context) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
@@ -111,7 +111,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   /// Updates specific profile field values.
-  
+
   void updateProfileField(String field, dynamic value) {
     final updatedData = Map<String, dynamic>.from(state.profileData);
     updatedData[field] = value;
@@ -120,7 +120,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   }
 
   /// Updates multiple profile fields at once.
-  
+
   void updateProfileFields(Map<String, dynamic> fields) {
     final updatedData = Map<String, dynamic>.from(state.profileData);
     updatedData.addAll(fields);
