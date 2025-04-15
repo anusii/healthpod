@@ -75,13 +75,13 @@ class ProfileImportService {
       final validationResult = validateProfileJson(jsonData);
       if (!validationResult.isValid) {
         if (!context.mounted) return false;
-        _showError(context, validationResult.error ?? 'Invalid profile data');
+        await _showValidationErrorDialog(context, validationResult.error ?? 'Invalid profile data');
         return false;
       }
 
-      // Show confirmation dialog
+      // Show confirmation dialog with data preview
       if (!context.mounted) return false;
-      final shouldProceed = await _showConfirmationDialog(context);
+      final shouldProceed = await _showPreviewDialog(context, validationResult.data!['data'] as Map<String, dynamic>);
       if (!shouldProceed) return false;
 
       // Save the profile data
@@ -149,6 +149,25 @@ class ProfileImportService {
     );
   }
 
+  /// Shows a validation error dialog with the given message.
+  static Future<void> _showValidationErrorDialog(BuildContext context, String message) async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Validation Error'),
+        content: SingleChildScrollView(
+          child: Text(message),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   /// Shows a confirmation dialog before importing.
   static Future<bool> _showConfirmationDialog(BuildContext context) async {
     final result = await showDialog<bool>(
@@ -172,6 +191,100 @@ class ProfileImportService {
       ),
     );
     return result ?? false;
+  }
+  
+  /// Shows a preview dialog with the profile data
+  static Future<bool> _showPreviewDialog(BuildContext context, Map<String, dynamic> profileData) async {
+    // List of important fields to show in the preview
+    final previewFields = [
+      'patientName',
+      'dateOfBirth',
+      'gender',
+      'email',
+      'bestContactPhone',
+      'address',
+    ];
+    
+    // Field display names for better readability
+    final fieldDisplayNames = {
+      'patientName': 'Patient Name',
+      'dateOfBirth': 'Date of Birth',
+      'gender': 'Gender',
+      'email': 'Email',
+      'bestContactPhone': 'Contact Phone',
+      'address': 'Address',
+      'identifyAsIndigenous': 'Identify as Indigenous',
+    };
+    
+    // Build the profile preview widgets
+    List<Widget> previewItems = [];
+    
+    for (final field in previewFields) {
+      if (profileData.containsKey(field)) {
+        final displayValue = field == 'identifyAsIndigenous' 
+            ? (profileData[field] ? 'Yes' : 'No')
+            : '${profileData[field]}';
+            
+        previewItems.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 120,
+                  child: Text(
+                    fieldDisplayNames[field] ?? field,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    displayValue,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+    
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirm Profile Import'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Please review the profile data:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ...previewItems,
+              const SizedBox(height: 16),
+              const Text(
+                'Do you want to import this profile data?',
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Import'),
+          ),
+        ],
+      ),
+    ) ?? false;
   }
 
   /// Saves profile data using the upload utility

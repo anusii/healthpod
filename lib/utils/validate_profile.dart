@@ -54,13 +54,23 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
 
     final data = json['data'] as Map<String, dynamic>;
     final defaultData = defaultProfileData['data'] as Map<String, dynamic>;
+    final fieldDisplayNames = {
+      'patientName': 'Patient Name',
+      'address': 'Address',
+      'bestContactPhone': 'Best Contact Phone',
+      'alternativeContactNumber': 'Alternative Contact Number',
+      'email': 'Email',
+      'dateOfBirth': 'Date of Birth',
+      'gender': 'Gender',
+      'identifyAsIndigenous': 'Identify as Indigenous',
+    };
 
     // Check if all required fields are present
     for (final field in defaultData.keys) {
       if (!data.containsKey(field)) {
         return ProfileValidationResult(
           isValid: false,
-          error: 'Missing required field: $field',
+          error: 'Missing required field: ${fieldDisplayNames[field] ?? field}',
         );
       }
     }
@@ -69,7 +79,7 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
     if (data['identifyAsIndigenous'] is! bool) {
       return ProfileValidationResult(
         isValid: false,
-        error: 'Field "identifyAsIndigenous" must be a boolean',
+        error: '"${fieldDisplayNames['identifyAsIndigenous']}" must be a boolean value (true/false)',
       );
     }
 
@@ -86,57 +96,65 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       if (data[field] == null) {
         return ProfileValidationResult(
           isValid: false,
-          error: 'Field "$field" cannot be null',
+          error: '"${fieldDisplayNames[field]}" cannot be null',
         );
       }
       if (data[field] is! String) {
         return ProfileValidationResult(
           isValid: false,
-          error: 'Field "$field" must be a string',
+          error: '"${fieldDisplayNames[field]}" must be a text value',
         );
       }
     }
 
+    // Validate patient name is not empty
+    if (data['patientName'].toString().trim().isEmpty) {
+      return ProfileValidationResult(
+        isValid: false,
+        error: '"${fieldDisplayNames['patientName']}" cannot be empty',
+      );
+    }
+
     // Validate email format if provided
-    if (data['email'].isNotEmpty) {
+    if (data['email'].toString().isNotEmpty) {
       final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
       if (!emailRegex.hasMatch(data['email'])) {
         return ProfileValidationResult(
           isValid: false,
-          error: 'Invalid email format',
+          error: '"${fieldDisplayNames['email']}" has an invalid format',
         );
       }
     }
 
     // Validate phone numbers if provided
-    if (data['bestContactPhone'].isNotEmpty) {
+    if (data['bestContactPhone'].toString().isNotEmpty) {
       final phoneRegex = RegExp(r'^\+?[\d\s-]+$');
       if (!phoneRegex.hasMatch(data['bestContactPhone'])) {
         return ProfileValidationResult(
           isValid: false,
-          error: 'Invalid phone number format for best contact',
+          error: '"${fieldDisplayNames['bestContactPhone']}" has an invalid format',
         );
       }
     }
 
-    if (data['alternativeContactNumber'].isNotEmpty) {
+    if (data['alternativeContactNumber'].toString().isNotEmpty) {
       final phoneRegex = RegExp(r'^\+?[\d\s-]+$');
       if (!phoneRegex.hasMatch(data['alternativeContactNumber'])) {
         return ProfileValidationResult(
           isValid: false,
-          error: 'Invalid phone number format for alternative contact',
+          error: '"${fieldDisplayNames['alternativeContactNumber']}" has an invalid format',
         );
       }
     }
 
     // Validate date of birth format if provided
-    if (data['dateOfBirth'].isNotEmpty) {
+    if (data['dateOfBirth'].toString().isNotEmpty) {
       try {
         DateTime.parse(data['dateOfBirth']);
       } catch (e) {
         return ProfileValidationResult(
           isValid: false,
-          error: 'Invalid date of birth format. Use YYYY-MM-DD',
+          error: '"${fieldDisplayNames['dateOfBirth']}" has an invalid format. Use YYYY-MM-DD',
         );
       }
     }

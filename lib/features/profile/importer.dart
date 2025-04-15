@@ -66,16 +66,26 @@ class ProfileImporter {
       final validationResult = _validateProfileData(profileData);
       
       if (!validationResult['isValid']) {
-        // Show error if validation fails
+        // Show validation error dialog instead of a snackbar
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Invalid profile data: ${validationResult['message']}'),
-              backgroundColor: Colors.red,
-            ),
+          await _showValidationErrorDialog(
+            context, 
+            'Invalid profile data: ${validationResult['message']}'
           );
         }
         return false;
+      }
+      
+      // Show confirmation dialog with the validated data
+      if (context.mounted) {
+        final confirmImport = await _showConfirmationDialog(
+          context,
+          validationResult['data'] as Map<String, dynamic>,
+        );
+        
+        if (!confirmImport) {
+          return false;
+        }
       }
       
       // Extract the validated data
@@ -214,4 +224,132 @@ class ProfileImporter {
   
   /// Returns the minimum of two integers (helper function)
   static int min(int a, int b) => a < b ? a : b;
+
+  /// Shows a validation error dialog
+  static Future<void> _showValidationErrorDialog(
+    BuildContext context, 
+    String message,
+  ) async {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Validation Error'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(message),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Shows a confirmation dialog with profile data preview
+  static Future<bool> _showConfirmationDialog(
+    BuildContext context,
+    Map<String, dynamic> data,
+  ) async {
+    final profileData = data.containsKey('data') ? data['data'] as Map<String, dynamic> : data;
+    
+    // Get the key fields to display in the dialog
+    final previewFields = [
+      'patientName',
+      'dateOfBirth',
+      'gender',
+      'email',
+      'bestContactPhone',
+    ];
+    
+    // Build preview items
+    final previewItems = <Widget>[];
+    
+    for (final field in previewFields) {
+      if (profileData.containsKey(field)) {
+        previewItems.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 120,
+                  child: Text(
+                    _formatFieldName(field),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    '${profileData[field]}',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    }
+    
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Profile Import'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                const Text(
+                  'You are about to import the following profile data:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                ...previewItems,
+                const SizedBox(height: 16),
+                const Text(
+                  'Importing this data will create a new profile record. Do you want to continue?',
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: const Text('Import'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    ) ?? false;
+  }
+  
+  /// Format field names for display
+  static String _formatFieldName(String field) {
+    // Convert camelCase to Title Case with spaces
+    final result = field.replaceAllMapped(
+      RegExp(r'([A-Z])'),
+      (match) => ' ${match.group(0)}',
+    );
+    
+    return result.substring(0, 1).toUpperCase() + result.substring(1);
+  }
 }
