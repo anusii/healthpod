@@ -48,7 +48,6 @@ import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
-
 /// A provider that manages the business logic for file operations.
 ///
 /// This provider handles all file-related operations including upload, download,
