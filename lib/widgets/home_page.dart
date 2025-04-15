@@ -28,10 +28,6 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/features/home/service/components/components.dart';
-import 'package:healthpod/features/home/service/components/profile_details.dart';
-import 'package:healthpod/features/home/service/components/manage_plan.dart';
-import 'package:healthpod/features/home/service/components/next_appointment.dart';
-import 'package:healthpod/features/home/service/components/number_appointments.dart';
 
 class HomePage extends StatefulWidget {
   final VoidCallback onNavigateToProfile;
@@ -120,7 +116,8 @@ class _HomePageState extends State<HomePage> {
       ),
     ];
 
-    // Return the widget directly without any constraints to preserve natural sizing
+    // Return the widget directly without any constraints to preserve natural sizing.
+
     return gridItems[index];
   }
 
@@ -132,13 +129,16 @@ class _HomePageState extends State<HomePage> {
           children: [
             _buildHeader(context),
             const SizedBox(height: 24),
-            // Replace GridView with a more flexible layout that respects natural heights
+            // Replace GridView with a more flexible layout that respects natural heights.
+
             if (maxWidth < 1200)
-              // Two column layout
+              // Two column layout.
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // First column
+                  // First column.
+
                   Expanded(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -150,28 +150,33 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const SizedBox(width: 24),
-                  // Second column - Profile Details
+                  // Second column - Profile Details.
+
                   Expanded(
                     child: _buildGridItem(2),
                   ),
                 ],
               )
             else
-              // Three column layout
+              // Three column layout.
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // First column
+                  // First column.
+
                   Expanded(
                     child: _buildGridItem(0),
                   ),
                   const SizedBox(width: 24),
-                  // Second column
+                  // Second column.
+
                   Expanded(
                     child: _buildGridItem(1),
                   ),
                   const SizedBox(width: 24),
-                  // Third column - Profile Details
+                  // Third column - Profile Details.
+
                   Expanded(
                     child: _buildGridItem(2),
                   ),
