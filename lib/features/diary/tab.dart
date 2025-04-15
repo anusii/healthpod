@@ -30,7 +30,6 @@
 library;
 
 import 'package:flutter/material.dart';
-
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:intl/intl.dart';
@@ -267,18 +266,26 @@ ${appointment.isPast ? 'Past' : 'Upcoming'}
               color: Theme.of(dialogContext).colorScheme.primary,
             ),
             const SizedBox(width: 8),
-            Text(appointment.title),
+            Expanded(
+              child: Text(
+                appointment.title,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: MarkdownBody(
-            data: markdownContent,
-            styleSheet: MarkdownStyleSheet(
-              h1: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              h2: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              p: const TextStyle(fontSize: 20),
-              strong: const TextStyle(fontWeight: FontWeight.bold),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: SizedBox(
+            width: double.maxFinite,
+            child: MarkdownBody(
+              data: markdownContent,
+              styleSheet: MarkdownStyleSheet(
+                h1: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                h2: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                p: const TextStyle(fontSize: 15),
+                strong: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ),
