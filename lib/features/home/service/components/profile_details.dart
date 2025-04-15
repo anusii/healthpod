@@ -99,8 +99,10 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       setState(() {
         _nameController.text = profileData['patientName'] ?? userName;
         _addressController.text = profileData['address'] ?? '';
-        _bestContactPhoneController.text = profileData['bestContactPhone'] ?? '';
-        _alternativeContactNumberController.text = profileData['alternativeContactNumber'] ?? '';
+        _bestContactPhoneController.text =
+            profileData['bestContactPhone'] ?? '';
+        _alternativeContactNumberController.text =
+            profileData['alternativeContactNumber'] ?? '';
         _emailController.text = profileData['email'] ?? '';
         _dateOfBirthController.text = profileData['dateOfBirth'] ?? '';
         _genderController.text = profileData['gender'] ?? '';
@@ -142,7 +144,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         'patientName': _nameController.text.trim(),
         'address': _addressController.text.trim(),
         'bestContactPhone': _bestContactPhoneController.text.trim(),
-        'alternativeContactNumber': _alternativeContactNumberController.text.trim(),
+        'alternativeContactNumber':
+            _alternativeContactNumberController.text.trim(),
         'email': _emailController.text.trim(),
         'dateOfBirth': _dateOfBirthController.text.trim(),
         'gender': _genderController.text.trim(),
@@ -203,7 +206,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         try {
           final dirUrl = await getDirUrl(constructPodPath('profile', ''));
           final resources = await getResourcesInContainer(dirUrl);
-          debugPrint('After save - Files in profile directory: ${resources.files}');
+          debugPrint(
+              'After save - Files in profile directory: ${resources.files}');
         } catch (e) {
           debugPrint('Error checking directory after save: $e');
         }
@@ -219,23 +223,28 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   bool _hasDataChanged() {
     return _nameController.text.trim() != (_profileData['patientName'] ?? '') ||
         _addressController.text.trim() != (_profileData['address'] ?? '') ||
-        _bestContactPhoneController.text.trim() != (_profileData['bestContactPhone'] ?? '') ||
-        _alternativeContactNumberController.text.trim() != (_profileData['alternativeContactNumber'] ?? '') ||
+        _bestContactPhoneController.text.trim() !=
+            (_profileData['bestContactPhone'] ?? '') ||
+        _alternativeContactNumberController.text.trim() !=
+            (_profileData['alternativeContactNumber'] ?? '') ||
         _emailController.text.trim() != (_profileData['email'] ?? '') ||
-        _dateOfBirthController.text.trim() != (_profileData['dateOfBirth'] ?? '') ||
+        _dateOfBirthController.text.trim() !=
+            (_profileData['dateOfBirth'] ?? '') ||
         _genderController.text.trim() != (_profileData['gender'] ?? '');
   }
 
   Future<void> _deleteExistingProfileFiles() async {
     try {
       final dirUrl = await getDirUrl(constructPodPath('profile', ''));
-      debugPrint('Looking for profile files to delete in: ${constructPodPath('profile', '')}');
+      debugPrint(
+          'Looking for profile files to delete in: ${constructPodPath('profile', '')}');
 
       final resources = await getResourcesInContainer(dirUrl);
       debugPrint('Files in profile directory: ${resources.files}');
 
       final profileFiles = resources.files
-          .where((file) => file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
+          .where((file) =>
+              file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
           .toList();
 
       if (profileFiles.isEmpty) {
@@ -285,13 +294,20 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   }
 
   Future<void> _showEditDialog() async {
-    final tempNameController = TextEditingController(text: _nameController.text);
-    final tempAddressController = TextEditingController(text: _addressController.text);
-    final tempBestContactPhoneController = TextEditingController(text: _bestContactPhoneController.text);
-    final tempAlternativeContactNumberController = TextEditingController(text: _alternativeContactNumberController.text);
-    final tempEmailController = TextEditingController(text: _emailController.text);
-    final tempDateOfBirthController = TextEditingController(text: _dateOfBirthController.text);
-    final tempGenderController = TextEditingController(text: _genderController.text);
+    final tempNameController =
+        TextEditingController(text: _nameController.text);
+    final tempAddressController =
+        TextEditingController(text: _addressController.text);
+    final tempBestContactPhoneController =
+        TextEditingController(text: _bestContactPhoneController.text);
+    final tempAlternativeContactNumberController =
+        TextEditingController(text: _alternativeContactNumberController.text);
+    final tempEmailController =
+        TextEditingController(text: _emailController.text);
+    final tempDateOfBirthController =
+        TextEditingController(text: _dateOfBirthController.text);
+    final tempGenderController =
+        TextEditingController(text: _genderController.text);
 
     final formKey = GlobalKey<FormState>();
 
@@ -313,7 +329,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     controller: tempNameController,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     ),
                     validator: _validateRequired,
                   ),
@@ -323,7 +340,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     controller: tempAddressController,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     ),
                     validator: _validateRequired,
                   ),
@@ -345,7 +363,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       controller: tempBestContactPhoneController,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         hintText: 'e.g. +61 4 1234 5678 or 04 1234 5678',
                         suffixIcon: Icon(Icons.info_outline),
                       ),
@@ -371,7 +390,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       controller: tempAlternativeContactNumberController,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         hintText: 'e.g. +61 4 1234 5678 or 04 1234 5678',
                         suffixIcon: Icon(Icons.info_outline),
                       ),
@@ -385,7 +405,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     controller: tempEmailController,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     ),
                     validator: _validateEmail,
                     keyboardType: TextInputType.emailAddress,
@@ -396,7 +417,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     onTap: () async {
                       final DateTime? picked = await showDatePicker(
                         context: context,
-                        initialDate: _parseDateOrDefault(tempDateOfBirthController.text),
+                        initialDate:
+                            _parseDateOrDefault(tempDateOfBirthController.text),
                         firstDate: DateTime(1900),
                         lastDate: DateTime.now(),
                       );
@@ -409,7 +431,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                         controller: tempDateOfBirthController,
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          contentPadding:
+                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           suffixIcon: Icon(Icons.calendar_today),
                         ),
                         validator: _validateRequired,
@@ -420,16 +443,22 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                   const SizedBox(height: 12),
                   const Text('Gender'),
                   DropdownButtonFormField<String>(
-                    value: tempGenderController.text.isEmpty ? null : tempGenderController.text,
+                    value: tempGenderController.text.isEmpty
+                        ? null
+                        : tempGenderController.text,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     ),
                     items: const [
                       DropdownMenuItem(value: 'Male', child: Text('Male')),
                       DropdownMenuItem(value: 'Female', child: Text('Female')),
-                      DropdownMenuItem(value: 'Non-binary', child: Text('Non-binary')),
-                      DropdownMenuItem(value: 'Prefer not to say', child: Text('Prefer not to say')),
+                      DropdownMenuItem(
+                          value: 'Non-binary', child: Text('Non-binary')),
+                      DropdownMenuItem(
+                          value: 'Prefer not to say',
+                          child: Text('Prefer not to say')),
                     ],
                     onChanged: (value) {
                       if (value != null) {
@@ -465,7 +494,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         _nameController.text = tempNameController.text;
         _addressController.text = tempAddressController.text;
         _bestContactPhoneController.text = tempBestContactPhoneController.text;
-        _alternativeContactNumberController.text = tempAlternativeContactNumberController.text;
+        _alternativeContactNumberController.text =
+            tempAlternativeContactNumberController.text;
         _emailController.text = tempEmailController.text;
         _dateOfBirthController.text = tempDateOfBirthController.text;
         _genderController.text = tempGenderController.text;
@@ -487,7 +517,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     try {
       final parts = dateStr.split('-');
       if (parts.length == 3) {
-        return DateTime(int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+        return DateTime(
+            int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
       }
     } catch (e) {
       debugPrint('Error parsing date: $e');
@@ -521,7 +552,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   }
 
   String? _validateRequired(String? value) {
-    return value == null || value.trim().isEmpty ? 'This field is required' : null;
+    return value == null || value.trim().isEmpty
+        ? 'This field is required'
+        : null;
   }
 
   @override
@@ -578,7 +611,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       ''',
                       child: IconButton(
                         icon: const Icon(Icons.edit),
-                        onPressed: _isLoading || _isSaving ? null : _showEditDialog,
+                        onPressed:
+                            _isLoading || _isSaving ? null : _showEditDialog,
                       ),
                     ),
                 ],
@@ -597,7 +631,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       children: [
                         const CircleAvatar(
                           radius: 24,
-                          backgroundImage: AssetImage('assets/images/sample_avatar_image.png'),
+                          backgroundImage: AssetImage(
+                              'assets/images/sample_avatar_image.png'),
                         ),
                         Positioned(
                           bottom: -2,
@@ -618,7 +653,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       ],
                     ),
                     const SizedBox(width: 12),
-                    
+
                     // Display user name
                     Expanded(
                       child: Text(
@@ -628,7 +663,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                         ),
                       ),
                     ),
-                    
+
                     // Notification bell with notification count badge
                     Stack(
                       clipBehavior: Clip.none,
@@ -677,13 +712,16 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     children: [
                       _buildDataRow('Address:', _addressController.text),
                       const SizedBox(height: 6),
-                      _buildDataRow('Best Contact Phone:', _bestContactPhoneController.text),
+                      _buildDataRow('Best Contact Phone:',
+                          _bestContactPhoneController.text),
                       const SizedBox(height: 6),
-                      _buildDataRow('Alternative Contact Number:', _alternativeContactNumberController.text),
+                      _buildDataRow('Alternative Contact Number:',
+                          _alternativeContactNumberController.text),
                       const SizedBox(height: 6),
                       _buildDataRow('Email:', _emailController.text),
                       const SizedBox(height: 6),
-                      _buildDataRow('Date of Birth:', _dateOfBirthController.text),
+                      _buildDataRow(
+                          'Date of Birth:', _dateOfBirthController.text),
                       const SizedBox(height: 6),
                       _buildDataRow('Gender:', _genderController.text),
                     ],
@@ -701,7 +739,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     children: [
                       const CircularProgressIndicator(),
                       const SizedBox(height: 8),
-                      Text(_isLoading ? 'Loading profile data...' : 'Saving profile data...'),
+                      Text(_isLoading
+                          ? 'Loading profile data...'
+                          : 'Saving profile data...'),
                     ],
                   ),
                 ),
@@ -726,7 +766,10 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                 height: 14,
                 width: 80,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.2),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withOpacity(0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -735,7 +778,10 @@ class _ProfileDetailsState extends State<ProfileDetails> {
               child: Container(
                 height: 14,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.1),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withOpacity(0.1),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -765,7 +811,10 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             value.isEmpty ? '—' : value,
             style: TextStyle(
               color: value.isEmpty
-                  ? Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5)
+                  ? Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withOpacity(0.5)
                   : Theme.of(context).colorScheme.onSurface,
             ),
           ),
@@ -773,4 +822,4 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       ],
     );
   }
-} 
+}
