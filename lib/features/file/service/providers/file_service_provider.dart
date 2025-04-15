@@ -76,9 +76,9 @@ class FileServiceNotifier extends StateNotifier<FileState> {
   void updateCurrentPath(String path) {
     state = state.copyWith(currentPath: path);
   }
-  
+
   /// Updates import in progress state.
-  
+
   void updateImportInProgress(bool inProgress) {
     state = state.copyWith(importInProgress: inProgress);
   }
@@ -499,9 +499,9 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       }
     }
   }
-  
+
   /// Handles the import of profile data from JSON format.
-  
+
   Future<void> handleProfileImport(BuildContext context,
       {required WidgetRef ref}) async {
     try {
@@ -523,7 +523,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
             context,
             onSuccess: () {
               if (!context.mounted) return;
-              
+
               // Show success message first
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -531,13 +531,13 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
-              
+
               // Use microtask to ensure UI operations complete first
               Future.microtask(() {
                 if (!context.mounted) return;
                 // Refresh profile data after successful import
                 ref.read(profileProvider.notifier).refreshProfileData(context);
-                
+
                 // Refresh file browser
                 refreshBrowser();
               });
@@ -565,4 +565,3 @@ final fileServiceProvider =
     StateNotifierProvider<FileServiceNotifier, FileState>((ref) {
   return FileServiceNotifier();
 });
-

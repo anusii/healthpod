@@ -79,7 +79,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
     if (data['identifyAsIndigenous'] is! bool) {
       return ProfileValidationResult(
         isValid: false,
-        error: '"${fieldDisplayNames['identifyAsIndigenous']}" must be a boolean value (true/false)',
+        error:
+            '"${fieldDisplayNames['identifyAsIndigenous']}" must be a boolean value (true/false)',
       );
     }
 
@@ -132,7 +133,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       if (!phoneRegex.hasMatch(data['bestContactPhone'])) {
         return ProfileValidationResult(
           isValid: false,
-          error: '"${fieldDisplayNames['bestContactPhone']}" has an invalid format',
+          error:
+              '"${fieldDisplayNames['bestContactPhone']}" has an invalid format',
         );
       }
     }
@@ -142,7 +144,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       if (!phoneRegex.hasMatch(data['alternativeContactNumber'])) {
         return ProfileValidationResult(
           isValid: false,
-          error: '"${fieldDisplayNames['alternativeContactNumber']}" has an invalid format',
+          error:
+              '"${fieldDisplayNames['alternativeContactNumber']}" has an invalid format',
         );
       }
     }
@@ -154,7 +157,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       } catch (e) {
         return ProfileValidationResult(
           isValid: false,
-          error: '"${fieldDisplayNames['dateOfBirth']}" has an invalid format. Use YYYY-MM-DD',
+          error:
+              '"${fieldDisplayNames['dateOfBirth']}" has an invalid format. Use YYYY-MM-DD',
         );
       }
     }
@@ -173,4 +177,4 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       error: 'Invalid JSON format: $e',
     );
   }
-} 
+}

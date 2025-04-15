@@ -33,7 +33,8 @@ class ProfileState {
   /// Constructor for initial state
   factory ProfileState.initial() {
     return ProfileState(
-      profileData: Map<String, dynamic>.from(defaultProfileData['data'] as Map<String, dynamic>),
+      profileData: Map<String, dynamic>.from(
+          defaultProfileData['data'] as Map<String, dynamic>),
       isLoading: false,
       error: null,
     );
@@ -61,21 +62,21 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   Future<void> refreshProfileData(BuildContext context) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
-      
+
       // Make sure context is still valid
       if (!context.mounted) {
         state = state.copyWith(isLoading: false);
         return;
       }
-      
+
       final data = await fetchProfileData(context);
-      
+
       // Check again if context is still valid after async operation
       if (!context.mounted) {
         state = state.copyWith(isLoading: false);
         return;
       }
-      
+
       state = state.copyWith(
         profileData: data,
         isLoading: false,
@@ -83,9 +84,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     } catch (e) {
       debugPrint('Error refreshing profile data: $e');
       state = state.copyWith(
-        isLoading: false, 
-        error: 'Failed to load profile data: ${e.toString()}'
-      );
+          isLoading: false,
+          error: 'Failed to load profile data: ${e.toString()}');
     }
   }
 
@@ -93,20 +93,21 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   void updateProfileField(String field, dynamic value) {
     final updatedData = Map<String, dynamic>.from(state.profileData);
     updatedData[field] = value;
-    
+
     state = state.copyWith(profileData: updatedData);
   }
-  
+
   /// Updates multiple profile fields at once
   void updateProfileFields(Map<String, dynamic> fields) {
     final updatedData = Map<String, dynamic>.from(state.profileData);
     updatedData.addAll(fields);
-    
+
     state = state.copyWith(profileData: updatedData);
   }
 }
 
 /// Global provider for profile state
-final profileProvider = StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
+final profileProvider =
+    StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
   return ProfileNotifier();
 });
