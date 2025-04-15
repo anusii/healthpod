@@ -31,6 +31,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_markdown/flutter_markdown.dart';
+
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -244,31 +246,51 @@ class _DiaryTabState extends State<DiaryTab> {
   }
 
   void _showAppointmentDetails(Appointment appointment) {
+    final markdownContent = '''
+
+**Date:** ${DateFormat('dd MMM, yyyy').format(appointment.date)}
+**Time:** ${DateFormat('hh:mm a').format(appointment.date)}
+
+## Description
+${appointment.description}
+
+## Status
+${appointment.isPast ? 'Past' : 'Upcoming'}
+
+''';
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text(appointment.title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
           children: [
-            Text(
-              'Date: ${DateFormat('MMM dd, yyyy').format(appointment.date)}',
+            Icon(
+              Icons.vaccines,
+              color: Theme.of(dialogContext).colorScheme.primary,
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Time: ${DateFormat('hh:mm a').format(appointment.date)}',
-            ),
-            const SizedBox(height: 8),
-            Text('Description: ${appointment.description}'),
-            const SizedBox(height: 8),
-            Text(
-              'Status: ${appointment.isPast ? 'Past' : 'Upcoming'}',
-              style: TextStyle(
-                color: appointment.isPast ? Colors.grey : Colors.green,
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                appointment.title,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
+        ),
+        content: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: SizedBox(
+            width: double.maxFinite,
+            child: MarkdownBody(
+              data: markdownContent,
+              styleSheet: MarkdownStyleSheet(
+                h1: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                h2: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                p: const TextStyle(fontSize: 15),
+                strong: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
         ),
         actions: [
           TextButton(
