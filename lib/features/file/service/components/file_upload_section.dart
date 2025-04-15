@@ -532,50 +532,82 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
             if (showCsvButtons) ...[
               const SizedBox(width: 8),
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: state.importInProgress
-                      ? null
-                      : () => ref
-                          .read(fileServiceProvider.notifier)
-                          .handleCsvImport(
-                            context,
-                            isVaccination: isInVaccinationDirectory,
-                          ),
-                  icon: const Icon(Icons.table_chart),
-                  label: const Text('Import CSV'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.secondaryContainer,
-                    foregroundColor:
-                        Theme.of(context).colorScheme.onSecondaryContainer,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: MarkdownTooltip(
+                  message: '''
+
+                  **Import CSV**
+
+                  This button allows you to import data from a CSV file:
+
+                  - Select a CSV file from your device
+
+                  - The data will be processed and added to your health records
+                  
+                  - For vaccination/blood pressure data, ensure the CSV follows the required format
+                  
+
+                  ''',
+                  child: ElevatedButton.icon(
+                    onPressed: state.importInProgress
+                        ? null
+                        : () => ref
+                            .read(fileServiceProvider.notifier)
+                            .handleCsvImport(
+                              context,
+                              isVaccination: isInVaccinationDirectory,
+                            ),
+                    icon: const Icon(Icons.table_chart),
+                    label: const Text('Import CSV'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.secondaryContainer,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onSecondaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: state.exportInProgress
-                      ? null
-                      : () => ref
-                          .read(fileServiceProvider.notifier)
-                          .handleCsvExport(
-                            context,
-                            isVaccination: isInVaccinationDirectory,
-                          ),
-                  icon: const Icon(Icons.download),
-                  label: const Text('Export CSV'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.tertiaryContainer,
-                    foregroundColor:
-                        Theme.of(context).colorScheme.onTertiaryContainer,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                child: MarkdownTooltip(
+                  message: '''
+
+                  **Export CSV**
+
+                  This button allows you to export your health data to a CSV file:
+                  - Export your vaccination or blood pressure records
+
+                  - The data will be saved in a standard CSV format
+
+                  - You can use this file for backup or analysis
+
+                  - The export process is quick and efficient
+
+                  ''',
+                  child: ElevatedButton.icon(
+                    onPressed: state.exportInProgress
+                        ? null
+                        : () => ref
+                            .read(fileServiceProvider.notifier)
+                            .handleCsvExport(
+                              context,
+                              isVaccination: isInVaccinationDirectory,
+                            ),
+                    icon: const Icon(Icons.download),
+                    label: const Text('Export CSV'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.tertiaryContainer,
+                      foregroundColor:
+                          Theme.of(context).colorScheme.onTertiaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
