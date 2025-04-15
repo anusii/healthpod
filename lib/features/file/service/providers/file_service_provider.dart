@@ -32,6 +32,7 @@ import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:healthpod/features/profile/importer.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
@@ -45,6 +46,7 @@ import 'package:healthpod/features/vaccination/importer.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
+import 'package:healthpod/providers/profile_provider.dart';
 
 /// A provider that manages the business logic for file operations.
 ///
@@ -64,10 +66,21 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     _refreshCallback = callback;
   }
 
+  // Method to call the refresh callback
+  void refreshBrowser() {
+    _refreshCallback?.call();
+  }
+
   /// Updates the current path and notifies listeners.
 
   void updateCurrentPath(String path) {
     state = state.copyWith(currentPath: path);
+  }
+  
+  /// Updates import in progress state.
+  
+  void updateImportInProgress(bool inProgress) {
+    state = state.copyWith(importInProgress: inProgress);
   }
 
   /// Handles file upload by reading its contents and encrypting it for upload.
@@ -486,6 +499,64 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       }
     }
   }
+  
+  /// Handles the import of profile data from JSON format.
+  
+  Future<void> handleProfileImport(BuildContext context,
+      {required WidgetRef ref}) async {
+    try {
+      state = state.copyWith(importInProgress: true);
+
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        if (file.path != null) {
+          if (!context.mounted) return;
+
+          bool success = await ProfileImporter.importJson(
+            file.path!,
+            'profile',
+            context,
+            onSuccess: () {
+              if (!context.mounted) return;
+              
+              // Show success message first
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Profile data imported successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+              
+              // Use microtask to ensure UI operations complete first
+              Future.microtask(() {
+                if (!context.mounted) return;
+                // Refresh profile data after successful import
+                ref.read(profileProvider.notifier).refreshProfileData(context);
+                
+                // Refresh file browser
+                refreshBrowser();
+              });
+            },
+          );
+
+          // Success message handled in onSuccess
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showAlert(context, 'Failed to import profile data: ${e.toString()}');
+      }
+    } finally {
+      if (context.mounted) {
+        state = state.copyWith(importInProgress: false);
+      }
+    }
+  }
 }
 
 /// The provider instance for file service operations.
@@ -494,3 +565,4 @@ final fileServiceProvider =
     StateNotifierProvider<FileServiceNotifier, FileState>((ref) {
   return FileServiceNotifier();
 });
+
