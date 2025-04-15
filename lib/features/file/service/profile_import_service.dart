@@ -29,10 +29,10 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/utils/validate_profile.dart';
-import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
 
 /// Service for importing profile data from JSON files.
+
 class ProfileImportService {
   /// Imports profile data from a JSON file.
   ///
@@ -42,13 +42,15 @@ class ProfileImportService {
   /// - [onSuccess]: Callback function called after successful import
   ///
   /// Returns true if import was successful, false otherwise.
+  
   static Future<bool> importProfileFromJson({
     required BuildContext context,
     required String filePath,
     required VoidCallback onSuccess,
   }) async {
     try {
-      // Read the JSON file
+      // Read the JSON file.
+
       final fileContent = await readPod(
         filePath,
         context,
@@ -61,7 +63,8 @@ class ProfileImportService {
         return false;
       }
 
-      // Parse and validate JSON
+      // Parse and validate JSON.
+
       final Map<String, dynamic> jsonData;
       try {
         jsonData = json.decode(fileContent) as Map<String, dynamic>;
@@ -71,7 +74,8 @@ class ProfileImportService {
         return false;
       }
 
-      // Validate profile data
+      // Validate profile data.
+
       final validationResult = validateProfileJson(jsonData);
       if (!validationResult.isValid) {
         if (!context.mounted) return false;
@@ -80,16 +84,19 @@ class ProfileImportService {
         return false;
       }
 
-      // Show confirmation dialog with data preview
+      // Show confirmation dialog with data preview.
+
       if (!context.mounted) return false;
-      final shouldProceed = await _showPreviewDialog(
+      final shouldProceed = await showPreviewDialog(
           context, validationResult.data!['data'] as Map<String, dynamic>);
       if (!shouldProceed) return false;
 
-      // Save the profile data
+      // Save the profile data.
+
       if (!context.mounted) return false;
 
-      // Ensure profile data is properly typed
+      // Ensure profile data is properly typed.
+
       final Map<String, dynamic> profileData =
           Map<String, dynamic>.from(validationResult.data ?? {});
 
@@ -115,6 +122,7 @@ class ProfileImportService {
   }
 
   /// Shows an error dialog with the given message.
+  
   static void _showError(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -132,6 +140,7 @@ class ProfileImportService {
   }
 
   /// Shows a success dialog.
+  
   static void _showSuccess(BuildContext context) {
     showDialog(
       context: context,
@@ -149,6 +158,7 @@ class ProfileImportService {
   }
 
   /// Shows a validation error dialog with the given message.
+  
   static Future<void> _showValidationErrorDialog(
       BuildContext context, String message) async {
     await showDialog(
@@ -169,7 +179,8 @@ class ProfileImportService {
   }
 
   /// Shows a confirmation dialog before importing.
-  static Future<bool> _showConfirmationDialog(BuildContext context) async {
+  
+  static Future<bool> showConfirmationDialog(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -193,10 +204,12 @@ class ProfileImportService {
     return result ?? false;
   }
 
-  /// Shows a preview dialog with the profile data
-  static Future<bool> _showPreviewDialog(
+  /// Shows a preview dialog with the profile data.
+
+  static Future<bool> showPreviewDialog(
       BuildContext context, Map<String, dynamic> profileData) async {
-    // List of important fields to show in the preview
+    // List of important fields to show in the preview.
+
     final previewFields = [
       'patientName',
       'dateOfBirth',
@@ -206,7 +219,8 @@ class ProfileImportService {
       'address',
     ];
 
-    // Field display names for better readability
+    // Field display names for better readability.
+
     final fieldDisplayNames = {
       'patientName': 'Patient Name',
       'dateOfBirth': 'Date of Birth',
@@ -217,8 +231,9 @@ class ProfileImportService {
       'identifyAsIndigenous': 'Identify as Indigenous',
     };
 
-    // Build the profile preview widgets
-    List<Widget> previewItems = [];
+    // Build the profile preview widgets.
+
+    final previewItems = <Widget>[];
 
     for (final field in previewFields) {
       if (profileData.containsKey(field)) {
@@ -289,14 +304,16 @@ class ProfileImportService {
         false;
   }
 
-  /// Saves profile data using the upload utility
+  /// Saves profile data using the upload utility.
+
   static Future<bool> _saveProfileData(
     BuildContext context,
     Map<String, dynamic> profileData,
     VoidCallback onSuccess,
   ) async {
     try {
-      // Capture the actual onSuccess we want to call
+      // Capture the actual onSuccess we want to call.
+
       void handleSuccess() {
         onSuccess();
       }

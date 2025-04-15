@@ -1,10 +1,23 @@
 /// Profile data importer.
 ///
-/// Copyright (C) 2025, Software Innovation Institute, ANU.
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
 /// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
 /// Authors: Ashley Tang
 
@@ -14,13 +27,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
-import 'package:healthpod/utils/upload_json_to_pod.dart';
 
 /// Class that handles the import of profile data from JSON file.
+
 class ProfileImporter {
   /// Imports profile data from a JSON file.
   ///
@@ -39,15 +52,18 @@ class ProfileImporter {
     void Function()? onSuccess,
   }) async {
     try {
-      // Read the file
+      // Read the file.
+
       final file = File(filePath);
       final jsonString = await file.readAsString();
 
-      // Log the content being imported to debug
+      // Log the content being imported to debug.
+
       debugPrint(
           'Importing JSON profile content: ${jsonString.substring(0, min(200, jsonString.length))}...');
 
-      // Attempt to parse the JSON
+      // Attempt to parse the JSON.
+
       Map<String, dynamic> profileData;
       try {
         profileData = jsonDecode(jsonString);
@@ -63,11 +79,13 @@ class ProfileImporter {
         return false;
       }
 
-      // Validate the profile data
+      // Validate the profile data.
+
       final validationResult = _validateProfileData(profileData);
 
       if (!validationResult['isValid']) {
-        // Show validation error dialog instead of a snackbar
+        // Show validation error dialog instead of a snackbar.
+
         if (context.mounted) {
           await _showValidationErrorDialog(
               context, 'Invalid profile data: ${validationResult['message']}');
@@ -75,7 +93,8 @@ class ProfileImporter {
         return false;
       }
 
-      // Show confirmation dialog with the validated data
+      // Show confirmation dialog with the validated data.
+
       if (context.mounted) {
         final confirmImport = await _showConfirmationDialog(
           context,
@@ -87,32 +106,39 @@ class ProfileImporter {
         }
       }
 
-      // Extract the validated data
+      // Extract the validated data.
+
       final finalData = validationResult['data'] as Map<String, dynamic>;
 
-      // Add timestamp if not present
+      // Add timestamp if not present.
+
       if (!finalData.containsKey('timestamp')) {
         finalData['timestamp'] = DateTime.now().toIso8601String();
       }
 
-      // Normalize the target path to always use the 'profile' subdirectory
-      final normalizedPath = "profile"; // Just use the subdirectory name
+      // Normalise the target path to always use the 'profile' subdirectory.
+
+      final normalizedPath = 'profile'; 
 
       debugPrint('Uploading profile to path: $normalizedPath');
 
-      // Create a formatted timestamp for the filename
+      // Create a formatted timestamp for the filename.
+
       final timestamp = formatTimestampForFilename(DateTime.now());
       final filename = 'profile_$timestamp.json';
 
-      // Prepare the JSON content
+      // Prepare the JSON content.
+
       final jsonContent = json.encode(finalData);
       debugPrint(
           'Prepared JSON content for encryption: ${jsonContent.substring(0, min(100, jsonContent.length))}...');
 
-      // Upload to POD with encryption
+      // Upload to POD with encryption.
+
       if (!context.mounted) return false;
 
-      // Use the same pattern as in SurveyData and BPObservation
+      // Use the same pattern as in SurveyData and BPObservation.
+
       final fullPath = '$normalizedPath/$filename.enc.ttl';
       debugPrint('Saving encrypted profile to: $fullPath');
 
@@ -157,9 +183,11 @@ class ProfileImporter {
   /// Validates profile JSON data against expected structure.
   ///
   /// Returns a map with validation result, data, and error message if any.
+  
   static Map<String, dynamic> _validateProfileData(
       Map<String, dynamic> jsonData) {
-    // Define required profile fields
+    // Define required profile fields.
+
     final requiredFields = [
       'patientName',
       'address',
@@ -171,7 +199,8 @@ class ProfileImporter {
       'identifyAsIndigenous',
     ];
 
-    // Check direct structure
+    // Check direct structure.
+
     bool directStructureValid = _checkRequiredFields(jsonData, requiredFields);
 
     if (directStructureValid) {
@@ -185,7 +214,8 @@ class ProfileImporter {
       };
     }
 
-    // Check data nested under 'data' key
+    // Check data nested under 'data' key.
+
     if (jsonData.containsKey('data') &&
         jsonData['data'] is Map<String, dynamic>) {
       final nestedData = jsonData['data'] as Map<String, dynamic>;
@@ -198,7 +228,8 @@ class ProfileImporter {
       }
     }
 
-    // Check data nested under 'responses' key
+    // Check data nested under 'responses' key.
+
     if (jsonData.containsKey('responses') &&
         jsonData['responses'] is Map<String, dynamic>) {
       final nestedData = jsonData['responses'] as Map<String, dynamic>;
@@ -220,16 +251,19 @@ class ProfileImporter {
     };
   }
 
-  /// Helper function to check if all required fields exist in the data
+  /// Helper function to check if all required fields exist in the data.
+  
   static bool _checkRequiredFields(
       Map<String, dynamic> data, List<String> requiredFields) {
     return requiredFields.every((field) => data.containsKey(field));
   }
 
-  /// Returns the minimum of two integers (helper function)
+  /// Returns the minimum of two integers (helper function).
+  
   static int min(int a, int b) => a < b ? a : b;
 
-  /// Shows a validation error dialog
+  /// Shows a validation error dialog.
+  
   static Future<void> _showValidationErrorDialog(
     BuildContext context,
     String message,
@@ -259,7 +293,8 @@ class ProfileImporter {
     );
   }
 
-  /// Shows a confirmation dialog with profile data preview
+  /// Shows a confirmation dialog with profile data preview.
+  
   static Future<bool> _showConfirmationDialog(
     BuildContext context,
     Map<String, dynamic> data,
@@ -267,7 +302,8 @@ class ProfileImporter {
     final profileData =
         data.containsKey('data') ? data['data'] as Map<String, dynamic> : data;
 
-    // Get the key fields to display in the dialog
+    // Get the key fields to display in the dialog.
+
     final previewFields = [
       'patientName',
       'dateOfBirth',
@@ -276,7 +312,8 @@ class ProfileImporter {
       'bestContactPhone',
     ];
 
-    // Build preview items
+    // Build preview items.
+
     final previewItems = <Widget>[];
 
     for (final field in previewFields) {
@@ -348,9 +385,11 @@ class ProfileImporter {
         false;
   }
 
-  /// Format field names for display
+  /// Format field names for display.
+  
   static String _formatFieldName(String field) {
-    // Convert camelCase to Title Case with spaces
+    // Convert camelCase to Title Case with spaces. 
+    
     final result = field.replaceAllMapped(
       RegExp(r'([A-Z])'),
       (match) => ' ${match.group(0)}',
