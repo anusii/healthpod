@@ -118,7 +118,7 @@ class ProfileImporter {
 
       // Normalise the target path to always use the 'profile' subdirectory.
 
-      final normalizedPath = 'profile'; 
+      final normalizedPath = 'profile';
 
       debugPrint('Uploading profile to path: $normalizedPath');
 
@@ -183,7 +183,7 @@ class ProfileImporter {
   /// Validates profile JSON data against expected structure.
   ///
   /// Returns a map with validation result, data, and error message if any.
-  
+
   static Map<String, dynamic> _validateProfileData(
       Map<String, dynamic> jsonData) {
     // Define required profile fields.
@@ -252,18 +252,18 @@ class ProfileImporter {
   }
 
   /// Helper function to check if all required fields exist in the data.
-  
+
   static bool _checkRequiredFields(
       Map<String, dynamic> data, List<String> requiredFields) {
     return requiredFields.every((field) => data.containsKey(field));
   }
 
   /// Returns the minimum of two integers (helper function).
-  
+
   static int min(int a, int b) => a < b ? a : b;
 
   /// Shows a validation error dialog.
-  
+
   static Future<void> _showValidationErrorDialog(
     BuildContext context,
     String message,
@@ -294,7 +294,7 @@ class ProfileImporter {
   }
 
   /// Shows a confirmation dialog with profile data preview.
-  
+
   static Future<bool> _showConfirmationDialog(
     BuildContext context,
     Map<String, dynamic> data,
@@ -386,10 +386,10 @@ class ProfileImporter {
   }
 
   /// Format field names for display.
-  
+
   static String _formatFieldName(String field) {
-    // Convert camelCase to Title Case with spaces. 
-    
+    // Convert camelCase to Title Case with spaces.
+
     final result = field.replaceAllMapped(
       RegExp(r'([A-Z])'),
       (match) => ' ${match.group(0)}',

@@ -169,7 +169,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
       });
 
       // Open file picker for JSON files.
-      
+
       final result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
@@ -221,7 +221,6 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           );
 
           // No need for additional success message as it's handled in onSuccess.
-
         }
       }
     } catch (e) {
@@ -244,7 +243,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
   Future<void> convertPDFToJsonUpload(File file) async {
     try {
-      // Show loading dialog while processing.  
+      // Show loading dialog while processing.
 
       if (!mounted) return;
       showDialog(
@@ -273,7 +272,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
       final List<String> lines = text.split('\n');
 
       // Close loading dialog.
-      
+
       if (!mounted) return;
       Navigator.pop(context);
 

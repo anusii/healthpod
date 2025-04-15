@@ -160,7 +160,7 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
     }
 
     // Validate date of birth format if provided.
-      
+
     if (data['dateOfBirth'].toString().isNotEmpty) {
       try {
         DateTime.parse(data['dateOfBirth']);

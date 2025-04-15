@@ -42,7 +42,7 @@ class ProfileImportService {
   /// - [onSuccess]: Callback function called after successful import
   ///
   /// Returns true if import was successful, false otherwise.
-  
+
   static Future<bool> importProfileFromJson({
     required BuildContext context,
     required String filePath,
@@ -122,7 +122,7 @@ class ProfileImportService {
   }
 
   /// Shows an error dialog with the given message.
-  
+
   static void _showError(BuildContext context, String message) {
     showDialog(
       context: context,
@@ -140,7 +140,7 @@ class ProfileImportService {
   }
 
   /// Shows a success dialog.
-  
+
   static void _showSuccess(BuildContext context) {
     showDialog(
       context: context,
@@ -158,7 +158,7 @@ class ProfileImportService {
   }
 
   /// Shows a validation error dialog with the given message.
-  
+
   static Future<void> _showValidationErrorDialog(
       BuildContext context, String message) async {
     await showDialog(
@@ -179,7 +179,7 @@ class ProfileImportService {
   }
 
   /// Shows a confirmation dialog before importing.
-  
+
   static Future<bool> showConfirmationDialog(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
