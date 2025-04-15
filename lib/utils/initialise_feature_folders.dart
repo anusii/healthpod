@@ -57,6 +57,7 @@ Future<void> initialiseFeatureFolders({
       'blood_pressure',
       'pathology',
       'vaccination',
+      'diary',
     ];
 
     // Check current resources.
