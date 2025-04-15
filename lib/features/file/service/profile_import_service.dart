@@ -26,10 +26,11 @@ library;
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/utils/validate_profile.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
+import 'package:healthpod/utils/validate_profile.dart';
 
 /// Service for importing profile data from JSON files.
 
