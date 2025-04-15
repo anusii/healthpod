@@ -93,7 +93,7 @@ class _ProfileManagementState extends State<ProfileManagement> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Combined Profile Details Section (replaces separate Identity and Personal Details sections)
                 _buildSection(
                   title: 'Profile Details',
