@@ -26,6 +26,7 @@ library;
 import 'package:healthpod/constants/profile.dart';
 
 /// Result of profile data validation.
+
 class ProfileValidationResult {
   final bool isValid;
   final String? error;
@@ -42,9 +43,11 @@ class ProfileValidationResult {
 ///
 /// Returns a [ProfileValidationResult] indicating whether the data is valid
 /// and contains all required fields in the correct format.
+
 ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
   try {
-    // Check if the JSON has the required structure
+    // Check if the JSON has the required structure.
+
     if (!json.containsKey('data')) {
       return ProfileValidationResult(
         isValid: false,
@@ -65,7 +68,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       'identifyAsIndigenous': 'Identify as Indigenous',
     };
 
-    // Check if all required fields are present
+    // Check if all required fields are present.
+
     for (final field in defaultData.keys) {
       if (!data.containsKey(field)) {
         return ProfileValidationResult(
@@ -75,7 +79,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       }
     }
 
-    // Validate field types
+    // Validate field types.
+
     if (data['identifyAsIndigenous'] is! bool) {
       return ProfileValidationResult(
         isValid: false,
@@ -84,7 +89,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       );
     }
 
-    // Validate string fields are not null
+    // Validate string fields are not null.
+
     for (final field in [
       'patientName',
       'address',
@@ -108,7 +114,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       }
     }
 
-    // Validate patient name is not empty
+    // Validate patient name is not empty.
+
     if (data['patientName'].toString().trim().isEmpty) {
       return ProfileValidationResult(
         isValid: false,
@@ -116,7 +123,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       );
     }
 
-    // Validate email format if provided
+    // Validate email format if provided.
+
     if (data['email'].toString().isNotEmpty) {
       final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
       if (!emailRegex.hasMatch(data['email'])) {
@@ -127,7 +135,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       }
     }
 
-    // Validate phone numbers if provided
+    // Validate phone numbers if provided.
+
     if (data['bestContactPhone'].toString().isNotEmpty) {
       final phoneRegex = RegExp(r'^\+?[\d\s-]+$');
       if (!phoneRegex.hasMatch(data['bestContactPhone'])) {
@@ -150,7 +159,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       }
     }
 
-    // Validate date of birth format if provided
+    // Validate date of birth format if provided.
+      
     if (data['dateOfBirth'].toString().isNotEmpty) {
       try {
         DateTime.parse(data['dateOfBirth']);
@@ -163,7 +173,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       }
     }
 
-    // If all validations pass, return success with the data
+    // If all validations pass, return success with the data.
+
     return ProfileValidationResult(
       isValid: true,
       data: {

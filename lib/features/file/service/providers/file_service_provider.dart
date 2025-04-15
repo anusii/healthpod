@@ -66,7 +66,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     _refreshCallback = callback;
   }
 
-  // Method to call the refresh callback
+  // Method to call the refresh callback.
+
   void refreshBrowser() {
     _refreshCallback?.call();
   }
@@ -517,7 +518,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         if (file.path != null) {
           if (!context.mounted) return;
 
-          bool success = await ProfileImporter.importJson(
+          await ProfileImporter.importJson(
             file.path!,
             'profile',
             context,
@@ -532,19 +533,20 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                 ),
               );
 
-              // Use microtask to ensure UI operations complete first
+              // Use microtask to ensure UI operations complete first.
+
               Future.microtask(() {
                 if (!context.mounted) return;
-                // Refresh profile data after successful import
+                // Refresh profile data after successful import.
+
                 ref.read(profileProvider.notifier).refreshProfileData(context);
 
-                // Refresh file browser
+                // Refresh file browser.
+
                 refreshBrowser();
               });
             },
           );
-
-          // Success message handled in onSuccess
         }
       }
     } catch (e) {
