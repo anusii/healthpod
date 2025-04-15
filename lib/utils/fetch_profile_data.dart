@@ -27,7 +27,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import 'package:solidpod/solidpod.dart';
+import 'package:solidpod/solidpod.dart' show 
+    SolidFunctionCallStatus, 
+    getResourcesInContainer, 
+    getDirUrl, 
+    readPod, 
+    getKeyFromUserIfRequired;
 
 import 'package:healthpod/constants/profile.dart';
 import 'package:healthpod/utils/construct_pod_path.dart';
@@ -43,20 +48,18 @@ import 'package:healthpod/utils/construct_pod_path.dart';
 Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
   try {
     // Get the directory URL for the profile folder.
-    // Note: constructPodPath already includes basePath in its implementation.
+    final podDirPath = constructPodPath('profile', '');
+    debugPrint("Looking for profile data in: $podDirPath");
 
-    final dirUrl = await getDirUrl(constructPodPath('profile', ''));
-    debugPrint(
-        "Looking for profile data in: ${constructPodPath('profile', '')}");
-
+    final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
     debugPrint('Profile dir contents: ${resources.files}');
 
-    // Look for profile files.
-
+    // Look for profile files with .enc.ttl extension (encrypted files).
     final profileFiles = resources.files
-        .where((file) =>
-            file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
+        .where((file) => 
+            file.startsWith('profile_') && 
+            file.endsWith('.enc.ttl'))
         .toList();
 
     if (profileFiles.isEmpty) {
@@ -65,120 +68,89 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     }
 
     // Sort files by name to get the most recent one (assuming timestamp in filename).
-
     profileFiles.sort((a, b) => b.compareTo(a));
     final latestProfileFile = profileFiles.first;
     debugPrint('Found latest profile file: $latestProfileFile');
 
     // Read the file contents.
-
     if (!context.mounted) {
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
 
     // Use readPod with the full constructed path to the file.
-
+    final filePath = constructPodPath('profile', latestProfileFile);
+    debugPrint('Reading profile data from path: $filePath');
+    
+    // Prompt for security key if needed
+    await getKeyFromUserIfRequired(
+      context,
+      const Text('Please enter your security key to access your profile data'),
+    );
+    
+    if (!context.mounted) {
+      return defaultProfileData['data'] as Map<String, dynamic>;
+    }
+    
     final fileContent = await readPod(
-      constructPodPath('profile', latestProfileFile),
+      filePath,
       context,
       const Text('Reading profile data'),
     );
 
-    if (fileContent.isEmpty) {
-      debugPrint('Failed to read profile data. Using default profile data.');
+    // Check for errors or empty content
+    if (fileContent.isEmpty || 
+        fileContent == SolidFunctionCallStatus.fail.toString() ||
+        fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
+      debugPrint('Failed to read profile data: $fileContent');
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
 
-    // Print raw content for debugging.
-
-    debugPrint('Raw decrypted profile data length: ${fileContent.length}');
-
-    // Try to parse the JSON data.
-
+    // Log content details for debugging
+    debugPrint('Successfully read encrypted profile data (length: ${fileContent.length})');
+    
+    // Try to parse the JSON directly - this should work if decryption is successful
     try {
-      // First check if we have Turtle format data (starts with @prefix).
-
+      // Check if content appears to be TTL format instead of JSON
       if (fileContent.trim().startsWith('@prefix')) {
-        debugPrint('Detected Turtle format data instead of JSON');
-
-        // Extract data from Turtle using regex - looking for our profile properties.
-
-        Map<String, dynamic> extractedData = {};
-
-        // Extract common fields we care about.
-
-        extractedData['patientName'] =
-            _extractTurtleValue(fileContent, 'patientName');
-        extractedData['address'] = _extractTurtleValue(fileContent, 'address');
-        extractedData['bestContactPhone'] =
-            _extractTurtleValue(fileContent, 'bestContactPhone');
-        extractedData['alternativeContactNumber'] =
-            _extractTurtleValue(fileContent, 'alternativeContactNumber');
-        extractedData['email'] = _extractTurtleValue(fileContent, 'email');
-        extractedData['dateOfBirth'] =
-            _extractTurtleValue(fileContent, 'dateOfBirth');
-        extractedData['gender'] = _extractTurtleValue(fileContent, 'gender');
-
-        // Handle boolean field differently.
-
-        final indigenousMatch = RegExp(r'identifyAsIndigenous\s+"(true|false)"')
-            .firstMatch(fileContent);
-        if (indigenousMatch != null && indigenousMatch.group(1) != null) {
-          extractedData['identifyAsIndigenous'] =
-              indigenousMatch.group(1) == 'true';
-        } else {
-          extractedData['identifyAsIndigenous'] = false;
-        }
-
-        debugPrint('Extracted data from Turtle: $extractedData');
-        return extractedData;
+        debugPrint('File appears to be in TTL format. This indicates the file is still encrypted.');
+        debugPrint('The file may be double-encrypted or the security key is incorrect.');
+        
+        // Return default profile data since we can't decrypt the TTL format directly
+        return defaultProfileData['data'] as Map<String, dynamic>;
       }
-
+      
       final Map<String, dynamic> jsonData = jsonDecode(fileContent);
-      debugPrint('Successfully parsed profile JSON');
+      debugPrint('Successfully parsed profile JSON with keys: ${jsonData.keys.join(', ')}');
 
-      // Check for responses key (profile data might be stored under 'responses').
-
-      if (jsonData.containsKey('responses')) {
-        return jsonData['responses'] as Map<String, dynamic>;
-      } else if (jsonData.containsKey('data')) {
+      // Check for nested data structures
+      if (jsonData.containsKey('data')) {
+        debugPrint('Found data key in profile, returning data object');
+        return jsonData['data'] as Map<String, dynamic>;
+      } else if (jsonData.containsKey('timestamp') && jsonData.containsKey('data')) {
+        debugPrint('Found timestamp and data keys, returning data object');
         return jsonData['data'] as Map<String, dynamic>;
       }
 
+      // Return the whole object if it doesn't have the expected structure
       return jsonData;
     } catch (e) {
-      debugPrint('Error parsing profile data JSON: $e');
-      // Try to extract just the data part if the whole file can't be parsed.
-
-      final dataMatch =
-          RegExp(r'"data":\s*(\{[^}]+\})').firstMatch(fileContent);
-      if (dataMatch != null && dataMatch.group(1) != null) {
-        try {
-          return jsonDecode('{${dataMatch.group(1)}}') as Map<String, dynamic>;
-        } catch (e2) {
-          debugPrint('Failed to extract data segment: $e2');
-        }
+      debugPrint('Error parsing profile JSON: $e');
+      debugPrint('Content preview: ${fileContent.substring(0, min(100, fileContent.length))}...');
+      
+      // If content starts with @prefix, it's likely TTL format and the security key is incorrect
+      if (fileContent.trim().startsWith('@prefix')) {
+        debugPrint('File appears to be in TTL format. This indicates double encryption or incorrect security key.');
       }
-
-      debugPrint('Using default profile data.');
+      
+      // Return default profile data
+      debugPrint('Using default profile data due to parsing error');
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
   } catch (e) {
     debugPrint('Error fetching profile data: $e');
-    // Return default profile data in case of error.
-
     return defaultProfileData['data'] as Map<String, dynamic>;
   }
 }
 
-/// Extracts a value from Turtle format data.
-
-String _extractTurtleValue(String content, String propertyName) {
-  final regex = RegExp('$propertyName\\s+"([^"]+)"');
-  final match = regex.firstMatch(content);
-  if (match != null && match.groupCount >= 1) {
-    final value = match.group(1);
-    return value ?? '';
-  }
-  return '';
-}
+/// Returns the minimum of two integers (helper function)
+int min(int a, int b) => a < b ? a : b;

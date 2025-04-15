@@ -32,11 +32,13 @@ import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:healthpod/features/profile/importer.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:path/path.dart' as path;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
+import 'package:healthpod/providers/profile_provider.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 
 /// A widget that handles file upload functionality and preview.
@@ -154,6 +156,78 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         ],
       ),
     );
+  }
+
+  /// Handle profile JSON import
+  Future<void> handleProfileImport() async {
+    try {
+      // Show loading indicator
+      setState(() {
+        ref.read(fileServiceProvider.notifier).updateImportInProgress(true);
+      });
+
+      // Open file picker for JSON files
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        if (file.path != null) {
+          // Show preview
+          if (!mounted) return;
+          await handlePreview(file.path!);
+
+          // Import profile data
+          if (!mounted) return;
+          final success = await ProfileImporter.importJson(
+            file.path!,
+            'profile',
+            context,
+            onSuccess: () {
+              // Only refresh if still mounted
+              if (!mounted) return;
+              
+              // Show success message first before any navigation or refresh
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Profile data imported successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+              
+              // Wrap in a microtask to ensure UI operations complete first
+              Future.microtask(() {
+                if (!mounted) return;
+                // Refresh profile data after import
+                ref.read(profileProvider.notifier).refreshProfileData(context);
+                
+                // Refresh file browser
+                ref.read(fileServiceProvider.notifier).refreshBrowser();
+              });
+            },
+          );
+
+          // No need for additional success message as it's handled in onSuccess
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error importing profile: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          ref.read(fileServiceProvider.notifier).updateImportInProgress(false);
+        });
+      }
+    }
   }
 
   Future<void> convertPDFToJsonUpload(File file) async {
@@ -415,7 +489,10 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         state.currentPath?.contains('blood_pressure') ?? false;
     final isInVaccinationDirectory =
         state.currentPath?.contains('vaccination') ?? false;
+    final isInProfileDirectory =
+        state.currentPath?.contains('profile') ?? false;
     final showCsvButtons = isInBpDirectory || isInVaccinationDirectory;
+    final showProfileImportButton = isInProfileDirectory;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -527,6 +604,30 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
               ),
             ),
 
+            // Show Profile Import button in Profile directory
+            if (showProfileImportButton) ...[
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: state.importInProgress
+                      ? null
+                      : () => handleProfileImport(),
+                  icon: const Icon(Icons.person),
+                  label: const Text('Import Profile'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.secondaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onSecondaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
             // Show CSV import/export buttons in BP or Vaccination directory.
 
             if (showCsvButtons) ...[
@@ -584,7 +685,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           ],
         ),
 
-        const SizedBox(width: 8),
+        const SizedBox(height: 12),
         MarkdownTooltip(
           message: '''
 
