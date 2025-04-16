@@ -16,13 +16,19 @@ As a [user] I would like to [clear and concise description of what you
 want to happen.]
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 ## Closing Crieria
 
 Checklist for closing the issue:
 
 - [ ] All tests pass
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 ## Alternatives
 
