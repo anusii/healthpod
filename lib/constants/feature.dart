@@ -28,7 +28,8 @@ library;
 
 enum Feature {
   bloodPressure('Blood pressure'),
-  vaccination('Vaccination');
+  vaccination('Vaccination'),
+  diary('Diary');
 
   const Feature(this.displayName);
 

@@ -415,7 +415,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         state.currentPath?.contains('blood_pressure') ?? false;
     final isInVaccinationDirectory =
         state.currentPath?.contains('vaccination') ?? false;
-    final showCsvButtons = isInBpDirectory || isInVaccinationDirectory;
+    final isInDiaryDirectory = state.currentPath?.contains('diary') ?? false;
+    final showCsvButtons =
+        isInBpDirectory || isInVaccinationDirectory || isInDiaryDirectory;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -527,7 +529,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
               ),
             ),
 
-            // Show CSV import/export buttons in BP or Vaccination directory.
+            // Show CSV import/export buttons in BP, Vaccination, or Diary directory.
 
             if (showCsvButtons) ...[
               const SizedBox(width: 8),
@@ -543,7 +545,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
                   - The data will be processed and added to your health records
                   
-                  - For vaccination/blood pressure data, ensure the CSV follows the required format
+                  - For vaccination/blood pressure/diary data, ensure the CSV follows the required format
                   
 
                   ''',
@@ -555,6 +557,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                             .handleCsvImport(
                               context,
                               isVaccination: isInVaccinationDirectory,
+                              isDiary: isInDiaryDirectory,
                             ),
                     icon: const Icon(Icons.table_chart),
                     label: const Text('Import CSV'),
@@ -579,7 +582,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                   **Export CSV**
 
                   This button allows you to export your health data to a CSV file:
-                  - Export your vaccination or blood pressure records
+                  - Export your vaccination, blood pressure, or diary records
 
                   - The data will be saved in a standard CSV format
 
@@ -596,6 +599,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                             .handleCsvExport(
                               context,
                               isVaccination: isInVaccinationDirectory,
+                              isDiary: isInDiaryDirectory,
                             ),
                     icon: const Icon(Icons.download),
                     label: const Text('Export CSV'),

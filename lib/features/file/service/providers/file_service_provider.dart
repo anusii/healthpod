@@ -32,6 +32,8 @@ import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:healthpod/features/diary/exporter.dart';
+import 'package:healthpod/features/diary/importer.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 
@@ -363,10 +365,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     state = state.copyWith(showPreview: !state.showPreview);
   }
 
-  /// Handles the import of BP or Vaccination data from CSV format.
+  /// Handles the import of BP, Vaccination, or Diary data from CSV format.
 
   Future<void> handleCsvImport(BuildContext context,
-      {bool isVaccination = false}) async {
+      {bool isVaccination = false, bool isDiary = false}) async {
     try {
       state = state.copyWith(importInProgress: true);
 
@@ -381,11 +383,14 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           if (!context.mounted) return;
 
           bool success;
-          final feature =
-              isVaccination ? Feature.vaccination : Feature.bloodPressure;
-
           if (isVaccination) {
             success = await VaccinationImporter.importCsv(
+              file.path!,
+              state.currentPath ?? basePath,
+              context,
+            );
+          } else if (isDiary) {
+            success = await DiaryImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
@@ -398,21 +403,34 @@ class FileServiceNotifier extends StateNotifier<FileState> {
             );
           }
 
-          if (context.mounted && success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    '${feature.displayName} data imported and converted successfully'),
-                backgroundColor: Theme.of(context).colorScheme.tertiary,
-              ),
-            );
+          if (context.mounted) {
+            final feature = isVaccination
+                ? Feature.vaccination
+                : isDiary
+                    ? Feature.diary
+                    : Feature.bloodPressure;
+            if (success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content:
+                      Text('${feature.displayName} data imported successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+            } else {
+              showAlert(
+                  context, 'Failed to import ${feature.displayName} data');
+            }
           }
         }
       }
     } catch (e) {
       if (context.mounted) {
-        final feature =
-            isVaccination ? Feature.vaccination : Feature.bloodPressure;
+        final feature = isVaccination
+            ? Feature.vaccination
+            : isDiary
+                ? Feature.diary
+                : Feature.bloodPressure;
         showAlert(context,
             'Failed to import ${feature.displayName} data: ${e.toString()}');
       }
@@ -423,17 +441,20 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     }
   }
 
-  /// Handles the export of BP or Vaccination data to CSV format.
+  /// Handles the export of BP, Vaccination, or Diary data to CSV format.
 
   Future<void> handleCsvExport(BuildContext context,
-      {bool isVaccination = false}) async {
+      {bool isVaccination = false, bool isDiary = false}) async {
     try {
       state = state.copyWith(exportInProgress: true);
 
-      final feature =
-          isVaccination ? Feature.vaccination : Feature.bloodPressure;
+      final feature = isVaccination
+          ? Feature.vaccination
+          : isDiary
+              ? Feature.diary
+              : Feature.bloodPressure;
       final fileName =
-          isVaccination ? 'vaccination_data.csv' : 'blood_pressure_data.csv';
+          '${feature.displayName.toLowerCase().replaceAll(' ', '_')}_data.csv';
 
       final String? outputFile = await FilePicker.platform.saveFile(
         dialogTitle: 'Save ${feature.displayName} data as CSV:',
@@ -447,6 +468,12 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
         if (isVaccination) {
           success = await VaccinationExporter.exportCsv(
+            outputFile,
+            state.currentPath ?? basePath,
+            context,
+          );
+        } else if (isDiary) {
+          success = await DiaryExporter.exportCsv(
             outputFile,
             state.currentPath ?? basePath,
             context,
@@ -475,8 +502,11 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       }
     } catch (e) {
       if (context.mounted) {
-        final feature =
-            isVaccination ? Feature.vaccination : Feature.bloodPressure;
+        final feature = isVaccination
+            ? Feature.vaccination
+            : isDiary
+                ? Feature.diary
+                : Feature.bloodPressure;
         showAlert(context,
             'Failed to export ${feature.displayName} data: ${e.toString()}');
       }
