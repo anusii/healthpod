@@ -36,14 +36,17 @@ class DiaryExporter extends HealthDataExporterBase {
       ];
 
   @override
-  Map<String, dynamic> processRecord(Map<String, dynamic> record) {
-    final date = DateTime.tryParse(record['date']?.toString() ?? '');
+  Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
+    // Extract the actual appointment data from the responses field
+    final responses = jsonData['responses'] as Map<String, dynamic>? ?? {};
+
+    final date = DateTime.tryParse(responses['date']?.toString() ?? '');
     final isPast = date?.isBefore(DateTime.now()) ?? false;
 
     return {
       'date': date?.toIso8601String() ?? '',
-      'title': record['title']?.toString() ?? '',
-      'description': record['description']?.toString() ?? '',
+      'title': responses['title']?.toString() ?? '',
+      'description': responses['description']?.toString() ?? '',
       'isPast': isPast,
     };
   }
