@@ -46,18 +46,9 @@ Where has the issue been observed:
 [Add any other context about the problem here.]
 
 Flutter Version:
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
 
 ## Closing Crieria
 
 Checklist for closing the issue:
 
 - [ ] All tests pass
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
