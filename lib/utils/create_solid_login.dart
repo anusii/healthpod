@@ -201,38 +201,76 @@ Widget createSolidLogin(BuildContext context) {
 
         if (email.isNotEmpty && password.isNotEmpty) {
           debugPrint('✨ Attempting auto-login with saved credentials');
+
+          // Create two futures - one for auto-login and one for minimum display time.
+
+          final autoLoginFuture =
+              _performAutoLogin(serverUrl, email, password, context);
+          final minimumSplashDuration =
+              Future.delayed(const Duration(seconds: 3), () => true);
+
           return FutureBuilder(
-            future: _performAutoLogin(serverUrl, email, password, context),
-            builder: (context, snapshot) {
+            // Wait for both futures to complete.
+
+            future: Future.wait([autoLoginFuture, minimumSplashDuration]),
+            builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+              // Always show the splash screen while waiting.
+
               if (snapshot.connectionState == ConnectionState.waiting) {
-                debugPrint('⏳ Auto-login in progress...');
-                return const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('Logging in with saved credentials...'),
-                    ],
+                debugPrint(
+                    '⏳ Auto-login or minimum display time in progress...');
+                // Show an elegant splash screen with app logo and subtle loading indicator.
+
+                return Container(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // App logo with larger size.
+
+                        Image(
+                          image: const AssetImage(
+                              'assets/images/healthpod_icon.png'),
+                          width: 120,
+                          height: 120,
+                        ),
+                        const SizedBox(height: 24),
+                        // Subtle loading indicator.
+
+                        SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Theme.of(context)
+                                  .primaryColor
+                                  .withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }
 
-              if (snapshot.hasError) {
-                debugPrint('❌ Auto-login failed: ${snapshot.error}');
-                // Fall back to normal login screen.
+              // Once both futures complete, check login result (first element in list).
 
-                return _buildNormalLogin(serverUrl);
-              }
-
-              if (snapshot.hasData && snapshot.data == true) {
+              if (snapshot.hasData && snapshot.data![0] == true) {
                 debugPrint('✅ Auto-login successful!');
                 return const HealthPodHome();
               }
 
-              // If auto-login failed, show normal login screen.
+              // For all other cases (error or failed login), show normal login screen
 
-              debugPrint('⚠️ Auto-login failed, showing login screen');
+              if (snapshot.hasError) {
+                debugPrint('❌ Auto-login failed: ${snapshot.error}');
+              } else {
+                debugPrint('⚠️ Auto-login failed, showing login screen');
+              }
+
               return _buildNormalLogin(serverUrl);
             },
           );
@@ -254,6 +292,29 @@ Future<bool> _performAutoLogin(
   BuildContext context,
 ) async {
   try {
+    // Add timeout to prevent hanging if login process takes too long.
+
+    return await Future.any([
+      _attemptLogin(serverUrl, username, password, context),
+      // Timeout after 5 seconds to prevent long waits.
+
+      Future.delayed(const Duration(seconds: 5), () => false),
+    ]);
+  } catch (e) {
+    debugPrint('❌ Auto-login error: $e');
+    return false;
+  }
+}
+
+/// Actual login attempt implementation.
+
+Future<bool> _attemptLogin(
+  String serverUrl,
+  String username,
+  String password,
+  BuildContext context,
+) async {
+  try {
     final loginService = ChromeLoginService.instance;
     await loginService.initialize();
 
@@ -264,9 +325,6 @@ Future<bool> _performAutoLogin(
         return result != null;
       }
     }
-    return false;
-  } catch (e) {
-    debugPrint('❌ Auto-login error: $e');
     return false;
   } finally {
     await ChromeLoginService.instance.dispose();
