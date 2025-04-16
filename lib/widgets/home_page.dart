@@ -75,18 +75,16 @@ class _HomePageState extends State<HomePage> {
             children: [
               _buildHeader(context),
               const SizedBox(height: 16),
-              const AvatarName(),
-              const SizedBox(height: 16),
-              const NextAppointment(),
-              const SizedBox(height: 16),
-              const ManagePlan(),
-              const SizedBox(height: 16),
-              PersonalDetails(
+              ProfileDetails(
                 key: _personalDetailsKey,
                 showEditButton: true,
                 onEditPressed: () {},
                 onDataChanged: _refreshPersonalDetails,
               ),
+              const SizedBox(height: 16),
+              const NextAppointment(),
+              const SizedBox(height: 16),
+              const ManagePlan(),
               const SizedBox(height: 16),
               const NumberAppointments(),
             ],
@@ -98,13 +96,11 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildGridItem(int index) {
     final List<Widget> gridItems = [
-      Column(
+      const Column(
         mainAxisSize: MainAxisSize.min,
-        children: const [
-          AvatarName(),
-          SizedBox(height: 10),
+        children: [
           NumberAppointments(),
-          SizedBox(height: 10),
+          SizedBox(height: 16),
           ManagePlan(),
         ],
       ),
@@ -112,25 +108,17 @@ class _HomePageState extends State<HomePage> {
         mainAxisSize: MainAxisSize.min,
         children: [NextAppointment()],
       ),
-      SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PersonalDetails(
-              key: _personalDetailsKey,
-              showEditButton: true,
-              onEditPressed: () {},
-              onDataChanged: _refreshPersonalDetails,
-            ),
-          ],
-        ),
+      ProfileDetails(
+        key: _personalDetailsKey,
+        showEditButton: true,
+        onEditPressed: () {},
+        onDataChanged: _refreshPersonalDetails,
       ),
     ];
 
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 400, minHeight: 220),
-      child: gridItems[index],
-    );
+    // Return the widget directly without any constraints to preserve natural sizing.
+
+    return gridItems[index];
   }
 
   Widget _buildDesktopLayout(BuildContext context, double maxWidth) {
@@ -140,19 +128,60 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             _buildHeader(context),
-            const SizedBox(height: 16),
-            GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: maxWidth < 1200 ? 2 : 3,
-                mainAxisSpacing: 24,
-                crossAxisSpacing: 24,
-                mainAxisExtent: 370,
+            const SizedBox(height: 24),
+            // Replace GridView with a more flexible layout that respects natural heights.
+
+            if (maxWidth < 1200)
+              // Two column layout.
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // First column.
+
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _buildGridItem(0),
+                        const SizedBox(height: 24),
+                        _buildGridItem(1),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  // Second column - Profile Details.
+
+                  Expanded(
+                    child: _buildGridItem(2),
+                  ),
+                ],
+              )
+            else
+              // Three column layout.
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // First column.
+
+                  Expanded(
+                    child: _buildGridItem(0),
+                  ),
+                  const SizedBox(width: 24),
+                  // Second column.
+
+                  Expanded(
+                    child: _buildGridItem(1),
+                  ),
+                  const SizedBox(width: 24),
+                  // Third column - Profile Details.
+
+                  Expanded(
+                    child: _buildGridItem(2),
+                  ),
+                ],
               ),
-              itemCount: 3,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) => _buildGridItem(index),
-            ),
           ],
         ),
       ),

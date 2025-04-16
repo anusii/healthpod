@@ -27,8 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/features/home/service/components/avatar_name.dart';
-import 'package:healthpod/features/home/service/components/personal_details.dart';
+import 'package:healthpod/features/home/service/components/profile_details.dart';
 
 /// A profile management widget that displays and allows editing of user identity and personal details.
 
@@ -94,18 +93,12 @@ class _ProfileManagementState extends State<ProfileManagement> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                // Identity Section.
+
+                // Combined Profile Details Section (replaces separate Identity and Personal Details sections).
 
                 _buildSection(
-                  title: 'Identity',
-                  child: AvatarName(isEditing: _isEditing),
-                ),
-                const SizedBox(height: 24),
-                // Personal Details Section.
-
-                _buildSection(
-                  title: 'Personal Details',
-                  child: PersonalDetails(
+                  title: 'Profile Details',
+                  child: ProfileDetails(
                     isEditing: _isEditing,
                     onDataChanged: _handleProfileDataChanged,
                     onEditPressed: () {},
@@ -119,39 +112,20 @@ class _ProfileManagementState extends State<ProfileManagement> {
     );
   }
 
-  Widget _buildSection({
-    required String title,
-    required Widget child,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+  Widget _buildSection({required String title, required Widget child}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 16),
-          child,
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        child,
+      ],
     );
   }
 }
