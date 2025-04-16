@@ -15,15 +15,12 @@ assignees: ''
 As a [user] I would like to [clear and concise description of what you
 want to happen.]
 
-<<<<<<< Updated upstream
-=======
 ## Closing Crieria
 
 Checklist for closing the issue:
 
 - [ ] All tests pass
 
->>>>>>> Stashed changes
 ## Alternatives
 
 [A clear and concise description of any alternative solutions or
