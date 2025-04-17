@@ -33,6 +33,7 @@ import 'package:version_widget/version_widget.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/charts/tab.dart';
+import 'package:healthpod/features/diary/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
 import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
@@ -71,14 +72,14 @@ final List<Map<String, dynamic>> homeTabs = [
     'title': 'Diary',
     'icon': Icons.calendar_today,
     'color': null,
-    'message': '''
+    'content': const DiaryTab(),
+    'tooltip': '''
 
     **Diary:** Tap here to access and manage your appointments. You can enter
     historic information, update the calendar when you recieve a new
     appointment, and load appointments from other sources into your calendar.
 
     ''',
-    'dialogTitle': 'Coming Soon - Appointment',
   },
   {
     'title': 'Update',
@@ -145,7 +146,9 @@ final List<Map<String, dynamic>> homeTabs = [
     resources including:
 
     - Health information and guides
+
     - External trusted resources
+    
     - Useful health calculators and tools
 
     ''',
@@ -163,6 +166,9 @@ class HealthPodHomeState extends State<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
   int _selectedIndex = 0;
+  // Key to force rebuilds when profile is updated.
+
+  final GlobalKey<State> _homePageKey = GlobalKey<State>();
 
   @override
   void initState() {
@@ -222,17 +228,27 @@ class HealthPodHomeState extends State<HealthPodHome> {
     });
   }
 
+  void _handleTabChange(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    final tab = homeTabs[index];
+
+    if (tab.containsKey('message')) {
+      alert(context, tab['message'], tab['dialogTitle']);
+    } else if (tab.containsKey('action')) {
+      tab['action'](context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _selectedIndex == 0
-              ? homeTabs[_selectedIndex]['title']
-              : homeTabs[_selectedIndex]['title'],
-        ),
+        title: Text(homeTabs[_selectedIndex]['title']),
         backgroundColor: theme.colorScheme.surface,
         automaticallyImplyLeading: false,
         actions: [
@@ -331,20 +347,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
                         child: NavigationRail(
                           backgroundColor: theme.colorScheme.surface,
                           selectedIndex: _selectedIndex,
-                          onDestinationSelected: (int index) async {
-                            setState(() {
-                              _selectedIndex = index;
-                            });
-
-                            final tab = homeTabs[index];
-
-                            if (tab.containsKey('message')) {
-                              alert(
-                                  context, tab['message'], tab['dialogTitle']);
-                            } else if (tab.containsKey('action')) {
-                              await tab['action'](context);
-                            }
-                          },
+                          onDestinationSelected: _handleTabChange,
                           labelType: NavigationRailLabelType.all,
                           destinations: homeTabs.map((tab) {
                             final tooltipMessage =
@@ -379,8 +382,11 @@ class HealthPodHomeState extends State<HealthPodHome> {
                 ),
                 VerticalDivider(color: theme.dividerColor),
                 Expanded(
-                  child:
-                      homeTabs[_selectedIndex]['content'] ?? const HomePage(),
+                  child: homeTabs[_selectedIndex]['content'] ??
+                      HomePage(
+                        key: _homePageKey,
+                        onNavigateToProfile: () {},
+                      ),
                 ),
               ],
             ),

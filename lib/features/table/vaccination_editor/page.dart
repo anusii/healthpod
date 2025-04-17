@@ -27,6 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_markdown/flutter_markdown.dart';
+
 import 'package:healthpod/features/table/vaccination_editor/service.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
 
@@ -169,25 +171,27 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                   color: Colors.blue,
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  '''
-
-                  No data saved yet. The **Update** tab can be used to enter a
-                  vaccination record. Or the **Files** tab can be used to import
-                  a spreadsheet of your vaccinations.
-
-                  ''',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                MarkdownBody(
+                  data:
+                      'Please go to Update page to submit your first vaccination record.',
+                  styleSheet: MarkdownStyleSheet(
+                    p: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'Error details: $error',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+                MarkdownBody(
+                  data: '**Error details:** $error',
+                  styleSheet: MarkdownStyleSheet(
+                    p: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                    strong: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],

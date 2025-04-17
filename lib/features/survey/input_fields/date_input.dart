@@ -25,15 +25,12 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:intl/intl.dart';
+
 import 'package:healthpod/features/survey/form_state.dart';
 import 'package:healthpod/features/survey/question.dart';
 
-/// A widget for date input in a health survey form.
-///
-/// This widget provides a date picker for users to select dates.
-/// The selected date is stored in the survey form state.
-
-class HealthSurveyDateInput extends StatelessWidget {
+class HealthSurveyDateInput extends StatefulWidget {
   /// The survey question associated with this date input field.
 
   final HealthSurveyQuestion question;
@@ -55,6 +52,11 @@ class HealthSurveyDateInput extends StatelessWidget {
     required this.controller,
   });
 
+  @override
+  State<HealthSurveyDateInput> createState() => _HealthSurveyDateInputState();
+}
+
+class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
   /// Shows a date picker dialog and updates the form state with the selected date.
 
   Future<void> _selectDate(BuildContext context) async {
@@ -65,22 +67,90 @@ class HealthSurveyDateInput extends StatelessWidget {
       lastDate: DateTime.now(),
     );
     if (picked != null) {
-      controller.updateResponse(
-        question.fieldName,
-        '${picked.year}-${picked.month}-${picked.day}',
+      // Format the date with leading zeros for month and day.
+
+      final formattedDate =
+          '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+      widget.controller.updateResponse(
+        widget.question.fieldName,
+        formattedDate,
       );
+      // Force rebuild after date selection.
+
+      setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(question.question),
-      subtitle: Text(
-        controller.responses[question.fieldName]?.toString() ?? 'Select a date',
-      ),
-      trailing: const Icon(Icons.calendar_today),
-      onTap: () => _selectDate(context),
+    final selectedDate =
+        widget.controller.responses[widget.question.fieldName]?.toString();
+    String formattedDate = 'Not Selected';
+
+    if (selectedDate != null) {
+      try {
+        final dateParts = selectedDate.split('-');
+        if (dateParts.length == 3) {
+          final date = DateTime(
+            int.parse(dateParts[0]),
+            int.parse(dateParts[1]),
+            int.parse(dateParts[2]),
+          );
+          formattedDate = DateFormat('dd MMMM yyyy').format(date);
+          formattedDate = 'Selected: $formattedDate';
+        }
+      } catch (e) {
+        debugPrint('Error formatting date: $e');
+        formattedDate = selectedDate;
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ListTile(
+                title: Text(widget.question.question),
+                trailing: Icon(
+                  selectedDate != null
+                      ? Icons.calendar_today
+                      : Icons.calendar_today_outlined,
+                  color: selectedDate != null
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                onTap: () => _selectDate(context),
+              ),
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check_circle_outline,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      ' $formattedDate',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

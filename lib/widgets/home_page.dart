@@ -29,8 +29,32 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/features/home/service/components/components.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomePage extends StatefulWidget {
+  final VoidCallback onNavigateToProfile;
+
+  const HomePage({
+    super.key,
+    required this.onNavigateToProfile,
+  });
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // Key to force rebuild of the PersonalDetails widget.
+
+  final GlobalKey _personalDetailsKey = GlobalKey();
+
+  // Force rebuild of the PersonalDetails widget.
+
+  void _refreshPersonalDetails() {
+    setState(() {
+      // Updating the key will force a rebuild.
+
+      _personalDetailsKey.currentState?.setState(() {});
+    });
+  }
 
   Widget _buildHeader(BuildContext context) {
     return Text(
@@ -57,7 +81,12 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 16),
               const ManagePlan(),
               const SizedBox(height: 16),
-              const PersonalDetails(),
+              PersonalDetails(
+                key: _personalDetailsKey,
+                showEditButton: true,
+                onEditPressed: () {},
+                onDataChanged: _refreshPersonalDetails,
+              ),
               const SizedBox(height: 16),
               const NumberAppointments(),
             ],
@@ -83,9 +112,18 @@ class HomePage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [NextAppointment()],
       ),
-      const Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [PersonalDetails()],
+      SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PersonalDetails(
+              key: _personalDetailsKey,
+              showEditButton: true,
+              onEditPressed: () {},
+              onDataChanged: _refreshPersonalDetails,
+            ),
+          ],
+        ),
       ),
     ];
 

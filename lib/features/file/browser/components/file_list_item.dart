@@ -177,10 +177,9 @@ class FileListItem extends StatelessWidget {
                           // Retrieve the PDF file content as a base64-encoded string.
 
                           final String fileContent = await readPod(
-                                  '$currentPath/${file.name}',
-                                  context,
-                                  Container()) ??
-                              '';
+                              '$currentPath/${file.name}',
+                              context,
+                              Container());
 
                           // Decode the base64 string into raw PDF bytes.
 
@@ -193,7 +192,7 @@ class FileListItem extends StatelessWidget {
                           showDialog(
                             context: context,
                             builder: (dialogContext) => AlertDialog(
-                              title: const Text("File Preview"),
+                              title: const Text('File Preview'),
                               content: SizedBox(
                                 width: double.maxFinite,
                                 height: 500,
@@ -209,7 +208,7 @@ class FileListItem extends StatelessWidget {
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(dialogContext),
-                                  child: const Text("Close"),
+                                  child: const Text('Close'),
                                 ),
                               ],
                             ),

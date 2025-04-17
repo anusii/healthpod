@@ -266,11 +266,11 @@ class Footer extends StatelessWidget {
     final theme = Theme.of(context);
     final serverUrl = webId?.split('profile')[0] ?? 'Not connected';
 
-    final loginStatus = webId == null ? "Not Logged In" : "Logged In";
+    final loginStatus = webId == null ? 'Not Logged In' : 'Logged In';
     final loginStatusColor =
         webId == null ? theme.colorScheme.error : theme.colorScheme.tertiary;
     final securityKeyStatus =
-        isKeySaved ? "Security Key: Saved" : "Security Key: Not Saved";
+        isKeySaved ? 'Security Key: Saved' : 'Security Key: Not Saved';
 
     return LayoutBuilder(
       builder: (context, constraints) {
