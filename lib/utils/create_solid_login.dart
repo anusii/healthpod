@@ -250,6 +250,17 @@ Widget createSolidLogin(BuildContext context) {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Attempting auto-login',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Theme.of(context).primaryColor,
+                            letterSpacing: 0.5,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
                       ],
                     ),
                   ),
