@@ -207,7 +207,7 @@ Widget createSolidLogin(BuildContext context) {
           final autoLoginFuture =
               _performAutoLogin(serverUrl, email, password, context);
           final minimumSplashDuration =
-              Future.delayed(const Duration(seconds: 3), () => true);
+              Future.delayed(const Duration(seconds: 1), () => true);
 
           return FutureBuilder(
             // Wait for both futures to complete.
