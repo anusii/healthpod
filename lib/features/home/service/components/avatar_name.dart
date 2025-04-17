@@ -66,7 +66,7 @@ class _AvatarNameState extends State<AvatarName> {
 
     try {
       final profileData = await fetchProfileData(context);
-      final name = profileData['patientName'] as String? ?? '';
+      final name = profileData['name'] as String? ?? '';
 
       setState(() {
         _patientName = name.isNotEmpty ? name : '';

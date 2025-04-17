@@ -1,0 +1,12 @@
+{
+    "timestamp": "2025-04-17T00:24:25Z",
+    "data": {
+	"patientName": "Sam Song",
+	"address": "14 Example Street, Actor, ACT",
+	"bestContactPhone": "0412 456 789",
+	"alternativeContactNumber": "(02) 1234 5678",
+	"email": "sam.song@togaware.com",
+	"dateOfBirth": "1990-07-24",
+	"gender": "Female"
+    }
+}
