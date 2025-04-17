@@ -189,21 +189,19 @@ class ProfileImporter {
     // Define required profile fields.
 
     final requiredFields = [
-      'patientName',
+      'name',
       'address',
       'bestContactPhone',
       'alternativeContactNumber',
       'email',
       'dateOfBirth',
       'gender',
-      'identifyAsIndigenous',
     ];
 
     // Check direct structure.
 
-    bool directStructureValid = _checkRequiredFields(jsonData, requiredFields);
-
-    if (directStructureValid) {
+    final directMissingFields = _checkRequiredFields(jsonData, requiredFields);
+    if (directMissingFields.isEmpty) {
       return {
         'isValid': true,
         'data': {
@@ -219,7 +217,9 @@ class ProfileImporter {
     if (jsonData.containsKey('data') &&
         jsonData['data'] is Map<String, dynamic>) {
       final nestedData = jsonData['data'] as Map<String, dynamic>;
-      if (_checkRequiredFields(nestedData, requiredFields)) {
+      final dataMissingFields =
+          _checkRequiredFields(nestedData, requiredFields);
+      if (dataMissingFields.isEmpty) {
         return {
           'isValid': true,
           'data': jsonData,
@@ -233,7 +233,9 @@ class ProfileImporter {
     if (jsonData.containsKey('responses') &&
         jsonData['responses'] is Map<String, dynamic>) {
       final nestedData = jsonData['responses'] as Map<String, dynamic>;
-      if (_checkRequiredFields(nestedData, requiredFields)) {
+      final responsesMissingFields =
+          _checkRequiredFields(nestedData, requiredFields);
+      if (responsesMissingFields.isEmpty) {
         return {
           'isValid': true,
           'data': {
@@ -245,17 +247,57 @@ class ProfileImporter {
       }
     }
 
+    // Determine which missing fields to report.
+
+    List<String> missingFieldsList = directMissingFields;
+
+    // Try to get the most specific error (fewest missing fields).
+
+    if (jsonData.containsKey('data') &&
+        jsonData['data'] is Map<String, dynamic>) {
+      final dataMissingFields = _checkRequiredFields(
+          jsonData['data'] as Map<String, dynamic>, requiredFields);
+      if (dataMissingFields.length < missingFieldsList.length) {
+        missingFieldsList = dataMissingFields;
+      }
+    }
+
+    if (jsonData.containsKey('responses') &&
+        jsonData['responses'] is Map<String, dynamic>) {
+      final responsesMissingFields = _checkRequiredFields(
+          jsonData['responses'] as Map<String, dynamic>, requiredFields);
+      if (responsesMissingFields.length < missingFieldsList.length) {
+        missingFieldsList = responsesMissingFields;
+      }
+    }
+
+    // Format missing fields for display.
+
+    final formattedMissingFields =
+        missingFieldsList.map(_formatFieldName).join(', ');
+
     return {
       'isValid': false,
-      'message': 'Invalid profile data structure - missing required fields'
+      'message':
+          'Invalid profile data structure - missing required fields: $formattedMissingFields'
     };
   }
 
-  /// Helper function to check if all required fields exist in the data.
+  /// Helper function to check required fields and return list of missing fields.
+  ///
+  /// Returns a list of missing field names. Empty list means all required fields are present.
 
-  static bool _checkRequiredFields(
+  static List<String> _checkRequiredFields(
       Map<String, dynamic> data, List<String> requiredFields) {
-    return requiredFields.every((field) => data.containsKey(field));
+    final missingFields = <String>[];
+
+    for (final field in requiredFields) {
+      if (!data.containsKey(field)) {
+        missingFields.add(field);
+      }
+    }
+
+    return missingFields;
   }
 
   /// Returns the minimum of two integers (helper function).
@@ -305,7 +347,7 @@ class ProfileImporter {
     // Get the key fields to display in the dialog.
 
     final previewFields = [
-      'patientName',
+      'name',
       'dateOfBirth',
       'gender',
       'email',

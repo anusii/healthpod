@@ -124,7 +124,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       setState(() {
         // Populate controllers with profile data or defaults.
 
-        _nameController.text = profileData['patientName'] ?? userName;
+        _nameController.text = profileData['name'] ?? userName;
         _addressController.text = profileData['address'] ?? '';
         _bestContactPhoneController.text =
             profileData['bestContactPhone'] ?? '';
@@ -178,7 +178,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       // Prepare data for saving.
 
       final updatedData = {
-        'patientName': _nameController.text.trim(),
+        'name': _nameController.text.trim(),
         'address': _addressController.text.trim(),
         'bestContactPhone': _bestContactPhoneController.text.trim(),
         'alternativeContactNumber':
@@ -276,7 +276,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   /// Check if any profile data has been changed compared to stored data.
 
   bool _hasDataChanged() {
-    return _nameController.text.trim() != (_profileData['patientName'] ?? '') ||
+    return _nameController.text.trim() != (_profileData['name'] ?? '') ||
         _addressController.text.trim() != (_profileData['address'] ?? '') ||
         _bestContactPhoneController.text.trim() !=
             (_profileData['bestContactPhone'] ?? '') ||

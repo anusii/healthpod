@@ -58,7 +58,7 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
     final data = json['data'] as Map<String, dynamic>;
     final defaultData = defaultProfileData['data'] as Map<String, dynamic>;
     final fieldDisplayNames = {
-      'patientName': 'Patient Name',
+      'name': 'Patient Name',
       'address': 'Address',
       'bestContactPhone': 'Best Contact Phone',
       'alternativeContactNumber': 'Alternative Contact Number',
@@ -81,7 +81,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
 
     // Validate field types.
 
-    if (data['identifyAsIndigenous'] is! bool) {
+    if (data.containsKey('identifyAsIndigenous') &&
+        data['identifyAsIndigenous'] is! bool) {
       return ProfileValidationResult(
         isValid: false,
         error:
@@ -92,7 +93,7 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
     // Validate string fields are not null.
 
     for (final field in [
-      'patientName',
+      'name',
       'address',
       'bestContactPhone',
       'alternativeContactNumber',
@@ -116,10 +117,10 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
 
     // Validate patient name is not empty.
 
-    if (data['patientName'].toString().trim().isEmpty) {
+    if (data['name'].toString().trim().isEmpty) {
       return ProfileValidationResult(
         isValid: false,
-        error: '"${fieldDisplayNames['patientName']}" cannot be empty',
+        error: '"${fieldDisplayNames['name']}" cannot be empty',
       );
     }
 

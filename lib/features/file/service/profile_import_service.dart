@@ -212,7 +212,7 @@ class ProfileImportService {
     // List of important fields to show in the preview.
 
     final previewFields = [
-      'patientName',
+      'name',
       'dateOfBirth',
       'gender',
       'email',
@@ -223,7 +223,7 @@ class ProfileImportService {
     // Field display names for better readability.
 
     final fieldDisplayNames = {
-      'patientName': 'Patient Name',
+      'name': 'Patient Name',
       'dateOfBirth': 'Date of Birth',
       'gender': 'Gender',
       'email': 'Email',

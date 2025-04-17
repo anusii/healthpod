@@ -131,7 +131,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
     try {
       final updatedData = {
-        'patientName': _profileData['patientName'] ?? '',
+        'name': _profileData['name'] ?? '',
         'address': _addressController.text.trim(),
         'bestContactPhone': _bestContactPhoneController.text.trim(),
         'alternativeContactNumber':
