@@ -28,7 +28,7 @@ library;
 final Map<String, dynamic> defaultProfileData = {
   'timestamp': DateTime.now().toIso8601String(),
   'data': {
-    'patientName': '',
+    'name': '',
     'address': '',
     'bestContactPhone': '',
     'alternativeContactNumber': '',
