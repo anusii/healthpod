@@ -83,6 +83,8 @@ class DiaryService {
             const Text('Loading appointment'),
           );
 
+          debugPrint('content: $content');
+
           // Check if the file was successfully read.
 
           if (content != SolidFunctionCallStatus.fail.toString() &&
@@ -91,14 +93,18 @@ class DiaryService {
               // Parse the appointment data from the file.
 
               final data = jsonDecode(content.toString());
+              debugPrint('data: $data');
               final appointmentData = data['responses'] ?? data;
+              debugPrint('appointmentData: $appointmentData');
               appointments.add(Appointment(
-                date: DateTime.parse(appointmentData['date']),
+                date: DateTime.parse(data['date']),
                 title: appointmentData['title'],
                 description: appointmentData['description'],
                 isPast: DateTime.parse(appointmentData['date'])
                     .isBefore(DateTime.now()),
               ));
+
+              debugPrint('appointments111: $appointments');
             } catch (e) {
               debugPrint('Error parsing appointment file $file: $e');
             }

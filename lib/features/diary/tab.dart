@@ -64,6 +64,7 @@ class _DiaryTabState extends State<DiaryTab> {
   Future<void> _loadAppointments() async {
     if (!mounted) return;
     final appointments = await DiaryService.loadAppointments(context);
+    debugPrint('appointments: $appointments');
     if (!mounted) return;
     setState(() {
       _appointments.clear();

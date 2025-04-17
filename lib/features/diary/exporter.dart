@@ -37,16 +37,32 @@ class DiaryExporter extends HealthDataExporterBase {
 
   @override
   Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
-    // Extract the actual appointment data from the responses field
-    final responses = jsonData['responses'] as Map<String, dynamic>? ?? {};
+    // Get the appointment data, either from responses or directly
+    final appointmentData = jsonData['responses'] ?? jsonData;
 
-    final date = DateTime.tryParse(responses['date']?.toString() ?? '');
-    final isPast = date?.isBefore(DateTime.now()) ?? false;
+    // Safely extract values with null checks
+    final dateStr = jsonData['date']
+        ?.toString(); // Get date from root level like service.dart
+    final title = appointmentData['title']?.toString() ?? '';
+    final description = appointmentData['description']?.toString() ?? '';
+
+    // Parse date and calculate isPast
+    DateTime? date;
+    bool isPast = false;
+
+    if (dateStr != null) {
+      try {
+        date = DateTime.parse(dateStr);
+        isPast = date.isBefore(DateTime.now());
+      } catch (e) {
+        debugPrint('Error parsing date: $e');
+      }
+    }
 
     return {
       'date': date?.toIso8601String() ?? '',
-      'title': responses['title']?.toString() ?? '',
-      'description': responses['description']?.toString() ?? '',
+      'title': title,
+      'description': description,
       'isPast': isPast,
     };
   }
