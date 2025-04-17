@@ -1,6 +1,6 @@
 /// Create Solid Login Widget.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-04-17 10:52:11 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -207,7 +207,7 @@ Widget createSolidLogin(BuildContext context) {
           final autoLoginFuture =
               _performAutoLogin(serverUrl, email, password, context);
           final minimumSplashDuration =
-              Future.delayed(const Duration(seconds: 3), () => true);
+              Future.delayed(const Duration(seconds: 1), () => true);
 
           return FutureBuilder(
             // Wait for both futures to complete.
