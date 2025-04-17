@@ -1,6 +1,6 @@
 /// File upload section component for the file service feature.
 ///
-// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-04-17 10:02:42 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -130,9 +130,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 IconButton(
                   icon: MarkdownTooltip(
                     message: '''
-                    
+
                     **Close Preview:** Tap here to close the file preview panel.
-                    
+
                     ''',
                     child: const Icon(Icons.close, size: 20),
                   ),
@@ -578,7 +578,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 message: '''
 
                 **Upload**: Tap here to upload a file to your Solid Health Pod.
-                    
+
                 ''',
                 child: ElevatedButton.icon(
                   onPressed: state.uploadInProgress
@@ -652,16 +652,14 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 child: MarkdownTooltip(
                   message: '''
 
-                  **Import CSV**
+                  **Import CSV:** Tap here to import data from a CSV file:
 
-                  This button allows you to import data from a CSV file:
+                  - Select a CSV file from your device;
 
-                  - Select a CSV file from your device
+                  - The data will be processed and added to your health records;
 
-                  - The data will be processed and added to your health records
-                  
-                  - For vaccination/blood pressure data, ensure the CSV follows the required format
-                  
+                  - Please ensure the CSV follows the required format.
+
 
                   ''',
                   child: ElevatedButton.icon(
@@ -693,9 +691,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 child: MarkdownTooltip(
                   message: '''
 
-                  **Export CSV**
+                  **Export CSV:** Tap here to export your health data to a CSV
+                  file:
 
-                  This button allows you to export your health data to a CSV file:
                   - Export your vaccination or blood pressure records
 
                   - The data will be saved in a standard CSV format
