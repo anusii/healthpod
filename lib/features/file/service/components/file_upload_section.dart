@@ -642,6 +642,30 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                   ),
                 ),
               ),
+              const SizedBox(width: 8),
+              // Export Profile button.
+
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: state.exportInProgress
+                      ? null
+                      : () => ref
+                          .read(fileServiceProvider.notifier)
+                          .handleProfileExport(context),
+                  icon: const Icon(Icons.download),
+                  label: const Text('Export Profile'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.tertiaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onTertiaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
             ],
 
             // Show CSV import/export buttons in BP or Vaccination directory.
