@@ -55,7 +55,7 @@ dependencies:
 
   solidpod:
     git:
-      url: https://github.com/atangster/solidpod.git
+      url: https://github.com/anusii/solidpod.git
       ref: dev
 
   version_widget:
