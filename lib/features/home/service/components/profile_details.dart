@@ -31,10 +31,10 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/appointment.dart';
+import 'package:healthpod/theme/card_style.dart';
 import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/fetch_profile_data.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
-import 'package:healthpod/theme/card_style.dart';
 
 /// A widget that combines user avatar and name with personal identification details.
 /// This integrated component displays all user profile information in a single card.
