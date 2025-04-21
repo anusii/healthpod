@@ -40,6 +40,7 @@ import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/features/file/service/models/file_state.dart';
+import 'package:healthpod/features/profile/exporter.dart';
 import 'package:healthpod/features/profile/importer.dart';
 import 'package:healthpod/features/vaccination/exporter.dart';
 import 'package:healthpod/features/vaccination/importer.dart';
@@ -72,10 +73,22 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     _refreshCallback?.call();
   }
 
+  // Method to call the refresh callback.
+
+  void refreshBrowser() {
+    _refreshCallback?.call();
+  }
+
   /// Updates the current path and notifies listeners.
 
   void updateCurrentPath(String path) {
     state = state.copyWith(currentPath: path);
+  }
+
+  /// Updates import in progress state.
+
+  void updateImportInProgress(bool inProgress) {
+    state = state.copyWith(importInProgress: inProgress);
   }
 
   /// Updates import in progress state.
@@ -556,6 +569,50 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     } finally {
       if (context.mounted) {
         state = state.copyWith(importInProgress: false);
+      }
+    }
+  }
+
+  /// Handles the export of profile data to JSON format.
+
+  Future<void> handleProfileExport(BuildContext context) async {
+    try {
+      state = state.copyWith(exportInProgress: true);
+
+      final String? outputFile = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Profile data as JSON:',
+        fileName: 'profile_export.json',
+      );
+
+      if (outputFile != null) {
+        if (!context.mounted) return;
+
+        final success = await ProfileExporter.exportJson(
+          outputFile,
+          state.currentPath ?? 'profile',
+          context,
+        );
+
+        if (context.mounted) {
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Profile data exported successfully'),
+                backgroundColor: Theme.of(context).colorScheme.tertiary,
+              ),
+            );
+          } else {
+            showAlert(context, 'Failed to export profile data');
+          }
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showAlert(context, 'Failed to export profile data: ${e.toString()}');
+      }
+    } finally {
+      if (context.mounted) {
+        state = state.copyWith(exportInProgress: false);
       }
     }
   }

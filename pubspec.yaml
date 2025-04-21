@@ -47,7 +47,6 @@ dependencies:
   shared_preferences: ^2.5.2
   syncfusion_flutter_pdf: ^29.1.38
   table_calendar: ^3.0.9
-  test: ^1.25.15
   timeline_tile: ^2.0.0
   universal_io: ^2.2.2
   url_launcher: ^6.3.1
