@@ -1,7 +1,6 @@
 /// File upload section component for the file service feature.
 ///
 // Time-stamp: <Thursday 2025-04-17 10:02:42 +1000 Graham Williams>
-// Time-stamp: <Thursday 2025-04-17 10:02:42 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -38,8 +37,6 @@ import 'package:path/path.dart' as path;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
-import 'package:healthpod/features/profile/importer.dart';
-import 'package:healthpod/providers/profile_provider.dart';
 import 'package:healthpod/features/profile/importer.dart';
 import 'package:healthpod/providers/profile_provider.dart';
 import 'package:healthpod/utils/is_text_file.dart';
@@ -134,9 +131,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                   icon: MarkdownTooltip(
                     message: '''
 
-
                     **Close Preview:** Tap here to close the file preview panel.
-
 
                     ''',
                     child: const Icon(Icons.close, size: 20),
@@ -246,93 +241,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
     }
   }
 
-  /// Handle profile JSON import.
-
-  Future<void> handleProfileImport() async {
-    try {
-      // Show loading indicator.
-
-      setState(() {
-        ref.read(fileServiceProvider.notifier).updateImportInProgress(true);
-      });
-
-      // Open file picker for JSON files.
-
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        if (file.path != null) {
-          // Show preview.
-
-          if (!mounted) return;
-          await handlePreview(file.path!);
-
-          // Import profile data.
-
-          if (!mounted) return;
-          await ProfileImporter.importJson(
-            file.path!,
-            'profile',
-            context,
-            onSuccess: () {
-              // Only refresh if still mounted.
-
-              if (!mounted) return;
-
-              // Show success message first before any navigation or refresh.
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('Profile data imported successfully'),
-                  backgroundColor: Theme.of(context).colorScheme.tertiary,
-                ),
-              );
-
-              // Wrap in a microtask to ensure UI operations complete first.
-
-              Future.microtask(() {
-                if (!mounted) return;
-
-                // Refresh profile data after import.
-
-                ref.read(profileProvider.notifier).refreshProfileData(context);
-
-                // Refresh file browser.
-
-                ref.read(fileServiceProvider.notifier).refreshBrowser();
-              });
-            },
-          );
-
-          // No need for additional success message as it's handled in onSuccess.
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error importing profile: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          ref.read(fileServiceProvider.notifier).updateImportInProgress(false);
-        });
-      }
-    }
-  }
-
   Future<void> convertPDFToJsonUpload(File file) async {
     try {
       // Show loading dialog while processing.
-
 
       if (!mounted) return;
       showDialog(
@@ -345,13 +256,11 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
       // Read PDF file.
 
-
       final bytes = await file.readAsBytes();
       if (!mounted) return;
       final PdfDocument pdf = PdfDocument(inputBytes: bytes);
 
       // Extract text from all pages.
-
 
       String text = '';
       for (var i = 0; i < pdf.pages.count; i++) {
@@ -360,11 +269,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
       // Structure the data to match kt_pathology.json format.
 
-
       final List<String> lines = text.split('\n');
 
       // Close loading dialog.
-
 
       if (!mounted) return;
       Navigator.pop(context);
@@ -600,10 +507,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         state.currentPath?.contains('vaccination') ?? false;
     final isInProfileDirectory =
         state.currentPath?.contains('profile') ?? false;
-    final isInProfileDirectory =
-        state.currentPath?.contains('profile') ?? false;
     final showCsvButtons = isInBpDirectory || isInVaccinationDirectory;
-    final showProfileImportButton = isInProfileDirectory;
     final showProfileImportButton = isInProfileDirectory;
 
     return Column(
@@ -675,7 +579,6 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
                 **Upload**: Tap here to upload a file to your Solid Health Pod.
 
-
                 ''',
                 child: ElevatedButton.icon(
                   onPressed: state.uploadInProgress
@@ -716,30 +619,6 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 ),
               ),
             ),
-
-            // Show Profile Import button in Profile directory
-            if (showProfileImportButton) ...[
-              const SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: state.importInProgress
-                      ? null
-                      : () => handleProfileImport(),
-                  icon: const Icon(Icons.person),
-                  label: const Text('Import Profile'),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.secondaryContainer,
-                    foregroundColor:
-                        Theme.of(context).colorScheme.onSecondaryContainer,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-            ],
 
             // Show Profile Import button in Profile directory
             if (showProfileImportButton) ...[
@@ -827,80 +706,12 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                child: MarkdownTooltip(
-                  message: '''
-
-                  **Import CSV:** Tap here to import data from a CSV file:
-
-                  - Select a CSV file from your device;
-
-                  - The data will be processed and added to your health records;
-
-                  - Please ensure the CSV follows the required format.
-
-
-                  ''',
-                  child: ElevatedButton.icon(
-                    onPressed: state.importInProgress
-                        ? null
-                        : () => ref
-                            .read(fileServiceProvider.notifier)
-                            .handleCsvImport(
-                              context,
-                              isVaccination: isInVaccinationDirectory,
-                            ),
-                    icon: const Icon(Icons.table_chart),
-                    label: const Text('Import CSV'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor:
-                          Theme.of(context).colorScheme.secondaryContainer,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onSecondaryContainer,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: MarkdownTooltip(
-                  message: '''
-
-                  **Export CSV:** Tap here to export your health data to a CSV
-                  file:
-
-                  - Export your vaccination or blood pressure records
-
-                  - The data will be saved in a standard CSV format
-
-                  - You can use this file for backup or analysis
-
-                  - The export process is quick and efficient
-
-                  ''',
-                  child: ElevatedButton.icon(
-                    onPressed: state.exportInProgress
-                        ? null
-                        : () => ref
-                            .read(fileServiceProvider.notifier)
-                            .handleCsvExport(
-                              context,
-                              isVaccination: isInVaccinationDirectory,
-                            ),
-                    icon: const Icon(Icons.download),
-                    label: const Text('Export CSV'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor:
-                          Theme.of(context).colorScheme.tertiaryContainer,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onTertiaryContainer,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
                 child: MarkdownTooltip(
                   message: '''
 
@@ -944,7 +755,6 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           ],
         ),
 
-        const SizedBox(height: 12),
         const SizedBox(height: 12),
         MarkdownTooltip(
           message: '''

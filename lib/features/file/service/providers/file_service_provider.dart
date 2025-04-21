@@ -73,22 +73,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     _refreshCallback?.call();
   }
 
-  // Method to call the refresh callback.
-
-  void refreshBrowser() {
-    _refreshCallback?.call();
-  }
-
   /// Updates the current path and notifies listeners.
 
   void updateCurrentPath(String path) {
     state = state.copyWith(currentPath: path);
-  }
-
-  /// Updates import in progress state.
-
-  void updateImportInProgress(bool inProgress) {
-    state = state.copyWith(importInProgress: inProgress);
   }
 
   /// Updates import in progress state.
