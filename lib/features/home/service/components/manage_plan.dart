@@ -27,6 +27,9 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/constants/appointment.dart';
+import 'package:healthpod/features/home/service/components/card_style.dart';
+
 /// A widget that provides a summary of the user's health management plan.
 ///
 /// This widget displays reminders for the user to continue their current medications,
@@ -52,17 +55,7 @@ class _ManagePlanState extends State<ManagePlan> {
     return Container(
       width: 400,
       padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow,
-            spreadRadius: 3,
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
+      decoration: getHomeCardDecoration(context),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -32,6 +32,7 @@ library;
 
 // Note: avatar_name.dart and personal_details.dart components are now combined into profile_details.dart.
 
+export 'avatar_name.dart';
 export 'manage_plan.dart';
 export 'next_appointment.dart';
 export 'number_appointments.dart';
