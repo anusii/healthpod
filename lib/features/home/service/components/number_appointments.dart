@@ -27,8 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/constants/appointment.dart';
-import 'package:healthpod/features/home/service/components/card_style.dart';
+import 'package:healthpod/theme/card_style.dart';
 
 /// A widget displaying the count of future medical appointments.
 ///
