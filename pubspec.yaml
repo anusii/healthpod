@@ -27,8 +27,8 @@ dependencies:
   csv: ^6.0.0
   editable: ^2.0.0
   encrypt: ^5.0.3
-  file_picker: ^8.1.7
-  fl_chart: ^0.70.2
+  file_picker: ^10.1.2
+  fl_chart: ^0.71.0
   flutter_inappwebview: ^6.1.5
   flutter_launcher_icons: ^0.14.2
   flutter_markdown: ^0.7.3
@@ -45,7 +45,7 @@ dependencies:
   rdflib: ^0.2.9
   riverpod: ^2.6.1
   shared_preferences: ^2.5.2
-  syncfusion_flutter_pdf: ^24.1.41
+  syncfusion_flutter_pdf: ^29.1.38
   table_calendar: ^3.0.9
   timeline_tile: ^2.0.0
   universal_io: ^2.2.2

@@ -345,15 +345,20 @@ Future<bool> _attemptLogin(
 /// Build the normal login widget.
 
 Widget _buildNormalLogin(String serverUrl) {
-  return SolidLogin(
-    required: false,
-    title: 'HEALTH POD',
-    appDirectory: 'healthpod',
-    webID:
-        serverUrl.isNotEmpty ? serverUrl : 'https://pods.dev.solidcommunity.au',
-    image: const AssetImage('assets/images/healthpod_image.png'),
-    logo: const AssetImage('assets/images/healthpod_icon.png'),
-    link: 'https://github.com/anusii/healthpod/blob/main/README.md',
-    child: const HealthPodHome(),
+  return Builder(
+    builder: (context) {
+      return SolidLogin(
+        required: false,
+        title: 'HEALTH POD',
+        appDirectory: 'healthpod',
+        webID: serverUrl.isNotEmpty
+            ? serverUrl
+            : 'https://pods.dev.solidcommunity.au',
+        image: const AssetImage('assets/images/healthpod_image.png'),
+        logo: const AssetImage('assets/images/healthpod_icon.png'),
+        link: 'https://github.com/anusii/healthpod/blob/main/README.md',
+        child: const HealthPodHome(),
+      );
+    },
   );
 }
