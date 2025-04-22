@@ -139,7 +139,6 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         'email': _emailController.text.trim(),
         'dateOfBirth': _dateOfBirthController.text.trim(),
         'gender': _genderController.text.trim(),
-        'identifyAsIndigenous': _profileData['identifyAsIndigenous'] ?? false,
       };
 
       // Clean up existing profile files before saving a new one.
