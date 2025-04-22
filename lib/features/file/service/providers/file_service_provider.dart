@@ -581,6 +581,18 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           context,
         );
 
+        // Add a newline character at the end of the file if export was successful.
+
+        if (success) {
+          final file = File(outputFile);
+          if (await file.exists()) {
+            final content = await file.readAsString();
+            if (!content.endsWith('\n')) {
+              await file.writeAsString('$content\n');
+            }
+          }
+        }
+
         if (context.mounted) {
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
