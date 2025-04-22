@@ -1,6 +1,6 @@
 /// Management Plan card widget.
 //
-// Time-stamp: <Sunday 2025-03-09 11:43:38 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-04-22 13:57:20 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -45,9 +45,10 @@ class ManagePlan extends StatefulWidget {
 class _ManagePlanState extends State<ManagePlan> {
   // Widget content as constants (dummy placeholders for now).
 
-  final String heading = 'Reminder! Health Management Plan';
-  final String bulletPoint1 = 'Continue all current medications.';
-  final String bulletPoint2 = 'Continue healthy eating and regular exercise.';
+  final String heading = 'Your Health Management Plan';
+  final String bulletPoint1 = 'Review and continue with current medications.';
+  final String bulletPoint2 =
+      'Healthy eating and regular exercise are crucial.';
 
   @override
   Widget build(BuildContext context) {
