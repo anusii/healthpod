@@ -65,7 +65,6 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
       'email': 'Email',
       'dateOfBirth': 'Date of Birth',
       'gender': 'Gender',
-      'identifyAsIndigenous': 'Identify as Indigenous',
     };
 
     // Check if all required fields are present.
@@ -80,15 +79,6 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
     }
 
     // Validate field types.
-
-    if (data.containsKey('identifyAsIndigenous') &&
-        data['identifyAsIndigenous'] is! bool) {
-      return ProfileValidationResult(
-        isValid: false,
-        error:
-            '"${fieldDisplayNames['identifyAsIndigenous']}" must be a boolean value (true/false)',
-      );
-    }
 
     // Validate string fields are not null.
 
