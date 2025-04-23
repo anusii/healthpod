@@ -158,6 +158,96 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
     );
   }
 
+  /// Builds a CSV format information card for each supported directory.
+
+  Widget _buildCsvFormatCard(
+      bool isInBpDirectory, bool isInVaccinationDirectory) {
+    if (!isInBpDirectory && !isInVaccinationDirectory)
+      return const SizedBox.shrink();
+
+    String title = '';
+    List<String> requiredFields = [];
+    List<String> optionalFields = [];
+
+    if (isInBpDirectory) {
+      title = 'Blood Pressure CSV Format';
+      requiredFields = ['timestamp', 'systolic', 'diastolic', 'heart_rate'];
+      optionalFields = ['feeling', 'notes'];
+    } else if (isInVaccinationDirectory) {
+      title = 'Vaccination CSV Format';
+      requiredFields = ['timestamp', 'name', 'type'];
+      optionalFields = ['location', 'notes', 'batch_number'];
+    }
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(top: 16, bottom: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withAlpha(10),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Required Fields:',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text('• ${requiredFields.join("\n• ")}'),
+            const SizedBox(height: 8),
+            if (optionalFields.isNotEmpty) ...[
+              Text(
+                'Optional Fields:',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text('• ${optionalFields.join("\n• ")}'),
+              const SizedBox(height: 8),
+            ],
+            Text(
+              'Note: The first row should contain these column headers. All values should be in the correct format.',
+              style: TextStyle(
+                fontStyle: FontStyle.italic,
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Handle profile JSON import.
 
   Future<void> handleProfileImport() async {
@@ -754,6 +844,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
             ],
           ],
         ),
+
+        // Display CSV format information card.
+        _buildCsvFormatCard(isInBpDirectory, isInVaccinationDirectory),
 
         const SizedBox(height: 12),
         MarkdownTooltip(
