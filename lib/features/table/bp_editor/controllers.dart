@@ -109,18 +109,9 @@ class BPEditorControllers {
     _addListeners(onObservationChanged);
   }
 
-  /// Callback for feeling changes.
+  /// Callback for observation changes.
 
   void Function(BPObservation updated)? _onObservationChanged;
-
-  /// Update feeling and notify listeners.
-
-  void updateFeeling(String feeling) {
-    if (_currentState != null && _onObservationChanged != null) {
-      _currentState = _currentState!.copyWith(feeling: feeling);
-      _onObservationChanged!(_currentState!);
-    }
-  }
 
   /// Add listeners to all controllers to update the observation.
 

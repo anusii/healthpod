@@ -443,9 +443,6 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                             final heartRate =
                                 data[HealthSurveyConstants.fieldHeartRate] ??
                                     'N/A';
-                            final feeling =
-                                data[HealthSurveyConstants.fieldFeeling] ??
-                                    'N/A';
                             final notes =
                                 data[HealthSurveyConstants.fieldNotes] ?? '';
 
@@ -469,7 +466,6 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                               '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
                               '🕒 Time: $timeStr',
                               '❤️ Heart Rate: $heartRate bpm',
-                              '😊 Feeling: $feeling',
                             ];
 
                             // Add notes if they exist.

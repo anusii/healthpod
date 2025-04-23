@@ -157,7 +157,6 @@ class BPEditorState with ChangeNotifier {
       systolic: 0,
       diastolic: 0,
       heartRate: 0,
-      feeling: 'Good',
       notes: '',
     );
     observations.insert(0, newObservation);
@@ -237,16 +236,5 @@ class BPEditorState with ChangeNotifier {
     BPObservation observation,
   ) async {
     await editorService.deleteObservationFromPod(context, observation);
-  }
-
-  /// Updates the feeling field in the current observation being edited.
-  ///
-  /// @param feeling The new feeling value to set.
-
-  void updateFeeling(String feeling) {
-    if (_currentEdit != null) {
-      _currentEdit = _currentEdit!.copyWith(feeling: feeling);
-      notifyListeners();
-    }
   }
 }

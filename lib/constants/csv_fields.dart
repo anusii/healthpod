@@ -35,7 +35,6 @@ class BPCSVFields {
     fieldSystolic,
     fieldDiastolic,
     fieldHeartRate,
-    fieldFeeling,
     fieldNotes,
   ];
 
@@ -49,7 +48,6 @@ class BPCSVFields {
 
   /// Optional CSV fields for blood pressure data.
   static const List<String> optionalFields = [
-    fieldFeeling,
     fieldNotes,
   ];
 
@@ -58,6 +56,5 @@ class BPCSVFields {
   static const String fieldSystolic = 'systolic';
   static const String fieldDiastolic = 'diastolic';
   static const String fieldHeartRate = 'heart_rate';
-  static const String fieldFeeling = 'feeling';
   static const String fieldNotes = 'notes';
 }

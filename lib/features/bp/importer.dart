@@ -55,7 +55,6 @@ class BPImporter extends HealthDataImporterBase {
       BPCSVFields.fieldSystolic: 0,
       BPCSVFields.fieldDiastolic: 0,
       BPCSVFields.fieldHeartRate: 0,
-      BPCSVFields.fieldFeeling: '',
       BPCSVFields.fieldNotes: '',
     };
   }
@@ -108,12 +107,6 @@ class BPImporter extends HealthDataImporterBase {
           responses[HealthSurveyConstants.fieldHeartRate] = heartRate;
           return true;
         }
-
-      // Optional field: Feeling - can be any value including empty.
-
-      case String h when h == HealthSurveyConstants.fieldFeeling.toLowerCase():
-        responses[HealthSurveyConstants.fieldFeeling] = value;
-        return true;
 
       // Optional field: Notes - can be any value including empty.
 

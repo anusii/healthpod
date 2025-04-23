@@ -31,7 +31,6 @@ import 'package:intl/intl.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/features/bp/obs/widgets/editing/action_buttons_cell.dart';
-import 'package:healthpod/features/bp/obs/widgets/editing/feeling_cell.dart';
 import 'package:healthpod/features/bp/obs/widgets/editing/notes_cell.dart';
 import 'package:healthpod/features/bp/obs/widgets/editing/numeric_cell.dart';
 
@@ -128,10 +127,9 @@ DataRow buildEditingRow({
     );
   }
 
-  // Add feeling and notes if screen is wide enough.
+  // Add notes if screen is wide enough.
 
   if (width > 800) {
-    cells.add(feelingCell(editorState, observation));
     cells.add(notesCell(editorState, observation));
   }
 

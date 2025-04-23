@@ -63,7 +63,6 @@ void main() {
 /// - Systolic: 120 mmHg
 /// - Diastolic: 80 mmHg
 /// - Heart Rate: 72 bpm
-/// - Feeling: Good
 /// - Notes: Test measurement after morning walk.
 
 void bpSurvey() {
@@ -157,7 +156,7 @@ Future<void> _verifySurveyPage(WidgetTester tester) async {
 
 /// Fills out the survey form with test data.
 ///
-/// Enters blood pressure measurements, heart rate, feeling, and notes.
+/// Enters blood pressure measurements, heart rate, and notes.
 
 Future<void> _fillSurveyForm(WidgetTester tester) async {
   debugPrint('\n✍️ Filling form fields...');
@@ -172,12 +171,6 @@ Future<void> _fillSurveyForm(WidgetTester tester) async {
   await tester.pumpAndSettle();
 
   await tester.enterText(formFields.at(2), '72');
-  await tester.pumpAndSettle();
-
-  // Select feeling.
-  final goodOption = find.text('Good');
-  expect(goodOption, findsOneWidget, reason: 'Good option not found');
-  await tester.tap(goodOption);
   await tester.pumpAndSettle();
 
   // Add notes.
