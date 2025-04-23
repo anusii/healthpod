@@ -628,11 +628,13 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     ),
                   ),
                   if (widget.showEditButton)
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed:
-                          _isLoading || _isSaving ? null : _showEditDialog,
-                      tooltip: 'Edit Details',
+                    MarkdownTooltip(
+                      message: '**Edit** personal details',
+                      child: IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed:
+                            _isLoading || _isSaving ? null : _showEditDialog,
+                      ),
                     ),
                 ],
               ),

@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/features/profile/medication/model.dart';
 import 'package:healthpod/theme/card_style.dart';
@@ -280,12 +281,14 @@ class _ManageMedicationsState extends State<ManageMedications> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () => _showMedicationDialog(),
-                tooltip: 'Add Medication',
-                constraints: const BoxConstraints(),
-                padding: EdgeInsets.zero,
+              MarkdownTooltip(
+                message: '**Add** a new medication',
+                child: IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () => _showMedicationDialog(),
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
+                ),
               ),
             ],
           ),
@@ -343,20 +346,24 @@ class _ManageMedicationsState extends State<ManageMedications> {
                             ),
                             Row(
                               children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit, size: 18),
-                                  onPressed: () =>
-                                      _showMedicationDialog(medication, index),
-                                  tooltip: 'Edit',
-                                  constraints: const BoxConstraints(),
-                                  padding: EdgeInsets.zero,
+                                MarkdownTooltip(
+                                  message: '**Edit** this medication',
+                                  child: IconButton(
+                                    icon: const Icon(Icons.edit, size: 18),
+                                    onPressed: () => _showMedicationDialog(
+                                        medication, index),
+                                    constraints: const BoxConstraints(),
+                                    padding: EdgeInsets.zero,
+                                  ),
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, size: 18),
-                                  onPressed: () => _deleteMedication(index),
-                                  tooltip: 'Delete',
-                                  constraints: const BoxConstraints(),
-                                  padding: EdgeInsets.zero,
+                                MarkdownTooltip(
+                                  message: '**Delete** this medication',
+                                  child: IconButton(
+                                    icon: const Icon(Icons.delete, size: 18),
+                                    onPressed: () => _deleteMedication(index),
+                                    constraints: const BoxConstraints(),
+                                    padding: EdgeInsets.zero,
+                                  ),
                                 ),
                               ],
                             ),

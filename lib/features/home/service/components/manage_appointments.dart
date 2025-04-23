@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/features/profile/appointment/model.dart';
 import 'package:healthpod/theme/card_style.dart';
@@ -309,12 +310,14 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () => _showAppointmentDialog(),
-                tooltip: 'Add Appointment',
-                constraints: const BoxConstraints(),
-                padding: EdgeInsets.zero,
+              MarkdownTooltip(
+                message: '**Add** a new appointment',
+                child: IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () => _showAppointmentDialog(),
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
+                ),
               ),
             ],
           ),
@@ -369,20 +372,24 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                             ),
                             Row(
                               children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit, size: 18),
-                                  onPressed: () => _showAppointmentDialog(
-                                      appointment, index),
-                                  tooltip: 'Edit',
-                                  constraints: const BoxConstraints(),
-                                  padding: EdgeInsets.zero,
+                                MarkdownTooltip(
+                                  message: '**Edit** this appointment',
+                                  child: IconButton(
+                                    icon: const Icon(Icons.edit, size: 18),
+                                    onPressed: () => _showAppointmentDialog(
+                                        appointment, index),
+                                    constraints: const BoxConstraints(),
+                                    padding: EdgeInsets.zero,
+                                  ),
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, size: 18),
-                                  onPressed: () => _deleteAppointment(index),
-                                  tooltip: 'Delete',
-                                  constraints: const BoxConstraints(),
-                                  padding: EdgeInsets.zero,
+                                MarkdownTooltip(
+                                  message: '**Delete** this appointment',
+                                  child: IconButton(
+                                    icon: const Icon(Icons.delete, size: 18),
+                                    onPressed: () => _deleteAppointment(index),
+                                    constraints: const BoxConstraints(),
+                                    padding: EdgeInsets.zero,
+                                  ),
                                 ),
                               ],
                             ),

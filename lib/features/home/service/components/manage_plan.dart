@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/theme/card_style.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 /// A widget to display and edit a health management plan.
 ///
@@ -89,31 +90,27 @@ class _ManagePlanState extends State<ManagePlan> {
                           });
                         },
                         itemBuilder: (context, index) {
-                          return Card(
+                          return MarkdownTooltip(
                             key: ValueKey(index),
-                            margin: const EdgeInsets.only(bottom: 8),
-                            child: ListTile(
-                              title: TextField(
-                                controller: controllers[index],
-                                decoration: const InputDecoration(
-                                  hintText: 'Enter plan item',
-                                  border: InputBorder.none,
-                                  contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 8,
+                            message: '**Drag** to reorder this item',
+                            child: Card(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: ListTile(
+                                title: TextField(
+                                  controller: controllers[index],
+                                  decoration: const InputDecoration(
+                                    hintText: 'Enter plan item',
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
                                   ),
+                                  maxLines: null,
                                 ),
-                                maxLines: null,
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.drag_handle),
-                                    tooltip: 'Drag to reorder',
-                                    onPressed: () {},
-                                  ),
-                                  IconButton(
+                                trailing: MarkdownTooltip(
+                                  message: '**Delete** this item',
+                                  child: IconButton(
                                     icon: const Icon(Icons.delete),
                                     onPressed: () {
                                       setState(() {
@@ -121,7 +118,7 @@ class _ManagePlanState extends State<ManagePlan> {
                                       });
                                     },
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           );
@@ -233,12 +230,14 @@ class _ManagePlanState extends State<ManagePlan> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: _editPlan,
-                tooltip: 'Edit Health Plan',
-                constraints: const BoxConstraints(),
-                padding: EdgeInsets.zero,
+              MarkdownTooltip(
+                message: '**Edit** health management plan',
+                child: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: _editPlan,
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
+                ),
               ),
             ],
           ),

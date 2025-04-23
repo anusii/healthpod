@@ -26,7 +26,9 @@
 library;
 
 import 'package:flutter/material.dart';
+
 import 'package:intl/intl.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/theme/card_style.dart';
 
@@ -342,12 +344,14 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.edit),
-                onPressed: _manageAppointments,
-                tooltip: 'Manage Appointments',
-                constraints: const BoxConstraints(),
-                padding: EdgeInsets.zero,
+              MarkdownTooltip(
+                message: '**Manage** your appointments',
+                child: IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: _manageAppointments,
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
+                ),
               ),
             ],
           ),

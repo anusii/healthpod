@@ -27,8 +27,9 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:intl/intl.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:intl/intl.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/theme/card_style.dart';
 
@@ -336,12 +337,14 @@ class _NextAppointmentState extends State<NextAppointment> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: _editAppointment,
-                        tooltip: 'Edit Appointment',
-                        constraints: const BoxConstraints(),
-                        padding: EdgeInsets.zero,
+                      MarkdownTooltip(
+                        message: '**Edit** appointment details',
+                        child: IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: _editAppointment,
+                          constraints: const BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
                       ),
                     ],
                   ),
@@ -420,15 +423,19 @@ class _NextAppointmentState extends State<NextAppointment> {
                         SizedBox(
                           width: 32,
                           height: 32,
-                          child: IconButton(
-                            icon: Icon(
-                              _isPlaying ? Icons.stop : Icons.volume_up,
-                              color: _isPlaying ? Colors.red : Colors.blue,
-                              size: 20,
+                          child: MarkdownTooltip(
+                            message: _isPlaying
+                                ? '**Stop** audio'
+                                : '**Play** audio explanation',
+                            child: IconButton(
+                              icon: Icon(
+                                _isPlaying ? Icons.stop : Icons.volume_up,
+                                color: _isPlaying ? Colors.red : Colors.blue,
+                                size: 20,
+                              ),
+                              onPressed: _toggleAudio,
+                              padding: EdgeInsets.zero,
                             ),
-                            onPressed: _toggleAudio,
-                            tooltip: _isPlaying ? 'Stop Audio' : 'Play Audio',
-                            padding: EdgeInsets.zero,
                           ),
                         ),
                       ],
