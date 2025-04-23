@@ -29,11 +29,10 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/theme/card_style.dart';
 
-/// A widget that provides a summary of the user's health management plan.
+/// A widget to display and edit a health management plan.
 ///
-/// This widget displays reminders for the user to continue their current medications,
-/// maintain healthy eating habits, and regular exercise. It visually includes a doctor's avatar
-/// alongside actionable advice points.
+/// This widget displays a card with the current health management plan items
+/// and provides functionality to edit, add, or remove items from the plan.
 
 class ManagePlan extends StatefulWidget {
   const ManagePlan({super.key});
@@ -43,12 +42,178 @@ class ManagePlan extends StatefulWidget {
 }
 
 class _ManagePlanState extends State<ManagePlan> {
-  // Widget content as constants (dummy placeholders for now).
+  // Plan data
+  String title = 'My Health Management Plan';
+  List<String> planItems = [
+    'Take Lisinopril 10mg daily for high blood pressure',
+    'Measure blood pressure twice a day',
+    'Follow low sodium diet',
+    'Walk 30 minutes daily',
+  ];
 
-  final String heading = 'Your Health Management Plan';
-  final String bulletPoint1 = 'Review and continue with current medications.';
-  final String bulletPoint2 =
-      'Healthy eating and regular exercise are crucial.';
+  /// Opens a dialog to edit the health management plan.
+  void _editPlan() {
+    // Create controllers for existing plan items
+    List<TextEditingController> controllers = planItems
+        .map((item) => TextEditingController(text: item))
+        .toList();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Edit Health Management Plan'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Current Plan Items',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Flexible(
+                      child: ReorderableListView.builder(
+                        shrinkWrap: true,
+                        itemCount: controllers.length,
+                        onReorder: (oldIndex, newIndex) {
+                          setState(() {
+                            if (oldIndex < newIndex) {
+                              newIndex -= 1;
+                            }
+                            final item = controllers.removeAt(oldIndex);
+                            controllers.insert(newIndex, item);
+                          });
+                        },
+                        itemBuilder: (context, index) {
+                          return Card(
+                            key: ValueKey(index),
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: ListTile(
+                              title: TextField(
+                                controller: controllers[index],
+                                decoration: const InputDecoration(
+                                  hintText: 'Enter plan item',
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                ),
+                                maxLines: null,
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.drag_handle),
+                                    tooltip: 'Drag to reorder',
+                                    onPressed: () {},
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () {
+                                      setState(() {
+                                        controllers.removeAt(index);
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.center,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            controllers.add(TextEditingController());
+                          });
+                        },
+                        icon: const Icon(Icons.add),
+                        label: const Text('Add Item'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Import/Export buttons
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            // TODO: Implement import functionality
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Import feature coming soon'),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.upload_file),
+                          label: const Text('Import'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            // TODO: Implement export functionality
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Export feature coming soon'),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.download),
+                          label: const Text('Export'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Update the plan items
+                    setState(() {
+                      planItems = controllers
+                          .map((controller) => controller.text)
+                          .where((text) => text.isNotEmpty)
+                          .toList();
+                    });
+                    
+                    // Update the parent widget state
+                    this.setState(() {
+                      planItems = controllers
+                          .map((controller) => controller.text)
+                          .where((text) => text.isNotEmpty)
+                          .toList();
+                    });
+                    
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,73 +221,44 @@ class _ManagePlanState extends State<ManagePlan> {
       width: 400,
       padding: const EdgeInsets.all(16.0),
       decoration: getHomeCardDecoration(context),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const CircleAvatar(
-            radius: 32,
-            backgroundImage:
-                AssetImage('assets/images/sample_doctor_image.png'),
-          ),
-
-          const SizedBox(width: 16),
-
-          // Column containing heading and bullet points.
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  heading,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-
-                const SizedBox(height: 8),
-
-                // Bullet point 1: Medications reminder.
-
-                Row(
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: _editPlan,
+                tooltip: 'Edit Health Plan',
+                constraints: const BoxConstraints(),
+                padding: EdgeInsets.zero,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ...planItems.map((item) => Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      '1. ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    const Text('• '),
                     Expanded(
                       child: Text(
-                        bulletPoint1,
+                        item,
                         style: const TextStyle(fontSize: 14),
                       ),
                     ),
                   ],
                 ),
-
-                const SizedBox(height: 8),
-
-                // Bullet point 2: Healthy lifestyle reminder.
-
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '2. ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Expanded(
-                      child: Text(
-                        bulletPoint2,
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+              )),
         ],
       ),
     );
