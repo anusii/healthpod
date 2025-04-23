@@ -1,6 +1,6 @@
 /// Appointment constants.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2025-04-23 21:12:11 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -27,12 +27,12 @@ library;
 
 /// Dummy data for the avatar and appointment section in home screen.
 
-final String appointmentDate = 'Monday, 13 March';
-final String appointmentTime = '14:30 pm';
-final String appointmentLocation = 'Gurriny Yealamucka';
-final String patientID = 'p43623';
-final String phoneNumber = '(07) 4226 4100';
-final String userName = 'Riley Breugel';
+final String appointmentDate = '';
+final String appointmentTime = '';
+final String appointmentLocation = '';
+final String patientID = '';
+final String phoneNumber = '';
+final String userName = '';
 
 final bool clinicBusAvailable = true;
 
