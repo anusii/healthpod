@@ -160,14 +160,18 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
   /// Builds a CSV format information card for each supported directory.
 
-  Widget _buildCsvFormatCard(
-      bool isInBpDirectory, bool isInVaccinationDirectory) {
-    if (!isInBpDirectory && !isInVaccinationDirectory)
+  Widget _buildFormatCard(bool isInBpDirectory, bool isInVaccinationDirectory,
+      bool isInProfileDirectory) {
+    if (!isInBpDirectory &&
+        !isInVaccinationDirectory &&
+        !isInProfileDirectory) {
       return const SizedBox.shrink();
+    }
 
     String title = '';
     List<String> requiredFields = [];
     List<String> optionalFields = [];
+    bool isJson = false;
 
     if (isInBpDirectory) {
       title = 'Blood Pressure CSV Format';
@@ -177,6 +181,18 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
       title = 'Vaccination CSV Format';
       requiredFields = ['timestamp', 'name', 'type'];
       optionalFields = ['location', 'notes', 'batch_number'];
+    } else if (isInProfileDirectory) {
+      title = 'Profile JSON Format';
+      requiredFields = [
+        'name',
+        'address',
+        'bestContactPhone',
+        'alternativeContactNumber',
+        'email',
+        'dateOfBirth',
+        'gender'
+      ];
+      isJson = true;
     }
 
     return Card(
@@ -235,7 +251,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
               const SizedBox(height: 8),
             ],
             Text(
-              'Note: The first row should contain these column headers. All values should be in the correct format.',
+              isJson
+                  ? 'Note: The JSON file must contain these required fields with valid values.'
+                  : 'Note: The first row should contain these column headers. All values should be in the correct format.',
               style: TextStyle(
                 fontStyle: FontStyle.italic,
                 fontSize: 12,
@@ -846,7 +864,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         ),
 
         // Display CSV format information card.
-        _buildCsvFormatCard(isInBpDirectory, isInVaccinationDirectory),
+
+        _buildFormatCard(
+            isInBpDirectory, isInVaccinationDirectory, isInProfileDirectory),
 
         const SizedBox(height: 12),
         MarkdownTooltip(
