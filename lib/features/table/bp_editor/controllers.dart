@@ -66,8 +66,6 @@ class BPEditorControllers {
 
     _currentState = observation;
 
-    _onObservationChanged = onObservationChanged;
-
     // Remove existing listeners before updating.
 
     _removeListeners();
@@ -108,10 +106,6 @@ class BPEditorControllers {
 
     _addListeners(onObservationChanged);
   }
-
-  /// Callback for observation changes.
-
-  void Function(BPObservation updated)? _onObservationChanged;
 
   /// Add listeners to all controllers to update the observation.
 
@@ -210,7 +204,6 @@ class BPEditorControllers {
 
   void dispose() {
     _removeListeners();
-    _onObservationChanged = null;
     systolicController?.dispose();
     diastolicController?.dispose();
     heartRateController?.dispose();
