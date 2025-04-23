@@ -27,8 +27,9 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:healthpod/theme/card_style.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
+
+import 'package:healthpod/theme/card_style.dart';
 
 /// A widget to display and edit a health management plan.
 ///
@@ -145,7 +146,8 @@ class _ManagePlanState extends State<ManagePlan> {
                       children: [
                         OutlinedButton.icon(
                           onPressed: () {
-                            // TODO: Implement import functionality
+                            // TODO: Implement import functionality.
+
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -158,7 +160,8 @@ class _ManagePlanState extends State<ManagePlan> {
                         ),
                         OutlinedButton.icon(
                           onPressed: () {
-                            // TODO: Implement export functionality
+                            // TODO: Implement export functionality.
+
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

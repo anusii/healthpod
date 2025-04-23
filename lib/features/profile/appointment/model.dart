@@ -23,6 +23,8 @@
 ///
 /// Authors: Ashley
 
+library;
+
 import 'package:flutter/material.dart';
 
 /// Model class to represent an appointment.
