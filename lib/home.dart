@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Wednesday 2025-04-02 16:14:46 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-04-24 06:04:07 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -148,7 +148,7 @@ final List<Map<String, dynamic>> homeTabs = [
     - Health information and guides
 
     - External trusted resources
-    
+
     - Useful health calculators and tools
 
     ''',
@@ -257,10 +257,10 @@ class HealthPodHomeState extends State<HealthPodHome> {
           MarkdownTooltip(
             message: '''
 
-            **Version:** Here you can see the current version of the HealthPod
-            app. If the version is out of date then the text will be red. You
-            can tap on the version to view the change log file to see if it is
-            worth updating your version.
+            **Version:** This is the current version of the HealthPod app. If
+            the version is out of date then the text will be red. You can tap on
+            the version to view the app's Change Log to determine if it is worth
+            updating your version.
 
             ''',
             child: const VersionWidget(

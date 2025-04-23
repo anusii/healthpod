@@ -212,7 +212,7 @@ jobs:
         run: flutter config --enable-macos-desktop
 
       - name: Build artifacts
-        run: flutter build macos --release --xcodebuild-argument=-allowProvisioningUpdates
+        run: flutter build macos --release
 
       - name: Archive Release
         uses: thedoctor0/zip-release@master
