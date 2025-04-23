@@ -54,9 +54,8 @@ class _ManagePlanState extends State<ManagePlan> {
   /// Opens a dialog to edit the health management plan.
   void _editPlan() {
     // Create controllers for existing plan items
-    List<TextEditingController> controllers = planItems
-        .map((item) => TextEditingController(text: item))
-        .toList();
+    List<TextEditingController> controllers =
+        planItems.map((item) => TextEditingController(text: item)).toList();
 
     showDialog(
       context: context,
@@ -194,7 +193,7 @@ class _ManagePlanState extends State<ManagePlan> {
                           .where((text) => text.isNotEmpty)
                           .toList();
                     });
-                    
+
                     // Update the parent widget state
                     this.setState(() {
                       planItems = controllers
@@ -202,7 +201,7 @@ class _ManagePlanState extends State<ManagePlan> {
                           .where((text) => text.isNotEmpty)
                           .toList();
                     });
-                    
+
                     Navigator.pop(context);
                   },
                   child: const Text('Save'),

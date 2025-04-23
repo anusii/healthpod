@@ -26,17 +26,14 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
+import 'package:intl/intl.dart';
 import 'package:audioplayers/audioplayers.dart';
 
-import 'package:healthpod/constants/appointment.dart';
-import 'package:healthpod/features/home/service/home_utils.dart';
 import 'package:healthpod/theme/card_style.dart';
-import 'package:healthpod/utils/address_link.dart';
-import 'package:healthpod/utils/audio_tooltip.dart';
-import 'package:healthpod/utils/call_icon.dart';
-import 'package:healthpod/utils/touch_finger_oval.dart';
+
+// Add this global variable if it doesn't exist elsewhere
+bool transportAudioIn = false;
 
 /// A widget that displays the next medical appointment details.
 ///
@@ -118,13 +115,15 @@ class _NextAppointmentState extends State<NextAppointment> {
   bool useClinicBus = true;
 
   /// Opens a dialog to edit the next appointment details.
+
   void _editAppointment() {
     final dateController = TextEditingController(
         text: DateFormat('yyyy-MM-dd').format(appointmentDate));
-    final timeController =
-        TextEditingController(text: DateFormat('HH:mm').format(appointmentDate));
+    final timeController = TextEditingController(
+        text: DateFormat('HH:mm').format(appointmentDate));
     final locationController = TextEditingController(text: location);
-    final transportPhoneController = TextEditingController(text: transportPhone);
+    final transportPhoneController =
+        TextEditingController(text: transportPhone);
     final transportNoteController = TextEditingController(text: transportNote);
 
     bool tempNeedsTransport = needsTransport;
@@ -142,7 +141,8 @@ class _NextAppointmentState extends State<NextAppointment> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const SizedBox(height: 8),
-                    // Date field
+                    // Date field.
+
                     TextField(
                       controller: dateController,
                       decoration: const InputDecoration(
@@ -156,7 +156,8 @@ class _NextAppointmentState extends State<NextAppointment> {
                           context: context,
                           initialDate: appointmentDate,
                           firstDate: DateTime(2020),
-                          lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 365 * 5)),
                         );
                         if (picked != null) {
                           setState(() {
@@ -167,7 +168,8 @@ class _NextAppointmentState extends State<NextAppointment> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    // Time field
+                    // Time field.
+
                     TextField(
                       controller: timeController,
                       decoration: const InputDecoration(
@@ -190,7 +192,8 @@ class _NextAppointmentState extends State<NextAppointment> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    // Location field
+                    // Location field.
+
                     TextField(
                       controller: locationController,
                       decoration: const InputDecoration(
@@ -200,7 +203,8 @@ class _NextAppointmentState extends State<NextAppointment> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Transport section
+                    // Transport section.
+
                     const Text(
                       'Transportation Details',
                       style: TextStyle(fontWeight: FontWeight.bold),
@@ -255,12 +259,14 @@ class _NextAppointmentState extends State<NextAppointment> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Parse date and time
-                    final date = DateFormat('yyyy-MM-dd').parse(dateController.text);
+                    // Parse date and time.
+
+                    final date =
+                        DateFormat('yyyy-MM-dd').parse(dateController.text);
                     final timeStr = timeController.text.split(':');
                     final hour = int.parse(timeStr[0]);
                     final minute = int.parse(timeStr[1]);
-                    
+
                     final newDate = DateTime(
                       date.year,
                       date.month,
@@ -268,15 +274,17 @@ class _NextAppointmentState extends State<NextAppointment> {
                       hour,
                       minute,
                     );
-                    
-                    // Update the appointment details
+
+                    // Update the appointment details.
+
                     setState(() {
-                      // This setState refers to the parent StatefulBuilder
+                      // This setState refers to the parent StatefulBuilder.
                     });
-                    
+
                     Navigator.pop(context);
-                    
-                    // Update the state in the card widget
+
+                    // Update the state in the card widget.
+
                     this.setState(() {
                       appointmentDate = newDate;
                       location = locationController.text;
@@ -303,7 +311,8 @@ class _NextAppointmentState extends State<NextAppointment> {
         maxWidth: 400,
         minHeight: 300,
       ),
-      padding: const EdgeInsets.only(left: 16.0, top: 16.0, right: 24.0, bottom: 16.0),
+      padding: const EdgeInsets.only(
+          left: 16.0, top: 16.0, right: 24.0, bottom: 16.0),
       decoration: getHomeCardDecoration(context),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -356,10 +365,12 @@ class _NextAppointmentState extends State<NextAppointment> {
                     DateFormat('h:mm a').format(appointmentDate),
                   ),
                   const SizedBox(height: 8),
-                  // Location
+                  // Location.
+
                   _buildInfoRow('Where:', location),
                   const SizedBox(height: 16),
-                  // Transport
+                  // Transport.
+
                   if (useClinicBus)
                     Row(
                       children: [
@@ -381,6 +392,7 @@ class _NextAppointmentState extends State<NextAppointment> {
                     const SizedBox(height: 8),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(Icons.phone, size: 20),
                         const SizedBox(width: 8),
@@ -390,17 +402,33 @@ class _NextAppointmentState extends State<NextAppointment> {
                               children: [
                                 TextSpan(
                                   text: 'Call $transportPhone ',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 TextSpan(
                                   text: transportNote,
-                                  style: const TextStyle(fontStyle: FontStyle.italic),
+                                  style: const TextStyle(
+                                      fontStyle: FontStyle.italic),
                                 ),
                                 const TextSpan(
                                   text: ' to change or request transport.',
                                 ),
                               ],
                             ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: IconButton(
+                            icon: Icon(
+                              _isPlaying ? Icons.stop : Icons.volume_up,
+                              color: _isPlaying ? Colors.red : Colors.blue,
+                              size: 20,
+                            ),
+                            onPressed: _toggleAudio,
+                            tooltip: _isPlaying ? 'Stop Audio' : 'Play Audio',
+                            padding: EdgeInsets.zero,
                           ),
                         ),
                       ],
@@ -417,6 +445,7 @@ class _NextAppointmentState extends State<NextAppointment> {
   }
 
   /// Helper method to build consistent information rows.
+
   Widget _buildInfoRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,

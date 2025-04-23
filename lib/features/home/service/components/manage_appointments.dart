@@ -1,8 +1,36 @@
+/// A widget to display and manage appointments.
+///
+// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+///
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
+///
+/// Licensed under the GNU General Public License, Version 3 (the "License").
+///
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://www.gnu.org/licenses/>.
+///
+/// Authors: Ashley Tang
+
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/theme/card_style.dart';
+
 import 'package:intl/intl.dart';
+
+import 'package:healthpod/features/profile/appointment/model.dart';
+import 'package:healthpod/theme/card_style.dart';
 
 /// A widget to display and manage healthcare appointments.
 ///
@@ -17,7 +45,8 @@ class ManageAppointments extends StatefulWidget {
 }
 
 class _ManageAppointmentsState extends State<ManageAppointments> {
-  // Appointments data
+  // Appointments data.
+
   final List<Appointment> _appointments = [
     Appointment(
       doctorName: 'Dr. Smith',
@@ -37,17 +66,24 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
     ),
   ];
 
-  /// Opens dialog to add or edit an appointment
+  /// Opens dialog to add or edit an appointment.
+
   void _showAppointmentDialog([Appointment? appointment, int? index]) {
     final bool isEditing = appointment != null;
-    
-    final doctorController = TextEditingController(text: appointment?.doctorName ?? '');
-    final specialtyController = TextEditingController(text: appointment?.specialty ?? '');
-    final locationController = TextEditingController(text: appointment?.location ?? '');
-    final notesController = TextEditingController(text: appointment?.notes ?? '');
-    
-    TimeOfDay selectedTime = appointment?.time ?? const TimeOfDay(hour: 9, minute: 0);
-    DateTime selectedDate = appointment?.date ?? DateTime.now().add(const Duration(days: 1));
+
+    final doctorController =
+        TextEditingController(text: appointment?.doctorName ?? '');
+    final specialtyController =
+        TextEditingController(text: appointment?.specialty ?? '');
+    final locationController =
+        TextEditingController(text: appointment?.location ?? '');
+    final notesController =
+        TextEditingController(text: appointment?.notes ?? '');
+
+    TimeOfDay selectedTime =
+        appointment?.time ?? const TimeOfDay(hour: 9, minute: 0);
+    DateTime selectedDate =
+        appointment?.date ?? DateTime.now().add(const Duration(days: 1));
 
     showDialog(
       context: context,
@@ -94,7 +130,8 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                               context: context,
                               initialDate: selectedDate,
                               firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(const Duration(days: 365)),
+                              lastDate:
+                                  DateTime.now().add(const Duration(days: 365)),
                             );
                             if (date != null) {
                               setState(() {
@@ -161,7 +198,7 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                       time: selectedTime,
                       notes: notesController.text.trim(),
                     );
-                    
+
                     if (appointment.doctorName.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -170,24 +207,25 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                       );
                       return;
                     }
-                    
+
                     this.setState(() {
                       if (isEditing && index != null) {
                         _appointments[index] = appointment;
                       } else {
                         _appointments.add(appointment);
                       }
-                      
-                      // Sort appointments by date and time
+
+                      // Sort appointments by date and time.
+
                       _appointments.sort((a, b) {
                         int dateCompare = a.date.compareTo(b.date);
                         if (dateCompare != 0) return dateCompare;
-                        
+
                         return (a.time.hour * 60 + a.time.minute)
                             .compareTo(b.time.hour * 60 + b.time.minute);
                       });
                     });
-                    
+
                     Navigator.pop(context);
                   },
                   child: Text(isEditing ? 'Save' : 'Add'),
@@ -200,7 +238,8 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
     );
   }
 
-  /// Deletes an appointment at the specified index
+  /// Deletes an appointment at the specified index.
+
   void _deleteAppointment(int index) {
     showDialog(
       context: context,
@@ -224,11 +263,11 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                 });
                 Navigator.pop(context);
               },
-              child: const Text('Delete'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
+              child: const Text('Delete'),
             ),
           ],
         );
@@ -241,7 +280,7 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = today.add(const Duration(days: 1));
     final appointmentDate = DateTime(date.year, date.month, date.day);
-    
+
     if (appointmentDate == today) {
       return 'Today';
     } else if (appointmentDate == tomorrow) {
@@ -332,7 +371,8 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.edit, size: 18),
-                                  onPressed: () => _showAppointmentDialog(appointment, index),
+                                  onPressed: () => _showAppointmentDialog(
+                                      appointment, index),
                                   tooltip: 'Edit',
                                   constraints: const BoxConstraints(),
                                   padding: EdgeInsets.zero,
@@ -350,9 +390,11 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                         ),
                         const SizedBox(height: 8),
                         Container(
-                          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 4, horizontal: 8),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primaryContainer,
+                            color:
+                                Theme.of(context).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Row(
@@ -364,7 +406,9 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                                 _formatAppointmentDate(appointment.date),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -374,7 +418,9 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                                 '${appointment.time.hour}:${appointment.time.minute.toString().padLeft(2, '0')}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
                                 ),
                               ),
                             ],
@@ -401,22 +447,3 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
     );
   }
 }
-
-/// Model class to represent an appointment
-class Appointment {
-  final String doctorName;
-  final String specialty;
-  final String location;
-  final DateTime date;
-  final TimeOfDay time;
-  final String notes;
-
-  Appointment({
-    required this.doctorName,
-    required this.specialty,
-    required this.location,
-    required this.date,
-    required this.time,
-    required this.notes,
-  });
-} 

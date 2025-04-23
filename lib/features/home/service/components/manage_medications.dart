@@ -1,8 +1,36 @@
+/// A widget to display and manage medications.
+///
+// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+///
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
+///
+/// Licensed under the GNU General Public License, Version 3 (the "License").
+///
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://www.gnu.org/licenses/>.
+///
+/// Authors: Ashley Tang
+
 library;
 
 import 'package:flutter/material.dart';
-import 'package:healthpod/theme/card_style.dart';
+
 import 'package:intl/intl.dart';
+
+import 'package:healthpod/features/profile/medication/model.dart';
+import 'package:healthpod/theme/card_style.dart';
 
 /// A widget to display and manage medications.
 ///
@@ -17,7 +45,8 @@ class ManageMedications extends StatefulWidget {
 }
 
 class _ManageMedicationsState extends State<ManageMedications> {
-  // Medications data
+  // Medications data.
+
   final List<Medication> _medications = [
     Medication(
       name: 'Lisinopril',
@@ -37,15 +66,19 @@ class _ManageMedicationsState extends State<ManageMedications> {
     ),
   ];
 
-  /// Opens dialog to add or edit a medication
+  /// Opens dialog to add or edit a medication.
+
   void _showMedicationDialog([Medication? medication, int? index]) {
     final bool isEditing = medication != null;
-    
+
     final nameController = TextEditingController(text: medication?.name ?? '');
-    final dosageController = TextEditingController(text: medication?.dosage ?? '');
-    final frequencyController = TextEditingController(text: medication?.frequency ?? '');
-    final notesController = TextEditingController(text: medication?.notes ?? '');
-    
+    final dosageController =
+        TextEditingController(text: medication?.dosage ?? '');
+    final frequencyController =
+        TextEditingController(text: medication?.frequency ?? '');
+    final notesController =
+        TextEditingController(text: medication?.notes ?? '');
+
     TimeOfDay selectedTime = medication?.time ?? TimeOfDay.now();
     DateTime selectedDate = medication?.startDate ?? DateTime.now();
 
@@ -161,7 +194,7 @@ class _ManageMedicationsState extends State<ManageMedications> {
                       startDate: selectedDate,
                       notes: notesController.text.trim(),
                     );
-                    
+
                     if (medication.name.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
@@ -170,7 +203,7 @@ class _ManageMedicationsState extends State<ManageMedications> {
                       );
                       return;
                     }
-                    
+
                     this.setState(() {
                       if (isEditing && index != null) {
                         _medications[index] = medication;
@@ -178,7 +211,7 @@ class _ManageMedicationsState extends State<ManageMedications> {
                         _medications.add(medication);
                       }
                     });
-                    
+
                     Navigator.pop(context);
                   },
                   child: Text(isEditing ? 'Save' : 'Add'),
@@ -191,7 +224,8 @@ class _ManageMedicationsState extends State<ManageMedications> {
     );
   }
 
-  /// Deletes a medication at the specified index
+  /// Deletes a medication at the specified index.
+
   void _deleteMedication(int index) {
     showDialog(
       context: context,
@@ -215,11 +249,11 @@ class _ManageMedicationsState extends State<ManageMedications> {
                 });
                 Navigator.pop(context);
               },
-              child: const Text('Delete'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
               ),
+              child: const Text('Delete'),
             ),
           ],
         );
@@ -294,7 +328,8 @@ class _ManageMedicationsState extends State<ManageMedications> {
                                       fontSize: 16,
                                     ),
                                   ),
-                                  Text('${medication.dosage} - ${medication.frequency}'),
+                                  Text(
+                                      '${medication.dosage} - ${medication.frequency}'),
                                   if (medication.notes.isNotEmpty)
                                     Text(
                                       medication.notes,
@@ -310,7 +345,8 @@ class _ManageMedicationsState extends State<ManageMedications> {
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.edit, size: 18),
-                                  onPressed: () => _showMedicationDialog(medication, index),
+                                  onPressed: () =>
+                                      _showMedicationDialog(medication, index),
                                   tooltip: 'Edit',
                                   constraints: const BoxConstraints(),
                                   padding: EdgeInsets.zero,
@@ -355,22 +391,3 @@ class _ManageMedicationsState extends State<ManageMedications> {
     );
   }
 }
-
-/// Model class to represent a medication
-class Medication {
-  final String name;
-  final String dosage;
-  final String frequency;
-  final TimeOfDay time;
-  final DateTime startDate;
-  final String notes;
-
-  Medication({
-    required this.name,
-    required this.dosage,
-    required this.frequency,
-    required this.time,
-    required this.startDate,
-    required this.notes,
-  });
-} 

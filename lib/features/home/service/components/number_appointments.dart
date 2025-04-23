@@ -43,7 +43,8 @@ class NumberAppointments extends StatefulWidget {
 }
 
 class _NumberAppointmentsState extends State<NumberAppointments> {
-  // Appointment data
+  // Appointment data.
+
   String title = 'Numbers for Medical Appointments';
   String summary = 'Only one appointment in the future';
   List<Map<String, dynamic>> appointments = [
@@ -56,6 +57,7 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
   ];
 
   /// Opens a dialog to manage appointments.
+
   void _manageAppointments() {
     showDialog(
       context: context,
@@ -107,7 +109,8 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
                       alignment: Alignment.center,
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          // Show dialog to add new appointment
+                          // Show dialog to add new appointment.
+
                           _showAddAppointmentDialog(context, setState);
                         },
                         icon: const Icon(Icons.add),
@@ -115,13 +118,15 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Import/Export buttons
+                    // Import/Export buttons.
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         OutlinedButton.icon(
                           onPressed: () {
-                            // TODO: Implement import functionality
+                            // TODO: Implement import functionality.
+
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -134,7 +139,8 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
                         ),
                         OutlinedButton.icon(
                           onPressed: () {
-                            // TODO: Implement export functionality
+                            // TODO: Implement export functionality.
+
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -159,14 +165,16 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Update the state in the card widget
+                    // Update the state in the card widget.
+
                     this.setState(() {
                       if (appointments.isEmpty) {
                         summary = 'No upcoming appointments';
                       } else if (appointments.length == 1) {
                         summary = 'Only one appointment in the future';
                       } else {
-                        summary = '${appointments.length} appointments scheduled';
+                        summary =
+                            '${appointments.length} appointments scheduled';
                       }
                     });
                     Navigator.pop(context);
@@ -182,6 +190,7 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
   }
 
   /// Shows a dialog to add a new appointment.
+
   void _showAddAppointmentDialog(
       BuildContext context, void Function(void Function()) parentSetState) {
     final titleController = TextEditingController();
