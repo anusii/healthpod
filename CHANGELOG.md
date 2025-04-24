@@ -15,6 +15,10 @@ Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
 ## 1.0 First stable release
 
++ HOME: Rename tabs [0.1.7 20250424 gjw]
++ HOME: Allow health plan to be edited [0.1.6 20250424 atangster]
++ BLOOD PRESSURE: Remove feeling [0.1.5 20250424 atangster]
++ FILES: Explain csv/json formats [0.1.4 20250424 atangster]
 + General cleanup [0.1.3 20250424 gjw]
 + Resync [0.1.2 20250423 gjw]
 + HOME: Concept dashboard and vaccinations [0.1.1 20250402 misc]
