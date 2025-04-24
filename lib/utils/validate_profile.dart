@@ -60,8 +60,8 @@ ProfileValidationResult validateProfileJson(Map<String, dynamic> json) {
     final fieldDisplayNames = {
       'name': 'Patient Name',
       'address': 'Address',
-      'bestContactPhone': 'Best Contact Phone',
-      'alternativeContactNumber': 'Alternative Contact Number',
+      'bestContactPhone': 'Phone',
+      'alternativeContactNumber': 'Alternative Phone',
       'email': 'Email',
       'dateOfBirth': 'Date of Birth',
       'gender': 'Gender',
