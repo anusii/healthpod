@@ -356,7 +356,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     validator: _validateRequired,
                   ),
                   const SizedBox(height: 12),
-                  const Text('Best Contact Phone'),
+                  const Text('Phone'),
                   MarkdownTooltip(
                     message: '''
                     
@@ -383,7 +383,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const Text('Alternative Contact Number'),
+                  const Text('Alternative Phone'),
                   MarkdownTooltip(
                     message: '''
                     
@@ -649,10 +649,9 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     children: [
                       _buildDataRow('Address:', _addressController.text),
                       const SizedBox(height: 8),
-                      _buildDataRow('Best Contact Phone:',
-                          _bestContactPhoneController.text),
+                      _buildDataRow('Phone:', _bestContactPhoneController.text),
                       const SizedBox(height: 8),
-                      _buildDataRow('Alternative Contact Number:',
+                      _buildDataRow('Alternative Phone:',
                           _alternativeContactNumberController.text),
                       const SizedBox(height: 8),
                       _buildDataRow('Email:', _emailController.text),
