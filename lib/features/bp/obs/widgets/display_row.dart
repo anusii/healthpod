@@ -34,7 +34,7 @@ import 'package:healthpod/features/bp/obs/model.dart';
 /// Creates a read-only [DataRow] for displaying a single [BPObservation].
 ///
 /// This row shows the observation's timestamp, systolic pressure, diastolic
-/// pressure, heart rate, feeling, and notes. It also provides an edit button
+/// pressure, heart rate and notes. It also provides an edit button
 /// (`onEdit`) and a delete button (`onDelete`) for user interactions.
 ///
 /// The [index] can help identify the observation's position in the parent list.
@@ -66,10 +66,9 @@ DataRow buildDisplayRow({
     cells.add(DataCell(Text('${observation.heartRate}')));
   }
 
-  // Add feeling and notes if screen is wide enough.
+  // Add notes if screen is wide enough.
 
   if (width > 800) {
-    cells.add(DataCell(Text(observation.feeling)));
     cells.add(DataCell(Text(observation.notes)));
   }
 

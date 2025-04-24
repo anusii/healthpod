@@ -66,8 +66,6 @@ class BPEditorControllers {
 
     _currentState = observation;
 
-    _onObservationChanged = onObservationChanged;
-
     // Remove existing listeners before updating.
 
     _removeListeners();
@@ -107,19 +105,6 @@ class BPEditorControllers {
     // Add new listeners.
 
     _addListeners(onObservationChanged);
-  }
-
-  /// Callback for feeling changes.
-
-  void Function(BPObservation updated)? _onObservationChanged;
-
-  /// Update feeling and notify listeners.
-
-  void updateFeeling(String feeling) {
-    if (_currentState != null && _onObservationChanged != null) {
-      _currentState = _currentState!.copyWith(feeling: feeling);
-      _onObservationChanged!(_currentState!);
-    }
   }
 
   /// Add listeners to all controllers to update the observation.
@@ -219,7 +204,6 @@ class BPEditorControllers {
 
   void dispose() {
     _removeListeners();
-    _onObservationChanged = null;
     systolicController?.dispose();
     diastolicController?.dispose();
     heartRateController?.dispose();

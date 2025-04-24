@@ -30,7 +30,7 @@ import 'package:healthpod/constants/blood_pressure_survey.dart';
 /// Model class representing a blood pressure observation.
 ///
 /// Stores complete blood pressure measurements including systolic/diastolic pressure,
-/// heart rate, subjective feeling, and any additional health notes. Provides JSON
+/// heart rate and any additional health notes. Provides JSON
 /// serialization and object copying functionality.
 ///
 /// Note: previously 'BPRecord' was used as the class name, but 'BPObservation' is
@@ -55,10 +55,6 @@ class BPObservation {
 
   final double heartRate;
 
-  /// Subjective feeling (Excellent/Good/Fair/Poor).
-
-  final String feeling;
-
   /// Additional health notes or observations.
 
   final String notes;
@@ -68,14 +64,13 @@ class BPObservation {
     required this.systolic,
     required this.diastolic,
     required this.heartRate,
-    required this.feeling,
     required this.notes,
   });
 
   /// Creates a BPObservation from JSON data.
   ///
   /// Expects specific survey response format with blood pressure measurements,
-  /// heart rate, feeling and notes stored under 'responses' key.
+  /// heart rate and notes stored under 'responses' key.
 
   factory BPObservation.fromJson(Map<String, dynamic> json) {
     return BPObservation(
@@ -84,7 +79,6 @@ class BPObservation {
           .fieldSystolic], // Use BP survey field variable instead of full question.
       diastolic: json['responses'][HealthSurveyConstants.fieldDiastolic],
       heartRate: json['responses'][HealthSurveyConstants.fieldHeartRate],
-      feeling: json['responses'][HealthSurveyConstants.fieldFeeling] ?? '',
       notes: json['responses'][HealthSurveyConstants.fieldNotes] ?? '',
     );
   }
@@ -101,7 +95,6 @@ class BPObservation {
             systolic, // Use BP survey field variable instead of full question.
         HealthSurveyConstants.fieldDiastolic: diastolic,
         HealthSurveyConstants.fieldHeartRate: heartRate,
-        HealthSurveyConstants.fieldFeeling: feeling,
         HealthSurveyConstants.fieldNotes: notes,
       },
     };
@@ -116,7 +109,6 @@ class BPObservation {
     double? systolic,
     double? diastolic,
     double? heartRate,
-    String? feeling,
     String? notes,
   }) {
     return BPObservation(
@@ -124,7 +116,6 @@ class BPObservation {
       systolic: systolic ?? this.systolic,
       diastolic: diastolic ?? this.diastolic,
       heartRate: heartRate ?? this.heartRate,
-      feeling: feeling ?? this.feeling,
       notes: notes ?? this.notes,
     );
   }

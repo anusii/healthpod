@@ -32,7 +32,6 @@ import 'package:healthpod/constants/health_data_type.dart';
 /// - Red for blood pressure-related questions.
 /// - Pink for heart rate questions.
 /// - Blue for general numerical data.
-/// - Amber for categorical data related to feelings.
 /// - Green for text-based data.
 /// - Purple for general categorical data.
 /// - Grey for unclassified types.
@@ -49,10 +48,6 @@ Color getIconColor(HealthDataType type, String question) {
       return Colors.pink.shade400;
     }
     return Colors.blue.shade400;
-  }
-
-  if (type == HealthDataType.categorical && lowerQuestion.contains('feeling')) {
-    return Colors.amber.shade400;
   }
 
   return switch (type) {

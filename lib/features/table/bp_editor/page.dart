@@ -115,7 +115,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
   ///
   /// Uses a DataTable with responsive columns that adapt based on screen width.
   /// The table shows a minimum set of columns (timestamp, systolic, diastolic) and
-  /// progressively reveals more columns (heart rate, feeling, notes) as screen width increases.
+  /// progressively reveals more columns (heart rate, notes) as screen width increases.
   ///
   /// @param context The build context.
   /// @param width The current screen width.
@@ -223,8 +223,6 @@ class _BPEditorPageState extends State<BPEditorPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildInfoRow('Heart Rate', '${obs.heartRate} BPM'),
-                    const SizedBox(height: 8),
-                    _buildInfoRow('Feeling', obs.feeling),
                     if (obs.notes.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       _buildInfoRow('Notes', obs.notes),
@@ -360,26 +358,6 @@ class _BPEditorPageState extends State<BPEditorPage> {
               suffix: 'BPM',
             ),
             const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: editorState.currentEdit?.feeling.isEmpty ?? true
-                  ? 'Good'
-                  : editorState.currentEdit?.feeling ?? obs.feeling,
-              decoration: const InputDecoration(labelText: 'Feeling'),
-              items: ['Excellent', 'Good', 'Fair', 'Poor']
-                  .map((String value) => DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      ))
-                  .toList(),
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    editorState.updateFeeling(newValue);
-                  });
-                }
-              },
-            ),
-            const SizedBox(height: 16),
             TextField(
               controller: editorState.notesController,
               maxLines: 3,
@@ -458,7 +436,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
   /// Implements responsive column visibility:
   /// - Base columns (Timestamp, Systolic, Diastolic) always visible
   /// - Heart Rate visible when width > 600
-  /// - Feeling and Notes visible when width > 800
+  /// - Notes visible when width > 800
   /// - Actions column always visible
   ///
   /// @param width The current screen width.
@@ -476,7 +454,6 @@ class _BPEditorPageState extends State<BPEditorPage> {
     }
 
     if (width > 800) {
-      columns.add(const DataColumn(label: Text('Feeling')));
       columns.add(const DataColumn(label: Text('Notes')));
     }
 

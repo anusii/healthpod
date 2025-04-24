@@ -176,7 +176,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
     if (isInBpDirectory) {
       title = 'Blood Pressure CSV Format';
       requiredFields = ['timestamp', 'systolic', 'diastolic', 'heart_rate'];
-      optionalFields = ['feeling', 'notes'];
+      optionalFields = ['notes'];
     } else if (isInVaccinationDirectory) {
       title = 'Vaccination CSV Format';
       requiredFields = ['timestamp', 'name', 'type'];
