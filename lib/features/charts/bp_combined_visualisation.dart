@@ -1,6 +1,6 @@
 /// BP combined visualisation widget.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-04-25 07:02:02 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -233,7 +233,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                     * **Systolic**: Upper number - Pressure when heart contracts
 
-                    * **Diastolic**: Lower number - Pressure when heart relaxes 
+                    * **Diastolic**: Lower number - Pressure when heart relaxes
 
                   ''',
                   child: Row(children: [
@@ -306,7 +306,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                         - Balanced diet
                         - Stress management
                         - Limited sodium & alcohol
-                        
+
                   ''',
                   child: Icon(
                     Icons.health_and_safety_outlined,
@@ -323,7 +323,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                   message: '''
 
                   **American Heart Association**
-                  
+
                   Click to visit [AHA's website](https://www.heart.org) for expert guidance on heart health and blood pressure management.
 
                   ''',
@@ -433,62 +433,85 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                         /// Removed normal ranges for each type.
 
                         getTooltipItems: (List<LineBarSpot> touchedSpots) {
-                          return touchedSpots.map((LineBarSpot spot) {
-                            final isSystolic = spot.barIndex == 0;
-                            final index = spot.x.toInt();
-                            final data = _surveyData[index]['responses'];
+                          if (touchedSpots.isEmpty) return [];
 
-                            // Get additional data points.
+                          // Get the index of the data point from the first spot.
 
-                            final heartRate =
-                                data[HealthSurveyConstants.fieldHeartRate] ??
-                                    'N/A';
-                            final notes =
-                                data[HealthSurveyConstants.fieldNotes] ?? '';
+                          final index = touchedSpots[0].x.toInt();
+                          final data = _surveyData[index]['responses'];
 
-                            // Format timestamp.
+                          // Extract shared metadata.
 
-                            final timestamp =
-                                DateTime.parse(_surveyData[index]['timestamp']);
-                            final timeStr =
-                                DateFormat('HH:mm').format(timestamp);
+                          final heartRate =
+                              data[HealthSurveyConstants.fieldHeartRate] ??
+                                  'N/A';
+                          final notes =
+                              data[HealthSurveyConstants.fieldNotes] ?? '';
+                          final timestamp =
+                              DateTime.parse(_surveyData[index]['timestamp']);
+                          String timeStr =
+                              DateFormat('dd MMMM y h:mm a').format(timestamp);
 
-                            // Build tooltip content.
+                          // Get both systolic and diastolic values from the data.
 
-                            final pressureType =
-                                isSystolic ? 'Systolic' : 'Diastolic';
-                            final pressureValue = parseNumericInput(spot.y);
+                          final systolicValue = parseNumericInput(
+                              _parseNumericValue(
+                                  data[HealthSurveyConstants.fieldSystolic]));
+                          final diastolicValue = parseNumericInput(
+                              _parseNumericValue(
+                                  data[HealthSurveyConstants.fieldDiastolic]));
 
-                            // Create formatted content lines.
+                          // Create a consistent tooltip regardless of which point was touched.
 
-                            final List<String> contentLines = [
-                              '${pressureType.toUpperCase()}: $pressureValue mmHg',
-                              '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-                              '🕒 Time: $timeStr',
-                              '❤️ Heart Rate: $heartRate bpm',
-                            ];
+                          final List<String> contentLines = [
+                            'BLOOD PRESSURE: $systolicValue/$diastolicValue mmHg',
+                            '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+                            '🕒 Time: $timeStr',
+                            '❤️ Heart Rate: $heartRate bpm',
+                          ];
 
-                            // Add notes if they exist.
+                          // Add notes if they exist.
 
-                            if (notes.isNotEmpty) {
-                              contentLines.add('📝 Notes: $notes');
+                          if (notes.isNotEmpty) {
+                            contentLines.add('📝 Notes: $notes');
+                          }
+
+                          // Join lines with consistent newlines.
+
+                          final tooltipContent = contentLines.join('\n');
+
+                          // We need to return an item for each touched spot to satisfy fl_chart requirements.
+                          // Make the first item visible with content, and hide the rest with empty content.
+
+                          final List<LineTooltipItem> items = [];
+
+                          // Add a tooltip item for each touched spot.
+
+                          for (int i = 0; i < touchedSpots.length; i++) {
+                            // Only the first tooltip will actually be visible with content.
+
+                            if (i == 0) {
+                              items.add(LineTooltipItem(
+                                tooltipContent,
+                                TextStyle(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13,
+                                  height: 1.8,
+                                ),
+                                textAlign: TextAlign.left,
+                              ));
+                            } else {
+                              // Add empty tooltip items for other spots, they won't be visible.
+
+                              items.add(LineTooltipItem(
+                                '',
+                                const TextStyle(fontSize: 0),
+                              ));
                             }
+                          }
 
-                            // Join lines with consistent newlines.
-
-                            final tooltipContent = contentLines.join('\n');
-
-                            return LineTooltipItem(
-                              tooltipContent,
-                              TextStyle(
-                                color: theme.colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 13,
-                                height: 1.8,
-                              ),
-                              textAlign: TextAlign.left,
-                            );
-                          }).toList();
+                          return items;
                         },
                       ),
                       handleBuiltInTouches: true,

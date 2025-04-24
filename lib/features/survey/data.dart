@@ -65,6 +65,29 @@ class SurveyData {
     allData.sort((a, b) => DateTime.parse(a['timestamp'])
         .compareTo(DateTime.parse(b['timestamp'])));
 
+    // Remove duplicate date entries - keeping only the latest entry for each day.
+
+    final Map<String, Map<String, dynamic>> uniqueDayEntries = {};
+
+    for (var entry in allData) {
+      final dateTime = DateTime.parse(entry['timestamp']);
+      final dateKey = '${dateTime.year}-${dateTime.month}-${dateTime.day}';
+
+      // Only overwrite if it's a later time on the same day.
+
+      if (!uniqueDayEntries.containsKey(dateKey) ||
+          DateTime.parse(uniqueDayEntries[dateKey]!['timestamp'])
+              .isBefore(dateTime)) {
+        uniqueDayEntries[dateKey] = entry;
+      }
+    }
+
+    // Convert back to list and re-sort.
+
+    allData = uniqueDayEntries.values.toList();
+    allData.sort((a, b) => DateTime.parse(a['timestamp'])
+        .compareTo(DateTime.parse(b['timestamp'])));
+
     return allData;
   }
 
