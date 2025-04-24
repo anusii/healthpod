@@ -11,4 +11,4 @@ PRODUCT_NAME = healthpod
 PRODUCT_BUNDLE_IDENTIFIER = com.togaware.healthpod
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 com.togaware.healthpod. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 Togaware Pty Ltd. All rights reserved.
