@@ -97,28 +97,28 @@ final List<Map<String, dynamic>> homeTabs = [
     ''',
   },
   {
-    'title': 'Charts',
+    'title': 'Visuals',
     'icon': Icons.show_chart,
     'color': null,
     'content': const ChartTab(),
     'tooltip': '''
 
-    **Charts:** Tap here to visualise your health data that is stored in your
+    **Visuals:** Tap here to visualise your health data that is stored in your
       pod. Your **blood pressure** observations will show trends over time and
       other health metrics. Your **vaccinations** will be shown as a timeline.
 
     ''',
   },
   {
-    'title': 'Table',
+    'title': 'Tables',
     'icon': Icons.table_chart,
     'color': null,
     'content': const TableTab(),
     'tooltip': '''
 
-    **Table:** Tap here to view, modify, add, or remove your saved health
-      data. All of your health data from your pod is accessible here in a
-      detailed table view.
+    **Tables:** Tap here to view, modify, add, or remove your saved health data
+      through a tabular form. All of your health data from your pod is
+      accessible here.
 
     ''',
   },
