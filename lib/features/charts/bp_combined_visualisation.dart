@@ -1,6 +1,6 @@
 /// BP combined visualisation widget.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-04-25 07:02:02 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -233,7 +233,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                     * **Systolic**: Upper number - Pressure when heart contracts
 
-                    * **Diastolic**: Lower number - Pressure when heart relaxes 
+                    * **Diastolic**: Lower number - Pressure when heart relaxes
 
                   ''',
                   child: Row(children: [
@@ -306,7 +306,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                         - Balanced diet
                         - Stress management
                         - Limited sodium & alcohol
-                        
+
                   ''',
                   child: Icon(
                     Icons.health_and_safety_outlined,
@@ -323,7 +323,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                   message: '''
 
                   **American Heart Association**
-                  
+
                   Click to visit [AHA's website](https://www.heart.org) for expert guidance on heart health and blood pressure management.
 
                   ''',
@@ -449,7 +449,8 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                               data[HealthSurveyConstants.fieldNotes] ?? '';
                           final timestamp =
                               DateTime.parse(_surveyData[index]['timestamp']);
-                          final timeStr = DateFormat('HH:mm').format(timestamp);
+                          String timeStr =
+                              DateFormat('dd MMMM y h:mm a').format(timestamp);
 
                           // Get both systolic and diastolic values from the data.
 
