@@ -13,7 +13,8 @@ environment:
 # To see which dependencies have newer versions available:
 #
 # `flutter pub outdated`.
-
+#
+# (gjw 20250429)
 
 dependencies:
   flutter:
@@ -45,21 +46,24 @@ dependencies:
   rdflib: ^0.2.9
   riverpod: ^2.6.1
   shared_preferences: ^2.5.2
-  syncfusion_flutter_pdf: ^29.1.38
-  table_calendar: ^3.0.9
-  timeline_tile: ^2.0.0
-  universal_io: ^2.2.2
-  url_launcher: ^6.3.1
-  webdriver: ^3.0.3
-  window_manager: ^0.4.3
+
+  # Temporarily use the github repo version of solidpod until it is
+  # released to the dart repository. (gjw 20250429)
+  #
+  # solidpod: ^0.0.0
 
   solidpod:
     git:
       url: https://github.com/anusii/solidpod.git
       ref: dev
+  syncfusion_flutter_pdf: ^29.1.38
+  table_calendar: ^3.0.9
+  timeline_tile: ^2.0.0
+  universal_io: ^2.2.2
+  url_launcher: ^6.3.1
   version_widget: ^0.0.6
-
-
+  webdriver: ^3.0.3
+  window_manager: ^0.4.3
 
 dev_dependencies:
 
@@ -71,34 +75,35 @@ dev_dependencies:
       url: https://github.com/anusii/import-order-lint.git
       ref: main
 
-  ubuntu_lints: ^0.4.0
   test: ^1.25.15
-
-
-
+  ubuntu_lints: ^0.4.0
 
 dependency_overrides:
 
-  # file: ^7.0.0 # Use only if necessary
+  # Why (gjw 20250429)
 
-  # Add analyzer override to resolve version conflicts
+  # file: ^7.0.0
+
+  # Add analyzer override to resolve version conflicts. More details
+  # required. (gjw 20250429)
+
   # analyzer: ^6.6.0
 
-  # TODO 20240710 gjw solid-auth DEPENDS ON intl-0.19.0
-  #
-  # This may require Anushka's update. We will want to remove this
+  # This may no longer be required with latest solid_auth 0.1.23 which
+  # has better intl dependency constraint (>=). (gjw 20250429)
   # override asap.
 
   # intl: ^0.19.0
-  test_api: ^0.7.3
+
+  # Why? (gjw 20250429)
+
+  # test_api: ^0.7.3
+
+  # See https://???? (gjw 20250429)
+
   flutter_secure_storage_linux: ^2.0.1
   flutter_secure_storage_platform_interface: ^2.0.0
 
-
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
-# The following section is specific to Flutter packages.
 
 flutter:
   uses-material-design: true
@@ -110,6 +115,8 @@ flutter:
 # the apps can be automatically updated using:
 #
 # `dart run flutter_launcher_icons`
+#
+# (gjw 20250429)
 
 flutter_launcher_icons:
   image_path: "assets/images/healthpod_icon.png"
