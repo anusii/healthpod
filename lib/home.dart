@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Wednesday 2025-04-02 16:14:46 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-04-24 06:42:45 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -76,45 +76,49 @@ final List<Map<String, dynamic>> homeTabs = [
     'tooltip': '''
 
     **Diary:** Tap here to access and manage your appointments. You can enter
-    historic information, update the calendar when you recieve a new
-    appointment, and load appointments from other sources into your calendar.
+    previous appointments for the record and update the calendar when you
+    recieve a new appointment. To load appointments from other sources via a
+    *CSV* file into your calendar visit the **Files** tab.
 
     ''',
   },
   {
-    'title': 'Update',
+    'title': 'New',
     'icon': Icons.assignment,
     'color': null,
     'content': const SurveyTab(),
     'tooltip': '''
 
-    **Update:** Tap here to enter new data, including observations of your Blood
-    Pressure (systolic, diastolic, heart rate), and vaccinations.
+    **New:** Tap here to directly enter new data. This could be new observations
+    of your **Blood Pressure** (systolic, diastolic, heart rate) or a new
+    **Vaccination**. To upload new data from a *CSV* file vist the **Files**
+    tab.
 
     ''',
   },
   {
-    'title': 'Charts',
+    'title': 'Visuals',
     'icon': Icons.show_chart,
     'color': null,
     'content': const ChartTab(),
     'tooltip': '''
 
-    **Charts:** Tap here to visualise your blood pressure observations, showing
-      any trends over time, as well as other health metrics. Your vaccination
-      timeline charts are also available.
+    **Visuals:** Tap here to visualise your health data that is stored in your
+      pod. Your **blood pressure** observations will show trends over time and
+      other health metrics. Your **vaccinations** will be shown as a timeline.
 
     ''',
   },
   {
-    'title': 'Table',
+    'title': 'Tables',
     'icon': Icons.table_chart,
     'color': null,
     'content': const TableTab(),
     'tooltip': '''
 
-    **Table:** Tap here to view and manage your saved health data through a
-    detailed table view.
+    **Tables:** Tap here to view, modify, add, or remove your saved health data
+      through a tabular form. All of your health data from your pod is
+      accessible here.
 
     ''',
   },
@@ -125,13 +129,13 @@ final List<Map<String, dynamic>> homeTabs = [
     'content': const FileService(),
     'tooltip': '''
 
-    **Files:** Tap here to access file management features.  This is a great
-    place to initially load the Health Data Wallet into your Pod. You can:
+    **Files:** Tap here to access file management features.  Here you can load
+    your health data from any local *CSV* files you may have created into your
+    Health Pod.
 
-          - Browse your POD storage
-          - Upload files to your POD
-          - Download files from your POD
-          - Delete files from your POD
+    The **Files** tab allows you to **browse** your pod storage, **upload**
+    files to your pod, **download** files from your pod to you local device, and
+    to **delete** files from your pod storage.
 
     ''',
   },
@@ -148,7 +152,7 @@ final List<Map<String, dynamic>> homeTabs = [
     - Health information and guides
 
     - External trusted resources
-    
+
     - Useful health calculators and tools
 
     ''',
@@ -257,10 +261,10 @@ class HealthPodHomeState extends State<HealthPodHome> {
           MarkdownTooltip(
             message: '''
 
-            **Version:** Here you can see the current version of the HealthPod
-            app. If the version is out of date then the text will be red. You
-            can tap on the version to view the change log file to see if it is
-            worth updating your version.
+            **Version:** This is the current version of the HealthPod app. If
+            the version is out of date then the text will be red. You can tap on
+            the version to view the app's Change Log to determine if it is worth
+            updating your version.
 
             ''',
             child: const VersionWidget(

@@ -30,11 +30,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 
-import 'package:healthpod/constants/feature.dart';
 import 'package:healthpod/features/file/browser/page.dart';
 import 'package:healthpod/features/file/service/components/file_upload_section.dart';
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
-import 'package:healthpod/providers/tab_state.dart';
 
 /// The main file service widget that provides file upload, download, and preview functionality.
 ///
@@ -54,11 +52,9 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
   /// Navigate to the appropriate folder based on the selected tab.
 
   void _navigateToFeatureFolder() {
-    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
-    final feature =
-        selectedIndex == 0 ? Feature.bloodPressure : Feature.vaccination;
-    final path =
-        'healthpod/data/${feature.displayName.toLowerCase().replaceAll(' ', '_')}';
+    // Navigate directly to the parent data folder instead of feature-specific folder.
+
+    const path = 'healthpod/data';
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(fileServiceProvider.notifier).updateCurrentPath(path);

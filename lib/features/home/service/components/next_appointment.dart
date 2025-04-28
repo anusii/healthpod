@@ -28,13 +28,18 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:intl/intl.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
-import 'package:healthpod/constants/appointment.dart';
-import 'package:healthpod/features/home/service/home_utils.dart';
-import 'package:healthpod/utils/address_link.dart';
-import 'package:healthpod/utils/audio_tooltip.dart';
-import 'package:healthpod/utils/call_icon.dart';
-import 'package:healthpod/utils/touch_finger_oval.dart';
+import 'package:healthpod/theme/card_style.dart';
+
+// Add this global variable if it doesn't exist elsewhere
+bool transportAudioIn = false;
+
+/// A widget that displays the next medical appointment details.
+///
+/// This component shows information about the user's upcoming appointment,
+/// including date, time, location, and transportation details.
 
 class NextAppointment extends StatefulWidget {
   const NextAppointment({super.key});
@@ -100,6 +105,206 @@ class _NextAppointmentState extends State<NextAppointment> {
     super.dispose();
   }
 
+  // Appointment data
+  String title = 'Reminder!';
+  String subtitle = 'Next Appointment Details';
+  DateTime appointmentDate = DateTime(2023, 3, 13, 14, 30);
+  String location = 'Gurriny Yealamucka';
+  bool needsTransport = true;
+  String transportPhone = '(07) 4226 4100';
+  String transportNote = '(only during office hours)';
+  bool useClinicBus = true;
+
+  /// Opens a dialog to edit the next appointment details.
+
+  void _editAppointment() {
+    final dateController = TextEditingController(
+        text: DateFormat('yyyy-MM-dd').format(appointmentDate));
+    final timeController = TextEditingController(
+        text: DateFormat('HH:mm').format(appointmentDate));
+    final locationController = TextEditingController(text: location);
+    final transportPhoneController =
+        TextEditingController(text: transportPhone);
+    final transportNoteController = TextEditingController(text: transportNote);
+
+    bool tempNeedsTransport = needsTransport;
+    bool tempUseClinicBus = useClinicBus;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Edit Appointment Details'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 8),
+                    // Date field.
+
+                    TextField(
+                      controller: dateController,
+                      decoration: const InputDecoration(
+                        labelText: 'Date (YYYY-MM-DD)',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.calendar_today),
+                      ),
+                      readOnly: true,
+                      onTap: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: appointmentDate,
+                          firstDate: DateTime(2020),
+                          lastDate:
+                              DateTime.now().add(const Duration(days: 365 * 5)),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            dateController.text =
+                                DateFormat('yyyy-MM-dd').format(picked);
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // Time field.
+
+                    TextField(
+                      controller: timeController,
+                      decoration: const InputDecoration(
+                        labelText: 'Time (HH:MM)',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.access_time),
+                      ),
+                      readOnly: true,
+                      onTap: () async {
+                        final TimeOfDay? picked = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.fromDateTime(appointmentDate),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            timeController.text =
+                                '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    // Location field.
+
+                    TextField(
+                      controller: locationController,
+                      decoration: const InputDecoration(
+                        labelText: 'Location',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.location_on),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Transport section.
+
+                    const Text(
+                      'Transportation Details',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    SwitchListTile(
+                      title: const Text('Need transportation?'),
+                      value: tempNeedsTransport,
+                      onChanged: (bool value) {
+                        setState(() {
+                          tempNeedsTransport = value;
+                        });
+                      },
+                    ),
+                    if (tempNeedsTransport) ...[
+                      SwitchListTile(
+                        title: const Text('Use clinic bus?'),
+                        value: tempUseClinicBus,
+                        onChanged: (bool value) {
+                          setState(() {
+                            tempUseClinicBus = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: transportPhoneController,
+                        decoration: const InputDecoration(
+                          labelText: 'Transport Phone',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.phone),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: transportNoteController,
+                        decoration: const InputDecoration(
+                          labelText: 'Transport Note',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.note),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    // Parse date and time.
+
+                    final date =
+                        DateFormat('yyyy-MM-dd').parse(dateController.text);
+                    final timeStr = timeController.text.split(':');
+                    final hour = int.parse(timeStr[0]);
+                    final minute = int.parse(timeStr[1]);
+
+                    final newDate = DateTime(
+                      date.year,
+                      date.month,
+                      date.day,
+                      hour,
+                      minute,
+                    );
+
+                    // Update the appointment details.
+
+                    setState(() {
+                      // This setState refers to the parent StatefulBuilder.
+                    });
+
+                    Navigator.pop(context);
+
+                    // Update the state in the card widget.
+
+                    this.setState(() {
+                      appointmentDate = newDate;
+                      location = locationController.text;
+                      needsTransport = tempNeedsTransport;
+                      useClinicBus = tempUseClinicBus;
+                      transportPhone = transportPhoneController.text;
+                      transportNote = transportNoteController.text;
+                    });
+                  },
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -107,18 +312,9 @@ class _NextAppointmentState extends State<NextAppointment> {
         maxWidth: 400,
         minHeight: 300,
       ),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow,
-            spreadRadius: 3,
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.only(
+          left: 16.0, top: 16.0, right: 24.0, bottom: 16.0),
+      decoration: getHomeCardDecoration(context),
       child: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -131,174 +327,149 @@ class _NextAppointmentState extends State<NextAppointment> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
-                    'Reminder!',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      MarkdownTooltip(
+                        message: '**Edit** appointment details',
+                        child: IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: _editAppointment,
+                          constraints: const BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Next Appointment Details',
-                    style: TextStyle(
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // Date.
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Date: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Expanded(
-                        child: Text(
-                          appointmentDate,
-                          // Ensure the text is wrapped to the next line if it's too long.
-
-                          softWrap: true,
-                        ),
-                      ),
-                    ],
+                  // Date
+                  _buildInfoRow(
+                    'Date:',
+                    'Monday, ${DateFormat('d MMMM').format(appointmentDate)}',
                   ),
-                  const SizedBox(height: 10),
-
-                  // Time.
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Time: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Expanded(
-                        child: Text(
-                          appointmentTime,
-                          // Ensure the text is wrapped to the next line if it's too long.
-
-                          softWrap: true,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 8),
+                  // Time
+                  _buildInfoRow(
+                    'Time:',
+                    DateFormat('h:mm a').format(appointmentDate),
                   ),
-                  const SizedBox(height: 10),
-
+                  const SizedBox(height: 8),
                   // Location.
 
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Where: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Expanded(
-                        child: SelectableText.rich(
-                          addressLink(appointmentLocation, context,
-                              fontSize: 14),
-                          maxLines: 2,
-                          style: const TextStyle(height: 1.2),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Clinic bus info.
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Expanded(
-                        child: SelectableText.rich(
-                          TextSpan(
-                            text: 'Clinic Bus: ',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            children: <TextSpan>[
-                              TextSpan(
-                                text: '',
-                                style: TextStyle(fontWeight: FontWeight.normal),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      touchFingerOval(
-                        'Call the Clinic reception for more\ninformation about transport services.',
-                      ),
-                    ],
-                  ),
+                  _buildInfoRow('Where:', location),
                   const SizedBox(height: 16),
+                  // Transport.
 
-                  // Transport help section.
-
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: SelectableText.rich(
-                          TextSpan(
-                            text: 'Need help with transport?',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                  if (useClinicBus)
+                    Row(
+                      children: [
+                        const Icon(Icons.directions_bus, color: Colors.green),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Clinic Bus:',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const Icon(Icons.check, color: Colors.green),
+                      ],
+                    ),
+                  if (needsTransport) ...[
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Need help with transport?',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.phone, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Call $transportPhone ',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                TextSpan(
+                                  text: transportNote,
+                                  style: const TextStyle(
+                                      fontStyle: FontStyle.italic),
+                                ),
+                                const TextSpan(
+                                  text: ' to change or request transport.',
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ),
-                      AudioWithTooltip(
-                        isPlaying: _isPlaying,
-                        toggleAudio: _toggleAudio,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-
-                  // Phone number and info.
-
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CallIcon(contactNumber: phoneNumber),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: RichText(
-                          text: TextSpan(
-                            style: DefaultTextStyle.of(context).style.copyWith(
-                                  fontSize: 13,
-                                ),
-                            children: [
-                              TextSpan(
-                                text: 'Call $phoneNumber ',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                        SizedBox(
+                          width: 32,
+                          height: 32,
+                          child: MarkdownTooltip(
+                            message: _isPlaying
+                                ? '**Stop** audio'
+                                : '**Play** audio explanation',
+                            child: IconButton(
+                              icon: Icon(
+                                _isPlaying ? Icons.stop : Icons.volume_up,
+                                color: _isPlaying ? Colors.red : Colors.blue,
+                                size: 20,
                               ),
-                              const TextSpan(
-                                text: '(only during office hours) ',
-                                style: TextStyle(fontStyle: FontStyle.italic),
-                              ),
-                              const TextSpan(
-                                text: 'to change or request transport.',
-                              ),
-                            ],
+                              onPressed: _toggleAudio,
+                              padding: EdgeInsets.zero,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  /// Helper method to build consistent information rows.
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 60,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(value),
+        ),
+      ],
     );
   }
 }

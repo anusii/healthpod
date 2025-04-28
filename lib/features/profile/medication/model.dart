@@ -1,4 +1,4 @@
-/// Components for the home service feature.
+/// A model class to represent a medication.
 ///
 // Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
 ///
@@ -21,20 +21,28 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Zheyuan Xu
+/// Authors: Ashley Tang
 
 library;
 
-/// Components for the home service feature.
-///
-/// This barrel file exports all the components used in the home service feature,
-/// making them easily accessible to other parts of the application.
+import 'package:flutter/material.dart';
 
-// Note: avatar_name.dart and personal_details.dart components are now combined into profile_details.dart.
+/// A model class to represent a medication.
 
-export 'avatar_name.dart';
-export 'manage_plan.dart';
-export 'next_appointment.dart';
-export 'number_appointments.dart';
-export 'profile_details.dart';
-export 'profile_management.dart';
+class Medication {
+  final String name;
+  final String dosage;
+  final String frequency;
+  final TimeOfDay time;
+  final DateTime startDate;
+  final String notes;
+
+  Medication({
+    required this.name,
+    required this.dosage,
+    required this.frequency,
+    required this.time,
+    required this.startDate,
+    required this.notes,
+  });
+}

@@ -32,7 +32,6 @@ import 'package:healthpod/constants/health_data_type.dart';
 /// - Heart icon for blood pressure-related questions.
 /// - Monitor heart icon for heart rate questions.
 /// - Numbers icon for general numerical data.
-/// - Mood icon for categorical data related to feelings.
 /// - Notes icon for text-based data.
 /// - Checklist icon for general categorical data.
 /// - Calendar icon for date inputs.
@@ -51,9 +50,6 @@ IconData getQuestionIcon(HealthDataType type, String question) {
     }
     return Icons.numbers;
   } else if (type == HealthDataType.categorical) {
-    if (lowerQuestion.contains('feeling')) {
-      return Icons.mood;
-    }
     return Icons.checklist;
   } else if (type == HealthDataType.text) {
     if (lowerQuestion.contains('which vaccine did you receive')) {

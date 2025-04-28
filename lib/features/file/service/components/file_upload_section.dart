@@ -1,6 +1,6 @@
 /// File upload section component for the file service feature.
 ///
-// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-04-17 10:02:42 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -37,6 +37,8 @@ import 'package:path/path.dart' as path;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
+import 'package:healthpod/features/profile/importer.dart';
+import 'package:healthpod/providers/profile_provider.dart';
 import 'package:healthpod/utils/is_text_file.dart';
 
 /// A widget that handles file upload functionality and preview.
@@ -128,9 +130,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 IconButton(
                   icon: MarkdownTooltip(
                     message: '''
-                    
+
                     **Close Preview:** Tap here to close the file preview panel.
-                    
+
                     ''',
                     child: const Icon(Icons.close, size: 20),
                   ),
@@ -156,9 +158,201 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
     );
   }
 
+  /// Builds a CSV format information card for each supported directory.
+
+  Widget _buildFormatCard(bool isInBpDirectory, bool isInVaccinationDirectory,
+      bool isInProfileDirectory) {
+    if (!isInBpDirectory &&
+        !isInVaccinationDirectory &&
+        !isInProfileDirectory) {
+      return const SizedBox.shrink();
+    }
+
+    String title = '';
+    List<String> requiredFields = [];
+    List<String> optionalFields = [];
+    bool isJson = false;
+
+    if (isInBpDirectory) {
+      title = 'Blood Pressure CSV Format';
+      requiredFields = ['timestamp', 'systolic', 'diastolic', 'heart_rate'];
+      optionalFields = ['notes'];
+    } else if (isInVaccinationDirectory) {
+      title = 'Vaccination CSV Format';
+      requiredFields = ['timestamp', 'name', 'type'];
+      optionalFields = ['location', 'notes', 'batch_number'];
+    } else if (isInProfileDirectory) {
+      title = 'Profile JSON Format';
+      requiredFields = [
+        'name',
+        'address',
+        'bestContactPhone',
+        'alternativeContactNumber',
+        'email',
+        'dateOfBirth',
+        'gender'
+      ];
+      isJson = true;
+    }
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(top: 16, bottom: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).dividerColor.withAlpha(10),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 20,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Required Fields:',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text('• ${requiredFields.join("\n• ")}'),
+            const SizedBox(height: 8),
+            if (optionalFields.isNotEmpty) ...[
+              Text(
+                'Optional Fields:',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text('• ${optionalFields.join("\n• ")}'),
+              const SizedBox(height: 8),
+            ],
+            Text(
+              isJson
+                  ? 'Note: The JSON file must contain these required fields with valid values.'
+                  : 'Note: The first row should contain these column headers. All values should be in the correct format.',
+              style: TextStyle(
+                fontStyle: FontStyle.italic,
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Handle profile JSON import.
+
+  Future<void> handleProfileImport() async {
+    try {
+      // Show loading indicator.
+
+      setState(() {
+        ref.read(fileServiceProvider.notifier).updateImportInProgress(true);
+      });
+
+      // Open file picker for JSON files.
+
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        if (file.path != null) {
+          // Show preview.
+
+          if (!mounted) return;
+          await handlePreview(file.path!);
+
+          // Import profile data.
+
+          if (!mounted) return;
+          await ProfileImporter.importJson(
+            file.path!,
+            'profile',
+            context,
+            onSuccess: () {
+              // Only refresh if still mounted.
+
+              if (!mounted) return;
+
+              // Show success message first before any navigation or refresh.
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Profile data imported successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+
+              // Wrap in a microtask to ensure UI operations complete first.
+
+              Future.microtask(() {
+                if (!mounted) return;
+
+                // Refresh profile data after import.
+
+                ref.read(profileProvider.notifier).refreshProfileData(context);
+
+                // Refresh file browser.
+
+                ref.read(fileServiceProvider.notifier).refreshBrowser();
+              });
+            },
+          );
+
+          // No need for additional success message as it's handled in onSuccess.
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error importing profile: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          ref.read(fileServiceProvider.notifier).updateImportInProgress(false);
+        });
+      }
+    }
+  }
+
   Future<void> convertPDFToJsonUpload(File file) async {
     try {
       // Show loading dialog while processing.
+
       if (!mounted) return;
       showDialog(
         context: context,
@@ -169,20 +363,24 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
       );
 
       // Read PDF file.
+
       final bytes = await file.readAsBytes();
       if (!mounted) return;
       final PdfDocument pdf = PdfDocument(inputBytes: bytes);
 
       // Extract text from all pages.
+
       String text = '';
       for (var i = 0; i < pdf.pages.count; i++) {
         text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
       }
 
       // Structure the data to match kt_pathology.json format.
+
       final List<String> lines = text.split('\n');
 
       // Close loading dialog.
+
       if (!mounted) return;
       Navigator.pop(context);
 
@@ -416,8 +614,11 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
     final isInVaccinationDirectory =
         state.currentPath?.contains('vaccination') ?? false;
     final isInDiaryDirectory = state.currentPath?.contains('diary') ?? false;
+    final isInProfileDirectory =
+        state.currentPath?.contains('profile') ?? false;
     final showCsvButtons =
         isInBpDirectory || isInVaccinationDirectory || isInDiaryDirectory;
+    final showProfileImportButton = isInProfileDirectory;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -487,7 +688,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 message: '''
 
                 **Upload**: Tap here to upload a file to your Solid Health Pod.
-                    
+
                 ''',
                 child: ElevatedButton.icon(
                   onPressed: state.uploadInProgress
@@ -529,6 +730,54 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
               ),
             ),
 
+            // Show Profile Import button in Profile directory
+            if (showProfileImportButton) ...[
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: state.importInProgress
+                      ? null
+                      : () => handleProfileImport(),
+                  icon: const Icon(Icons.person),
+                  label: const Text('Import Profile'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.secondaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onSecondaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Export Profile button.
+
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: state.exportInProgress
+                      ? null
+                      : () => ref
+                          .read(fileServiceProvider.notifier)
+                          .handleProfileExport(context),
+                  icon: const Icon(Icons.download),
+                  label: const Text('Export Profile'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.tertiaryContainer,
+                    foregroundColor:
+                        Theme.of(context).colorScheme.onTertiaryContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+
             // Show CSV import/export buttons in BP, Vaccination, or Diary directory.
 
             if (showCsvButtons) ...[
@@ -537,16 +786,14 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 child: MarkdownTooltip(
                   message: '''
 
-                  **Import CSV**
+                  **Import CSV:** Tap here to import data from a CSV file:
 
-                  This button allows you to import data from a CSV file:
+                  - Select a CSV file from your device;
 
-                  - Select a CSV file from your device
+                  - The data will be processed and added to your health records;
 
-                  - The data will be processed and added to your health records
-                  
-                  - For vaccination/blood pressure/diary data, ensure the CSV follows the required format
-                  
+                  - Please ensure the CSV follows the required format.
+
 
                   ''',
                   child: ElevatedButton.icon(
@@ -579,7 +826,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                 child: MarkdownTooltip(
                   message: '''
 
-                  **Export CSV**
+                  **Export CSV:** Tap here to export your health data to a CSV
+                  file:
 
                   This button allows you to export your health data to a CSV file:
                   - Export your vaccination, blood pressure, or diary records
@@ -620,7 +868,12 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
           ],
         ),
 
-        const SizedBox(width: 8),
+        // Display CSV format information card.
+
+        _buildFormatCard(
+            isInBpDirectory, isInVaccinationDirectory, isInProfileDirectory),
+
+        const SizedBox(height: 12),
         MarkdownTooltip(
           message: '''
 

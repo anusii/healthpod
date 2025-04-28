@@ -148,11 +148,11 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                 minHeight: 300,
               ),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(15),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withAlpha(77),
+                    color: Theme.of(context).shadowColor.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 5),
                   ),
@@ -164,14 +164,17 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text(
+                      Text(
                         'Settings',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Theme.of(context).textTheme.titleLarge?.color,
                         ),
                       ),
-                      const Divider(),
+                      Divider(
+                        color: Theme.of(context).dividerColor,
+                      ),
                       SettingField(
                         label: 'Server URL',
                         hint: 'https://pods.dev.solidcommunity.au',
@@ -292,11 +295,19 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.grey[50],
+                                backgroundColor: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Theme.of(context).colorScheme.surface
+                                    : Colors.grey[50],
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Clear All',
-                                style: TextStyle(color: Colors.grey),
+                                style: TextStyle(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Theme.of(context).colorScheme.onSurface
+                                      : Colors.grey,
+                                ),
                               ),
                             ),
                           ),
@@ -324,11 +335,22 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                                 );
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red[50],
+                                backgroundColor: Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .error
+                                        .withValues(alpha: 0.2)
+                                    : Colors.red[50],
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Reset to Default',
-                                style: TextStyle(color: Colors.red),
+                                style: TextStyle(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Theme.of(context).colorScheme.error
+                                      : Colors.red,
+                                ),
                               ),
                             ),
                           ),
@@ -349,7 +371,10 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                   **Close:** Tap here to close the settings dialog.
                   
                   ''',
-                  child: const Icon(Icons.close),
+                  child: Icon(
+                    Icons.close,
+                    color: Theme.of(context).iconTheme.color,
+                  ),
                 ),
                 onPressed: () => Navigator.of(context).pop(),
               ),

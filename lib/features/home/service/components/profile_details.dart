@@ -1,6 +1,6 @@
-/// Personal details card widget.
+/// Integrated profile details card widget.
 //
-// Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
+// Time-stamp: <Sunday 2025-03-16 15:30:05 +1100>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -21,7 +21,7 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Zheyuan Xu
+/// Authors: Ashley Tang
 
 library;
 
@@ -30,19 +30,36 @@ import 'package:flutter/material.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/appointment.dart';
+import 'package:healthpod/theme/card_style.dart';
 import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/fetch_profile_data.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
 
-/// A widget that displays and allows editing of personal identification information.
+/// A widget that combines user avatar and name with personal identification details.
+/// This integrated component displays all user profile information in a single card.
+///
+/// Includes functionality for viewing and editing user profile data, which is
+/// persisted in the user's Solid Pod with encryption.
 
-class PersonalDetails extends StatefulWidget {
+class ProfileDetails extends StatefulWidget {
+  /// Whether the widget is in editing mode.
+
   final bool isEditing;
+
+  /// Whether to show the edit button.
+
   final bool showEditButton;
+
+  /// Callback when edit button is pressed.
+
   final VoidCallback onEditPressed;
+
+  /// Callback when data is changed and saved.
+
   final VoidCallback onDataChanged;
 
-  const PersonalDetails({
+  const ProfileDetails({
     super.key,
     this.isEditing = false,
     this.showEditButton = true,
@@ -51,10 +68,13 @@ class PersonalDetails extends StatefulWidget {
   });
 
   @override
-  State<PersonalDetails> createState() => _PersonalDetailsState();
+  State<ProfileDetails> createState() => _ProfileDetailsState();
 }
 
-class _PersonalDetailsState extends State<PersonalDetails> {
+class _ProfileDetailsState extends State<ProfileDetails> {
+  // Controllers for the editable fields.
+
+  late TextEditingController _nameController;
   late TextEditingController _addressController;
   late TextEditingController _bestContactPhoneController;
   late TextEditingController _alternativeContactNumberController;
@@ -65,6 +85,9 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = true;
   bool _isSaving = false;
+
+  // Holds full profile data.
+
   Map<String, dynamic> _profileData = {};
 
   @override
@@ -74,7 +97,10 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     _loadProfileData();
   }
 
+  /// Initialise all text controllers.
+
   void _initializeControllers() {
+    _nameController = TextEditingController();
     _addressController = TextEditingController();
     _bestContactPhoneController = TextEditingController();
     _alternativeContactNumberController = TextEditingController();
@@ -83,16 +109,23 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     _genderController = TextEditingController();
   }
 
+  /// Load profile data from the pod and update state.
+
   Future<void> _loadProfileData() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
+      // Fetch profile data using utility function.
+
       final profileData = await fetchProfileData(context);
       _profileData = profileData;
 
       setState(() {
+        // Populate controllers with profile data or defaults.
+
+        _nameController.text = profileData['name'] ?? userName;
         _addressController.text = profileData['address'] ?? '';
         _bestContactPhoneController.text =
             profileData['bestContactPhone'] ?? '';
@@ -101,20 +134,33 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         _emailController.text = profileData['email'] ?? '';
         _dateOfBirthController.text = profileData['dateOfBirth'] ?? '';
         _genderController.text = profileData['gender'] ?? '';
+        _isLoading = false;
       });
     } catch (e) {
       debugPrint('Error loading profile data: $e');
-    } finally {
       setState(() {
+        // Set defaults in case of failure.
+
+        _nameController.text = userName;
+        _addressController.text = '';
+        _bestContactPhoneController.text = '';
+        _alternativeContactNumberController.text = '';
+        _emailController.text = '';
+        _dateOfBirthController.text = '';
+        _genderController.text = '';
         _isLoading = false;
       });
     }
   }
 
+  /// Save profile data to the pod.
+
   Future<void> _saveProfileData() async {
+    // Validate form before saving.
+
     if (!_formKey.currentState!.validate()) return;
 
-    // Check if any data has actually changed.
+    // Skip if no changes detected.
 
     if (!_hasDataChanged()) {
       if (mounted) {
@@ -130,8 +176,10 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     });
 
     try {
+      // Prepare data for saving.
+
       final updatedData = {
-        'name': _profileData['name'] ?? '',
+        'name': _nameController.text.trim(),
         'address': _addressController.text.trim(),
         'bestContactPhone': _bestContactPhoneController.text.trim(),
         'alternativeContactNumber':
@@ -141,11 +189,11 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         'gender': _genderController.text.trim(),
       };
 
-      // Clean up existing profile files before saving a new one.
+      // Clean up existing files before saving new ones.
 
       await _deleteExistingProfileFiles();
 
-      // Try to use the uploadJsonToPod method which is known to work with other components.
+      // Save the data using the uploadJsonToPod utility.
 
       final result = await _saveProfileDataUsingUploadUtil(updatedData);
 
@@ -153,7 +201,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         throw Exception('Failed to save profile data: $result');
       }
 
-      // Update local profile data.
+      // Update local data and notify parent.
 
       _profileData = updatedData;
       widget.onDataChanged();
@@ -177,22 +225,23 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     }
   }
 
-  /// Saves the profile data using the uploadJsonToPod utility which handles file creation
-  /// and proper encryption consistently.
+  /// Save profile data using the uploadJsonToPod utility.
+  ///
+  /// Wraps the data in a timestamped structure before saving.
 
   Future<SolidFunctionCallStatus> _saveProfileDataUsingUploadUtil(
       Map<String, dynamic> updatedData) async {
     debugPrint('Saving profile using uploadJsonToPod utility...');
 
     try {
-      // Create a proper JSON structure with timestamp and data.
+      // Create a structured JSON object with timestamp.
 
       final jsonData = {
         'timestamp': DateTime.now().toIso8601String(),
         'data': updatedData,
       };
 
-      // Use uploadJsonToPod which is used by other components successfully.
+      // Save to pod using utility.
 
       final result = await uploadJsonToPod(
         data: jsonData,
@@ -204,7 +253,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         },
       );
 
-      // Double-check by logging the directory contents after saving.
+      // Verify save by checking directory contents.
 
       if (result == SolidFunctionCallStatus.success) {
         try {
@@ -224,10 +273,11 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     }
   }
 
-  /// Check if any data has changed compared to the original profile data.
+  /// Check if any profile data has been changed compared to stored data.
 
   bool _hasDataChanged() {
-    return _addressController.text.trim() != (_profileData['address'] ?? '') ||
+    return _nameController.text.trim() != (_profileData['name'] ?? '') ||
+        _addressController.text.trim() != (_profileData['address'] ?? '') ||
         _bestContactPhoneController.text.trim() !=
             (_profileData['bestContactPhone'] ?? '') ||
         _alternativeContactNumberController.text.trim() !=
@@ -238,14 +288,12 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         _genderController.text.trim() != (_profileData['gender'] ?? '');
   }
 
-  /// Deletes existing profile files before saving a new one to prevent duplication.
-  /// Keeps track of the most recent file (if any) for persistence purposes.
+  /// Delete existing profile files to prevent duplication.
+  ///
+  /// This helps maintain a clean pod structure with only the latest profile data.
 
   Future<void> _deleteExistingProfileFiles() async {
     try {
-      // Get all files in the profile directory.
-      // Note: constructPodPath already includes basePath.
-
       final dirUrl = await getDirUrl(constructPodPath('profile', ''));
       debugPrint(
           'Looking for profile files to delete in: ${constructPodPath('profile', '')}');
@@ -253,7 +301,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       final resources = await getResourcesInContainer(dirUrl);
       debugPrint('Files in profile directory: ${resources.files}');
 
-      // Find all profile files.
+      // Find all profile files with the expected extension.
 
       final profileFiles = resources.files
           .where((file) =>
@@ -265,11 +313,11 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         return;
       }
 
-      // Sort to find the most recent one (we'll keep the metadata from this).
+      // Sort to find the most recent file.
 
       profileFiles.sort((a, b) => b.compareTo(a));
 
-      // Delete all profile files - we'll create a new one with the current data.
+      // Delete all profile files to create a clean slate.
 
       int deletedCount = 0;
       for (final file in profileFiles) {
@@ -286,12 +334,14 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       debugPrint('Successfully deleted $deletedCount profile files');
     } catch (e) {
       debugPrint('Error cleaning up profile files: $e');
-      // Don't rethrow - we want to continue with saving even if cleanup fails.
     }
   }
 
   @override
   void dispose() {
+    // Clean up all controllers to prevent memory leaks.
+
+    _nameController.dispose();
     _addressController.dispose();
     _bestContactPhoneController.dispose();
     _alternativeContactNumberController.dispose();
@@ -302,21 +352,23 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   }
 
   @override
-  void didUpdateWidget(PersonalDetails oldWidget) {
+  void didUpdateWidget(ProfileDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // If we're exiting edit mode, save the data.
+    // Save data when exiting edit mode.
 
     if (oldWidget.isEditing && !widget.isEditing) {
       _saveProfileData();
     }
   }
 
-  // Show edit dialog for editing personal details.
+  /// Show dialog for editing profile details.
 
   Future<void> _showEditDialog() async {
-    // Create temporary controllers with current values.
+    // Create temporary controllers for dialog fields.
 
+    final tempNameController =
+        TextEditingController(text: _nameController.text);
     final tempAddressController =
         TextEditingController(text: _addressController.text);
     final tempBestContactPhoneController =
@@ -332,12 +384,14 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
     final formKey = GlobalKey<FormState>();
 
+    // Show dialog with edit form.
+
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Edit Personal Details'),
+          title: const Text('Edit Profile Details'),
           content: SingleChildScrollView(
             child: Form(
               key: formKey,
@@ -345,6 +399,17 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Text('Name'),
+                  TextFormField(
+                    controller: tempNameController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    ),
+                    validator: _validateRequired,
+                  ),
+                  const SizedBox(height: 12),
                   const Text('Address'),
                   TextFormField(
                     controller: tempAddressController,
@@ -425,6 +490,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   const Text('Date of Birth'),
                   InkWell(
                     onTap: () async {
+                      // Show date picker for selecting date of birth.
+
                       final DateTime? picked = await showDatePicker(
                         context: context,
                         initialDate:
@@ -499,10 +566,11 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       },
     );
 
-    // If user confirmed saving, update the main controllers and save data.
+    // If user confirmed, update main controllers and save data.
 
     if (result == true) {
       setState(() {
+        _nameController.text = tempNameController.text;
         _addressController.text = tempAddressController.text;
         _bestContactPhoneController.text = tempBestContactPhoneController.text;
         _alternativeContactNumberController.text =
@@ -515,8 +583,9 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       await _saveProfileData();
     }
 
-    // Dispose temporary controllers after they are no longer needed.
+    // Clean up temporary controllers.
 
+    tempNameController.dispose();
     tempAddressController.dispose();
     tempBestContactPhoneController.dispose();
     tempAlternativeContactNumberController.dispose();
@@ -525,11 +594,10 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     tempGenderController.dispose();
   }
 
-  /// Parse a date string or return a default date.
+  /// Parse a date string into DateTime or return a default date.
 
   DateTime _parseDateOrDefault(String dateStr) {
     try {
-      // Try to parse the date in format YYYY-MM-DD.
       final parts = dateStr.split('-');
       if (parts.length == 3) {
         return DateTime(
@@ -538,43 +606,34 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     } catch (e) {
       debugPrint('Error parsing date: $e');
     }
-    // Return a default date (30 years ago).
-
+    // Return a default date (30 years ago)
     return DateTime.now().subtract(const Duration(days: 365 * 30));
   }
 
-  /// Format a date as YYYY-MM-DD.
+  /// Format a DateTime as YYYY-MM-DD.
 
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
-  /// Validate an email address.
+  /// Validate email format - optional field.
 
   String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) return null; // Make email optional
+    if (value == null || value.isEmpty) return null;
     final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
     if (!emailRegex.hasMatch(value)) return 'Enter a valid email address';
     return null;
   }
 
-  /// Validate a phone number.
+  /// Validate phone number format - optional field.
 
   String? _validatePhone(String? value) {
-    if (value == null || value.isEmpty) return null; // Make phone optional
+    if (value == null || value.isEmpty) return null;
 
-    // Clean the input by removing spaces, dashes, and parentheses.
+    // Clean the input by removing spaces, dashes and parentheses.
 
     final cleanedValue = value.replaceAll(RegExp(r'[\s\-()]'), '');
-
-    // Australian mobile: +61 4XX XXX XXX or 04XX XXX XXX.
-    // Australian landline: +61 X XXXX XXXX or 0X XXXX XXXX.
-    // Allow international format with + prefix.
-
     final australianPhoneRegex = RegExp(r'^(\+61|0)[0-9]{9,10}$');
-
-    // Also allow international numbers with country code.
-
     final internationalPhoneRegex = RegExp(r'^\+[0-9]{10,14}$');
 
     if (!australianPhoneRegex.hasMatch(cleanedValue) &&
@@ -584,7 +643,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     return null;
   }
 
-  /// Validate a required field.
+  /// Validate required fields - field must not be empty.
 
   String? _validateRequired(String? value) {
     return value == null || value.trim().isEmpty
@@ -594,34 +653,27 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       constraints: const BoxConstraints(
         maxWidth: 400,
-        minHeight: 300,
       ),
       padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow,
-            spreadRadius: 3,
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
+      decoration: getHomeCardDecoration(context),
       child: Stack(
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Title and edit button row.
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'Personal Identification Details',
+                    'Profile Details',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -629,7 +681,20 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   ),
                   if (widget.showEditButton)
                     MarkdownTooltip(
-                      message: '**Edit** personal details',
+                      message: '''
+                      
+                      **Edit Profile Details**
+                      
+                      Click to modify your personal information:
+                      
+                      - Name
+                      - Address
+                      - Contact information
+                      - Personal details
+                      
+                      Your data is securely stored in your personal pod.
+                      
+                      ''',
                       child: IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed:
@@ -639,6 +704,97 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                 ],
               ),
               const SizedBox(height: 12),
+
+              // Avatar and Name Section
+              if (_isLoading)
+                const Center(child: CircularProgressIndicator())
+              else
+                Row(
+                  children: [
+                    // User avatar with lock icon.
+
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        const CircleAvatar(
+                          radius: 24,
+                          backgroundImage: AssetImage(
+                              'assets/images/sample_avatar_image.png'),
+                        ),
+                        // Security lock indicator.
+
+                        Positioned(
+                          bottom: -2,
+                          right: -2,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.tertiary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.lock,
+                              color: theme.colorScheme.onTertiary,
+                              size: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Display user name.
+
+                    Expanded(
+                      child: Text(
+                        _nameController.text,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+
+                    // Notification bell with notification count badge.
+
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Icon(
+                          Icons.notifications,
+                          size: 28,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                        // Notification counter badge.
+
+                        if (notificationCount > 0)
+                          Positioned(
+                            right: -2,
+                            top: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.error,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Text(
+                                '$notificationCount',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.onError,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+
+              const SizedBox(height: 16),
+              const Divider(),
+              const SizedBox(height: 8),
+
+              // Personal Identification Details section.
+
               if (_isLoading)
                 ..._buildLoadingRows()
               else
@@ -646,30 +802,32 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       _buildDataRow('Address:', _addressController.text),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildDataRow('Phone:', _bestContactPhoneController.text),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildDataRow('Alternative Phone:',
                           _alternativeContactNumberController.text),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildDataRow('Email:', _emailController.text),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildDataRow(
                           'Date of Birth:', _dateOfBirthController.text),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildDataRow('Gender:', _genderController.text),
                     ],
                   ),
                 ),
             ],
           ),
+          // Loading/saving overlay.
+
           if (_isLoading || _isSaving)
             Positioned.fill(
               child: Container(
-                color:
-                    Theme.of(context).cardTheme.color?.withValues(alpha: 0.7),
+                color: theme.cardTheme.color?.withValues(alpha: 0.7),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -688,6 +846,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       ),
     );
   }
+
+  /// Create placeholder loading rows during data fetch.
 
   List<Widget> _buildLoadingRows() {
     return List.generate(
@@ -729,7 +889,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     );
   }
 
-  /// Helper method to build a data row for display mode.
+  /// Build a single data row with label and value.
 
   Widget _buildDataRow(String label, String value) {
     return Row(

@@ -47,7 +47,7 @@ import 'utils/verify_home_screen.dart';
 ///    - systolic
 ///    - diastolic
 ///    - heart_rate
-///    Optional columns: feeling, notes
+///    Optional columns: notes
 
 void main() {
   bpImportCSV();

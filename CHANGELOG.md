@@ -13,11 +13,19 @@ Binaries to download latest version:
 
 Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
-## 0.2 LATEST UPDATES
+## 1.0 First stable release
 
-## 0.1 Initial usable release.
-
++ BLOOD PRESSURE: Simplified popup in VISUAL [0.1.8 20250425 atangster]
++ HOME: Rename tabs [0.1.7 20250424 gjw]
++ HOME: Allow health plan to be edited [0.1.6 20250424 atangster]
++ BLOOD PRESSURE: Remove feeling [0.1.5 20250424 atangster]
++ FILES: Explain csv/json formats [0.1.4 20250424 atangster]
++ General cleanup [0.1.3 20250424 gjw]
++ Resync [0.1.2 20250423 gjw]
 + HOME: Concept dashboard and vaccinations [0.1.1 20250402 misc]
+
+## 0.1 Initial beta release.
+
 + Ready for beta release [0.1.0 20250326 gjw]
 + Deploy navigator [0.0.9 20250218 kev]
 + Refine and add import order lint [0.0.8 20250207 atangster]

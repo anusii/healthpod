@@ -65,7 +65,6 @@ class BPExporter extends HealthDataExporterBase {
       BPCSVFields.fieldSystolic: responses[BPCSVFields.fieldSystolic],
       BPCSVFields.fieldDiastolic: responses[BPCSVFields.fieldDiastolic],
       BPCSVFields.fieldHeartRate: responses[BPCSVFields.fieldHeartRate],
-      BPCSVFields.fieldFeeling: responses[BPCSVFields.fieldFeeling],
       BPCSVFields.fieldNotes: responses[BPCSVFields.fieldNotes],
     };
   }
@@ -149,7 +148,6 @@ class BPExporter extends HealthDataExporterBase {
             BPCSVFields.fieldSystolic: responses[BPCSVFields.fieldSystolic],
             BPCSVFields.fieldDiastolic: responses[BPCSVFields.fieldDiastolic],
             BPCSVFields.fieldHeartRate: responses[BPCSVFields.fieldHeartRate],
-            BPCSVFields.fieldFeeling: responses[BPCSVFields.fieldFeeling],
             BPCSVFields.fieldNotes: responses[BPCSVFields.fieldNotes],
           });
         } catch (e) {

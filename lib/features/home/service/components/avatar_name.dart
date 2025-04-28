@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/appointment.dart';
+import 'package:healthpod/theme/card_style.dart';
 import 'package:healthpod/utils/fetch_profile_data.dart';
 
 /// A widget that displays the user's avatar, name,
@@ -66,7 +67,7 @@ class _AvatarNameState extends State<AvatarName> {
 
     try {
       final profileData = await fetchProfileData(context);
-      final name = profileData['patientName'] as String? ?? '';
+      final name = profileData['name'] as String? ?? '';
 
       setState(() {
         _patientName = name.isNotEmpty ? name : '';
@@ -95,17 +96,7 @@ class _AvatarNameState extends State<AvatarName> {
     return Container(
       width: 400,
       padding: const EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow,
-            spreadRadius: 3,
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
-      ),
+      decoration: getHomeCardDecoration(context),
       child: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : Row(
