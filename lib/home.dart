@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Thursday 2025-04-24 06:42:45 +1000 Graham Williams>
+// Time-stamp: <Tuesday 2025-04-29 08:46:13 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -268,6 +268,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
             ''',
             child: const VersionWidget(
+              version: '0.0.0',
               changelogUrl:
                   'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
               showDate: true,
