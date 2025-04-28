@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Tuesday 2025-04-29 08:46:13 +1000 Graham Williams>
+// Time-stamp: <Tuesday 2025-04-29 08:50:09 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -28,6 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
+import 'package:solidpod/solidpod.dart' show getAppNameVersion;
 import 'package:version_widget/version_widget.dart';
 
 import 'package:healthpod/dialogs/alert.dart';
@@ -170,6 +171,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
   int _selectedIndex = 0;
+  String _appVersion = '';
+  bool _isVersionLoaded = false;
   // Key to force rebuilds when profile is updated.
 
   final GlobalKey<State> _homePageKey = GlobalKey<State>();
@@ -177,8 +180,21 @@ class HealthPodHomeState extends State<HealthPodHome> {
   @override
   void initState() {
     super.initState();
+    _loadAppInfo();
     _initialiseFooterData(context);
     _initialiseData(context);
+  }
+
+  /// Loads the app name and version from package_info_plus.
+
+  Future<void> _loadAppInfo() async {
+    final appInfo = await getAppNameVersion();
+    if (mounted) {
+      setState(() {
+        _appVersion = appInfo.version;
+        _isVersionLoaded = true;
+      });
+    }
   }
 
   /// Initialises all required data including footer data and feature folders.
@@ -258,22 +274,23 @@ class HealthPodHomeState extends State<HealthPodHome> {
         actions: [
           // Add version widget.
 
-          MarkdownTooltip(
-            message: '''
+          if (_isVersionLoaded)
+            MarkdownTooltip(
+              message: '''
 
-            **Version:** This is the current version of the HealthPod app. If
-            the version is out of date then the text will be red. You can tap on
-            the version to view the app's Change Log to determine if it is worth
-            updating your version.
+              **Version:** This is the current version of the HealthPod app. If
+              the version is out of date then the text will be red. You can tap on
+              the version to view the app's Change Log to determine if it is worth
+              updating your version.
 
-            ''',
-            child: const VersionWidget(
-              version: '0.0.0',
-              changelogUrl:
-                  'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
-              showDate: true,
+              ''',
+              child: VersionWidget(
+                version: _appVersion,
+                changelogUrl:
+                    'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
+                showDate: true,
+              ),
             ),
-          ),
 
           const SizedBox(width: 50),
 
