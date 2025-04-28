@@ -47,8 +47,8 @@ dependencies:
   riverpod: ^2.6.1
   shared_preferences: ^2.5.2
 
-  # Temporarily use the github repo version of solidpod until it is
-  # released to the dart repository. (gjw 20250429)
+  # Temporarily use the github repository version of solidpod until it
+  # is released to the dart repository. (gjw 20250429)
   #
   # solidpod: ^0.0.0
 
