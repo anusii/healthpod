@@ -26,6 +26,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:version_widget/version_widget.dart';
@@ -170,6 +171,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
   int _selectedIndex = 0;
+  String _appVersion = '';
   // Key to force rebuilds when profile is updated.
 
   final GlobalKey<State> _homePageKey = GlobalKey<State>();
@@ -177,8 +179,19 @@ class HealthPodHomeState extends State<HealthPodHome> {
   @override
   void initState() {
     super.initState();
+    _loadAppInfo();
     _initialiseFooterData(context);
     _initialiseData(context);
+  }
+
+  /// Loads the app name and version from package_info_plus.
+
+  Future<void> _loadAppInfo() async {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    print('packageInfo: $packageInfo');
+    setState(() {
+      _appVersion = packageInfo.version;
+    });
   }
 
   /// Initialises all required data including footer data and feature folders.
@@ -267,7 +280,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
             updating your version.
 
             ''',
-            child: const VersionWidget(
+            child: VersionWidget(
+              version: _appVersion,
               changelogUrl:
                   'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
               showDate: true,

@@ -57,11 +57,9 @@ dependencies:
     git:
       url: https://github.com/anusii/solidpod.git
       ref: dev
+  version_widget: ^0.0.6
 
-  version_widget:
-    git:
-      url: https://github.com/anusii/version_widget.git
-      ref: main
+
 
 dev_dependencies:
 
