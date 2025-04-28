@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Thursday 2025-04-24 06:42:45 +1000 Graham Williams>
+// Time-stamp: <Tuesday 2025-04-29 08:50:09 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -28,7 +28,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
-import 'package:solidpod/solidpod.dart';
+import 'package:solidpod/solidpod.dart' show getAppNameVersion;
 import 'package:version_widget/version_widget.dart';
 
 import 'package:healthpod/dialogs/alert.dart';
