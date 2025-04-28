@@ -26,7 +26,6 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:solidpod/solidpod.dart';
@@ -189,14 +188,11 @@ class HealthPodHomeState extends State<HealthPodHome> {
   /// Loads the app name and version from package_info_plus.
 
   Future<void> _loadAppInfo() async {
-    print('Loading app info');
     final appInfo = await getAppNameVersion();
-    print('appInfo: $appInfo');
     if (mounted) {
       setState(() {
         _appVersion = appInfo.version;
         _isVersionLoaded = true;
-        print('appVersion: $_appVersion');
       });
     }
   }
