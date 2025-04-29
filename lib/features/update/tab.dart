@@ -1,6 +1,6 @@
-/// Survey tab including blood pressure and vaccination surveys.
+/// Survey tab including blood pressure, medications, and vaccination surveys.
 ///
-// Time-stamp: <Friday 2025-02-21 17:02:01 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-04-29 10:15:00 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -21,7 +21,7 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Kevin Wang
+/// Authors: Kevin Wang, Ashley Tang
 library;
 
 import 'package:flutter/material.dart';
@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/features/bp/survey.dart';
+import 'package:healthpod/features/medication/survey.dart';
 import 'package:healthpod/features/vaccination/survey.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
@@ -36,6 +37,10 @@ final List<Map<String, dynamic>> surveyPanels = [
   {
     'title': 'Blood Pressure',
     'widget': BPSurvey(),
+  },
+  {
+    'title': 'Medications',
+    'widget': MedicationSurvey(),
   },
   {
     'title': 'Vaccinations',

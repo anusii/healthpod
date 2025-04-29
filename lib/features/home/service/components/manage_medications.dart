@@ -30,7 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
-import 'package:healthpod/features/profile/medication/model.dart';
+import 'package:healthpod/features/medication/obs/model.dart';
 import 'package:healthpod/theme/card_style.dart';
 
 /// A widget to display and manage medications.
@@ -48,20 +48,18 @@ class ManageMedications extends StatefulWidget {
 class _ManageMedicationsState extends State<ManageMedications> {
   // Medications data.
 
-  final List<Medication> _medications = [
-    Medication(
+  final List<MedicationObservation> _medications = [
+    MedicationObservation(
       name: 'Lisinopril',
       dosage: '10mg',
-      frequency: 'Once daily',
-      time: TimeOfDay(hour: 8, minute: 0),
+      frequency: 'Once daily at 8:00 AM',
       startDate: DateTime.now().subtract(const Duration(days: 30)),
       notes: 'Take with food',
     ),
-    Medication(
+    MedicationObservation(
       name: 'Metformin',
       dosage: '500mg',
-      frequency: 'Twice daily',
-      time: TimeOfDay(hour: 18, minute: 0),
+      frequency: 'Twice daily at 8:00 AM and 6:00 PM',
       startDate: DateTime.now().subtract(const Duration(days: 60)),
       notes: 'Take after meals',
     ),
@@ -69,7 +67,7 @@ class _ManageMedicationsState extends State<ManageMedications> {
 
   /// Opens dialog to add or edit a medication.
 
-  void _showMedicationDialog([Medication? medication, int? index]) {
+  void _showMedicationDialog([MedicationObservation? medication, int? index]) {
     final bool isEditing = medication != null;
 
     final nameController = TextEditingController(text: medication?.name ?? '');
@@ -80,7 +78,6 @@ class _ManageMedicationsState extends State<ManageMedications> {
     final notesController =
         TextEditingController(text: medication?.notes ?? '');
 
-    TimeOfDay selectedTime = medication?.time ?? TimeOfDay.now();
     DateTime selectedDate = medication?.startDate ?? DateTime.now();
 
     showDialog(
@@ -115,31 +112,8 @@ class _ManageMedicationsState extends State<ManageMedications> {
                       controller: frequencyController,
                       decoration: const InputDecoration(
                         labelText: 'Frequency',
-                        hintText: 'e.g., Once daily',
+                        hintText: 'e.g., Once daily at 8:00 AM',
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        const Text('Reminder Time: '),
-                        TextButton(
-                          onPressed: () async {
-                            final TimeOfDay? time = await showTimePicker(
-                              context: context,
-                              initialTime: selectedTime,
-                            );
-                            if (time != null) {
-                              setState(() {
-                                selectedTime = time;
-                              });
-                            }
-                          },
-                          child: Text(
-                            '${selectedTime.hour}:${selectedTime.minute.toString().padLeft(2, '0')}',
-                            style: const TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ],
                     ),
                     const SizedBox(height: 12),
                     Row(
@@ -187,11 +161,10 @@ class _ManageMedicationsState extends State<ManageMedications> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    final medication = Medication(
+                    final medication = MedicationObservation(
                       name: nameController.text.trim(),
                       dosage: dosageController.text.trim(),
                       frequency: frequencyController.text.trim(),
-                      time: selectedTime,
                       startDate: selectedDate,
                       notes: notesController.text.trim(),
                     );
@@ -372,13 +345,6 @@ class _ManageMedicationsState extends State<ManageMedications> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            const Icon(Icons.access_time, size: 14),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${medication.time.hour}:${medication.time.minute.toString().padLeft(2, '0')}',
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            const SizedBox(width: 12),
                             const Icon(Icons.calendar_today, size: 14),
                             const SizedBox(width: 4),
                             Text(

@@ -41,7 +41,7 @@ dependencies:
   path: ^1.9.0
   path_provider: ^2.1.5
   pdf: ^3.11.3
-  printing: ^5.14.2
+  printing: ^5.11.0 
   process_run: ^1.2.2+1
   rdflib: ^0.2.9
   riverpod: ^2.6.1
