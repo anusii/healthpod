@@ -38,71 +38,70 @@ import 'package:healthpod/features/table/medication_editor/controllers.dart';
 
 class MedicationEditorState with ChangeNotifier {
   /// The list of loaded medication observations, sorted by startDate.
+  ///
   List<MedicationObservation> observations = [];
 
   /// Index of the observation currently being edited, or null if no observation is being edited.
+
   int? editingIndex;
 
   /// Whether data is currently being loaded asynchronously.
+
   bool isLoading = true;
 
   /// Error message if data loading fails, null if no error.
+
   String? error;
 
   /// Flag indicating whether we are creating a new observation (true) or editing an existing one (false).
+
   bool isNewObservation = false;
 
   /// The original observation being edited (before changes).
   /// Used for finding the original record to delete when saving edits.
+
   MedicationObservation? originalObservation;
 
   /// Controller manager for handling text input fields.
   /// Manages the lifecycle of all text controllers used in the editor.
+
   final controllers = MedicationEditorControllers();
 
   /// The medication name text controller.
+
   TextEditingController? get nameController => controllers.nameController;
 
   /// The medication dosage text controller.
+
   TextEditingController? get dosageController => controllers.dosageController;
 
   /// The medication frequency text controller.
+
   TextEditingController? get frequencyController =>
       controllers.frequencyController;
 
   /// The notes text controller.
+
   TextEditingController? get notesController => controllers.notesController;
 
   /// The observation currently being edited.
+
   MedicationObservation? _currentEdit;
 
   /// Gets the observation currently being edited.
+
   MedicationObservation? get currentEdit => _currentEdit;
 
-  /// Initializes text controllers for editing a medication observation.
+  /// Initialises text controllers for editing a medication observation.
   ///
   /// Sets up all text controllers with the observation's current values and
   /// configures them to update the observation when their values change.
   ///
   /// @param observation The medication observation to edit.
   void initialiseControllers(MedicationObservation observation) {
-    debugPrint('Initializing controllers with values:');
-    debugPrint('  name: "${observation.name}"');
-    debugPrint('  dosage: "${observation.dosage}"');
-    debugPrint('  frequency: "${observation.frequency}"');
-    debugPrint('  startDate: ${observation.startDate}');
-    debugPrint('  notes: "${observation.notes}"');
-
     controllers.initialize(
       observation,
       onObservationChanged: (updated) {
-        debugPrint('Controller changed, updated values:');
-        debugPrint('  name: "${updated.name}"');
-        debugPrint('  dosage: "${updated.dosage}"');
-        debugPrint('  frequency: "${updated.frequency}"');
-        debugPrint('  startDate: ${updated.startDate}');
-        debugPrint('  notes: "${updated.notes}"');
-
         currentEdit = updated;
       },
     );
@@ -112,6 +111,7 @@ class MedicationEditorState with ChangeNotifier {
   ///
   /// Disposes of text controllers, clears the editing index, and resets flags.
   /// Notifies listeners of the state change.
+
   void cancelEdit() {
     controllers.dispose();
     editingIndex = null;
@@ -127,10 +127,12 @@ class MedicationEditorState with ChangeNotifier {
   /// initializes controllers with the observation's values.
   ///
   /// @param index The index of the observation to edit.
+
   void enterEditMode(int index) {
     editingIndex = index;
     isNewObservation = false;
-    // Store a copy of the original observation for later reference
+    // Store a copy of the original observation for later reference.
+
     originalObservation = observations[index];
     currentEdit = observations[index];
     initialiseControllers(currentEdit!);
@@ -139,6 +141,7 @@ class MedicationEditorState with ChangeNotifier {
   /// Updates the current edit observation and notifies listeners.
   ///
   /// @param value The new observation value, or null to clear the current edit.
+
   set currentEdit(MedicationObservation? value) {
     _currentEdit = value;
     notifyListeners();
@@ -148,6 +151,7 @@ class MedicationEditorState with ChangeNotifier {
   ///
   /// Inserts a new observation at the top of the list with default values
   /// and initialises it for editing.
+
   void addNewObservation() {
     final newObservation = MedicationObservation(
       name: '',
@@ -156,8 +160,6 @@ class MedicationEditorState with ChangeNotifier {
       startDate: DateTime.now(),
       notes: '',
     );
-
-    debugPrint('Adding new observation with default values');
 
     observations.insert(0, newObservation);
     editingIndex = 0;
@@ -176,12 +178,14 @@ class MedicationEditorState with ChangeNotifier {
   /// @param editorService The service for saving observations.
   /// @param index The index of the observation being saved.
   /// @returns A Future that completes when the save operation is done.
+
   Future<void> saveObservation(
     BuildContext context,
     dynamic editorService,
     int index,
   ) async {
     // Validate required fields.
+
     if (!controllers.hasRequiredValues()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -194,24 +198,12 @@ class MedicationEditorState with ChangeNotifier {
       return;
     }
 
-    // Get the observation to save - either the current edit or the one at the specified index
+    // Get the observation to save - either the current edit or the one at the specified index.
+
     final obs = currentEdit ?? observations[index];
 
-    debugPrint('About to save observation:');
-    debugPrint('  Text controller values:');
-    debugPrint('    name: "${nameController?.text ?? "NULL"}"');
-    debugPrint('    dosage: "${dosageController?.text ?? "NULL"}"');
-    debugPrint('    frequency: "${frequencyController?.text ?? "NULL"}"');
-    debugPrint('    notes: "${notesController?.text ?? "NULL"}"');
+    // Create a new observation with the current text field values to ensure we have the latest data.
 
-    debugPrint('  Observation values:');
-    debugPrint('    name: "${obs.name}"');
-    debugPrint('    dosage: "${obs.dosage}"');
-    debugPrint('    frequency: "${obs.frequency}"');
-    debugPrint('    startDate: ${obs.startDate}');
-    debugPrint('    notes: "${obs.notes}"');
-
-    // Create a new observation with the current text field values to ensure we have the latest data
     final updatedObs = MedicationObservation(
       name: nameController?.text ?? '',
       dosage: dosageController?.text ?? '',
@@ -220,15 +212,9 @@ class MedicationEditorState with ChangeNotifier {
       notes: notesController?.text ?? '',
     );
 
-    debugPrint('Using updated observation with latest values:');
-    debugPrint('  name: "${updatedObs.name}"');
-    debugPrint('  dosage: "${updatedObs.dosage}"');
-    debugPrint('  frequency: "${updatedObs.frequency}"');
-    debugPrint('  startDate: ${updatedObs.startDate}');
-    debugPrint('  notes: "${updatedObs.notes}"');
-
     // If editing an existing record, pass the original observation
-    // to help locate and replace the existing file
+    // to help locate and replace the existing file.
+
     if (!isNewObservation && originalObservation != null) {
       await editorService.saveObservationToPod(
         context,
@@ -244,6 +230,7 @@ class MedicationEditorState with ChangeNotifier {
     }
 
     // Clean up edit state.
+
     controllers.dispose();
     editingIndex = null;
     isNewObservation = false;
@@ -257,12 +244,14 @@ class MedicationEditorState with ChangeNotifier {
   /// @param editorService The service for deleting observations.
   /// @param observation The observation to delete.
   /// @returns A Future that completes when the delete operation is done.
+
   Future<void> deleteObservation(
     BuildContext context,
     dynamic editorService,
     MedicationObservation observation,
   ) async {
     // Show confirmation dialog.
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -285,12 +274,15 @@ class MedicationEditorState with ChangeNotifier {
 
     if (confirmed != true) return;
 
+    if (!context.mounted) return;
+
     await editorService.deleteObservationFromPod(
       context,
       observation,
     );
 
     // Remove from local list if it exists.
+
     final index = observations.indexOf(observation);
     if (index >= 0) {
       observations.removeAt(index);

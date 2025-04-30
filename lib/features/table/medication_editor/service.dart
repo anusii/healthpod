@@ -298,8 +298,6 @@ class MedicationEditorService {
         );
       }
     } catch (e) {
-      debugPrint('Error deleting medication observation: $e');
-
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
