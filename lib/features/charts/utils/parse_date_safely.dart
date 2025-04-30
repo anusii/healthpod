@@ -29,44 +29,44 @@ import 'package:flutter/material.dart';
 
 /// Safely parse date strings with fallbacks for various formats.
 
-  DateTime? parseDateSafely(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return null;
-    
+DateTime? parseDateSafely(String? dateStr) {
+  if (dateStr == null || dateStr.isEmpty) return null;
+
+  try {
+    // First try standard ISO format.
+
+    return DateTime.parse(dateStr);
+  } catch (e) {
+    // If that fails, try other formats.
+
     try {
-      // First try standard ISO format.
+      // Try handling just the date part (YYYY-MM-DD).
 
-      return DateTime.parse(dateStr);
+      if (dateStr.length >= 10) {
+        final datePart = dateStr.substring(0, 10);
+        return DateTime.parse(datePart);
+      }
     } catch (e) {
-      // If that fails, try other formats.
-
-      try {
-        // Try handling just the date part (YYYY-MM-DD).
-
-        if (dateStr.length >= 10) {
-          final datePart = dateStr.substring(0, 10);
-          return DateTime.parse(datePart);
-        }
-      } catch (e) {
-        debugPrint('Error parsing date part: $e');
-      }
-      
-      // Try custom format parsing as a last resort.
-
-      try {
-        // Handle MM/DD/YYYY format.
-        
-        final parts = dateStr.split('/');
-        if (parts.length == 3) {
-          final month = int.tryParse(parts[0]) ?? 1;
-          final day = int.tryParse(parts[1]) ?? 1;
-          final year = int.tryParse(parts[2]) ?? 2000;
-          return DateTime(year, month, day);
-        }
-      } catch (e) {
-        debugPrint('Error parsing custom date format: $e');
-      }
-      
-      debugPrint('Unable to parse date: $dateStr');
-      return null;
+      debugPrint('Error parsing date part: $e');
     }
+
+    // Try custom format parsing as a last resort.
+
+    try {
+      // Handle MM/DD/YYYY format.
+
+      final parts = dateStr.split('/');
+      if (parts.length == 3) {
+        final month = int.tryParse(parts[0]) ?? 1;
+        final day = int.tryParse(parts[1]) ?? 1;
+        final year = int.tryParse(parts[2]) ?? 2000;
+        return DateTime(year, month, day);
+      }
+    } catch (e) {
+      debugPrint('Error parsing custom date format: $e');
+    }
+
+    debugPrint('Unable to parse date: $dateStr');
+    return null;
   }
+}

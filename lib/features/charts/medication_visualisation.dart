@@ -47,7 +47,8 @@ class MedicationVisualisation extends StatefulWidget {
   const MedicationVisualisation({super.key});
 
   @override
-  State<MedicationVisualisation> createState() => _MedicationVisualisationState();
+  State<MedicationVisualisation> createState() =>
+      _MedicationVisualisationState();
 }
 
 class _MedicationVisualisationState extends State<MedicationVisualisation> {
@@ -62,7 +63,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
     // Catch any error that might come from date parsing.
 
     FlutterError.onError = (details) {
-      if (details.exception is FormatException && 
+      if (details.exception is FormatException &&
           details.exception.toString().contains('Invalid date format null')) {
         debugPrint('Caught date format error: ${details.exception}');
         // Don't propagate this specific error.
@@ -91,12 +92,13 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
     try {
       // First, try to load data from the medication directory in the pod.
 
-      final medicationData = await MedicationData.fetchAllMedicationData(context);
-      
+      final medicationData =
+          await MedicationData.fetchAllMedicationData(context);
+
       // Validate each record and fix issues.
-      
+
       final List<Map<String, dynamic>> validData = [];
-      
+
       for (final record in medicationData) {
         try {
           // Ensure responses exists.
@@ -105,34 +107,38 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
             debugPrint('Skipping record without responses: $record');
             continue;
           }
-          
+
           // Create a validated copy of the record to avoid modifying the original.
-          
+
           final validatedRecord = <String, dynamic>{
-            'timestamp': record['timestamp'] ?? DateTime.now().toIso8601String(),
+            'timestamp':
+                record['timestamp'] ?? DateTime.now().toIso8601String(),
             'responses': <String, dynamic>{},
           };
-          
+
           final responses = record['responses'] as Map<String, dynamic>?;
           if (responses == null) {
             debugPrint('Skipping record with null responses: $record');
             continue;
           }
-          
+
           // Copy responses with validation.
 
-          validatedRecord['responses'][MedicationSurveyConstants.fieldName] = 
-              responses[MedicationSurveyConstants.fieldName] ?? 'Unknown medication';
-              
-          validatedRecord['responses'][MedicationSurveyConstants.fieldDosage] = 
+          validatedRecord['responses'][MedicationSurveyConstants.fieldName] =
+              responses[MedicationSurveyConstants.fieldName] ??
+                  'Unknown medication';
+
+          validatedRecord['responses'][MedicationSurveyConstants.fieldDosage] =
               responses[MedicationSurveyConstants.fieldDosage] ?? '';
-              
-          validatedRecord['responses'][MedicationSurveyConstants.fieldFrequency] = 
+
+          validatedRecord['responses']
+                  [MedicationSurveyConstants.fieldFrequency] =
               responses[MedicationSurveyConstants.fieldFrequency] ?? '';
-          
+
           // Special handling for date fields.
 
-          String? startDateStr = responses[MedicationSurveyConstants.fieldStartDate] as String?;
+          String? startDateStr =
+              responses[MedicationSurveyConstants.fieldStartDate] as String?;
           if (startDateStr == null || startDateStr.isEmpty) {
             // If no start date, use record timestamp.
 
@@ -144,34 +150,35 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
               startDateStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
             }
           }
-          validatedRecord['responses'][MedicationSurveyConstants.fieldStartDate] = startDateStr;
-          
-          validatedRecord['responses'][MedicationSurveyConstants.fieldNotes] = 
+          validatedRecord['responses']
+              [MedicationSurveyConstants.fieldStartDate] = startDateStr;
+
+          validatedRecord['responses'][MedicationSurveyConstants.fieldNotes] =
               responses[MedicationSurveyConstants.fieldNotes] ?? '';
-          
+
           // Add the validated record.
 
           validData.add(validatedRecord);
-          
         } catch (e) {
           debugPrint('Error validating medication record: $e');
           // Skip invalid records.
-
         }
       }
-      
+
       if (mounted) {
         setState(() {
           // If we have medication data, use it.
 
           if (validData.isNotEmpty) {
             _surveyData = validData;
-            debugPrint('Loaded ${validData.length} medication records from pod');
+            debugPrint(
+                'Loaded ${validData.length} medication records from pod');
           } else {
             // Otherwise use sample data.
 
             _surveyData = _getSampleData();
-            debugPrint('No valid medication data found in pod, using sample data');
+            debugPrint(
+                'No valid medication data found in pod, using sample data');
           }
           _isLoading = false;
         });
@@ -193,7 +200,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
     }
   }
 
-  /// Provides sample data to use when server data is unavailable.  
+  /// Provides sample data to use when server data is unavailable.
 
   List<Map<String, dynamic>> _getSampleData() {
     return [
@@ -241,7 +248,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
   }
 
   /// Builds a list of statistical summary widgets.
-  
+
   List<Widget> _buildStatItems() {
     if (_surveyData.isEmpty) {
       return [
@@ -259,20 +266,21 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
       try {
         final responses = entry['responses'];
         if (responses == null) continue;
-        
+
         // Get frequency and normalize it for better grouping.
 
-        String frequency = responses[MedicationSurveyConstants.fieldFrequency] as String? ?? 'Unknown';
-        
+        String frequency =
+            responses[MedicationSurveyConstants.fieldFrequency] as String? ??
+                'Unknown';
+
         // Normalise frequency for better grouping (e.g. "Once daily" and "once a day" should count as the same).
 
         frequency = normaliseFrequency(frequency);
-        
+
         frequencyCount[frequency] = (frequencyCount[frequency] ?? 0) + 1;
       } catch (e) {
         debugPrint('Error processing medication entry in stats: $e');
         // Skip this entry.
-
       }
     }
 
@@ -321,20 +329,22 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
     // Sort medications by start date, most recent first.
 
     final sortedData = [..._surveyData];
-    
+
     try {
       sortedData.sort((a, b) {
         try {
           // Get date strings, handle both formats.
 
-          final aDateStr = a['responses'][MedicationSurveyConstants.fieldStartDate] as String?;
-          final bDateStr = b['responses'][MedicationSurveyConstants.fieldStartDate] as String?;
-          
+          final aDateStr = a['responses']
+              [MedicationSurveyConstants.fieldStartDate] as String?;
+          final bDateStr = b['responses']
+              [MedicationSurveyConstants.fieldStartDate] as String?;
+
           // Parse dates safely.
 
           final DateTime aDate = parseDateSafely(aDateStr) ?? DateTime(1900);
           final DateTime bDate = parseDateSafely(bDateStr) ?? DateTime(1900);
-          
+
           return bDate.compareTo(aDate);
         } catch (e) {
           // If there's an error parsing dates, maintain original order.
@@ -346,7 +356,6 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
     } catch (e) {
       debugPrint('Error sorting medication data: $e');
       // Continue with unsorted data if sorting fails.
-
     }
 
     return RefreshIndicator(
@@ -406,26 +415,33 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
 
           // Extract data with null safety.
 
-          final name = responses[MedicationSurveyConstants.fieldName] as String? ?? 'Unknown medication';
-          final dosage = responses[MedicationSurveyConstants.fieldDosage] as String? ?? '';
-          final rawFrequency = responses[MedicationSurveyConstants.fieldFrequency] as String? ?? '';
+          final name =
+              responses[MedicationSurveyConstants.fieldName] as String? ??
+                  'Unknown medication';
+          final dosage =
+              responses[MedicationSurveyConstants.fieldDosage] as String? ?? '';
+          final rawFrequency =
+              responses[MedicationSurveyConstants.fieldFrequency] as String? ??
+                  '';
           final frequency = normaliseFrequency(rawFrequency);
-          
+
           // Parse date with error handling.
 
           DateTime? startDate;
           try {
-            final dateStr = responses[MedicationSurveyConstants.fieldStartDate] as String?;
+            final dateStr =
+                responses[MedicationSurveyConstants.fieldStartDate] as String?;
             startDate = parseDateSafely(dateStr);
           } catch (e) {
             debugPrint('Error parsing date in timeline: $e');
           }
-          
-          final notes = responses[MedicationSurveyConstants.fieldNotes] as String? ?? '';
+
+          final notes =
+              responses[MedicationSurveyConstants.fieldNotes] as String? ?? '';
 
           // Format the date or use a placeholder.
 
-          final formattedDate = startDate != null 
+          final formattedDate = startDate != null
               ? DateFormat('MMM d, yyyy').format(startDate)
               : 'Unknown date';
 
@@ -456,8 +472,10 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
                   const SizedBox(height: 4),
                   if (dosage.isNotEmpty || frequency.isNotEmpty)
                     Text(
-                      [if (dosage.isNotEmpty) dosage, if (frequency.isNotEmpty) frequency]
-                          .join(', '),
+                      [
+                        if (dosage.isNotEmpty) dosage,
+                        if (frequency.isNotEmpty) frequency
+                      ].join(', '),
                       style: theme.textTheme.bodyMedium,
                     ),
                   const SizedBox(height: 4),
@@ -496,4 +514,4 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
       },
     );
   }
-} 
+}

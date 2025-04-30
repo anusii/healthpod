@@ -110,23 +110,22 @@ class MedicationData {
           debugPrint('Error comparing timestamps: $e');
           // Preserve original order on error.
 
-          return 0; 
+          return 0;
         }
       });
     } catch (e) {
       debugPrint('Error sorting by timestamp: $e');
       // Continue with unsorted data.
-
     }
 
     return allData;
   }
-  
+
   /// Parse timestamp safely with fallback to current time.
-  
+
   static DateTime _parseTimestampSafely(dynamic timestamp) {
     if (timestamp == null) return DateTime.now();
-    
+
     try {
       if (timestamp is String) {
         return DateTime.parse(timestamp);

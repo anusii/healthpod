@@ -27,31 +27,35 @@ library;
 
 /// Normalise frequency text to group similar entries.
 
-  String normaliseFrequency(String frequency) {
-    // Convert to lowercase.  
+String normaliseFrequency(String frequency) {
+  // Convert to lowercase.
 
-    final lower = frequency.toLowerCase();
-    
-    // Group common patterns.
+  final lower = frequency.toLowerCase();
 
-    if (lower.contains('once') && (lower.contains('day') || lower.contains('daily'))) {
-      return 'Once daily';
-    }
-    if (lower.contains('twice') && (lower.contains('day') || lower.contains('daily'))) {
-      return 'Twice daily';
-    }
-    if (lower.contains('three') && (lower.contains('day') || lower.contains('daily')) ||
-        lower.contains('3') && (lower.contains('day') || lower.contains('daily'))) {
-      return 'Three times daily';
-    }
-    if (lower.contains('week')) {
-      return 'Weekly';
-    }
-    if (lower.contains('month')) {
-      return 'Monthly';
-    }
-    
-    // Return original if no match.
+  // Group common patterns.
 
-    return frequency;
+  if (lower.contains('once') &&
+      (lower.contains('day') || lower.contains('daily'))) {
+    return 'Once daily';
   }
+  if (lower.contains('twice') &&
+      (lower.contains('day') || lower.contains('daily'))) {
+    return 'Twice daily';
+  }
+  if (lower.contains('three') &&
+          (lower.contains('day') || lower.contains('daily')) ||
+      lower.contains('3') &&
+          (lower.contains('day') || lower.contains('daily'))) {
+    return 'Three times daily';
+  }
+  if (lower.contains('week')) {
+    return 'Weekly';
+  }
+  if (lower.contains('month')) {
+    return 'Monthly';
+  }
+
+  // Return original if no match.
+
+  return frequency;
+}
