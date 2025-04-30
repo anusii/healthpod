@@ -32,7 +32,6 @@ class DiaryExporter extends HealthDataExporterBase {
         'date',
         'title',
         'description',
-        'isPast',
       ];
 
   @override
@@ -46,14 +45,12 @@ class DiaryExporter extends HealthDataExporterBase {
     final title = appointmentData['title']?.toString() ?? '';
     final description = appointmentData['description']?.toString() ?? '';
 
-    // Parse date and calculate isPast
+    // Parse date
     DateTime? date;
-    bool isPast = false;
 
     if (dateStr != null) {
       try {
         date = DateTime.parse(dateStr);
-        isPast = date.isBefore(DateTime.now());
       } catch (e) {
         debugPrint('Error parsing date: $e');
       }
@@ -63,7 +60,6 @@ class DiaryExporter extends HealthDataExporterBase {
       'date': date?.toIso8601String() ?? '',
       'title': title,
       'description': description,
-      'isPast': isPast,
     };
   }
 
