@@ -29,9 +29,10 @@ import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 
+import 'package:healthpod/features/medication/obs/model.dart';
 import 'package:healthpod/features/table/medication_editor/service.dart';
 import 'package:healthpod/features/table/medication_editor/state.dart';
-import 'package:healthpod/features/medication/obs/model.dart';
+
 
 /// A page for viewing and editing medication observations.
 ///
