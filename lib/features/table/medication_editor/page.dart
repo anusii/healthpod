@@ -33,7 +33,6 @@ import 'package:healthpod/features/medication/obs/model.dart';
 import 'package:healthpod/features/table/medication_editor/service.dart';
 import 'package:healthpod/features/table/medication_editor/state.dart';
 
-
 /// A page for viewing and editing medication observations.
 ///
 /// Displays a table of medication entries and provides interfaces for adding,
