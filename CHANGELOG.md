@@ -15,6 +15,7 @@ Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
 ## 1.0 First stable release
 
++ HOME: Update to lateset VersionWidget() [0.1.9 20250429 kev]
 + BLOOD PRESSURE: Simplified popup in VISUAL [0.1.8 20250425 atangster]
 + HOME: Rename tabs [0.1.7 20250424 gjw]
 + HOME: Allow health plan to be edited [0.1.6 20250424 atangster]

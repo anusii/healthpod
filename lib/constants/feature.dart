@@ -28,6 +28,7 @@ library;
 
 enum Feature {
   bloodPressure('Blood pressure'),
+  medication('Medication'),
   vaccination('Vaccination'),
   diary('Diary');
 

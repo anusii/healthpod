@@ -156,9 +156,16 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   /// Save profile data to the pod.
 
   Future<void> _saveProfileData() async {
-    // Validate form before saving.
+    // Validate only the name field.
 
-    if (!_formKey.currentState!.validate()) return;
+    if (_nameController.text.trim().isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Name is required')),
+        );
+      }
+      return;
+    }
 
     // Skip if no changes detected.
 
@@ -407,7 +414,12 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     ),
-                    validator: _validateRequired,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Name is required';
+                      }
+                      return null;
+                    },
                   ),
                   const SizedBox(height: 12),
                   const Text('Address'),
@@ -418,7 +430,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     ),
-                    validator: _validateRequired,
                   ),
                   const SizedBox(height: 12),
                   const Text('Phone'),
@@ -488,61 +499,88 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                   ),
                   const SizedBox(height: 12),
                   const Text('Date of Birth'),
-                  InkWell(
-                    onTap: () async {
-                      // Show date picker for selecting date of birth.
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InkWell(
+                          onTap: () async {
+                            // Show date picker for selecting date of birth.
 
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate:
-                            _parseDateOrDefault(tempDateOfBirthController.text),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
-                      );
-                      if (picked != null) {
-                        tempDateOfBirthController.text = _formatDate(picked);
-                      }
-                    },
-                    child: AbsorbPointer(
-                      child: TextFormField(
-                        controller: tempDateOfBirthController,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          suffixIcon: Icon(Icons.calendar_today),
+                            final DateTime? picked = await showDatePicker(
+                              context: context,
+                              initialDate: _parseDateOrDefault(
+                                  tempDateOfBirthController.text),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            );
+                            if (picked != null) {
+                              tempDateOfBirthController.text =
+                                  _formatDate(picked);
+                            }
+                          },
+                          child: AbsorbPointer(
+                            child: TextFormField(
+                              controller: tempDateOfBirthController,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                suffixIcon: Icon(Icons.calendar_today),
+                              ),
+                              keyboardType: TextInputType.datetime,
+                            ),
+                          ),
                         ),
-                        validator: _validateRequired,
-                        keyboardType: TextInputType.datetime,
                       ),
-                    ),
+                      if (tempDateOfBirthController.text.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            tempDateOfBirthController.clear();
+                          },
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   const Text('Gender'),
-                  DropdownButtonFormField<String>(
-                    value: tempGenderController.text.isEmpty
-                        ? null
-                        : tempGenderController.text,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'Male', child: Text('Male')),
-                      DropdownMenuItem(value: 'Female', child: Text('Female')),
-                      DropdownMenuItem(
-                          value: 'Non-binary', child: Text('Non-binary')),
-                      DropdownMenuItem(
-                          value: 'Prefer not to say',
-                          child: Text('Prefer not to say')),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: DropdownButtonFormField<String?>(
+                          value: tempGenderController.text.isEmpty
+                              ? null
+                              : tempGenderController.text,
+                          decoration: const InputDecoration(
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                                value: null, child: Text('Select gender')),
+                            DropdownMenuItem(
+                                value: 'Male', child: Text('Male')),
+                            DropdownMenuItem(
+                                value: 'Female', child: Text('Female')),
+                            DropdownMenuItem(
+                                value: 'Non-binary', child: Text('Non-binary')),
+                            DropdownMenuItem(
+                                value: 'Prefer not to say',
+                                child: Text('Prefer not to say')),
+                          ],
+                          onChanged: (value) {
+                            tempGenderController.text = value ?? '';
+                          },
+                        ),
+                      ),
+                      if (tempGenderController.text.isNotEmpty)
+                        IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            tempGenderController.clear();
+                          },
+                        ),
                     ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        tempGenderController.text = value;
-                      }
-                    },
-                    validator: _validateRequired,
                   ),
                 ],
               ),
@@ -641,14 +679,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       return 'Enter a valid phone number (e.g. +61 4 1234 5678 or 04 1234 5678)';
     }
     return null;
-  }
-
-  /// Validate required fields - field must not be empty.
-
-  String? _validateRequired(String? value) {
-    return value == null || value.trim().isEmpty
-        ? 'This field is required'
-        : null;
   }
 
   @override
