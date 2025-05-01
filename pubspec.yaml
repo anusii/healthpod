@@ -1,7 +1,7 @@
 name: healthpod
 description: "Private and Secure Storage of Health data in your Solid Pod."
 publish_to: "none"
-version: 0.1.9+6
+version: 0.1.10+6
 
 environment:
   sdk: ">=3.2.3 <4.0.0"
@@ -41,21 +41,12 @@ dependencies:
   path: ^1.9.0
   path_provider: ^2.1.5
   pdf: ^3.11.3
-  printing: ^5.11.0 
+  printing: ^5.11.0
   process_run: ^1.2.2+1
   rdflib: ^0.2.9
   riverpod: ^2.6.1
   shared_preferences: ^2.5.2
-
-  # Temporarily use the github repository version of solidpod until it
-  # is released to the dart repository. (gjw 20250429)
-  #
-  # solidpod: ^0.0.0
-
-  solidpod:
-    git:
-      url: https://github.com/anusii/solidpod.git
-      ref: dev
+  solidpod: ^0.6.5
   syncfusion_flutter_pdf: ^29.1.38
   table_calendar: ^3.0.9
   timeline_tile: ^2.0.0
@@ -80,26 +71,7 @@ dev_dependencies:
 
 dependency_overrides:
 
-  # Why (gjw 20250429)
-
-  # file: ^7.0.0
-
-  # Add analyzer override to resolve version conflicts. More details
-  # required. (gjw 20250429)
-
-  # analyzer: ^6.6.0
-
-  # This may no longer be required with latest solid_auth 0.1.23 which
-  # has better intl dependency constraint (>=). (gjw 20250429)
-  # override asap.
-
-  # intl: ^0.19.0
-
-  # Why? (gjw 20250429)
-
-  # test_api: ^0.7.3
-
-  # See https://???? (gjw 20250429)
+  # Why? See https://???? (gjw 20250429)
 
   flutter_secure_storage_linux: ^2.0.1
   flutter_secure_storage_platform_interface: ^2.0.0

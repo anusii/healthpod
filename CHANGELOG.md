@@ -15,6 +15,7 @@ Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
 ## 1.0 First stable release
 
++ MEDICATIONS: NEW, VIEW, TABLE support [0.1.10 20250501 atangster]
 + HOME: Update to lateset VersionWidget() [0.1.9 20250429 kev]
 + BLOOD PRESSURE: Simplified popup in VISUAL [0.1.8 20250425 atangster]
 + HOME: Rename tabs [0.1.7 20250424 gjw]
