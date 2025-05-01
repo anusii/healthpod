@@ -166,7 +166,8 @@ class _DiaryTabState extends State<DiaryTab> {
     return Scaffold(
       body: Column(
         children: [
-          // Add month and year selector
+          // Add month and year selector.
+
           Container(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -184,7 +185,8 @@ class _DiaryTabState extends State<DiaryTab> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Month dropdown
+                // Month dropdown.
+
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -238,7 +240,8 @@ class _DiaryTabState extends State<DiaryTab> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Year dropdown
+                // Year dropdown.
+
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),

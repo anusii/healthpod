@@ -225,11 +225,8 @@ abstract class HealthDataImporterBase {
             }
 
             // Process other fields using the implementation-specific method
-            // Allow empty values for non-timestamp fields
             final fieldProcessed = processField(header, value, responses, i);
-            if (!fieldProcessed &&
-                lowerRequiredColumns.contains(header) &&
-                value.isNotEmpty) {
+            if (!fieldProcessed && lowerRequiredColumns.contains(header)) {
               hasRequiredFields = false;
             }
           }
