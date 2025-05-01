@@ -1,15 +1,29 @@
 /// Diary data exporter.
 ///
-/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
+// Time-stamp: <Wednesday 2025-03-26 09:39:04 +1100 Graham Williams>
+///
+/// Copyright (C) 2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://www.gnu.org/licenses/>.
+///
+/// Authors: Kevin Wang
 
 library;
-
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -36,16 +50,19 @@ class DiaryExporter extends HealthDataExporterBase {
 
   @override
   Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
-    // Get the appointment data, either from responses or directly
+    // Get the appointment data, either from responses or directly.
+
     final appointmentData = jsonData['responses'] ?? jsonData;
 
-    // Safely extract values with null checks
-    final dateStr = jsonData['date']
-        ?.toString(); // Get date from root level like service.dart
+    // Safely extract values with null checks.
+    // Get date from root level like service.dart.
+
+    final dateStr = jsonData['date']?.toString();
     final title = appointmentData['title']?.toString() ?? '';
     final description = appointmentData['description']?.toString() ?? '';
 
-    // Parse date
+    // Parse date.
+
     DateTime? date;
 
     if (dateStr != null) {
