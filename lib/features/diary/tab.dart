@@ -176,7 +176,7 @@ class _DiaryTabState extends State<DiaryTab> {
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withAlpha(13),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -192,10 +192,8 @@ class _DiaryTabState extends State<DiaryTab> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withOpacity(0.2),
+                      color:
+                          Theme.of(context).colorScheme.outline.withAlpha(51),
                     ),
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -247,10 +245,8 @@ class _DiaryTabState extends State<DiaryTab> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline
-                          .withOpacity(0.2),
+                      color:
+                          Theme.of(context).colorScheme.outline.withAlpha(51),
                     ),
                     borderRadius: BorderRadius.circular(8),
                   ),
