@@ -207,7 +207,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
       {
         'timestamp': DateTime(2025, 3, 15).toIso8601String(),
         'responses': {
-          MedicationSurveyConstants.fieldName: 'Lisinopril',
+          MedicationSurveyConstants.fieldName: 'e.g. Lisinopril',
           MedicationSurveyConstants.fieldDosage: '10mg',
           MedicationSurveyConstants.fieldFrequency: 'Once daily',
           MedicationSurveyConstants.fieldStartDate: '2025-01-15',
@@ -217,7 +217,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
       {
         'timestamp': DateTime(2025, 3, 10).toIso8601String(),
         'responses': {
-          MedicationSurveyConstants.fieldName: 'Metformin',
+          MedicationSurveyConstants.fieldName: 'e.g. Metformin',
           MedicationSurveyConstants.fieldDosage: '500mg',
           MedicationSurveyConstants.fieldFrequency: 'Twice daily',
           MedicationSurveyConstants.fieldStartDate: '2024-12-01',
@@ -227,7 +227,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
       {
         'timestamp': DateTime(2025, 2, 28).toIso8601String(),
         'responses': {
-          MedicationSurveyConstants.fieldName: 'Atorvastatin',
+          MedicationSurveyConstants.fieldName: 'e.g. Atorvastatin',
           MedicationSurveyConstants.fieldDosage: '20mg',
           MedicationSurveyConstants.fieldFrequency: 'Once daily',
           MedicationSurveyConstants.fieldStartDate: '2024-11-15',
@@ -237,7 +237,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
       {
         'timestamp': DateTime(2025, 2, 15).toIso8601String(),
         'responses': {
-          MedicationSurveyConstants.fieldName: 'Aspirin',
+          MedicationSurveyConstants.fieldName: 'e.g. Aspirin',
           MedicationSurveyConstants.fieldDosage: '81mg',
           MedicationSurveyConstants.fieldFrequency: 'Once daily',
           MedicationSurveyConstants.fieldStartDate: '2024-10-10',

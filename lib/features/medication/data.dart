@@ -97,6 +97,8 @@ class MedicationData {
       }
     } catch (e) {
       debugPrint('Error fetching medication data from POD: $e');
+      // Log more specific details about the error
+      debugPrint('Unable to load medication data from pod: ${e.toString()}');
     }
 
     // Sort by timestamp (most recent first).
