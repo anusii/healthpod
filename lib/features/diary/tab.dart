@@ -166,6 +166,133 @@ class _DiaryTabState extends State<DiaryTab> {
     return Scaffold(
       body: Column(
         children: [
+          // Add month and year selector
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Month dropdown
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withOpacity(0.2),
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_month,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      DropdownButton<int>(
+                        value: _focusedDay.month,
+                        underline: const SizedBox(),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 16,
+                        ),
+                        items: List.generate(12, (index) => index + 1)
+                            .map((month) => DropdownMenuItem<int>(
+                                  value: month,
+                                  child: Text(
+                                    DateFormat('MMMM').format(
+                                        DateTime(_focusedDay.year, month)),
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ))
+                            .toList(),
+                        onChanged: (int? newMonth) {
+                          if (newMonth != null) {
+                            setState(() {
+                              _focusedDay = DateTime(
+                                _focusedDay.year,
+                                newMonth,
+                                _focusedDay.day,
+                              );
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Year dropdown
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withOpacity(0.2),
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      DropdownButton<int>(
+                        value: _focusedDay.year,
+                        underline: const SizedBox(),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 16,
+                        ),
+                        items: List.generate(11, (index) => 2020 + index)
+                            .map((year) => DropdownMenuItem<int>(
+                                  value: year,
+                                  child: Text(
+                                    year.toString(),
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ))
+                            .toList(),
+                        onChanged: (int? newYear) {
+                          if (newYear != null) {
+                            setState(() {
+                              _focusedDay = DateTime(
+                                newYear,
+                                _focusedDay.month,
+                                _focusedDay.day,
+                              );
+                            });
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           Center(
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.5,
