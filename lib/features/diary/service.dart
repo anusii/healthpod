@@ -100,8 +100,7 @@ class DiaryService {
                 date: DateTime.parse(data['date']),
                 title: appointmentData['title'],
                 description: appointmentData['description'],
-                isPast: DateTime.parse(appointmentData['date'])
-                    .isBefore(DateTime.now()),
+                isPast: DateTime.parse(data['date']).isBefore(DateTime.now()),
               ));
 
               debugPrint('appointments111: $appointments');
