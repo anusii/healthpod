@@ -1,4 +1,4 @@
-/// Table tab including blood pressure and vaccination tables.
+/// Table tab including blood pressure, medications, and vaccination tables.
 ///
 // Time-stamp: <Friday 2025-02-21 17:02:01 +1100 Graham Williams>
 ///
@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/features/table/bp_editor/page.dart';
+import 'package:healthpod/features/table/medication_editor/page.dart';
 import 'package:healthpod/features/table/vaccination_editor/page.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
@@ -36,6 +37,10 @@ final List<Map<String, dynamic>> tablePanels = [
   {
     'title': 'Blood Pressure',
     'widget': const BPEditorPage(),
+  },
+  {
+    'title': 'Medications',
+    'widget': const MedicationEditorPage(),
   },
   {
     'title': 'Vaccinations',
