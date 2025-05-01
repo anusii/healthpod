@@ -50,14 +50,14 @@ class _ManageMedicationsState extends State<ManageMedications> {
 
   final List<MedicationObservation> _medications = [
     MedicationObservation(
-      name: 'Lisinopril',
+      name: 'e.g. Lisinopril',
       dosage: '10mg',
       frequency: 'Once daily at 8:00 AM',
       startDate: DateTime.now().subtract(const Duration(days: 30)),
       notes: 'Take with food',
     ),
     MedicationObservation(
-      name: 'Metformin',
+      name: 'e.g. Metformin',
       dosage: '500mg',
       frequency: 'Twice daily at 8:00 AM and 6:00 PM',
       startDate: DateTime.now().subtract(const Duration(days: 60)),

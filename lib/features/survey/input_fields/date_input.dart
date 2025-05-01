@@ -82,6 +82,24 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    // Use today's date as default if no date is already selected.
+
+    if (widget.controller.responses[widget.question.fieldName] == null) {
+      final now = DateTime.now();
+      final todayFormatted =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+      widget.controller.updateResponse(
+        widget.question.fieldName,
+        todayFormatted,
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final selectedDate =
         widget.controller.responses[widget.question.fieldName]?.toString();

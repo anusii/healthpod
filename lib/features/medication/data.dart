@@ -75,7 +75,19 @@ class MedicationData {
             try {
               final data = jsonDecode(content.toString());
               if (data is Map<String, dynamic>) {
-                allData.add(data);
+                // Add only if it has valid format (contains responses).
+
+                if (data.containsKey('responses')) {
+                  if (data['responses'] is Map) {
+                    allData.add(data);
+                  } else {
+                    debugPrint('Skipping record with non-map responses: $data');
+                  }
+                } else {
+                  debugPrint('Skipping record without responses field: $data');
+                }
+              } else {
+                debugPrint('Skipping record with non-map data: $data');
               }
             } catch (e) {
               debugPrint('Error parsing medication JSON from $filePath: $e');
@@ -85,16 +97,46 @@ class MedicationData {
       }
     } catch (e) {
       debugPrint('Error fetching medication data from POD: $e');
+      // Log more specific details about the error
+      debugPrint('Unable to load medication data from pod: ${e.toString()}');
     }
 
     // Sort by timestamp (most recent first).
+    try {
+      allData.sort((a, b) {
+        try {
+          final aTime = _parseTimestampSafely(a['timestamp']);
+          final bTime = _parseTimestampSafely(b['timestamp']);
+          return bTime.compareTo(aTime);
+        } catch (e) {
+          debugPrint('Error comparing timestamps: $e');
+          // Preserve original order on error.
 
-    allData.sort((a, b) {
-      final aTime = DateTime.parse(a['timestamp'].toString());
-      final bTime = DateTime.parse(b['timestamp'].toString());
-      return bTime.compareTo(aTime);
-    });
+          return 0;
+        }
+      });
+    } catch (e) {
+      debugPrint('Error sorting by timestamp: $e');
+      // Continue with unsorted data.
+    }
 
     return allData;
+  }
+
+  /// Parse timestamp safely with fallback to current time.
+
+  static DateTime _parseTimestampSafely(dynamic timestamp) {
+    if (timestamp == null) return DateTime.now();
+
+    try {
+      if (timestamp is String) {
+        return DateTime.parse(timestamp);
+      } else {
+        return DateTime.now();
+      }
+    } catch (e) {
+      debugPrint('Error parsing timestamp ($timestamp): $e');
+      return DateTime.now();
+    }
   }
 }
