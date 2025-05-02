@@ -294,7 +294,8 @@ class _DiaryTabState extends State<DiaryTab> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Today button
+                // Today button.
+
                 TextButton.icon(
                   onPressed: _goToToday,
                   icon: Icon(
