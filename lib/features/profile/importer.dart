@@ -31,6 +31,7 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/security_key/manager.dart';
 
 /// Class that handles the import of profile data from JSON file.
 
@@ -109,11 +110,47 @@ class ProfileImporter {
       // Extract the validated data.
 
       final finalData = validationResult['data'] as Map<String, dynamic>;
+      debugPrint(
+          'Validated profile data: ${json.encode(finalData).substring(0, min(100, json.encode(finalData).length))}...');
 
-      // Add timestamp if not present.
-
+      // Add timestamp if not present, otherwise use the existing one.
+      String timestampString;
       if (!finalData.containsKey('timestamp')) {
-        finalData['timestamp'] = DateTime.now().toIso8601String();
+        debugPrint('No timestamp found in profile data, using current time');
+        timestampString = DateTime.now().toIso8601String();
+        finalData['timestamp'] = timestampString;
+      } else {
+        timestampString = finalData['timestamp'] as String;
+        debugPrint('Found timestamp in profile data: $timestampString');
+      }
+
+      // Check if timestamp is nested inside 'data' object
+      if (finalData.containsKey('data') &&
+          finalData['data'] is Map<String, dynamic> &&
+          (finalData['data'] as Map<String, dynamic>)
+              .containsKey('timestamp')) {
+        final nestedTimestamp =
+            (finalData['data'] as Map<String, dynamic>)['timestamp'];
+        if (nestedTimestamp is String) {
+          debugPrint(
+              'Found nested timestamp in profile data["data"]: $nestedTimestamp');
+          timestampString = nestedTimestamp;
+          // Update the top-level timestamp to match the nested one
+          finalData['timestamp'] = timestampString;
+        }
+      }
+
+      // Parse the timestamp to ensure it's in a valid format
+      DateTime timestamp;
+      try {
+        timestamp = DateTime.parse(timestampString);
+        debugPrint('Successfully parsed timestamp: $timestamp');
+      } catch (e) {
+        debugPrint(
+            'Invalid timestamp format: $timestampString, using current time');
+        timestamp = DateTime.now();
+        timestampString = timestamp.toIso8601String();
+        finalData['timestamp'] = timestampString;
       }
 
       // Normalise the target path to always use the 'profile' subdirectory.
@@ -122,10 +159,41 @@ class ProfileImporter {
 
       debugPrint('Uploading profile to path: $normalizedPath');
 
-      // Create a formatted timestamp for the filename.
+      // Check for existing profiles and prompt for confirmation if found
+      if (context.mounted) {
+        debugPrint(
+            'Checking for existing profiles with timestamp: $timestampString');
+        final existingProfiles =
+            await _checkForExistingProfiles(context, timestampString);
 
-      final timestamp = formatTimestampForFilename(DateTime.now());
-      final filename = 'profile_$timestamp.json';
+        // Only show the dialog if actual profiles were found
+        if (existingProfiles.isNotEmpty) {
+          debugPrint(
+              'Found ${existingProfiles.length} existing profiles. Showing override dialog.');
+          final shouldOverride =
+              await _showOverrideConfirmationDialog(context, existingProfiles);
+
+          if (!shouldOverride) {
+            debugPrint('Profile import cancelled by user');
+            return false;
+          }
+
+          debugPrint(
+              'User confirmed profile override, deleting existing profiles');
+
+          // Delete the existing profile files before saving the new one
+          await _deleteExistingProfiles(context, existingProfiles);
+        } else {
+          debugPrint('No existing profiles found matching the timestamp.');
+        }
+      }
+
+      // Create a formatted timestamp for the filename using the timestamp from the data.
+      final formattedTimestamp = formatTimestampForFilename(timestamp);
+      final filename = 'profile_$formattedTimestamp.json';
+
+      debugPrint(
+          'Using timestamp from profile data for filename: $formattedTimestamp');
 
       // Prepare the JSON content.
 
@@ -438,5 +506,301 @@ class ProfileImporter {
     );
 
     return result.substring(0, 1).toUpperCase() + result.substring(1);
+  }
+
+  /// Checks for existing profiles and returns a list of profile files.
+  ///
+  /// This method checks the profile directory for any existing profile files
+  /// that would be overridden by a new import.
+  ///
+  /// Parameters:
+  /// - [context]: Flutter build context for UI interactions
+  /// - [timestampString]: The timestamp from the profile being imported
+  ///
+  /// Returns a list of existing profile file names.
+
+  static Future<List<String>> _checkForExistingProfiles(
+      BuildContext context, String timestampString) async {
+    try {
+      // Parse the incoming timestamp
+      DateTime importTimestamp;
+      try {
+        importTimestamp = DateTime.parse(timestampString);
+        debugPrint('Parsed import timestamp: $importTimestamp');
+      } catch (e) {
+        debugPrint('Error parsing timestamp: $e');
+        // If we can't parse the timestamp, just use the current time
+        importTimestamp = DateTime.now();
+      }
+
+      // Format the timestamp how it would appear in a filename
+      final formattedTimestamp = formatTimestampForFilename(importTimestamp);
+      final expectedFilename = 'profile_$formattedTimestamp.json.enc.ttl';
+
+      debugPrint('Looking for any profile file matching: $expectedFilename');
+
+      // Try different path approaches to find existing files
+      List<String> profileFiles = [];
+
+      // First try with the standard path
+      try {
+        debugPrint('Trying standard path: profile');
+        final dirUrl = await getDirUrl('profile');
+        final resources = await getResourcesInContainer(dirUrl);
+
+        // Get all files in directory for debugging
+        debugPrint('All files in directory: ${resources.files.join(', ')}');
+        debugPrint('All subdirs in directory: ${resources.subDirs.join(', ')}');
+
+        profileFiles = resources.files
+            .where((file) =>
+                file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
+            .toList();
+
+        debugPrint(
+            'Found ${profileFiles.length} profile files with standard path');
+      } catch (e) {
+        debugPrint('Error accessing with standard path: $e');
+      }
+
+      // If first approach didn't work, try with healthpod/data prefix
+      if (profileFiles.isEmpty) {
+        try {
+          debugPrint(
+              'Trying with healthpod/data prefix: healthpod/data/profile');
+          final dirUrl = await getDirUrl('healthpod/data/profile');
+          final resources = await getResourcesInContainer(dirUrl);
+
+          profileFiles = resources.files
+              .where((file) =>
+                  file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
+              .toList();
+
+          debugPrint(
+              'Found ${profileFiles.length} profile files with healthpod/data prefix');
+        } catch (e) {
+          debugPrint('Error accessing with healthpod/data prefix: $e');
+        }
+      }
+
+      // Process the results
+      if (profileFiles.isNotEmpty) {
+        debugPrint('Existing profile files: ${profileFiles.join(', ')}');
+
+        // Check if any files match our expected filename pattern
+        final matchingFiles = profileFiles
+            .where((file) => file.contains(formattedTimestamp))
+            .toList();
+
+        if (matchingFiles.isNotEmpty) {
+          debugPrint(
+              'Found exact matching profile files: ${matchingFiles.join(', ')}');
+          return matchingFiles;
+        }
+
+        // If no exact matches, return all profile files
+        debugPrint(
+            'No exact matches, but returning all profile files for confirmation');
+        return profileFiles;
+      }
+
+      debugPrint('No profile files found in directory');
+      return [];
+    } catch (e) {
+      debugPrint('Error checking for existing profiles: $e');
+      return [];
+    }
+  }
+
+  /// Shows a confirmation dialog for overriding existing profiles.
+  ///
+  /// This method displays a dialog with a list of profile files that would be overridden
+  /// and asks the user to confirm the override.
+  ///
+  /// Parameters:
+  /// - [context]: Flutter build context for UI interactions
+  /// - [existingProfiles]: List of profile file names that would be overridden
+  ///
+  /// Returns a boolean indicating whether the user confirmed the override.
+
+  static Future<bool> _showOverrideConfirmationDialog(
+    BuildContext context,
+    List<String> existingProfiles,
+  ) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            title: const Text(
+              'Existing Profile Detected',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'You already have a profile saved. Importing a new profile will replace your existing profile data.',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Existing profile files:',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  constraints: const BoxConstraints(
+                    maxHeight: 150,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: existingProfiles
+                          .map((filename) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 6),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      '•',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        filename,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Warning: This action cannot be undone. Your existing profile will be permanently replaced.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: const Text(
+                  'Replace Profile',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            buttonPadding: const EdgeInsets.symmetric(horizontal: 8),
+          ),
+        ) ??
+        false;
+  }
+
+  /// Deletes existing profile files.
+  ///
+  /// Parameters:
+  /// - [context]: Flutter build context for UI interactions
+  /// - [existingProfiles]: List of profile file names to delete
+  ///
+  /// Returns a Future that completes when all files are deleted.
+
+  static Future<void> _deleteExistingProfiles(
+      BuildContext context, List<String> existingProfiles) async {
+    try {
+      // Define the normalized path to use for deleting files
+      final normalizedPath = 'profile';
+
+      for (final filename in existingProfiles) {
+        try {
+          final filePath = '$normalizedPath/$filename';
+          debugPrint('Attempting to delete profile file: $filePath');
+
+          // Try to delete the file using SolidPod's deleteFile function
+          try {
+            await deleteFile(filePath);
+            debugPrint('Successfully deleted profile file: $filename');
+          } catch (deleteError) {
+            // Check if it's a "not found" error (404)
+            if (deleteError.toString().contains('404') ||
+                deleteError.toString().contains('NotFoundHttpError')) {
+              // Try alternative path
+              final alternativePath = filename;
+              debugPrint(
+                  'File not found at $filePath, trying alternative path: $alternativePath');
+
+              try {
+                await deleteFile(alternativePath);
+                debugPrint(
+                    'Successfully deleted profile file with alternative path: $alternativePath');
+              } catch (alternativeError) {
+                // If both paths fail, just log and continue
+                debugPrint(
+                    'Could not delete profile file with either path. Error: $alternativeError');
+              }
+            } else {
+              // For other errors, just log and continue
+              debugPrint('Error deleting profile file: $deleteError');
+            }
+          }
+        } catch (fileError) {
+          debugPrint('Error processing profile file $filename: $fileError');
+          // Continue trying to delete other files
+        }
+      }
+    } catch (e) {
+      debugPrint('Error deleting existing profiles: $e');
+    }
   }
 }
