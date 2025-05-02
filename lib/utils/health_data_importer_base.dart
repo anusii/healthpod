@@ -916,7 +916,8 @@ abstract class HealthDataImporterBase {
   ) async {
     debugPrint('Deleting ${filesToDelete.length} existing files before import');
 
-    // Determine the full path format based on the directory structure
+    // Determine the full path format based on the directory structure.
+
     String basePath;
     if (dirPath.endsWith('/$dataType')) {
       basePath = dataType;
@@ -926,34 +927,42 @@ abstract class HealthDataImporterBase {
       basePath = cleanDirPath.isEmpty ? '' : cleanDirPath;
     }
 
-    // Attempt to delete each file
+    // Attempt to delete each file.
+
     for (final fileName in filesToDelete) {
       try {
-        // Construct the full path
+        // Construct the full path.
+
         final fullPath = basePath.isEmpty ? fileName : '$basePath/$fileName';
 
         debugPrint('Deleting file: $fullPath');
 
-        // Try to delete the file with the primary path
+        // Try to delete the file with the primary path.
+
         try {
           if (context.mounted) {
             await deleteFile(fullPath);
             debugPrint('Successfully deleted: $fullPath');
-            continue; // Skip to next file if this delete succeeded
+            continue;
           }
         } catch (deleteError) {
-          // Check if it's a "not found" error (404)
+          // Check if it's a "not found" error (404).
+
           if (deleteError.toString().contains('404') ||
               deleteError.toString().contains('NotFoundHttpError')) {
             debugPrint('File not found at primary path: $fullPath');
 
-            // Try alternative path formats
+            // Try alternative path formats.
+
             final alternativePaths = [
-              // Try without basePath
+              // Try without basePath.
+
               fileName,
-              // Try with only dataType prefix
+              // Try with only dataType prefix.
+
               '$dataType/$fileName',
-              // Try with healthpod/data prefix
+              // Try with healthpod/data prefix.
+
               'healthpod/data/$dataType/$fileName',
             ];
 
@@ -978,17 +987,18 @@ abstract class HealthDataImporterBase {
               debugPrint('Could not delete file with any path: $fileName');
             }
           } else {
-            // For other errors, just log and continue
+            // For other errors, just log and continue.
+
             debugPrint('Error deleting file: $deleteError');
           }
         }
       } catch (e) {
         debugPrint('Error processing file $fileName: $e');
-        // Continue with other files even if one deletion fails
       }
     }
   }
 
-  // Helper function to get minimum of two integers
+  // Helper function to get minimum of two integers.
+
   int min(int a, int b) => a < b ? a : b;
 }
