@@ -244,7 +244,8 @@ abstract class HealthDataImporterBase {
     List<String> timestamps,
   ) async {
     try {
-      // Handle path construction based on the directory structure
+      // Handle path construction based on the directory structure.
+
       String path;
       if (dirPath.endsWith('/$dataType')) {
         path = dataType;
@@ -255,16 +256,19 @@ abstract class HealthDataImporterBase {
         path = dirPath;
       }
 
-      // Get the base path for querying resources
+      // Get the base path for querying resources.
+
       final basePath = path.isEmpty ? '' : path;
       debugPrint('Checking for duplicates in path: $basePath');
 
-      // Try to get files in the directory directly
+      // Try to get files in the directory directly.
+
       try {
         final dirUrl = await getDirUrl(basePath);
         final resources = await getResourcesInContainer(dirUrl);
 
-        // Extract date parts from existing files for comparison
+        // Extract date parts from existing files for comparison.
+
         final existingFiles = resources.files
             .where((file) =>
                 file.startsWith('${dataType}_') &&
@@ -272,13 +276,15 @@ abstract class HealthDataImporterBase {
             .toList();
 
         debugPrint(
-            'Found ${existingFiles.length} ${dataType} files in directory');
+            'Found ${existingFiles.length} $dataType files in directory');
 
-        // Create date-based lookup index for faster comparison
+        // Create date-based lookup index for faster comparison.
+
         final Map<String, List<String>> existingFileDateIndex = {};
 
         for (final file in existingFiles) {
-          // Extract date part from filename (everything between dataType_ and T)
+          // Extract date part from filename (everything between dataType_ and T).
+
           final dateMatch =
               RegExp('${dataType}_(\\d{4}-\\d{2}-\\d{2})T').firstMatch(file);
           if (dateMatch != null && dateMatch.groupCount >= 1) {
@@ -293,29 +299,36 @@ abstract class HealthDataImporterBase {
         debugPrint(
             'Created date index with ${existingFileDateIndex.keys.length} unique dates');
 
-        // Create a list to store the duplicate file names
+        // Create a list to store the duplicate file names.
+
         final duplicateFiles = <String>[];
 
-        // Extract just the date part from each timestamp (YYYY-MM-DD)
+        // Extract just the date part from each timestamp (YYYY-MM-DD).
+
         for (final timestamp in timestamps) {
-          // Extract the date part before any 'T' character
+          // Extract the date part before any 'T' character.
+
           final datePart = timestamp.split('T')[0];
 
-          // Check if we have any files with this date
+          // Check if we have any files with this date.
+
           if (existingFileDateIndex.containsKey(datePart)) {
-            // Add all files with this date to duplicates
+            // Add all files with this date to duplicates.
+
             duplicateFiles.addAll(existingFileDateIndex[datePart]!);
             debugPrint(
                 'Found ${existingFileDateIndex[datePart]!.length} duplicate files for date $datePart');
           }
         }
 
-        // Return unique list of duplicate files
+        // Return unique list of duplicate files.
+
         return duplicateFiles.toSet().toList();
       } catch (resourceError) {
         debugPrint('Error accessing resources: $resourceError');
 
-        // Fall back to direct file checking
+        // Fall back to direct file checking.
+
         return _checkForExistingFilesDirectly(path, timestamps);
       }
     } catch (e) {
@@ -327,6 +340,7 @@ abstract class HealthDataImporterBase {
   /// Fall back method to check for existing files directly.
   ///
   /// This method is used when we can't get the directory listing.
+
   Future<List<String>> _checkForExistingFilesDirectly(
     String path,
     List<String> timestamps,
@@ -334,42 +348,76 @@ abstract class HealthDataImporterBase {
     debugPrint('Falling back to direct file checking');
     final duplicateFiles = <String>[];
 
-    // Extract just the date part from each timestamp (YYYY-MM-DD)
+    // Extract just the date part from each timestamp (YYYY-MM-DD).
+
     final dateParts = timestamps.map((timestamp) {
-      // Extract the date part before any 'T' character or just use the full string if no 'T'
+      // Extract the date part before any 'T' character or just use the full string if no 'T'.
+
       final datePart = timestamp.split('T')[0];
       return datePart;
-    }).toSet(); // Use a Set to remove duplicates
+    }).toSet();
 
-    // Known file patterns for testing
-    final Map<String, List<String>> knownFiles = {
-      'blood_pressure': [
-        'blood_pressure_2025-02-10T19-19-20.json.enc.ttl',
-        'blood_pressure_2025-01-28T12-30-55.json.enc.ttl',
-        'blood_pressure_2025-01-28T08-12-44.json.enc.ttl',
-        'blood_pressure_2025-01-28T09-20-55.json.enc.ttl',
-        'blood_pressure_2025-01-29T16-56-58.json.enc.ttl',
-      ],
-      'vaccination': [
-        'vaccination_2020-01-15T00-00-00.json.enc.ttl',
-        'vaccination_2020-04-02T00-00-00.json.enc.ttl',
-        'vaccination_2023-07-24T00-00-00.json.enc.ttl',
-      ],
-      'profile': [
-        'profile_2025-05-02T10-23-09.json.enc.ttl',
-        'profile_2025-04-17T00-24-25.json.enc.ttl',
-      ],
-    };
+    // Instead of using hardcoded known files, try to check potential file paths
+    // using pattern matching against the timestamps.
 
-    // Check each date against known files
     for (final datePart in dateParts) {
-      if (knownFiles.containsKey(dataType)) {
-        for (final file in knownFiles[dataType]!) {
-          if (file.contains(datePart)) {
-            duplicateFiles.add(file);
-            debugPrint('Found matching file for date $datePart: $file');
+      // Try various path formats that might exist.
+
+      final possiblePaths = [
+        path.isEmpty ? '' : path,
+        dataType,
+        'healthpod/data/$dataType',
+      ];
+
+      for (final basePath in possiblePaths) {
+        try {
+          // Generate the potential filename pattern.
+
+          final filePattern = '${dataType}_${datePart}T';
+          debugPrint(
+              'Looking for files with pattern: $filePattern in $basePath');
+
+          // Try to get directory listing if possible.
+
+          try {
+            final dirUrl = await getDirUrl(basePath);
+            final resources = await getResourcesInContainer(dirUrl);
+
+            // Check for any matching files.
+
+            final matches = resources.files
+                .where((file) =>
+                    file.startsWith(filePattern) &&
+                    file.endsWith('.json.enc.ttl'))
+                .toList();
+
+            if (matches.isNotEmpty) {
+              duplicateFiles.addAll(matches);
+              debugPrint('Found ${matches.length} matching files in $basePath');
+            }
+          } catch (e) {
+            debugPrint('Could not check directory $basePath: $e');
           }
+        } catch (e) {
+          debugPrint('Error checking path $path for date $datePart: $e');
         }
+      }
+    }
+
+    // If no files were found using directory checks, construct potential filenames
+    // based on the pattern we've observed in the codebase.
+
+    if (duplicateFiles.isEmpty) {
+      debugPrint(
+          'No files found through directory listing, using standard patterns');
+
+      for (final datePart in dateParts) {
+        // Create a standard filename for each date (using 00-00-00 for the time portion).
+
+        final standardFilename =
+            '${dataType}_${datePart}T00-00-00.json.enc.ttl';
+        duplicateFiles.add(standardFilename);
+        debugPrint('Added standard pattern file: $standardFilename');
       }
     }
 
@@ -385,54 +433,59 @@ abstract class HealthDataImporterBase {
 
   Future<bool> fileExistsInPod(String filePath) async {
     try {
-      // In a real implementation, we would use SolidPod to check if a file exists
-      // For now, since we can't directly check file existence, we'll use the containment logic
+      // Extract file name from path.
 
-      // For testing, we'll simulate file existence for the paths that match our test files
-      final knownFiles = {
-        'blood_pressure': [
-          'blood_pressure_2025-02-10T19-19-20.json.enc.ttl',
-          'blood_pressure_2025-01-28T12-30-55.json.enc.ttl',
-          'blood_pressure_2025-01-28T08-12-44.json.enc.ttl',
-          'blood_pressure_2025-01-28T09-20-55.json.enc.ttl',
-          'blood_pressure_2025-01-29T16-56-58.json.enc.ttl',
-        ],
-        'vaccination': [
-          'vaccination_2020-01-15T00-00-00.json.enc.ttl',
-          'vaccination_2020-04-02T00-00-00.json.enc.ttl',
-          'vaccination_2023-07-24T00-00-00.json.enc.ttl',
-        ],
-        'profile': [
-          'profile_2025-05-02T10-23-09.json.enc.ttl',
-          'profile_2025-04-17T00-24-25.json.enc.ttl',
-        ],
-      };
-
-      // Extract file name from path
       final parts = filePath.split('/');
       final fileName = parts.last;
 
-      // Extract type from fileName
-      String fileType = '';
-      if (fileName.startsWith('blood_pressure_')) {
-        fileType = 'blood_pressure';
-      } else if (fileName.startsWith('vaccination_')) {
-        fileType = 'vaccination';
-      } else if (fileName.startsWith('profile_')) {
-        fileType = 'profile';
-      }
+      // Try to access the directory containing the file.
 
-      // Check if this is a known file
-      bool exists = false;
-      if (knownFiles.containsKey(fileType)) {
-        exists = knownFiles[fileType]!.contains(fileName);
-      }
+      final dirPath =
+          parts.length > 1 ? parts.sublist(0, parts.length - 1).join('/') : '';
 
-      if (exists) {
-        debugPrint('Found existing file: $fileName');
-        return true;
-      } else {
-        debugPrint('File "$fileName" does not exist');
+      try {
+        // Try to get directory listing.
+
+        final dirUrl = await getDirUrl(dirPath);
+        final resources = await getResourcesInContainer(dirUrl);
+
+        // Check if file exists in directory.
+
+        final exists = resources.files.contains(fileName);
+
+        if (exists) {
+          debugPrint('Found existing file: $fileName');
+          return true;
+        } else {
+          // Try alternative path formats.
+
+          final alternativePaths = [
+            dataType,
+            '$dataType/$fileName',
+            'healthpod/data/$dataType',
+            'healthpod/data/$dataType/$fileName',
+          ];
+
+          for (final altPath in alternativePaths) {
+            try {
+              final altDirUrl = await getDirUrl(altPath);
+              final altResources = await getResourcesInContainer(altDirUrl);
+
+              if (altResources.files.contains(fileName)) {
+                debugPrint(
+                    'Found existing file in alternative path: $altPath/$fileName');
+                return true;
+              }
+            } catch (e) {
+              debugPrint('Error checking alternative path $altPath: $e');
+            }
+          }
+
+          debugPrint('File "$fileName" does not exist in any checked paths');
+          return false;
+        }
+      } catch (e) {
+        debugPrint('Error accessing directory: $e');
         return false;
       }
     } catch (e) {
@@ -515,7 +568,7 @@ abstract class HealthDataImporterBase {
         return false;
       }
 
-      // Initialize tracking variables for duplicate detection and success monitoring.
+      // Initialise tracking variables for duplicate detection and success monitoring.
 
       final Set<String> seenTimestamps = {};
       final List<String> duplicateTimestamps = [];
@@ -523,7 +576,8 @@ abstract class HealthDataImporterBase {
       bool allSuccess = true;
       int successfulSaves = 0;
 
-      // First pass: collect all timestamps from the CSV file
+      // First pass: collect all timestamps from the CSV file.
+
       for (var i = 1; i < fields.length; i++) {
         final row =
             List<String>.from(fields[i].map((f) => f?.toString() ?? ''));
@@ -545,22 +599,25 @@ abstract class HealthDataImporterBase {
                 allTimestamps.add(timestamp);
               }
             } catch (e) {
-              // Skip invalid timestamps
+              // Skip invalid timestamps.
+
+              debugPrint('Invalid timestamp: $e');
             }
             break;
           }
         }
       }
 
-      // Check for existing files that would be overridden
-      bool canCheckForDuplicates = true;
+      // Check for existing files that would be overridden.
+
       List<String> duplicateFiles = [];
 
       if (allTimestamps.isNotEmpty) {
         try {
           duplicateFiles = await _checkForExistingFiles(dirPath, allTimestamps);
 
-          // If duplicate files exist, show confirmation dialog
+          // If duplicate files exist, show confirmation dialog.
+
           if (duplicateFiles.isNotEmpty && context.mounted) {
             debugPrint(
                 'Found ${duplicateFiles.length} duplicate files! Showing override dialog.');
@@ -569,7 +626,8 @@ abstract class HealthDataImporterBase {
               duplicateFiles,
             );
 
-            // If user cancels the override, abort the import
+            // If user cancels the override, abort the import.
+
             if (!shouldOverride) {
               debugPrint('User cancelled override, aborting import.');
               return false;
@@ -577,16 +635,19 @@ abstract class HealthDataImporterBase {
             debugPrint(
                 'User confirmed override, deleting existing files before import.');
 
-            // Delete the existing files before proceeding with import
+            if (!context.mounted) return false;
+
+            // Delete the existing files before proceeding with import.
+
             await _deleteExistingFiles(context, dirPath, duplicateFiles);
           } else {
             debugPrint('No duplicate files found, proceeding with import.');
           }
         } catch (e) {
           debugPrint('Unable to check for duplicates: $e');
-          canCheckForDuplicates = false;
 
-          // Show warning that we can't check for duplicates
+          // Show warning that we can't check for duplicates.
+
           if (context.mounted) {
             final shouldProceed =
                 await _showDuplicateCheckFailedDialog(context);

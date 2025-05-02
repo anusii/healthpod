@@ -31,7 +31,6 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
-import 'package:healthpod/utils/security_key/manager.dart';
 
 /// Class that handles the import of profile data from JSON file.
 
@@ -114,6 +113,7 @@ class ProfileImporter {
           'Validated profile data: ${json.encode(finalData).substring(0, min(100, json.encode(finalData).length))}...');
 
       // Add timestamp if not present, otherwise use the existing one.
+
       String timestampString;
       if (!finalData.containsKey('timestamp')) {
         debugPrint('No timestamp found in profile data, using current time');
@@ -124,7 +124,8 @@ class ProfileImporter {
         debugPrint('Found timestamp in profile data: $timestampString');
       }
 
-      // Check if timestamp is nested inside 'data' object
+      // Check if timestamp is nested inside 'data' object.
+
       if (finalData.containsKey('data') &&
           finalData['data'] is Map<String, dynamic> &&
           (finalData['data'] as Map<String, dynamic>)
@@ -135,12 +136,14 @@ class ProfileImporter {
           debugPrint(
               'Found nested timestamp in profile data["data"]: $nestedTimestamp');
           timestampString = nestedTimestamp;
-          // Update the top-level timestamp to match the nested one
+          // Update the top-level timestamp to match the nested one.
+
           finalData['timestamp'] = timestampString;
         }
       }
 
-      // Parse the timestamp to ensure it's in a valid format
+      // Parse the timestamp to ensure it's in a valid format.
+
       DateTime timestamp;
       try {
         timestamp = DateTime.parse(timestampString);
@@ -166,8 +169,10 @@ class ProfileImporter {
         final existingProfiles =
             await _checkForExistingProfiles(context, timestampString);
 
-        // Only show the dialog if actual profiles were found
+        // Only show the dialog if actual profiles were found.
+
         if (existingProfiles.isNotEmpty) {
+          if (!context.mounted) return false;
           debugPrint(
               'Found ${existingProfiles.length} existing profiles. Showing override dialog.');
           final shouldOverride =
@@ -181,7 +186,9 @@ class ProfileImporter {
           debugPrint(
               'User confirmed profile override, deleting existing profiles');
 
-          // Delete the existing profile files before saving the new one
+          if (!context.mounted) return false;
+          // Delete the existing profile files before saving the new one.
+
           await _deleteExistingProfiles(context, existingProfiles);
         } else {
           debugPrint('No existing profiles found matching the timestamp.');
@@ -189,6 +196,7 @@ class ProfileImporter {
       }
 
       // Create a formatted timestamp for the filename using the timestamp from the data.
+
       final formattedTimestamp = formatTimestampForFilename(timestamp);
       final filename = 'profile_$formattedTimestamp.json';
 
@@ -522,72 +530,51 @@ class ProfileImporter {
   static Future<List<String>> _checkForExistingProfiles(
       BuildContext context, String timestampString) async {
     try {
-      // Parse the incoming timestamp
+      // Parse the incoming timestamp.
+
       DateTime importTimestamp;
       try {
         importTimestamp = DateTime.parse(timestampString);
         debugPrint('Parsed import timestamp: $importTimestamp');
       } catch (e) {
         debugPrint('Error parsing timestamp: $e');
-        // If we can't parse the timestamp, just use the current time
+        // If we can't parse the timestamp, just use the current time.
+
         importTimestamp = DateTime.now();
       }
 
-      // Format the timestamp how it would appear in a filename
+      // Format the timestamp how it would appear in a filename.
+
       final formattedTimestamp = formatTimestampForFilename(importTimestamp);
       final expectedFilename = 'profile_$formattedTimestamp.json.enc.ttl';
 
       debugPrint('Looking for any profile file matching: $expectedFilename');
 
-      // Try different path approaches to find existing files
+      // Try different path approaches to find existing files.
+
       List<String> profileFiles = [];
 
-      // First try with the standard path
+      // First try with the standard path.
+
       try {
-        debugPrint('Trying standard path: profile');
         final dirUrl = await getDirUrl('profile');
         final resources = await getResourcesInContainer(dirUrl);
-
-        // Get all files in directory for debugging
-        debugPrint('All files in directory: ${resources.files.join(', ')}');
-        debugPrint('All subdirs in directory: ${resources.subDirs.join(', ')}');
 
         profileFiles = resources.files
             .where((file) =>
                 file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
             .toList();
-
-        debugPrint(
-            'Found ${profileFiles.length} profile files with standard path');
       } catch (e) {
         debugPrint('Error accessing with standard path: $e');
       }
 
-      // If first approach didn't work, try with healthpod/data prefix
-      if (profileFiles.isEmpty) {
-        try {
-          debugPrint(
-              'Trying with healthpod/data prefix: healthpod/data/profile');
-          final dirUrl = await getDirUrl('healthpod/data/profile');
-          final resources = await getResourcesInContainer(dirUrl);
+      // Process the results.
 
-          profileFiles = resources.files
-              .where((file) =>
-                  file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
-              .toList();
-
-          debugPrint(
-              'Found ${profileFiles.length} profile files with healthpod/data prefix');
-        } catch (e) {
-          debugPrint('Error accessing with healthpod/data prefix: $e');
-        }
-      }
-
-      // Process the results
       if (profileFiles.isNotEmpty) {
         debugPrint('Existing profile files: ${profileFiles.join(', ')}');
 
-        // Check if any files match our expected filename pattern
+        // Check if any files match our expected filename pattern.
+
         final matchingFiles = profileFiles
             .where((file) => file.contains(formattedTimestamp))
             .toList();
@@ -598,9 +585,8 @@ class ProfileImporter {
           return matchingFiles;
         }
 
-        // If no exact matches, return all profile files
-        debugPrint(
-            'No exact matches, but returning all profile files for confirmation');
+        // If no exact matches, return all profile files.
+
         return profileFiles;
       }
 
@@ -759,7 +745,8 @@ class ProfileImporter {
   static Future<void> _deleteExistingProfiles(
       BuildContext context, List<String> existingProfiles) async {
     try {
-      // Define the normalized path to use for deleting files
+      // Define the normalised path to use for deleting files.
+
       final normalizedPath = 'profile';
 
       for (final filename in existingProfiles) {
@@ -767,15 +754,18 @@ class ProfileImporter {
           final filePath = '$normalizedPath/$filename';
           debugPrint('Attempting to delete profile file: $filePath');
 
-          // Try to delete the file using SolidPod's deleteFile function
+          // Try to delete the file using SolidPod's deleteFile function.
+
           try {
             await deleteFile(filePath);
             debugPrint('Successfully deleted profile file: $filename');
           } catch (deleteError) {
-            // Check if it's a "not found" error (404)
+            // Check if it's a "not found" error (404).
+
             if (deleteError.toString().contains('404') ||
                 deleteError.toString().contains('NotFoundHttpError')) {
-              // Try alternative path
+              // Try alternative path.
+
               final alternativePath = filename;
               debugPrint(
                   'File not found at $filePath, trying alternative path: $alternativePath');
@@ -785,18 +775,19 @@ class ProfileImporter {
                 debugPrint(
                     'Successfully deleted profile file with alternative path: $alternativePath');
               } catch (alternativeError) {
-                // If both paths fail, just log and continue
+                // If both paths fail, just log and continue.
+
                 debugPrint(
                     'Could not delete profile file with either path. Error: $alternativeError');
               }
             } else {
-              // For other errors, just log and continue
+              // For other errors, just log and continue.
+
               debugPrint('Error deleting profile file: $deleteError');
             }
           }
         } catch (fileError) {
           debugPrint('Error processing profile file $filename: $fileError');
-          // Continue trying to delete other files
         }
       }
     } catch (e) {
