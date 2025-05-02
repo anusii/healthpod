@@ -52,7 +52,11 @@ dependencies:
   timeline_tile: ^2.0.0
   universal_io: ^2.2.2
   url_launcher: ^6.3.1
-  version_widget: ^0.0.6
+  #version_widget: ^0.0.6
+  version_widget:
+    git:
+      url: https://github.com/anusii/version_widget.git
+      ref: main
   webdriver: ^3.0.3
   window_manager: ^0.4.3
 
