@@ -161,13 +161,19 @@ class _DiaryTabState extends State<DiaryTab> {
     }
   }
 
+  void _goToToday() {
+    setState(() {
+      _focusedDay = DateTime.now();
+      _selectedDay = DateTime.now();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
           // Add month and year selector.
-
           Container(
             padding:
                 const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -186,7 +192,6 @@ class _DiaryTabState extends State<DiaryTab> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Month dropdown.
-
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -239,7 +244,6 @@ class _DiaryTabState extends State<DiaryTab> {
                 ),
                 const SizedBox(width: 16),
                 // Year dropdown.
-
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
@@ -287,6 +291,28 @@ class _DiaryTabState extends State<DiaryTab> {
                         },
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Today button.
+
+                TextButton.icon(
+                  onPressed: _goToToday,
+                  icon: Icon(
+                    Icons.today,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  label: const Text('Today'),
+                  style: TextButton.styleFrom(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      side: BorderSide(
+                        color:
+                            Theme.of(context).colorScheme.outline.withAlpha(51),
+                      ),
+                    ),
                   ),
                 ),
               ],
