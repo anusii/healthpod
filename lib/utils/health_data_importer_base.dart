@@ -205,7 +205,6 @@ abstract class HealthDataImporterBase {
             final value = row[j].toString().trim();
 
             // Handle timestamp field specially
-
             if (header == timestampField.toLowerCase()) {
               if (value.isEmpty) {
                 hasRequiredFields = false;
@@ -226,7 +225,6 @@ abstract class HealthDataImporterBase {
             }
 
             // Process other fields using the implementation-specific method
-
             final fieldProcessed = processField(header, value, responses, i);
             if (!fieldProcessed && lowerRequiredColumns.contains(header)) {
               hasRequiredFields = false;
