@@ -70,20 +70,6 @@ final List<Map<String, dynamic>> homeTabs = [
     ''',
   },
   {
-    'title': 'Diary',
-    'icon': Icons.calendar_today,
-    'color': null,
-    'content': const DiaryTab(),
-    'tooltip': '''
-
-    **Diary:** Tap here to access and manage your appointments. You can enter
-    previous appointments for the record and update the calendar when you
-    recieve a new appointment. To load appointments from other sources via a
-    *CSV* file into your calendar visit the **Files** tab.
-
-    ''',
-  },
-  {
     'title': 'Add',
     'icon': Icons.assignment,
     'color': null,
