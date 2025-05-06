@@ -55,16 +55,19 @@ class DiaryExporter extends HealthDataExporterBase {
     final appointmentData = jsonData['responses'] ?? jsonData;
 
     // Safely extract values with null checks.
-    // Get date from root level like service.dart.
+    // Try to get date from both root level and responses.
+    // This is because the date is sometimes stored in the root level and sometimes in the responses.
 
-    final dateStr = jsonData['date']?.toString();
+    final rootDateStr = jsonData['date']?.toString();
+    final responseDateStr = appointmentData['date']?.toString();
+    final dateStr = rootDateStr ?? responseDateStr;
+
     final title = appointmentData['title']?.toString() ?? '';
     final description = appointmentData['description']?.toString() ?? '';
 
     // Parse date.
 
     DateTime? date;
-
     if (dateStr != null) {
       try {
         date = DateTime.parse(dateStr);
