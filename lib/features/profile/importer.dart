@@ -554,18 +554,26 @@ class ProfileImporter {
 
       List<String> profileFiles = [];
 
-      // First try with the standard path.
+      // Only check the known path where profile files are stored.
+
+      final profilePath = 'healthpod/data/profile';
 
       try {
-        final dirUrl = await getDirUrl('profile');
+        debugPrint('Checking for profiles in path: $profilePath');
+        final dirUrl = await getDirUrl(profilePath);
         final resources = await getResourcesInContainer(dirUrl);
 
         profileFiles = resources.files
             .where((file) =>
                 file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
             .toList();
+
+        if (profileFiles.isNotEmpty) {
+          debugPrint(
+              'Found ${profileFiles.length} profile files in $profilePath');
+        }
       } catch (e) {
-        debugPrint('Error accessing with standard path: $e');
+        debugPrint('Error accessing path $profilePath: $e');
       }
 
       // Process the results.

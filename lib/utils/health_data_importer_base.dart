@@ -244,27 +244,13 @@ abstract class HealthDataImporterBase {
     List<String> timestamps,
   ) async {
     try {
-      // Handle path construction based on the directory structure.
+      // Only check the known working path where health data files are stored.
 
-      String path;
-      if (dirPath.endsWith('/$dataType')) {
-        path = dataType;
-      } else if (dirPath.startsWith('healthpod/data')) {
-        path = dirPath.replaceFirst('healthpod/data/', '');
-        path = path.isEmpty ? '' : path;
-      } else {
-        path = dirPath;
-      }
-
-      // Get the base path for querying resources.
-
-      final basePath = path.isEmpty ? '' : path;
-      debugPrint('Checking for duplicates in path: $basePath');
-
-      // Try to get files in the directory directly.
+      final String dataPath = 'healthpod/data/$dataType';
+      debugPrint('Checking for duplicates in path: $dataPath');
 
       try {
-        final dirUrl = await getDirUrl(basePath);
+        final dirUrl = await getDirUrl(dataPath);
         final resources = await getResourcesInContainer(dirUrl);
 
         // Extract date parts from existing files for comparison.
@@ -325,11 +311,11 @@ abstract class HealthDataImporterBase {
 
         return duplicateFiles.toSet().toList();
       } catch (resourceError) {
-        debugPrint('Error accessing resources: $resourceError');
+        debugPrint('Error accessing resources in path: $resourceError');
 
-        // Fall back to direct file checking.
+        // If we can't access the directory, fall back to direct file checking.
 
-        return _checkForExistingFilesDirectly(path, timestamps);
+        return _checkForExistingFilesDirectly(timestamps);
       }
     } catch (e) {
       debugPrint('Error checking for existing files: $e');
@@ -342,7 +328,6 @@ abstract class HealthDataImporterBase {
   /// This method is used when we can't get the directory listing.
 
   Future<List<String>> _checkForExistingFilesDirectly(
-    String path,
     List<String> timestamps,
   ) async {
     debugPrint('Falling back to direct file checking');
@@ -357,35 +342,33 @@ abstract class HealthDataImporterBase {
       return datePart;
     }).toSet();
 
-    // Instead of using hardcoded known files, try to check potential file paths
-    // using pattern matching against the timestamps.
+    // Only use the known working path.
 
-    for (final datePart in dateParts) {
-      // Try various path formats that might exist.
+    final String dataPath = 'healthpod/data/$dataType';
 
-      final possiblePaths = [
-        path.isEmpty ? '' : path,
-        dataType,
-        'healthpod/data/$dataType',
-      ];
+    try {
+      debugPrint('Checking for files in path: $dataPath');
+      try {
+        // Try to get directory listing.
 
-      for (final basePath in possiblePaths) {
-        try {
-          // Generate the potential filename pattern.
+        final dirUrl = await getDirUrl(dataPath);
+        final resources = await getResourcesInContainer(dirUrl);
 
-          final filePattern = '${dataType}_${datePart}T';
-          debugPrint(
-              'Looking for files with pattern: $filePattern in $basePath');
+        // If we get here, we found a valid directory, now check for matching files.
 
-          // Try to get directory listing if possible.
+        debugPrint('Successfully accessed directory: $dataPath');
 
-          try {
-            final dirUrl = await getDirUrl(basePath);
-            final resources = await getResourcesInContainer(dirUrl);
+        // Check each date against all files in this directory.
 
-            // Check for any matching files.
+        final files = resources.files;
+        if (files.isNotEmpty) {
+          debugPrint('Found ${files.length} files in directory $dataPath');
 
-            final matches = resources.files
+          // For each date part, find any matching files.
+
+          for (final datePart in dateParts) {
+            final filePattern = '${dataType}_${datePart}T';
+            final matches = files
                 .where((file) =>
                     file.startsWith(filePattern) &&
                     file.endsWith('.json.enc.ttl'))
@@ -393,15 +376,16 @@ abstract class HealthDataImporterBase {
 
             if (matches.isNotEmpty) {
               duplicateFiles.addAll(matches);
-              debugPrint('Found ${matches.length} matching files in $basePath');
+              debugPrint(
+                  'Found ${matches.length} matching files for date $datePart in $dataPath');
             }
-          } catch (e) {
-            debugPrint('Could not check directory $basePath: $e');
           }
-        } catch (e) {
-          debugPrint('Error checking path $path for date $datePart: $e');
         }
+      } catch (e) {
+        debugPrint('Could not check directory $dataPath: $e');
       }
+    } catch (e) {
+      debugPrint('Error checking path $dataPath: $e');
     }
 
     // If no files were found using directory checks, construct potential filenames
@@ -916,81 +900,24 @@ abstract class HealthDataImporterBase {
   ) async {
     debugPrint('Deleting ${filesToDelete.length} existing files before import');
 
-    // Determine the full path format based on the directory structure.
-
-    String basePath;
-    if (dirPath.endsWith('/$dataType')) {
-      basePath = dataType;
-    } else {
-      final cleanDirPath =
-          dirPath.replaceFirst(RegExp(r'^healthpod/data/?'), '');
-      basePath = cleanDirPath.isEmpty ? '' : cleanDirPath;
-    }
+    // Use the known working path
+    final String dataPath = 'healthpod/data/$dataType';
 
     // Attempt to delete each file.
-
     for (final fileName in filesToDelete) {
       try {
         // Construct the full path.
-
-        final fullPath = basePath.isEmpty ? fileName : '$basePath/$fileName';
+        final fullPath = '$dataPath/$fileName';
 
         debugPrint('Deleting file: $fullPath');
-
-        // Try to delete the file with the primary path.
 
         try {
           if (context.mounted) {
             await deleteFile(fullPath);
             debugPrint('Successfully deleted: $fullPath');
-            continue;
           }
         } catch (deleteError) {
-          // Check if it's a "not found" error (404).
-
-          if (deleteError.toString().contains('404') ||
-              deleteError.toString().contains('NotFoundHttpError')) {
-            debugPrint('File not found at primary path: $fullPath');
-
-            // Try alternative path formats.
-
-            final alternativePaths = [
-              // Try without basePath.
-
-              fileName,
-              // Try with only dataType prefix.
-
-              '$dataType/$fileName',
-              // Try with healthpod/data prefix.
-
-              'healthpod/data/$dataType/$fileName',
-            ];
-
-            bool deleted = false;
-            for (final altPath in alternativePaths) {
-              try {
-                if (context.mounted) {
-                  debugPrint('Trying alternative path: $altPath');
-                  await deleteFile(altPath);
-                  debugPrint(
-                      'Successfully deleted with alternative path: $altPath');
-                  deleted = true;
-                  break;
-                }
-              } catch (altError) {
-                debugPrint(
-                    'Failed with alternative path $altPath: ${altError.toString().substring(0, min(100, altError.toString().length))}');
-              }
-            }
-
-            if (!deleted) {
-              debugPrint('Could not delete file with any path: $fileName');
-            }
-          } else {
-            // For other errors, just log and continue.
-
-            debugPrint('Error deleting file: $deleteError');
-          }
+          debugPrint('Error deleting file: $deleteError');
         }
       } catch (e) {
         debugPrint('Error processing file $fileName: $e');
