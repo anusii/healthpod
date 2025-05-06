@@ -247,7 +247,6 @@ abstract class HealthDataImporterBase {
       // Only check the known working path where health data files are stored.
 
       final String dataPath = 'healthpod/data/$dataType';
-      debugPrint('Checking for duplicates in path: $dataPath');
 
       try {
         final dirUrl = await getDirUrl(dataPath);
@@ -260,9 +259,6 @@ abstract class HealthDataImporterBase {
                 file.startsWith('${dataType}_') &&
                 file.endsWith('.json.enc.ttl'))
             .toList();
-
-        debugPrint(
-            'Found ${existingFiles.length} $dataType files in directory');
 
         // Create date-based lookup index for faster comparison.
 
@@ -282,9 +278,6 @@ abstract class HealthDataImporterBase {
           }
         }
 
-        debugPrint(
-            'Created date index with ${existingFileDateIndex.keys.length} unique dates');
-
         // Create a list to store the duplicate file names.
 
         final duplicateFiles = <String>[];
@@ -302,8 +295,6 @@ abstract class HealthDataImporterBase {
             // Add all files with this date to duplicates.
 
             duplicateFiles.addAll(existingFileDateIndex[datePart]!);
-            debugPrint(
-                'Found ${existingFileDateIndex[datePart]!.length} duplicate files for date $datePart');
           }
         }
 
@@ -311,101 +302,12 @@ abstract class HealthDataImporterBase {
 
         return duplicateFiles.toSet().toList();
       } catch (resourceError) {
-        debugPrint('Error accessing resources in path: $resourceError');
-
-        // If we can't access the directory, fall back to direct file checking.
-
-        return _checkForExistingFilesDirectly(timestamps);
+        throw Exception(
+            'Failed to access resources in $dataPath: $resourceError');
       }
     } catch (e) {
-      debugPrint('Error checking for existing files: $e');
-      return [];
+      throw Exception('Error checking for existing files: $e');
     }
-  }
-
-  /// Fall back method to check for existing files directly.
-  ///
-  /// This method is used when we can't get the directory listing.
-
-  Future<List<String>> _checkForExistingFilesDirectly(
-    List<String> timestamps,
-  ) async {
-    debugPrint('Falling back to direct file checking');
-    final duplicateFiles = <String>[];
-
-    // Extract just the date part from each timestamp (YYYY-MM-DD).
-
-    final dateParts = timestamps.map((timestamp) {
-      // Extract the date part before any 'T' character or just use the full string if no 'T'.
-
-      final datePart = timestamp.split('T')[0];
-      return datePart;
-    }).toSet();
-
-    // Only use the known working path.
-
-    final String dataPath = 'healthpod/data/$dataType';
-
-    try {
-      debugPrint('Checking for files in path: $dataPath');
-      try {
-        // Try to get directory listing.
-
-        final dirUrl = await getDirUrl(dataPath);
-        final resources = await getResourcesInContainer(dirUrl);
-
-        // If we get here, we found a valid directory, now check for matching files.
-
-        debugPrint('Successfully accessed directory: $dataPath');
-
-        // Check each date against all files in this directory.
-
-        final files = resources.files;
-        if (files.isNotEmpty) {
-          debugPrint('Found ${files.length} files in directory $dataPath');
-
-          // For each date part, find any matching files.
-
-          for (final datePart in dateParts) {
-            final filePattern = '${dataType}_${datePart}T';
-            final matches = files
-                .where((file) =>
-                    file.startsWith(filePattern) &&
-                    file.endsWith('.json.enc.ttl'))
-                .toList();
-
-            if (matches.isNotEmpty) {
-              duplicateFiles.addAll(matches);
-              debugPrint(
-                  'Found ${matches.length} matching files for date $datePart in $dataPath');
-            }
-          }
-        }
-      } catch (e) {
-        debugPrint('Could not check directory $dataPath: $e');
-      }
-    } catch (e) {
-      debugPrint('Error checking path $dataPath: $e');
-    }
-
-    // If no files were found using directory checks, construct potential filenames
-    // based on the pattern we've observed in the codebase.
-
-    if (duplicateFiles.isEmpty) {
-      debugPrint(
-          'No files found through directory listing, using standard patterns');
-
-      for (final datePart in dateParts) {
-        // Create a standard filename for each date (using 00-00-00 for the time portion).
-
-        final standardFilename =
-            '${dataType}_${datePart}T00-00-00.json.enc.ttl';
-        duplicateFiles.add(standardFilename);
-        debugPrint('Added standard pattern file: $standardFilename');
-      }
-    }
-
-    return duplicateFiles;
   }
 
   /// Helper method to check if a file exists in the POD.
@@ -414,35 +316,28 @@ abstract class HealthDataImporterBase {
   /// by checking the file listing from the directory or using a direct method.
   ///
   /// Returns true if the file exists, false otherwise.
-
   Future<bool> fileExistsInPod(String filePath) async {
     try {
       // Extract file name from path.
-
       final parts = filePath.split('/');
       final fileName = parts.last;
 
       // Try to access the directory containing the file.
-
       final dirPath =
           parts.length > 1 ? parts.sublist(0, parts.length - 1).join('/') : '';
 
       try {
         // Try to get directory listing.
-
         final dirUrl = await getDirUrl(dirPath);
         final resources = await getResourcesInContainer(dirUrl);
 
         // Check if file exists in directory.
-
         final exists = resources.files.contains(fileName);
 
         if (exists) {
-          debugPrint('Found existing file: $fileName');
           return true;
         } else {
           // Try alternative path formats.
-
           final alternativePaths = [
             dataType,
             '$dataType/$fileName',
@@ -451,30 +346,20 @@ abstract class HealthDataImporterBase {
           ];
 
           for (final altPath in alternativePaths) {
-            try {
-              final altDirUrl = await getDirUrl(altPath);
-              final altResources = await getResourcesInContainer(altDirUrl);
+            final altDirUrl = await getDirUrl(altPath);
+            final altResources = await getResourcesInContainer(altDirUrl);
 
-              if (altResources.files.contains(fileName)) {
-                debugPrint(
-                    'Found existing file in alternative path: $altPath/$fileName');
-                return true;
-              }
-            } catch (e) {
-              debugPrint('Error checking alternative path $altPath: $e');
+            if (altResources.files.contains(fileName)) {
+              return true;
             }
           }
-
-          debugPrint('File "$fileName" does not exist in any checked paths');
           return false;
         }
       } catch (e) {
-        debugPrint('Error accessing directory: $e');
-        return false;
+        throw Exception('Failed to access directory $dirPath: $e');
       }
     } catch (e) {
-      debugPrint('Error checking if file exists: $e');
-      return false;
+      throw Exception('Error checking if file exists: $e');
     }
   }
 
@@ -584,8 +469,6 @@ abstract class HealthDataImporterBase {
               }
             } catch (e) {
               // Skip invalid timestamps.
-
-              debugPrint('Invalid timestamp: $e');
             }
             break;
           }
@@ -603,8 +486,6 @@ abstract class HealthDataImporterBase {
           // If duplicate files exist, show confirmation dialog.
 
           if (duplicateFiles.isNotEmpty && context.mounted) {
-            debugPrint(
-                'Found ${duplicateFiles.length} duplicate files! Showing override dialog.');
             final shouldOverride = await _showOverrideConfirmationDialog(
               context,
               duplicateFiles,
@@ -613,23 +494,16 @@ abstract class HealthDataImporterBase {
             // If user cancels the override, abort the import.
 
             if (!shouldOverride) {
-              debugPrint('User cancelled override, aborting import.');
               return false;
             }
-            debugPrint(
-                'User confirmed override, deleting existing files before import.');
 
             if (!context.mounted) return false;
 
             // Delete the existing files before proceeding with import.
 
             await _deleteExistingFiles(context, dirPath, duplicateFiles);
-          } else {
-            debugPrint('No duplicate files found, proceeding with import.');
           }
         } catch (e) {
-          debugPrint('Unable to check for duplicates: $e');
-
           // Show warning that we can't check for duplicates.
 
           if (context.mounted) {
@@ -678,7 +552,6 @@ abstract class HealthDataImporterBase {
             if (header == timestampField.toLowerCase()) {
               if (value.isEmpty) {
                 hasRequiredFields = false;
-                debugPrint('Row $i: Missing required timestamp');
                 continue;
               }
 
@@ -705,8 +578,6 @@ abstract class HealthDataImporterBase {
           // Skip rows with missing required fields.
 
           if (!hasRequiredFields) {
-            debugPrint(
-                'Skipping row $i due to missing or invalid required fields');
             continue;
           }
 
@@ -755,18 +626,13 @@ abstract class HealthDataImporterBase {
             successfulSaves++;
           } else {
             allSuccess = false;
-            debugPrint('Failed to save file for row $i');
           }
         } catch (rowError) {
-          debugPrint('Error processing row $i: $rowError');
           allSuccess = false;
         }
       }
 
       // Log the completion status.
-
-      debugPrint(
-          'Processing complete. Successfully saved $successfulSaves files');
 
       // Show warning for any duplicate timestamps found within the CSV.
 
@@ -784,7 +650,6 @@ abstract class HealthDataImporterBase {
     } catch (e) {
       // Handle any errors during the import process.
 
-      debugPrint('Import error: $e');
       if (context.mounted) {
         showAlert(context, 'Error importing CSV: ${e.toString()}');
       }
@@ -898,34 +763,30 @@ abstract class HealthDataImporterBase {
     String dirPath,
     List<String> filesToDelete,
   ) async {
-    debugPrint('Deleting ${filesToDelete.length} existing files before import');
+    try {
+      final String dataPath = 'healthpod/data/$dataType';
 
-    // Use the known working path
-    final String dataPath = 'healthpod/data/$dataType';
+      // Attempt to delete each file.
 
-    // Attempt to delete each file.
-    for (final fileName in filesToDelete) {
-      try {
-        // Construct the full path.
-        final fullPath = '$dataPath/$fileName';
-
-        debugPrint('Deleting file: $fullPath');
-
+      for (final fileName in filesToDelete) {
         try {
-          if (context.mounted) {
-            await deleteFile(fullPath);
-            debugPrint('Successfully deleted: $fullPath');
+          // Construct the full path.
+
+          final fullPath = '$dataPath/$fileName';
+
+          try {
+            if (context.mounted) {
+              await deleteFile(fullPath);
+            }
+          } catch (deleteError) {
+            throw Exception('Failed to delete file $fullPath: $deleteError');
           }
-        } catch (deleteError) {
-          debugPrint('Error deleting file: $deleteError');
+        } catch (e) {
+          throw Exception('Error processing file $fileName: $e');
         }
-      } catch (e) {
-        debugPrint('Error processing file $fileName: $e');
       }
+    } catch (e) {
+      throw Exception('Failed to delete existing files: $e');
     }
   }
-
-  // Helper function to get minimum of two integers.
-
-  int min(int a, int b) => a < b ? a : b;
 }
