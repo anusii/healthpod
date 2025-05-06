@@ -147,19 +147,20 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                           DataCell(
                             TextButton(
                               onPressed: () async {
+                                final ctx = context;
                                 final pickedDate = await showDatePicker(
-                                  context: context,
+                                  context: ctx,
                                   initialDate: _editingDate ?? appointment.date,
                                   firstDate: DateTime(2000),
                                   lastDate: DateTime(2100),
                                 );
-                                if (pickedDate != null && mounted) {
+                                if (pickedDate != null && ctx.mounted) {
                                   final pickedTime = await showTimePicker(
-                                    context: context,
+                                    context: ctx,
                                     initialTime: TimeOfDay.fromDateTime(
                                         _editingDate ?? appointment.date),
                                   );
-                                  if (pickedTime != null && mounted) {
+                                  if (pickedTime != null && ctx.mounted) {
                                     setState(() {
                                       _editingDate = DateTime(
                                         pickedDate.year,

@@ -34,7 +34,6 @@ import 'package:version_widget/version_widget.dart';
 import 'package:healthpod/dialogs/alert.dart';
 import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/charts/tab.dart';
-import 'package:healthpod/features/diary/tab.dart';
 import 'package:healthpod/features/file/service/page.dart';
 import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';

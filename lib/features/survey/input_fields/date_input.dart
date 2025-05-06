@@ -193,9 +193,10 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
                   ],
                 ),
                 onTap: () async {
-                  await _selectDate(context);
-                  if (widget.question.showTime) {
-                    await _selectTime(context);
+                  final ctx = context;
+                  await _selectDate(ctx);
+                  if (widget.question.showTime && ctx.mounted) {
+                    await _selectTime(ctx);
                   }
                 },
               ),
