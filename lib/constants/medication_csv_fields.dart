@@ -34,9 +34,11 @@ import 'package:healthpod/constants/medication_survey.dart';
 
 class MedicationCSVFields {
   /// Timestamp field for recording when the medication entry was created.
+
   static const String fieldTimestamp = 'timestamp';
 
   /// Required fields for medication CSV.
+
   static const List<String> requiredFields = [
     fieldTimestamp,
     MedicationSurveyConstants.fieldName,
@@ -46,11 +48,13 @@ class MedicationCSVFields {
   ];
 
   /// Optional fields for medication CSV.
+
   static const List<String> optionalFields = [
     MedicationSurveyConstants.fieldNotes,
   ];
 
   /// All fields that can be included in a medication CSV.
+
   static const List<String> allFields = [
     fieldTimestamp,
     MedicationSurveyConstants.fieldName,

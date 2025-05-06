@@ -77,6 +77,7 @@ class MedicationExporter extends HealthDataExporterBase {
   }
 
   /// Static method to maintain backward compatibility with existing code.
+
   static Future<bool> exportCsv(
     String savePath,
     String dirPath,
@@ -89,6 +90,7 @@ class MedicationExporter extends HealthDataExporterBase {
   ///
   /// Reads all JSON files in the medication directory, extracts the medication data,
   /// and combines them into a single CSV file sorted by timestamp.
+
   @override
   Future<bool> exportToCsv(
     String savePath,
@@ -97,9 +99,11 @@ class MedicationExporter extends HealthDataExporterBase {
   ) async {
     try {
       // Get the directory URL for the medication folder.
+
       final dirUrl = await getDirUrl(dirPath);
 
       // Get resources in the container.
+
       final resources = await getResourcesInContainer(dirUrl);
       final files =
           resources.files.where((file) => file.endsWith('.enc.ttl')).toList();
@@ -109,12 +113,15 @@ class MedicationExporter extends HealthDataExporterBase {
       }
 
       // Store all medication readings.
+
       List<Map<String, dynamic>> allReadings = [];
 
       // Process each JSON file.
+
       for (var fileName in files) {
         try {
           // Read and decrypt the file.
+
           if (!context.mounted) return false;
           final content = await readPod(
             '$dirPath/$fileName',
@@ -128,9 +135,11 @@ class MedicationExporter extends HealthDataExporterBase {
           }
 
           // Parse JSON content.
+
           final jsonData = json.decode(content);
 
           // Ensure we use ISO format for timestamp with T and Z.
+
           var timestamp = normaliseTimestamp(
               jsonData[MedicationCSVFields.fieldTimestamp],
               toIso: true);
@@ -138,6 +147,7 @@ class MedicationExporter extends HealthDataExporterBase {
           final responses = jsonData['responses'];
 
           // Add to readings list.
+
           allReadings.add({
             MedicationCSVFields.fieldTimestamp: timestamp,
             MedicationSurveyConstants.fieldName:
@@ -162,23 +172,28 @@ class MedicationExporter extends HealthDataExporterBase {
       }
 
       // Sort readings by timestamp.
+
       allReadings.sort((a, b) => a[MedicationCSVFields.fieldTimestamp]
           .compareTo(b[MedicationCSVFields.fieldTimestamp]));
 
       // Prepare CSV data.
+
       final headers = MedicationCSVFields.allFields;
 
       List<List<dynamic>> rows = [headers];
 
       // Add data rows.
+
       for (var reading in allReadings) {
         rows.add(headers.map((header) => reading[header]).toList());
       }
 
       // Convert to CSV.
+
       final csv = const ListToCsvConverter().convert(rows);
 
       // Save CSV file.
+
       final file = File(savePath);
       await file.writeAsString(csv);
 

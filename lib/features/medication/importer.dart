@@ -68,7 +68,8 @@ class MedicationImporter extends HealthDataImporterBase {
     int rowIndex,
   ) {
     switch (header) {
-      // Required field: Medication name
+      // Required field: Medication name.
+
       case String h when h == MedicationSurveyConstants.fieldName.toLowerCase():
         if (value.isEmpty) {
           debugPrint('Row $rowIndex: Missing required medication name');
@@ -78,7 +79,8 @@ class MedicationImporter extends HealthDataImporterBase {
           return true;
         }
 
-      // Required field: Dosage
+      // Required field: Dosage.
+
       case String h
           when h == MedicationSurveyConstants.fieldDosage.toLowerCase():
         if (value.isEmpty) {
@@ -89,7 +91,8 @@ class MedicationImporter extends HealthDataImporterBase {
           return true;
         }
 
-      // Required field: Frequency
+      // Required field: Frequency.
+
       case String h
           when h == MedicationSurveyConstants.fieldFrequency.toLowerCase():
         if (value.isEmpty) {
@@ -100,7 +103,8 @@ class MedicationImporter extends HealthDataImporterBase {
           return true;
         }
 
-      // Required field: Start Date
+      // Required field: Start Date.
+
       case String h
           when h == MedicationSurveyConstants.fieldStartDate.toLowerCase():
         if (value.isEmpty) {
@@ -111,19 +115,22 @@ class MedicationImporter extends HealthDataImporterBase {
           return true;
         }
 
-      // Optional field: Notes
+      // Optional field: Notes.
+
       case String h
           when h == MedicationSurveyConstants.fieldNotes.toLowerCase():
         responses[MedicationSurveyConstants.fieldNotes] = value;
         return true;
 
       default:
-        // Ignore unknown fields
+        // Ignore unknown fields.
+
         return true;
     }
   }
 
   /// Static method to maintain backward compatibility with existing code.
+
   static Future<bool> importCsv(
     String filePath,
     String dirPath,
