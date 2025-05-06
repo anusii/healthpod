@@ -44,6 +44,22 @@ class HealthSurveyQuestion {
   final double? min; // Optional minimum value for numerical inputs
   final double? max; // Optional maximum value for numerical inputs
   final bool isRequired;
+  final bool
+      allowFutureDate; // Whether to allow future dates in date/datetime inputs
+  final bool showTime; // Whether to show time picker for datetime inputs
+
+  /// Creates a new [HealthSurveyQuestion] instance.
+  ///
+  /// [question] is the text displayed to users.
+  /// [fieldName] is the name used for data storage.
+  /// [type] is the data type of the question.
+  /// [options] is the list of options for categorical questions.
+  /// [unit] is the optional unit for measurements.
+  /// [min] is the optional minimum value for numerical inputs.
+  /// [max] is the optional maximum value for numerical inputs.
+  /// [isRequired] indicates if the question must be answered.
+  /// [allowFutureDate] indicates if future dates are allowed in date/datetime inputs.
+  /// [showTime] indicates if time picker should be shown for datetime inputs.
 
   HealthSurveyQuestion({
     required this.question,
@@ -54,6 +70,8 @@ class HealthSurveyQuestion {
     this.min,
     this.max,
     this.isRequired = true,
+    this.allowFutureDate = false,
+    this.showTime = false,
   }) : assert(
           type != HealthDataType.categorical ||
               (options != null && options.isNotEmpty),

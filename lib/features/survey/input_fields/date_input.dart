@@ -29,6 +29,7 @@ import 'package:intl/intl.dart';
 
 import 'package:healthpod/features/survey/form_state.dart';
 import 'package:healthpod/features/survey/question.dart';
+import 'package:healthpod/constants/health_data_type.dart';
 
 class HealthSurveyDateInput extends StatefulWidget {
   /// The survey question associated with this date input field.
@@ -57,72 +58,106 @@ class HealthSurveyDateInput extends StatefulWidget {
 }
 
 class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
-  /// Shows a date picker dialog and updates the form state with the selected date.
-
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      // Format the date with leading zeros for month and day.
-
-      final formattedDate =
-          '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-      widget.controller.updateResponse(
-        widget.question.fieldName,
-        formattedDate,
-      );
-      // Force rebuild after date selection.
-
-      setState(() {});
-    }
-  }
+  DateTime? _selectedDate;
+  TimeOfDay? _selectedTime;
 
   @override
   void initState() {
     super.initState();
 
-    // Use today's date as default if no date is already selected.
+    // Initialize selected date and time from existing response
+    final response = widget.controller.responses[widget.question.fieldName];
+    if (response != null) {
+      try {
+        final dateTime = DateTime.parse(response.toString());
+        _selectedDate = dateTime;
+        _selectedTime = TimeOfDay.fromDateTime(dateTime);
+      } catch (e) {
+        debugPrint('Error parsing date: $e');
+      }
+    }
 
-    if (widget.controller.responses[widget.question.fieldName] == null) {
-      final now = DateTime.now();
-      final todayFormatted =
-          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    // Use today's date as default if no date is already selected
+    if (_selectedDate == null) {
+      _selectedDate = DateTime.now();
+      if (widget.question.type == HealthDataType.datetime) {
+        _selectedTime = TimeOfDay.now();
+      }
+      _updateResponse();
+    }
+  }
 
+  void _updateResponse() {
+    if (_selectedDate != null) {
+      final DateTime dateTime;
+      if (widget.question.type == HealthDataType.datetime &&
+          _selectedTime != null) {
+        dateTime = DateTime(
+          _selectedDate!.year,
+          _selectedDate!.month,
+          _selectedDate!.day,
+          _selectedTime!.hour,
+          _selectedTime!.minute,
+        );
+      } else {
+        dateTime = DateTime(
+          _selectedDate!.year,
+          _selectedDate!.month,
+          _selectedDate!.day,
+        );
+      }
       widget.controller.updateResponse(
         widget.question.fieldName,
-        todayFormatted,
+        dateTime.toIso8601String(),
       );
+      setState(() {});
     }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate:
+          widget.question.allowFutureDate ? DateTime(2100) : DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _updateResponse();
+      });
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    if (!widget.question.showTime) return;
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _selectedTime ?? TimeOfDay.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedTime = picked;
+        _updateResponse();
+      });
+    }
+  }
+
+  String _getFormattedDateTime() {
+    if (_selectedDate == null) return 'Not Selected';
+
+    String formattedDate = DateFormat('dd MMMM yyyy').format(_selectedDate!);
+    if (widget.question.type == HealthDataType.datetime &&
+        _selectedTime != null) {
+      formattedDate += ' at ${_selectedTime!.format(context)}';
+    }
+    return 'Selected: $formattedDate';
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedDate =
-        widget.controller.responses[widget.question.fieldName]?.toString();
-    String formattedDate = 'Not Selected';
-
-    if (selectedDate != null) {
-      try {
-        final dateParts = selectedDate.split('-');
-        if (dateParts.length == 3) {
-          final date = DateTime(
-            int.parse(dateParts[0]),
-            int.parse(dateParts[1]),
-            int.parse(dateParts[2]),
-          );
-          formattedDate = DateFormat('dd MMMM yyyy').format(date);
-          formattedDate = 'Selected: $formattedDate';
-        }
-      } catch (e) {
-        debugPrint('Error formatting date: $e');
-        formattedDate = selectedDate;
-      }
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -133,15 +168,36 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
             children: [
               ListTile(
                 title: Text(widget.question.question),
-                trailing: Icon(
-                  selectedDate != null
-                      ? Icons.calendar_today
-                      : Icons.calendar_today_outlined,
-                  color: selectedDate != null
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _selectedDate != null
+                          ? Icons.calendar_today
+                          : Icons.calendar_today_outlined,
+                      color: _selectedDate != null
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    if (widget.question.showTime) ...[
+                      const SizedBox(width: 8),
+                      Icon(
+                        _selectedTime != null
+                            ? Icons.access_time
+                            : Icons.access_time_outlined,
+                        color: _selectedTime != null
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ],
                 ),
-                onTap: () => _selectDate(context),
+                onTap: () async {
+                  await _selectDate(context);
+                  if (widget.question.showTime) {
+                    await _selectTime(context);
+                  }
+                },
               ),
               const Divider(height: 1),
               Padding(
@@ -155,11 +211,15 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
                       size: 16,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      ' $formattedDate',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontSize: 14,
+                    Expanded(
+                      child: Text(
+                        _getFormattedDateTime(),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontSize: 14,
+                        ),
+                        softWrap: true,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
