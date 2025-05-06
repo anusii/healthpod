@@ -172,13 +172,11 @@ class DiaryService {
       BuildContext context, Appointment appointment) async {
     try {
       // Get the diary directory path.
-
       final podDirPath = getFeaturePath(feature);
       final dirUrl = await getDirUrl(podDirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
       // Find and delete the matching appointment file.
-
       for (final file in resources.files) {
         if (file.endsWith('.enc.ttl')) {
           final filePath = getFeaturePath(feature, file);
@@ -193,11 +191,20 @@ class DiaryService {
               content != SolidFunctionCallStatus.notLoggedIn.toString()) {
             try {
               // Check if this file contains the appointment to delete.
-
               final data = jsonDecode(content.toString());
               final appointmentData = data['responses'] ?? data;
-              final fileDate = DateTime.parse(appointmentData['date']);
 
+              // Try to get date from both root level and responses
+              final rootDateStr = data['date']?.toString();
+              final responseDateStr = appointmentData['date']?.toString();
+              final dateStr = rootDateStr ?? responseDateStr;
+
+              if (dateStr == null) {
+                debugPrint('Error: No date found in appointment data');
+                continue;
+              }
+
+              final fileDate = DateTime.parse(dateStr);
               if (fileDate.isAtSameMomentAs(appointment.date)) {
                 await deleteFile(filePath);
                 return true;

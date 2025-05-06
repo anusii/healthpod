@@ -13,11 +13,24 @@ class AppointmentEditorPage extends StatefulWidget {
 class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
   List<Appointment> _appointments = [];
   bool _isLoading = true;
+  int? _editingIndex;
+  late TextEditingController _titleController;
+  late TextEditingController _descriptionController;
+  DateTime? _editingDate;
 
   @override
   void initState() {
     super.initState();
+    _titleController = TextEditingController();
+    _descriptionController = TextEditingController();
     _loadAppointments();
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadAppointments() async {
@@ -31,11 +44,50 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
     if (mounted) {
       setState(() {
         _appointments = appointments;
-        _appointments.sort(
-            (a, b) => b.date.compareTo(a.date)); // Sort by date descending
+        _appointments.sort((a, b) => b.date.compareTo(a.date));
         _isLoading = false;
       });
     }
+  }
+
+  void _startEditing(int index, Appointment appointment) {
+    setState(() {
+      _editingIndex = index;
+      _titleController.text = appointment.title;
+      _descriptionController.text = appointment.description;
+      _editingDate = appointment.date;
+    });
+  }
+
+  void _cancelEditing() {
+    setState(() {
+      _editingIndex = null;
+      _titleController.clear();
+      _descriptionController.clear();
+      _editingDate = null;
+    });
+  }
+
+  Future<void> _saveEditing(Appointment originalAppointment) async {
+    final newAppointment = Appointment(
+      date: _editingDate ?? originalAppointment.date,
+      title: _titleController.text,
+      description: _descriptionController.text,
+      isPast:
+          (_editingDate ?? originalAppointment.date).isBefore(DateTime.now()),
+    );
+
+    if (mounted) {
+      final success =
+          await DiaryService.saveAppointment(context, newAppointment);
+      if (success && mounted) {
+        // Delete the old appointment after saving the new one
+        await DiaryService.deleteAppointment(context, originalAppointment);
+        _loadAppointments();
+      }
+    }
+
+    _cancelEditing();
   }
 
   Future<void> _deleteAppointment(Appointment appointment) async {
@@ -84,7 +136,97 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                     DataColumn(label: Text('Status')),
                     DataColumn(label: Text('Actions')),
                   ],
-                  rows: _appointments.map((appointment) {
+                  rows: _appointments.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final appointment = entry.value;
+                    final isEditing = _editingIndex == index;
+
+                    if (isEditing) {
+                      return DataRow(
+                        cells: [
+                          DataCell(
+                            TextButton(
+                              onPressed: () async {
+                                final pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: _editingDate ?? appointment.date,
+                                  firstDate: DateTime(2000),
+                                  lastDate: DateTime(2100),
+                                );
+                                if (pickedDate != null && mounted) {
+                                  final pickedTime = await showTimePicker(
+                                    context: context,
+                                    initialTime: TimeOfDay.fromDateTime(
+                                        _editingDate ?? appointment.date),
+                                  );
+                                  if (pickedTime != null && mounted) {
+                                    setState(() {
+                                      _editingDate = DateTime(
+                                        pickedDate.year,
+                                        pickedDate.month,
+                                        pickedDate.day,
+                                        pickedTime.hour,
+                                        pickedTime.minute,
+                                      );
+                                    });
+                                  }
+                                }
+                              },
+                              child: Text(
+                                DateFormat('dd MMM, yyyy')
+                                    .format(_editingDate ?? appointment.date),
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              DateFormat('hh:mm a')
+                                  .format(_editingDate ?? appointment.date),
+                            ),
+                          ),
+                          DataCell(
+                            TextField(
+                              controller: _titleController,
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            TextField(
+                              controller: _descriptionController,
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text((_editingDate ?? appointment.date)
+                                    .isBefore(DateTime.now())
+                                ? 'Past'
+                                : 'Upcoming'),
+                          ),
+                          DataCell(
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.save),
+                                  onPressed: () => _saveEditing(appointment),
+                                  color: Colors.green,
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.cancel),
+                                  onPressed: _cancelEditing,
+                                  color: Colors.red,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
                     return DataRow(
                       cells: [
                         DataCell(Text(DateFormat('dd MMM, yyyy')
@@ -96,9 +238,22 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                         DataCell(
                             Text(appointment.isPast ? 'Past' : 'Upcoming')),
                         DataCell(
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _deleteAppointment(appointment),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () =>
+                                    _startEditing(index, appointment),
+                                color: Colors.blue,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () =>
+                                    _deleteAppointment(appointment),
+                                color: Colors.red,
+                              ),
+                            ],
                           ),
                         ),
                       ],
