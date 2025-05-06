@@ -39,32 +39,30 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
   }
 
   Future<void> _deleteAppointment(Appointment appointment) async {
-    if (!appointment.isPast) {
-      final confirmed = await showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Delete Appointment'),
-          content:
-              Text('Are you sure you want to delete "${appointment.title}"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Delete'),
-            ),
-          ],
-        ),
-      );
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Appointment'),
+        content:
+            Text('Are you sure you want to delete "${appointment.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
 
-      if (confirmed == true && mounted) {
-        final success =
-            await DiaryService.deleteAppointment(context, appointment);
-        if (success && mounted) {
-          _loadAppointments();
-        }
+    if (confirmed == true && mounted) {
+      final success =
+          await DiaryService.deleteAppointment(context, appointment);
+      if (success && mounted) {
+        _loadAppointments();
       }
     }
   }
@@ -98,13 +96,10 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                         DataCell(
                             Text(appointment.isPast ? 'Past' : 'Upcoming')),
                         DataCell(
-                          appointment.isPast
-                              ? const Text('-')
-                              : IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () =>
-                                      _deleteAppointment(appointment),
-                                ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () => _deleteAppointment(appointment),
+                          ),
                         ),
                       ],
                     );
