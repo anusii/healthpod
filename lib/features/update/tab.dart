@@ -29,11 +29,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/features/bp/survey.dart';
+import 'package:healthpod/features/diary/tab.dart';
 import 'package:healthpod/features/medication/survey.dart';
 import 'package:healthpod/features/vaccination/survey.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> surveyPanels = [
+  {
+    'title': 'Appointments',
+    'widget': DiaryTab(),
+  },
   {
     'title': 'Blood Pressure',
     'widget': BPSurvey(),
