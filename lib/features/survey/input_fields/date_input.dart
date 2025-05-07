@@ -153,7 +153,7 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
     String formattedDate = DateFormat('dd MMMM yyyy').format(_selectedDate!);
     if (widget.question.type == HealthDataType.datetime &&
         _selectedTime != null) {
-      formattedDate += ' at ${_selectedTime!.format(context)}';
+      formattedDate += '\nat ${_selectedTime!.format(context)}';
     }
     return 'Selected: $formattedDate';
   }
