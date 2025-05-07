@@ -1,5 +1,5 @@
-import 'package:healthpod/features/survey/question.dart';
 import 'package:healthpod/constants/health_data_type.dart';
+import 'package:healthpod/features/survey/question.dart';
 
 /// Constants for the appointment survey form.
 class AppointmentSurveyConstants {
