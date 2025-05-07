@@ -1,6 +1,6 @@
 /// Diary data exporter.
 ///
-// Time-stamp: <Wednesday 2025-03-26 09:39:04 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-05-08 08:17:14 +1000 Graham Williams>
 ///
 /// Copyright (C) 2025, Software Innovation Institute, ANU.
 ///
@@ -76,8 +76,14 @@ class DiaryExporter extends HealthDataExporterBase {
       }
     }
 
+    // Seconds are not significant for appoinments so let's strip them from the
+    // timestamp for exporting. (gjw 20250508)
+
+    String dt = date?.toIso8601String() ?? '';
+    dt = dt.substring(0, dt.lastIndexOf(':'));
+
     return {
-      'date': date?.toIso8601String() ?? '',
+      'date': dt,
       'title': title,
       'description': description,
     };
