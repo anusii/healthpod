@@ -31,6 +31,9 @@ import 'package:intl/intl.dart';
 import 'package:healthpod/features/diary/models/appointment.dart';
 import 'package:healthpod/features/diary/service.dart';
 
+/// A page that displays and manages appointments in a data table format.
+/// Allows users to view, edit, and delete appointments.
+
 class AppointmentEditorPage extends StatefulWidget {
   const AppointmentEditorPage({super.key});
 
@@ -39,11 +42,25 @@ class AppointmentEditorPage extends StatefulWidget {
 }
 
 class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
+  /// List of all appointments loaded from storage.
+
   List<Appointment> _appointments = [];
+
+  /// Loading state indicator.
+
   bool _isLoading = true;
+
+  /// Index of the appointment currently being edited, null if not editing.
+
   int? _editingIndex;
+
+  /// Controllers for the title and description text fields during editing.
+
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
+
+  /// Date being edited, null if not editing.
+
   DateTime? _editingDate;
 
   @override
@@ -56,10 +73,14 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
 
   @override
   void dispose() {
+    // Clean up controllers when the widget is disposed.
+
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
   }
+
+  /// Loads appointments from storage and sorts them by date.
 
   Future<void> _loadAppointments() async {
     setState(() {
@@ -72,11 +93,15 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
     if (mounted) {
       setState(() {
         _appointments = appointments;
+        // Sort appointments with most recent first.
+
         _appointments.sort((a, b) => b.date.compareTo(a.date));
         _isLoading = false;
       });
     }
   }
+
+  /// Initiates editing mode for the specified appointment.
 
   void _startEditing(int index, Appointment appointment) {
     setState(() {
@@ -87,6 +112,8 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
     });
   }
 
+  /// Cancels editing mode and clears all editing-related fields.
+
   void _cancelEditing() {
     setState(() {
       _editingIndex = null;
@@ -95,6 +122,9 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
       _editingDate = null;
     });
   }
+
+  /// Saves the edited appointment and updates storage.
+  /// Creates a new appointment with edited values and deletes the original.
 
   Future<void> _saveEditing(Appointment originalAppointment) async {
     final newAppointment = Appointment(
@@ -118,6 +148,8 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
 
     _cancelEditing();
   }
+
+  /// Shows a confirmation dialog and deletes the appointment if confirmed.
 
   Future<void> _deleteAppointment(Appointment appointment) async {
     final confirmed = await showDialog<bool>(
@@ -170,6 +202,8 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                     final appointment = entry.value;
                     final isEditing = _editingIndex == index;
 
+                    // Return an editable row if this appointment is being edited.
+
                     if (isEditing) {
                       return DataRow(
                         cells: [
@@ -177,6 +211,8 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                             TextButton(
                               onPressed: () async {
                                 final ctx = context;
+                                // Show date picker dialog.
+
                                 final pickedDate = await showDatePicker(
                                   context: ctx,
                                   initialDate: _editingDate ?? appointment.date,
@@ -184,6 +220,8 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                                   lastDate: DateTime(2100),
                                 );
                                 if (pickedDate != null && ctx.mounted) {
+                                  // Show time picker dialog after date is selected.
+
                                   final pickedTime = await showTimePicker(
                                     context: ctx,
                                     initialTime: TimeOfDay.fromDateTime(
@@ -191,6 +229,8 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                                   );
                                   if (pickedTime != null && ctx.mounted) {
                                     setState(() {
+                                      // Combine picked date and time into a single DateTime.
+
                                       _editingDate = DateTime(
                                         pickedDate.year,
                                         pickedDate.month,
@@ -240,11 +280,15 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // Save button.
+
                                 IconButton(
                                   icon: const Icon(Icons.save),
                                   onPressed: () => _saveEditing(appointment),
                                   color: Colors.green,
                                 ),
+                                // Cancel button.
+
                                 IconButton(
                                   icon: const Icon(Icons.cancel),
                                   onPressed: _cancelEditing,
@@ -256,6 +300,8 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                         ],
                       );
                     }
+
+                    // Return a non-editable row for viewing.
 
                     return DataRow(
                       cells: [
@@ -271,12 +317,16 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              // Edit button.
+
                               IconButton(
                                 icon: const Icon(Icons.edit),
                                 onPressed: () =>
                                     _startEditing(index, appointment),
                                 color: Colors.blue,
                               ),
+                              // Delete button.
+
                               IconButton(
                                 icon: const Icon(Icons.delete),
                                 onPressed: () =>
