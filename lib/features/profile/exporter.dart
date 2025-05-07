@@ -89,8 +89,6 @@ class ProfileExporter {
       final mostRecentFile = files.first;
       final filePath = '$podPath/$mostRecentFile';
 
-      debugPrint('Exporting most recent profile file: $filePath');
-
       if (!context.mounted) return false;
 
       // Prompt for security key if needed.
@@ -118,11 +116,14 @@ class ProfileExporter {
 
       // Save the decrypted content to the specified output path.
 
-      await saveDecryptedContent(fileContent, outputPath);
+      try {
+        await saveDecryptedContent(fileContent, outputPath);
+      } catch (e) {
+        throw Exception('Failed to save decrypted content: $e');
+      }
 
       return true;
     } catch (e) {
-      debugPrint('Error exporting profile: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
