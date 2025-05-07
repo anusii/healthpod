@@ -4,7 +4,7 @@
 
 #define MyAppName "HealthPod"
 #define MyAppVersion "dev-windows-inno"
-#define MyAppPublisher "ANU"
+#define MyAppPublisher "ANU Software Innovation Institute"
 #define MyAppURL "https://pods.dev.solidcommunity.au/"
 #define MyAppExeName "healthpod.exe"
 
@@ -12,7 +12,7 @@
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-; (On Ubunut run `uuidgen` to generate a unique AppId.)
+; (On Ubuntu run `uuidgen` to generate a unique AppId.)
 AppId={{85ebe0b2-aa0a-4c65-b800-87b7af070424}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
@@ -20,7 +20,7 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\HealthPod
+DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=..\LICENSE
 PrivilegesRequiredOverridesAllowed=dialog
@@ -41,6 +41,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "..\build\windows\x64\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\windows\x64\runner\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
+
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
