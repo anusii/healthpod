@@ -70,6 +70,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
       // Fetch data from the server.
 
       final data = await VaccinationData.fetchAllVaccinationData(context);
+      print('11data: $data');
 
       if (mounted) {
         // If no data is found, use sample data.
@@ -80,11 +81,13 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
             _isLoading = false;
           });
         } else {
+          print('data: $data');
           // Convert JSON data to VaccinationRecord objects.
 
           setState(() {
             _records =
                 data.map((item) => VaccinationRecord.fromJson(item)).toList();
+            print('records: $_records');
             _isLoading = false;
           });
         }
