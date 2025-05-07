@@ -27,8 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/features/resources/service/resource_service.dart';
 import 'package:healthpod/theme/card_style.dart';
