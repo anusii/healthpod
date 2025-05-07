@@ -78,19 +78,11 @@ class VaccinationImporter extends HealthDataImporterBase {
     switch (header) {
       case String h
           when h == VaccinationSurveyConstants.fieldVaccineName.toLowerCase():
-        if (value.isEmpty) {
-          debugPrint('Row $rowIndex: Missing required vaccine name');
-          return false;
-        }
         responses[VaccinationSurveyConstants.fieldVaccineName] = value;
         return true;
 
       case String h
           when h == VaccinationSurveyConstants.fieldProvider.toLowerCase():
-        if (value.isEmpty) {
-          debugPrint('Row $rowIndex: Missing required provider');
-          return false;
-        }
         responses[VaccinationSurveyConstants.fieldProvider] = value;
         return true;
 
