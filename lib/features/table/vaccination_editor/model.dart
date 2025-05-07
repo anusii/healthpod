@@ -78,16 +78,27 @@ class VaccinationObservation {
   /// stored under 'responses' key.
 
   factory VaccinationObservation.fromJson(Map<String, dynamic> json) {
+    // Handle both 'date' and 'timestamp' fields
+    final timestamp = json['date'] ?? json['timestamp'];
+    if (timestamp == null) {
+      throw FormatException('Missing date/timestamp field in vaccination data');
+    }
+
+    // Get responses map, defaulting to empty map if null
+    final responses = json['responses'] as Map<String, dynamic>? ?? {};
+
     return VaccinationObservation(
-      timestamp: DateTime.parse(json['timestamp']),
+      timestamp: DateTime.parse(timestamp),
       vaccineName:
-          json['responses'][VaccinationSurveyConstants.fieldVaccineName] ?? '',
+          responses[VaccinationSurveyConstants.fieldVaccineName]?.toString() ??
+              '',
       provider:
-          json['responses'][VaccinationSurveyConstants.fieldProvider] ?? '',
+          responses[VaccinationSurveyConstants.fieldProvider]?.toString() ?? '',
       professional:
-          json['responses'][VaccinationSurveyConstants.fieldProfessional] ?? '',
-      cost: json['responses'][VaccinationSurveyConstants.fieldCost] ?? '',
-      notes: json['responses'][VaccinationSurveyConstants.fieldNotes] ?? '',
+          responses[VaccinationSurveyConstants.fieldProfessional]?.toString() ??
+              '',
+      cost: responses[VaccinationSurveyConstants.fieldCost]?.toString() ?? '',
+      notes: responses[VaccinationSurveyConstants.fieldNotes]?.toString() ?? '',
     );
   }
 

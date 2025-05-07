@@ -63,6 +63,7 @@ class VaccinationEditorService {
         context,
         const Text('Loading file'),
       );
+      print('content: $content');
       if (content == SolidFunctionCallStatus.fail.toString() ||
           content == SolidFunctionCallStatus.notLoggedIn.toString()) {
         continue;
@@ -70,6 +71,7 @@ class VaccinationEditorService {
 
       try {
         final data = json.decode(content.toString());
+        print('data: $data');
         loadedObservations.add(VaccinationObservation.fromJson(data));
       } catch (e) {
         debugPrint('Error parsing file $file: $e');
