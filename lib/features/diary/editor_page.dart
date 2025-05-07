@@ -109,7 +109,8 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
       final success =
           await DiaryService.saveAppointment(context, newAppointment);
       if (success && mounted) {
-        // Delete the old appointment after saving the new one
+        // Delete the old appointment after saving the new one.
+
         await DiaryService.deleteAppointment(context, originalAppointment);
         _loadAppointments();
       }
