@@ -27,8 +27,10 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
+import 'package:healthpod/features/resources/service/resource_service.dart';
 import 'package:healthpod/theme/card_style.dart';
 
 /// A widget to display and edit a health management plan.
@@ -47,10 +49,12 @@ class _ManagePlanState extends State<ManagePlan> {
   // Plan data
   String title = 'My Health Management Plan';
   List<String> planItems = [
-    'Take Lisinopril 10mg daily for high blood pressure',
-    'Measure blood pressure twice a day',
-    'Follow low sodium diet',
-    'Walk 30 minutes daily',
+    '**Important medication**: Take 2 tablets of Vitamin D3 daily',
+    '*Blood pressure goal*: Keep below 120/80 mmHg',
+    'Visit [HealthDirect](https://www.healthdirect.gov.au) for more information',
+    '## Exercise Plan\n- Walk 30 minutes *daily*\n- Swim **twice** weekly',
+    '> Remember to drink 2L of water daily!',
+    'Monitor glucose levels at these times:\n1. Before breakfast\n2. 2 hours after lunch\n3. Before bed',
   ];
 
   /// Opens a dialog to edit the health management plan.
@@ -100,7 +104,8 @@ class _ManagePlanState extends State<ManagePlan> {
                                 title: TextField(
                                   controller: controllers[index],
                                   decoration: const InputDecoration(
-                                    hintText: 'Enter plan item',
+                                    hintText:
+                                        'Enter plan item (markdown supported)',
                                     border: InputBorder.none,
                                     contentPadding: EdgeInsets.symmetric(
                                       horizontal: 16,
@@ -252,9 +257,56 @@ class _ManagePlanState extends State<ManagePlan> {
                   children: [
                     const Text('• '),
                     Expanded(
-                      child: Text(
-                        item,
-                        style: const TextStyle(fontSize: 14),
+                      child: MarkdownBody(
+                        data: item,
+                        selectable: true,
+                        onTapLink: (text, href, title) {
+                          if (href != null) {
+                            ResourceService.openExternalLink(context, href);
+                          }
+                        },
+                        styleSheet: MarkdownStyleSheet(
+                          p: const TextStyle(fontSize: 14),
+                          strong: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          em: TextStyle(
+                            fontStyle: FontStyle.italic,
+                            fontSize: 14,
+                            color: Theme.of(context).colorScheme.secondary,
+                          ),
+                          blockquote: TextStyle(
+                            fontSize: 14,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Theme.of(context).colorScheme.tertiary
+                                    : Theme.of(context).colorScheme.secondary,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          blockquoteDecoration: BoxDecoration(
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .surfaceContainerHighest
+                                        .withValues(alpha: 0.6)
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .secondaryContainer
+                                        .withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border(
+                              left: BorderSide(
+                                width: 4,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                          blockquotePadding: const EdgeInsets.only(
+                              left: 12, top: 4, bottom: 4, right: 4),
+                        ),
                       ),
                     ),
                   ],

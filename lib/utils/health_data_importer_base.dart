@@ -92,6 +92,277 @@ abstract class HealthDataImporterBase {
     int rowIndex,
   );
 
+  /// Shows a confirmation dialog for overriding duplicate files.
+  ///
+  /// This method displays a dialog with a list of duplicate files that would be overridden
+  /// and asks the user to confirm the override.
+  ///
+  /// Parameters:
+  /// - [context]: Flutter build context for UI interactions
+  /// - [duplicateFiles]: List of file names that would be overridden
+  ///
+  /// Returns a boolean indicating whether the user confirmed the override.
+
+  Future<bool> _showOverrideConfirmationDialog(
+    BuildContext context,
+    List<String> duplicateFiles,
+  ) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            title: const Text(
+              'Duplicate Data Detected',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'These observations need to be overridden. Are you sure you want to override?',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'The following existing files have the same dates as records in your import file:',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  constraints: const BoxConstraints(
+                    maxHeight: 200,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: duplicateFiles
+                          .map((filename) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 6),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      '•',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        filename,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: 'monospace',
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Proceeding will replace these files with your imported data.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.red,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: const Text(
+                  'Override',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            buttonPadding: const EdgeInsets.symmetric(horizontal: 8),
+          ),
+        ) ??
+        false;
+  }
+
+  /// Check for existing files that would be overridden by this import.
+  ///
+  /// This method checks if there are existing files with the same timestamps
+  /// in the specified directory.
+  ///
+  /// Parameters:
+  /// - [dirPath]: The directory path to check in
+  /// - [timestamps]: List of timestamps to check for
+  ///
+  /// Returns a list of file names that would be overridden.
+
+  Future<List<String>> _checkForExistingFiles(
+    String dirPath,
+    List<String> timestamps,
+  ) async {
+    try {
+      // Only check the known working path where health data files are stored.
+
+      final String dataPath = 'healthpod/data/$dataType';
+
+      try {
+        final dirUrl = await getDirUrl(dataPath);
+        final resources = await getResourcesInContainer(dirUrl);
+
+        // Extract date parts from existing files for comparison.
+
+        final existingFiles = resources.files
+            .where((file) =>
+                file.startsWith('${dataType}_') &&
+                file.endsWith('.json.enc.ttl'))
+            .toList();
+
+        // Create date-based lookup index for faster comparison.
+
+        final Map<String, List<String>> existingFileDateIndex = {};
+
+        for (final file in existingFiles) {
+          // Extract date part from filename (everything between dataType_ and T).
+
+          final dateMatch =
+              RegExp('${dataType}_(\\d{4}-\\d{2}-\\d{2})T').firstMatch(file);
+          if (dateMatch != null && dateMatch.groupCount >= 1) {
+            final dateStr = dateMatch.group(1)!;
+            if (!existingFileDateIndex.containsKey(dateStr)) {
+              existingFileDateIndex[dateStr] = [];
+            }
+            existingFileDateIndex[dateStr]!.add(file);
+          }
+        }
+
+        // Create a list to store the duplicate file names.
+
+        final duplicateFiles = <String>[];
+
+        // Extract just the date part from each timestamp (YYYY-MM-DD).
+
+        for (final timestamp in timestamps) {
+          // Extract the date part before any 'T' character.
+
+          final datePart = timestamp.split('T')[0];
+
+          // Check if we have any files with this date.
+
+          if (existingFileDateIndex.containsKey(datePart)) {
+            // Add all files with this date to duplicates.
+
+            duplicateFiles.addAll(existingFileDateIndex[datePart]!);
+          }
+        }
+
+        // Return unique list of duplicate files.
+
+        return duplicateFiles.toSet().toList();
+      } catch (resourceError) {
+        throw Exception(
+            'Failed to access resources in $dataPath: $resourceError');
+      }
+    } catch (e) {
+      throw Exception('Error checking for existing files: $e');
+    }
+  }
+
+  /// Helper method to check if a file exists in the POD.
+  ///
+  /// This is a check that attempts to determine if a file exists
+  /// by checking the file listing from the directory or using a direct method.
+  ///
+  /// Returns true if the file exists, false otherwise.
+  Future<bool> fileExistsInPod(String filePath) async {
+    try {
+      // Extract file name from path.
+      final parts = filePath.split('/');
+      final fileName = parts.last;
+
+      // Try to access the directory containing the file.
+      final dirPath =
+          parts.length > 1 ? parts.sublist(0, parts.length - 1).join('/') : '';
+
+      try {
+        // Try to get directory listing.
+        final dirUrl = await getDirUrl(dirPath);
+        final resources = await getResourcesInContainer(dirUrl);
+
+        // Check if file exists in directory.
+        final exists = resources.files.contains(fileName);
+
+        if (exists) {
+          return true;
+        } else {
+          // Try alternative path formats.
+          final alternativePaths = [
+            dataType,
+            '$dataType/$fileName',
+            'healthpod/data/$dataType',
+            'healthpod/data/$dataType/$fileName',
+          ];
+
+          for (final altPath in alternativePaths) {
+            final altDirUrl = await getDirUrl(altPath);
+            final altResources = await getResourcesInContainer(altDirUrl);
+
+            if (altResources.files.contains(fileName)) {
+              return true;
+            }
+          }
+          return false;
+        }
+      } catch (e) {
+        throw Exception('Failed to access directory $dirPath: $e');
+      }
+    } catch (e) {
+      throw Exception('Error checking if file exists: $e');
+    }
+  }
+
   /// Import health data from a CSV file.
   ///
   /// This method reads a CSV file, validates its structure, processes each row,
@@ -166,12 +437,84 @@ abstract class HealthDataImporterBase {
         return false;
       }
 
-      // Initialize tracking variables for duplicate detection and success monitoring.
+      // Initialise tracking variables for duplicate detection and success monitoring.
 
       final Set<String> seenTimestamps = {};
       final List<String> duplicateTimestamps = [];
+      final List<String> allTimestamps = [];
       bool allSuccess = true;
       int successfulSaves = 0;
+
+      // First pass: collect all timestamps from the CSV file.
+
+      for (var i = 1; i < fields.length; i++) {
+        final row =
+            List<String>.from(fields[i].map((f) => f?.toString() ?? ''));
+        if (row.isEmpty) continue;
+
+        while (row.length < headers.length) {
+          row.add('');
+        }
+
+        for (var j = 0; j < headers.length; j++) {
+          final header = headers[j];
+          final value = row[j].toString().trim();
+
+          if (header == timestampField.toLowerCase() && value.isNotEmpty) {
+            try {
+              final timestamp =
+                  normaliseTimestamp(roundTimestampToSecond(value));
+              if (isValidTimestamp(timestamp)) {
+                allTimestamps.add(timestamp);
+              }
+            } catch (e) {
+              // Skip invalid timestamps.
+            }
+            break;
+          }
+        }
+      }
+
+      // Check for existing files that would be overridden.
+
+      List<String> duplicateFiles = [];
+
+      if (allTimestamps.isNotEmpty) {
+        try {
+          duplicateFiles = await _checkForExistingFiles(dirPath, allTimestamps);
+
+          // If duplicate files exist, show confirmation dialog.
+
+          if (duplicateFiles.isNotEmpty && context.mounted) {
+            final shouldOverride = await _showOverrideConfirmationDialog(
+              context,
+              duplicateFiles,
+            );
+
+            // If user cancels the override, abort the import.
+
+            if (!shouldOverride) {
+              return false;
+            }
+
+            if (!context.mounted) return false;
+
+            // Delete the existing files before proceeding with import.
+
+            await _deleteExistingFiles(context, dirPath, duplicateFiles);
+          }
+        } catch (e) {
+          // Show warning that we can't check for duplicates.
+
+          if (context.mounted) {
+            final shouldProceed =
+                await _showDuplicateCheckFailedDialog(context);
+            if (!shouldProceed) {
+              return false;
+            }
+          }
+        }
+      }
 
       // Process each row in the CSV file starting from the second row.
 
@@ -208,7 +551,6 @@ abstract class HealthDataImporterBase {
             if (header == timestampField.toLowerCase()) {
               if (value.isEmpty) {
                 hasRequiredFields = false;
-                debugPrint('Row $i: Missing required timestamp');
                 continue;
               }
 
@@ -234,8 +576,6 @@ abstract class HealthDataImporterBase {
           // Skip rows with missing required fields.
 
           if (!hasRequiredFields) {
-            debugPrint(
-                'Skipping row $i due to missing or invalid required fields');
             continue;
           }
 
@@ -284,20 +624,15 @@ abstract class HealthDataImporterBase {
             successfulSaves++;
           } else {
             allSuccess = false;
-            debugPrint('Failed to save file for row $i');
           }
         } catch (rowError) {
-          debugPrint('Error processing row $i: $rowError');
           allSuccess = false;
         }
       }
 
       // Log the completion status.
 
-      debugPrint(
-          'Processing complete. Successfully saved $successfulSaves files');
-
-      // Show warning for any duplicate timestamps found.
+      // Show warning for any duplicate timestamps found within the CSV.
 
       if (duplicateTimestamps.isNotEmpty) {
         if (!context.mounted) return allSuccess;
@@ -313,11 +648,143 @@ abstract class HealthDataImporterBase {
     } catch (e) {
       // Handle any errors during the import process.
 
-      debugPrint('Import error: $e');
       if (context.mounted) {
         showAlert(context, 'Error importing CSV: ${e.toString()}');
       }
       return false;
+    }
+  }
+
+  /// Shows a warning dialog when duplicate checking fails.
+  ///
+  /// This dialog informs the user that we can't check for duplicate files
+  /// and asks if they want to proceed anyway.
+  ///
+  /// Parameters:
+  /// - [context]: Flutter build context for UI interactions
+  ///
+  /// Returns a boolean indicating whether the user wants to proceed.
+
+  Future<bool> _showDuplicateCheckFailedDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            title: const Text(
+              'Warning',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.orange,
+              ),
+            ),
+            content: const Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Unable to check for duplicate files.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'This import might overwrite existing files with the same dates. Do you want to proceed anyway?',
+                  style: TextStyle(fontSize: 14, height: 1.5),
+                ),
+                SizedBox(height: 12),
+                Text(
+                  'Note: Proceeding without checking may lead to unintended data loss.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                    color: Colors.orange,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                style: TextButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                ),
+                child: const Text(
+                  'Proceed',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+            actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            buttonPadding: const EdgeInsets.symmetric(horizontal: 8),
+          ),
+        ) ??
+        false;
+  }
+
+  /// Deletes existing files before importing new ones.
+  ///
+  /// This method deletes files that would be overridden by the import operation.
+  ///
+  /// Parameters:
+  /// - [context]: Flutter build context for UI interactions
+  /// - [dirPath]: The directory path where files are stored
+  /// - [filesToDelete]: List of file names to delete
+  ///
+  /// Returns a Future that completes when all files are deleted.
+
+  Future<void> _deleteExistingFiles(
+    BuildContext context,
+    String dirPath,
+    List<String> filesToDelete,
+  ) async {
+    try {
+      final String dataPath = 'healthpod/data/$dataType';
+
+      // Attempt to delete each file.
+
+      for (final fileName in filesToDelete) {
+        try {
+          // Construct the full path.
+
+          final fullPath = '$dataPath/$fileName';
+
+          try {
+            if (context.mounted) {
+              await deleteFile(fullPath);
+            }
+          } catch (deleteError) {
+            throw Exception('Failed to delete file $fullPath: $deleteError');
+          }
+        } catch (e) {
+          throw Exception('Error processing file $fileName: $e');
+        }
+      }
+    } catch (e) {
+      throw Exception('Failed to delete existing files: $e');
     }
   }
 }

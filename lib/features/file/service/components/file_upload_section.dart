@@ -161,10 +161,11 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
   /// Builds a CSV format information card for each supported directory.
 
   Widget _buildFormatCard(bool isInBpDirectory, bool isInVaccinationDirectory,
-      bool isInProfileDirectory) {
+      bool isInProfileDirectory, bool isInMedicationDirectory) {
     if (!isInBpDirectory &&
         !isInVaccinationDirectory &&
-        !isInProfileDirectory) {
+        !isInProfileDirectory &&
+        !isInMedicationDirectory) {
       return const SizedBox.shrink();
     }
 
@@ -181,6 +182,16 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
       title = 'Vaccination CSV Format';
       requiredFields = ['timestamp', 'name', 'type'];
       optionalFields = ['location', 'notes', 'batch_number'];
+    } else if (isInMedicationDirectory) {
+      title = 'Medication CSV Format';
+      requiredFields = [
+        'timestamp',
+        'name',
+        'dosage',
+        'frequency',
+        'start_date'
+      ];
+      optionalFields = ['notes'];
     } else if (isInProfileDirectory) {
       title = 'Profile JSON Format';
       requiredFields = [
@@ -616,8 +627,12 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
     final isInDiaryDirectory = state.currentPath?.contains('diary') ?? false;
     final isInProfileDirectory =
         state.currentPath?.contains('profile') ?? false;
-    final showCsvButtons =
-        isInBpDirectory || isInVaccinationDirectory || isInDiaryDirectory;
+    final isInMedicationDirectory =
+        state.currentPath?.contains('medication') ?? false;
+    final showCsvButtons = isInBpDirectory ||
+        isInVaccinationDirectory ||
+        isInMedicationDirectory ||
+        isInDiaryDirectory;
     final showProfileImportButton = isInProfileDirectory;
 
     return Column(
@@ -804,6 +819,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                             .handleCsvImport(
                               context,
                               isVaccination: isInVaccinationDirectory,
+                              isMedication: isInMedicationDirectory,
                               isDiary: isInDiaryDirectory,
                             ),
                     icon: const Icon(Icons.table_chart),
@@ -848,6 +864,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                               context,
                               isVaccination: isInVaccinationDirectory,
                               isDiary: isInDiaryDirectory,
+                              isMedication: isInMedicationDirectory,
                             ),
                     icon: const Icon(Icons.download),
                     label: const Text('Export CSV'),
@@ -870,8 +887,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
         // Display CSV format information card.
 
-        _buildFormatCard(
-            isInBpDirectory, isInVaccinationDirectory, isInProfileDirectory),
+        _buildFormatCard(isInBpDirectory, isInVaccinationDirectory,
+            isInProfileDirectory, isInMedicationDirectory),
 
         const SizedBox(height: 12),
         MarkdownTooltip(
