@@ -31,9 +31,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:healthpod/features/charts/bp_combined_visualisation.dart';
 import 'package:healthpod/features/charts/medication_visualisation.dart';
 import 'package:healthpod/features/charts/vaccination_visualisation.dart';
+import 'package:healthpod/features/diary/tab.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> chartPanels = [
+  {
+    'title': 'Appointments',
+    'widget': DiaryTab(),
+  },
   {
     'title': 'Blood Pressure',
     'widget': BPCombinedVisualisation(),

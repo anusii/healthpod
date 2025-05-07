@@ -92,12 +92,24 @@ class DiaryService {
 
               final data = jsonDecode(content.toString());
               final appointmentData = data['responses'] ?? data;
+
+              // Try to get date from both root level and responses.
+              // This is because the date is sometimes stored in the root level and sometimes in the responses.
+
+              final rootDateStr = data['date']?.toString();
+              final responseDateStr = appointmentData['date']?.toString();
+              final dateStr = rootDateStr ?? responseDateStr;
+
+              if (dateStr == null) {
+                debugPrint('Error: No date found in appointment data');
+                continue;
+              }
+
               appointments.add(Appointment(
-                date: DateTime.parse(appointmentData['date']),
+                date: DateTime.parse(dateStr),
                 title: appointmentData['title'],
                 description: appointmentData['description'],
-                isPast: DateTime.parse(appointmentData['date'])
-                    .isBefore(DateTime.now()),
+                isPast: DateTime.parse(dateStr).isBefore(DateTime.now()),
               ));
             } catch (e) {
               debugPrint('Error parsing appointment file $file: $e');
@@ -184,8 +196,19 @@ class DiaryService {
 
               final data = jsonDecode(content.toString());
               final appointmentData = data['responses'] ?? data;
-              final fileDate = DateTime.parse(appointmentData['date']);
 
+              // Try to get date from both root level and responses.
+
+              final rootDateStr = data['date']?.toString();
+              final responseDateStr = appointmentData['date']?.toString();
+              final dateStr = rootDateStr ?? responseDateStr;
+
+              if (dateStr == null) {
+                debugPrint('Error: No date found in appointment data');
+                continue;
+              }
+
+              final fileDate = DateTime.parse(dateStr);
               if (fileDate.isAtSameMomentAs(appointment.date)) {
                 await deleteFile(filePath);
                 return true;
