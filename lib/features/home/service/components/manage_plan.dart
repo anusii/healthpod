@@ -290,12 +290,12 @@ class _ManagePlanState extends State<ManagePlan> {
                                 Theme.of(context).brightness == Brightness.dark
                                     ? Theme.of(context)
                                         .colorScheme
-                                        .surfaceVariant
-                                        .withOpacity(0.6)
+                                        .surfaceContainerHighest
+                                        .withValues(alpha: 0.6)
                                     : Theme.of(context)
                                         .colorScheme
                                         .secondaryContainer
-                                        .withOpacity(0.5),
+                                        .withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(4),
                             border: Border(
                               left: BorderSide(
