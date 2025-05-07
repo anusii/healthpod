@@ -38,15 +38,37 @@ class HealthSurveyQuestion {
 
   final String fieldName;
 
+  // Data type of the question.
+
   final HealthDataType type;
-  final List<String>? options; // For categorical questions
-  final String? unit; // Optional unit for measurements (e.g. "mmHg", "kg")
-  final double? min; // Optional minimum value for numerical inputs
-  final double? max; // Optional maximum value for numerical inputs
+
+  // Options for categorical questions.
+
+  final List<String>? options;
+
+  // Optional unit for measurements (e.g. "mmHg", "kg").
+
+  final String? unit;
+
+  // Optional minimum value for numerical inputs.
+
+  final double? min;
+
+  // Optional maximum value for numerical inputs.
+
+  final double? max;
+
+  // Whether the question must be answered.
+
   final bool isRequired;
-  final bool
-      allowFutureDate; // Whether to allow future dates in date/datetime inputs
-  final bool showTime; // Whether to show time picker for datetime inputs
+
+  // Whether to allow future dates in date/datetime inputs.
+
+  final bool allowFutureDate;
+
+  // Whether to show time picker for datetime inputs.
+
+  final bool showTime;
 
   /// Creates a new [HealthSurveyQuestion] instance.
   ///
@@ -76,5 +98,5 @@ class HealthSurveyQuestion {
           type != HealthDataType.categorical ||
               (options != null && options.isNotEmpty),
           'Categorical questions must have options',
-        ); // Ensures categorical questions have options.
+        );
 }

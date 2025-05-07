@@ -65,7 +65,8 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
   void initState() {
     super.initState();
 
-    // Initialize selected date and time from existing response
+    // Initialize selected date and time from existing response.
+
     final response = widget.controller.responses[widget.question.fieldName];
     if (response != null) {
       try {
@@ -77,7 +78,8 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
       }
     }
 
-    // Use today's date as default if no date is already selected
+    // Use today's date as default if no date is already selected.
+
     if (_selectedDate == null) {
       _selectedDate = DateTime.now();
       if (widget.question.type == HealthDataType.datetime) {

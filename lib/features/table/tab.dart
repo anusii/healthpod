@@ -28,10 +28,10 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:healthpod/features/diary/editor_page.dart';
 import 'package:healthpod/features/table/bp_editor/page.dart';
 import 'package:healthpod/features/table/medication_editor/page.dart';
 import 'package:healthpod/features/table/vaccination_editor/page.dart';
-import 'package:healthpod/features/diary/editor_page.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> tablePanels = [
