@@ -34,7 +34,5 @@ library;
 
 export 'avatar_name.dart';
 export 'manage_plan.dart';
-export 'next_appointment.dart';
-export 'number_appointments.dart';
 export 'profile_details.dart';
 export 'profile_management.dart';

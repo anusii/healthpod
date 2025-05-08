@@ -118,8 +118,10 @@ class _HomePageState extends State<HomePage> {
             _buildHeader(context),
             const SizedBox(height: 24),
             // Replace GridView with a more flexible layout that respects natural heights.
+
             if (maxWidth < 1200)
               // Two column layout.
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -135,6 +137,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                   const SizedBox(width: 24),
                   // Second column - Profile Details.
+
                   Expanded(
                     child: _buildGridItem(2),
                   ),
@@ -146,16 +149,19 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // First column.
+
                   Expanded(
                     child: _buildGridItem(0),
                   ),
                   const SizedBox(width: 24),
                   // Second column.
+
                   Expanded(
                     child: _buildGridItem(1),
                   ),
                   const SizedBox(width: 24),
                   // Third column - Profile Details.
+
                   Expanded(
                     child: _buildGridItem(2),
                   ),

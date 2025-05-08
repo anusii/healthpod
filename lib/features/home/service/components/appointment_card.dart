@@ -34,6 +34,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/theme/card_style.dart';
 
 // Global flag to track if transport audio is currently playing.
+
 bool transportAudioIn = false;
 
 /// A widget that displays both next appointment details and appointment summary.
@@ -207,6 +208,8 @@ class _AppointmentCardState extends State<AppointmentCard> {
                       alignment: Alignment.center,
                       child: ElevatedButton.icon(
                         onPressed: () {
+                          // Show dialog to add new appointment.
+
                           _showAddAppointmentDialog(context, setState);
                         },
                         icon: const Icon(Icons.add),
@@ -217,8 +220,12 @@ class _AppointmentCardState extends State<AppointmentCard> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Import button.
+
                         OutlinedButton.icon(
                           onPressed: () {
+                            // TODO: Implement import functionality.
+
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -229,8 +236,12 @@ class _AppointmentCardState extends State<AppointmentCard> {
                           icon: const Icon(Icons.upload_file),
                           label: const Text('Import'),
                         ),
+                        // Export button.
+
                         OutlinedButton.icon(
                           onPressed: () {
+                            // TODO: Implement export functionality.
+
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -448,7 +459,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
           const SizedBox(height: 8),
           Text(
             appointments.isEmpty
-                ? 'No upcoming appointments'
+                ? 'No current appointments recorded.'
                 : appointments.length == 1
                     ? 'Only one appointment in the future'
                     : '${appointments.length} appointments scheduled',

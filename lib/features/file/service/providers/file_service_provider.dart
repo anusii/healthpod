@@ -402,6 +402,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           if (!context.mounted) return;
 
           bool success;
+          // ignore: unused_local_variable
           final Feature feature;
 
           if (isVaccination) {
