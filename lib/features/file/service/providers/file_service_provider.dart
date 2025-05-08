@@ -398,11 +398,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           if (!context.mounted) return;
 
           bool success = false;
-          // Define feature at the point of use to avoid unused variable warning.
 
-          final feature = isVaccination
-              ? Feature.vaccination
-              : (isMedication ? Feature.medication : Feature.bloodPressure);
+          // Import based on the type.
 
           if (isVaccination) {
             success = await VaccinationImporter.importCsv(
@@ -410,28 +407,54 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               state.currentPath ?? basePath,
               context,
             );
+
+            // Use the feature in success message.
+
+            if (context.mounted && success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      '${Feature.vaccination.displayName} data imported and converted successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+            }
           } else if (isMedication) {
             success = await MedicationImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
+
+            // Use the feature in success message.
+
+            if (context.mounted && success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      '${Feature.medication.displayName} data imported and converted successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+            }
           } else {
             success = await BPImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
-          }
 
-          if (context.mounted && success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                    '${feature.displayName} data imported and converted successfully'),
-                backgroundColor: Theme.of(context).colorScheme.tertiary,
-              ),
-            );
+            // Use the feature in success message.
+
+            if (context.mounted && success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      '${Feature.bloodPressure.displayName} data imported and converted successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+            }
           }
         }
       }
