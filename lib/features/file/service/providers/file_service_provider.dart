@@ -40,7 +40,6 @@ import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/features/diary/exporter.dart';
-import 'package:healthpod/features/diary/importer.dart';
 import 'package:healthpod/features/file/service/models/file_state.dart';
 import 'package:healthpod/features/medication/exporter.dart';
 import 'package:healthpod/features/medication/importer.dart';
@@ -401,32 +400,54 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         if (file.path != null) {
           if (!context.mounted) return;
 
-          bool success;
-          final Feature feature;
+          bool success = false;
+
+          // Import based on the type.
 
           if (isVaccination) {
-            feature = Feature.vaccination;
             success = await VaccinationImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
+
+            // Use the feature in success message.
+
+            if (context.mounted && success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      '${Feature.vaccination.displayName} data imported and converted successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+            }
           } else if (isDiary) {
-            feature = Feature.diary;
+            // feature = Feature.diary;
             success = await DiaryImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
           } else if (isMedication) {
-            feature = Feature.medication;
             success = await MedicationImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
+
+            // Use the feature in success message.
+
+            if (context.mounted && success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      '${Feature.medication.displayName} data imported and converted successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+            }
           } else {
-            feature = Feature.bloodPressure;
             success = await BPImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
@@ -438,14 +459,11 @@ class FileServiceNotifier extends StateNotifier<FileState> {
             if (success) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content:
-                      Text('${feature.displayName} data imported successfully'),
+                  content: Text(
+                      '${Feature.bloodPressure.displayName} data imported and converted successfully'),
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
-            } else {
-              showAlert(
-                  context, 'Failed to import ${feature.displayName} data');
             }
           }
         }
