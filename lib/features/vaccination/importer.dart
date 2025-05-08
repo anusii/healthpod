@@ -76,7 +76,7 @@ class VaccinationImporter extends HealthDataImporterBase {
     int rowIndex,
   ) {
     // Ensure value is not null, use empty string if it is
-    final safeValue = value ?? '';
+    final safeValue = value;
 
     switch (header) {
       case String h

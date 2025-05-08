@@ -53,19 +53,22 @@ class VaccinationData {
       BuildContext context) async {
     List<Map<String, dynamic>> allData = [];
 
-    /// Fetch POD data.
+    // Fetch POD data.
+
     if (context.mounted) {
       try {
         final podData = await fetchPodVaccinationData(context);
         allData.addAll(podData);
       } catch (e) {
         debugPrint('Error fetching vaccination data: $e');
-        // Return empty list instead of throwing to prevent UI errors
+        // Return empty list instead of throwing to prevent UI errors.
+
         return [];
       }
     }
 
-    /// Sort all data by timestamp (most recent first).
+    // Sort all data by timestamp (most recent first).
+
     allData.sort((a, b) {
       final aTimestamp = a['timestamp'] ?? a['date'];
       final bTimestamp = b['timestamp'] ?? b['date'];
@@ -116,7 +119,6 @@ class VaccinationData {
             /// Parse the JSON string result.
 
             final data = json.decode(result.toString());
-            print('data: $data');
             podData.add(data);
             // debugPrint('Vaccination data loaded: ${data['timestamp']}');
           } catch (e) {
