@@ -402,7 +402,6 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           if (!context.mounted) return;
 
           bool success;
-          // ignore: unused_local_variable
           final Feature feature;
 
           if (isVaccination) {
@@ -413,6 +412,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               context,
             );
           } else if (isDiary) {
+            feature = Feature.diary;
             success = await DiaryImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
@@ -435,11 +435,6 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           }
 
           if (context.mounted) {
-            final feature = isVaccination
-                ? Feature.vaccination
-                : isDiary
-                    ? Feature.diary
-                    : Feature.bloodPressure;
             if (success) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
