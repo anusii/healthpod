@@ -244,6 +244,8 @@ class _ManagePlanState extends State<ManagePlan> {
                     // Save to POD
                     await _saveHealthPlanData();
 
+                    if (!context.mounted) return;
+
                     Navigator.pop(context);
                   },
                   child: const Text('Save'),

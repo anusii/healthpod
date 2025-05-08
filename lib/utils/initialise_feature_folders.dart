@@ -29,8 +29,8 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/create_feature_folder.dart';
-import 'package:healthpod/utils/initialise_profile_data.dart';
 import 'package:healthpod/utils/initialise_health_plan_data.dart';
+import 'package:healthpod/utils/initialise_profile_data.dart';
 
 /// Initialises required feature folders in the user's POD.
 ///
