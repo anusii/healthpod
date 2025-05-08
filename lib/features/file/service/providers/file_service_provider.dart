@@ -60,7 +60,7 @@ import 'package:healthpod/utils/show_alert.dart';
 class FileServiceNotifier extends StateNotifier<FileState> {
   FileServiceNotifier() : super(FileState());
 
-  // Add callback for browser refresh.
+  // Add callback for browser refresh .
 
   Function? _refreshCallback;
 
