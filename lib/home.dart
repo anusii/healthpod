@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Thursday 2025-05-08 12:21:11 +1000 Graham Williams>
+// Time-stamp: <Thursday 2025-05-08 17:14:14 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -70,21 +70,7 @@ final List<Map<String, dynamic>> homeTabs = [
     ''',
   },
   {
-    'title': 'Diary',
-    'icon': Icons.calendar_today,
-    'color': null,
-    'content': const DiaryTab(),
-    'tooltip': '''
-
-    **Diary:** Tap here to access and manage your appointments. You can enter
-    previous appointments for the record and update the calendar when you
-    recieve a new appointment. To load appointments from other sources via a
-    *CSV* file into your calendar visit the **Files** tab.
-
-    ''',
-  },
-  {
-    'title': 'Add',
+    'title': 'New',
     'icon': Icons.assignment,
     'color': null,
     'content': const SurveyTab(),
