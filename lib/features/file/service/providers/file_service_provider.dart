@@ -397,25 +397,26 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         if (file.path != null) {
           if (!context.mounted) return;
 
-          bool success;
-          Feature feature;
+          bool success = false;
+          // Define feature at the point of use to avoid unused variable warning.
+
+          final feature = isVaccination
+              ? Feature.vaccination
+              : (isMedication ? Feature.medication : Feature.bloodPressure);
 
           if (isVaccination) {
-            feature = Feature.vaccination;
             success = await VaccinationImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
           } else if (isMedication) {
-            feature = Feature.medication;
             success = await MedicationImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
           } else {
-            feature = Feature.bloodPressure;
             success = await BPImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
