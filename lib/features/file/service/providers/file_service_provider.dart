@@ -398,7 +398,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           if (!context.mounted) return;
 
           bool success;
-          final Feature feature;
+          Feature feature;
 
           if (isVaccination) {
             feature = Feature.vaccination;
