@@ -15,6 +15,9 @@ Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
 ## 1.0 First stable release
 
++ MEDICATION: import/export [0.1.14 20250508 atangster]
++ DIARY: Collapse into tabs rather then separate tab [0.1.13 20250508 kev]
++ DIARY: import/export [0.1.12 20250508 kev]
 + DIARY: Updated calendar functionality [0.1.11 20250503 kev]
 + MEDICATIONS: NEW, VIEW, TABLE support [0.1.10 20250501 atangster]
 + HOME: Update to lateset VersionWidget() [0.1.9 20250429 kev]
