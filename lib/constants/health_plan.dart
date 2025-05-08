@@ -1,6 +1,4 @@
-/// Components for the home service feature.
-///
-// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+/// Health plan constants.
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -21,18 +19,23 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Zheyuan Xu
+/// Authors: Ashley Tang
 
 library;
 
-/// Components for the home service feature.
-///
-/// This barrel file exports all the components used in the home service feature,
-/// making them easily accessible to other parts of the application.
+/// Default health plan data structure.
 
-// Note: avatar_name.dart and personal_details.dart components are now combined into profile_details.dart.
-
-export 'avatar_name.dart';
-export 'manage_plan.dart';
-export 'profile_details.dart';
-export 'profile_management.dart';
+final Map<String, dynamic> defaultHealthPlanData = {
+  'timestamp': DateTime.now().toIso8601String(),
+  'data': {
+    'title': 'My Health Management Plan',
+    'planItems': [
+      '**Important medication**: Take 2 tablets of Vitamin D3 daily',
+      '*Blood pressure goal*: Keep below 120/80 mmHg',
+      'Visit [HealthDirect](https://www.healthdirect.gov.au) for more information',
+      '## Exercise Plan\n- Walk 30 minutes *daily*\n- Swim **twice** weekly',
+      '> Remember to drink 2L of water daily!',
+      'Monitor glucose levels at these times:\n1. Before breakfast\n2. 2 hours after lunch\n3. Before bed',
+    ],
+  }
+};

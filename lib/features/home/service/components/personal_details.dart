@@ -1,6 +1,6 @@
 /// Personal details card widget.
 //
-// Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-05-08 12:14:30 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -359,15 +359,15 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   const Text('Phone'),
                   MarkdownTooltip(
                     message: '''
-                    
+
                     **Valid Phone Number Formats:**
-                    
+
                     - **Australian Mobile:** +61 4XX XXX XXX or 04XX XXX XXX
                     - **Australian Landline:** +61 X XXXX XXXX or 0X XXXX XXXX
                     - **International:** +[country code] followed by number
-                    
+
                     Spaces, dashes and parentheses are allowed.
-                    
+
                     ''',
                     child: TextFormField(
                       controller: tempBestContactPhoneController,
@@ -386,15 +386,15 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   const Text('Alternative Phone'),
                   MarkdownTooltip(
                     message: '''
-                    
+
                     **Valid Phone Number Formats:**
-                    
+
                     - **Australian Mobile:** +61 4XX XXX XXX or 04XX XXX XXX
                     - **Australian Landline:** +61 X XXXX XXXX or 0X XXXX XXXX
                     - **International:** +[country code] followed by number
-                    
+
                     Spaces, dashes and parentheses are allowed.
-                    
+
                     ''',
                     child: TextFormField(
                       controller: tempAlternativeContactNumberController,

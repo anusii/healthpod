@@ -27,6 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/features/home/service/components/appointment_card.dart';
 import 'package:healthpod/features/home/service/components/components.dart';
 
 class HomePage extends StatefulWidget {
@@ -75,18 +76,16 @@ class _HomePageState extends State<HomePage> {
             children: [
               _buildHeader(context),
               const SizedBox(height: 16),
+              const ManagePlan(),
+              const SizedBox(height: 16),
+              const AppointmentCard(),
+              const SizedBox(height: 16),
               ProfileDetails(
                 key: _personalDetailsKey,
                 showEditButton: true,
                 onEditPressed: () {},
                 onDataChanged: _refreshPersonalDetails,
               ),
-              const SizedBox(height: 16),
-              const NextAppointment(),
-              const SizedBox(height: 16),
-              const ManagePlan(),
-              const SizedBox(height: 16),
-              const NumberAppointments(),
             ],
           ),
         ),
@@ -96,18 +95,8 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildGridItem(int index) {
     final List<Widget> gridItems = [
-      const Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          NumberAppointments(),
-          SizedBox(height: 16),
-          ManagePlan(),
-        ],
-      ),
-      const Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [NextAppointment()],
-      ),
+      const ManagePlan(),
+      const AppointmentCard(),
       ProfileDetails(
         key: _personalDetailsKey,
         showEditButton: true,
@@ -117,7 +106,6 @@ class _HomePageState extends State<HomePage> {
     ];
 
     // Return the widget directly without any constraints to preserve natural sizing.
-
     return gridItems[index];
   }
 
@@ -138,10 +126,8 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // First column.
-
                   Expanded(
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
                       children: [
                         _buildGridItem(0),
                         const SizedBox(height: 24),
@@ -159,7 +145,6 @@ class _HomePageState extends State<HomePage> {
               )
             else
               // Three column layout.
-
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

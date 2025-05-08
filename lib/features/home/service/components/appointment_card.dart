@@ -1,4 +1,4 @@
-/// Number of appointments card widget.
+/// Combined appointment card widget.
 //
 // Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
 //
@@ -27,28 +27,71 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/theme/card_style.dart';
 
-/// A widget that shows the number of upcoming medical appointments.
-///
-/// This card displays a summary of the number of appointments scheduled
-/// for the future, with an edit button to add or manage appointments.
+// Global flag to track if transport audio is currently playing.
 
-class NumberAppointments extends StatefulWidget {
-  const NumberAppointments({super.key});
+bool transportAudioIn = false;
+
+/// A widget that displays both next appointment details and appointment summary.
+///
+/// This component combines the functionality of showing the next appointment
+/// details and the total number of upcoming appointments in a single card.
+
+class AppointmentCard extends StatefulWidget {
+  const AppointmentCard({super.key});
 
   @override
-  State<NumberAppointments> createState() => _NumberAppointmentsState();
+  State<AppointmentCard> createState() => _AppointmentCardState();
 }
 
-class _NumberAppointmentsState extends State<NumberAppointments> {
-  // Appointment data.
+class _AppointmentCardState extends State<AppointmentCard> {
+  // Flag indicating whether audio is currently playing.
 
-  String title = 'Numbers for Medical Appointments';
-  String summary = 'Only one appointment in the future';
+  bool _isPlaying = false;
+
+  // Audio player instance for handling transport eligibility audio.
+
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  // Card title displayed at the top of the component.
+
+  String title = 'Medical Appointments';
+
+  // Subtitle shown when displaying next appointment details.
+
+  String subtitle = 'Next Appointment Details';
+
+  // Date and time of the next appointment.
+
+  DateTime appointmentDate = DateTime(2023, 3, 13, 14, 30);
+
+  // Location where the appointment will take place.
+
+  String location = 'Gurriny Yealamucka';
+
+  // Flag indicating if transport assistance is needed.
+
+  bool needsTransport = true;
+
+  // Phone number to call for transport assistance.
+
+  String transportPhone = '(07) 4226 4100';
+
+  // Additional note about transport service availability.
+
+  String transportNote = '(only during office hours)';
+
+  // Flag indicating if clinic bus service is available.
+
+  bool useClinicBus = true;
+
+  // List of all upcoming appointments with their details.
+
   List<Map<String, dynamic>> appointments = [
     {
       'title': 'General Checkup',
@@ -58,7 +101,61 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
     }
   ];
 
-  /// Opens a dialog to manage appointments.
+  /// Toggles the audio playback state.
+  ///
+  /// Stops playback if currently playing, or starts playback if stopped.
+  /// Ensures only one audio instance plays at a time.
+
+  Future<void> _toggleAudio() async {
+    if (_isPlaying) {
+      await _audioPlayer.stop();
+
+      setState(() {
+        _isPlaying = false;
+        transportAudioIn = false;
+      });
+    } else {
+      if (!transportAudioIn) {
+        await _audioPlayer.play(AssetSource('audio/transport_eligibility.mp3'));
+
+        setState(() {
+          _isPlaying = !_isPlaying;
+          transportAudioIn = true;
+        });
+      }
+    }
+  }
+
+  /// Handles the completion of audio playback.
+  ///
+  /// Resets the playing state and global audio flag when playback finishes.
+
+  void _onAudioComplete() {
+    setState(() {
+      _isPlaying = false;
+      transportAudioIn = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer.onPlayerComplete.listen((event) {
+      _onAudioComplete();
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    transportAudioIn = false;
+    super.dispose();
+  }
+
+  /// Opens a dialog to manage all appointments.
+  ///
+  /// Displays a list of current appointments with options to add, delete,
+  /// import, or export appointments.
 
   void _manageAppointments() {
     showDialog(
@@ -120,11 +217,11 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Import/Export buttons.
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Import button.
+
                         OutlinedButton.icon(
                           onPressed: () {
                             // TODO: Implement import functionality.
@@ -139,6 +236,8 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
                           icon: const Icon(Icons.upload_file),
                           label: const Text('Import'),
                         ),
+                        // Export button.
+
                         OutlinedButton.icon(
                           onPressed: () {
                             // TODO: Implement export functionality.
@@ -167,16 +266,13 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Update the state in the card widget.
-
                     this.setState(() {
-                      if (appointments.isEmpty) {
-                        summary = 'No upcoming appointments';
-                      } else if (appointments.length == 1) {
-                        summary = 'Only one appointment in the future';
-                      } else {
-                        summary =
-                            '${appointments.length} appointments scheduled';
+                      // Update the next appointment if there are any appointments.
+
+                      if (appointments.isNotEmpty) {
+                        final nextAppointment = appointments.first;
+                        appointmentDate = nextAppointment['date'];
+                        location = nextAppointment['location'];
                       }
                     });
                     Navigator.pop(context);
@@ -192,6 +288,9 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
   }
 
   /// Shows a dialog to add a new appointment.
+  ///
+  /// Provides form fields for appointment title, doctor name, location,
+  /// date, and time selection.
 
   void _showAddAppointmentDialog(
       BuildContext context, void Function(void Function()) parentSetState) {
@@ -305,7 +404,6 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
                   return;
                 }
 
-                // Add the new appointment to the list
                 parentSetState(() {
                   appointments.add({
                     'title': titleController.text,
@@ -328,7 +426,10 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 400,
+      constraints: const BoxConstraints(
+        maxWidth: 400,
+        minHeight: 300,
+      ),
       padding: const EdgeInsets.all(16.0),
       decoration: getHomeCardDecoration(context),
       child: Column(
@@ -357,11 +458,136 @@ class _NumberAppointmentsState extends State<NumberAppointments> {
           ),
           const SizedBox(height: 8),
           Text(
-            summary,
+            appointments.isEmpty
+                ? 'No current appointments recorded.'
+                : appointments.length == 1
+                    ? 'Only one appointment in the future'
+                    : '${appointments.length} appointments scheduled',
             style: const TextStyle(fontSize: 14),
           ),
+          const SizedBox(height: 16),
+          if (appointments.isNotEmpty) ...[
+            Text(
+              subtitle,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Date.
+
+            _buildInfoRow(
+              'Date:',
+              'Monday, ${DateFormat('d MMMM').format(appointmentDate)}',
+            ),
+            const SizedBox(height: 8),
+            // Time.
+
+            _buildInfoRow(
+              'Time:',
+              DateFormat('h:mm a').format(appointmentDate),
+            ),
+            const SizedBox(height: 8),
+            // Location.
+
+            _buildInfoRow('Where:', location),
+            const SizedBox(height: 16),
+            // Transport.
+
+            if (useClinicBus)
+              Row(
+                children: [
+                  const Icon(Icons.directions_bus, color: Colors.green),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Clinic Bus:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const Icon(Icons.check, color: Colors.green),
+                ],
+              ),
+            if (needsTransport) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Need help with transport?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.phone, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Call $transportPhone ',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          TextSpan(
+                            text: transportNote,
+                            style: const TextStyle(fontStyle: FontStyle.italic),
+                          ),
+                          const TextSpan(
+                            text: ' to change or request transport.',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: MarkdownTooltip(
+                      message: _isPlaying
+                          ? '**Stop** audio'
+                          : '**Play** audio explanation',
+                      child: IconButton(
+                        icon: Icon(
+                          _isPlaying ? Icons.stop : Icons.volume_up,
+                          color: _isPlaying ? Colors.red : Colors.blue,
+                          size: 20,
+                        ),
+                        onPressed: _toggleAudio,
+                        padding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
         ],
       ),
+    );
+  }
+
+  /// Helper method to build consistent information rows.
+  ///
+  /// Creates a row with a label and value, maintaining consistent styling
+  /// and layout across the card.
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 60,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(value),
+        ),
+      ],
     );
   }
 }

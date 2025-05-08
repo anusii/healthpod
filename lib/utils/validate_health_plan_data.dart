@@ -1,6 +1,4 @@
-/// Components for the home service feature.
-///
-// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+/// Validation function to check if uploaded health plan data is valid.
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -21,18 +19,29 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Zheyuan Xu
+/// Authors: Ashley Tang
 
 library;
 
-/// Components for the home service feature.
-///
-/// This barrel file exports all the components used in the home service feature,
-/// making them easily accessible to other parts of the application.
+/// Validation function to check if uploaded health plan data is valid.
 
-// Note: avatar_name.dart and personal_details.dart components are now combined into profile_details.dart.
+bool validateHealthPlanData(Map<String, dynamic> data) {
+  if (!data.containsKey('title') || data['title'] is! String) {
+    return false;
+  }
 
-export 'avatar_name.dart';
-export 'manage_plan.dart';
-export 'profile_details.dart';
-export 'profile_management.dart';
+  if (!data.containsKey('planItems') || data['planItems'] is! List) {
+    return false;
+  }
+
+  // Check that all plan items are strings.
+
+  final planItems = data['planItems'] as List;
+  for (final item in planItems) {
+    if (item is! String) {
+      return false;
+    }
+  }
+
+  return true;
+}

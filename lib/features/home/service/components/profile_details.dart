@@ -1,6 +1,6 @@
 /// Integrated profile details card widget.
 //
-// Time-stamp: <Sunday 2025-03-16 15:30:05 +1100>
+// Time-stamp: <Thursday 2025-05-08 12:15:21 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -435,15 +435,15 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                   const Text('Phone'),
                   MarkdownTooltip(
                     message: '''
-                    
+
                     **Valid Phone Number Formats:**
-                    
+
                     - **Australian Mobile:** +61 4XX XXX XXX or 04XX XXX XXX
                     - **Australian Landline:** +61 X XXXX XXXX or 0X XXXX XXXX
                     - **International:** +[country code] followed by number
-                    
+
                     Spaces, dashes and parentheses are allowed.
-                    
+
                     ''',
                     child: TextFormField(
                       controller: tempBestContactPhoneController,
@@ -462,15 +462,15 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                   const Text('Alternative Phone'),
                   MarkdownTooltip(
                     message: '''
-                    
+
                     **Valid Phone Number Formats:**
-                    
+
                     - **Australian Mobile:** +61 4XX XXX XXX or 04XX XXX XXX
                     - **Australian Landline:** +61 X XXXX XXXX or 0X XXXX XXXX
                     - **International:** +[country code] followed by number
-                    
+
                     Spaces, dashes and parentheses are allowed.
-                    
+
                     ''',
                     child: TextFormField(
                       controller: tempAlternativeContactNumberController,
@@ -712,18 +712,18 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                   if (widget.showEditButton)
                     MarkdownTooltip(
                       message: '''
-                      
+
                       **Edit Profile Details**
-                      
+
                       Click to modify your personal information:
-                      
+
                       - Name
                       - Address
                       - Contact information
                       - Personal details
-                      
+
                       Your data is securely stored in your personal pod.
-                      
+
                       ''',
                       child: IconButton(
                         icon: const Icon(Icons.edit),
@@ -838,7 +838,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       const SizedBox(height: 6),
                       _buildDataRow('Phone:', _bestContactPhoneController.text),
                       const SizedBox(height: 6),
-                      _buildDataRow('Alternative Phone:',
+                      _buildDataRow('Alternative:',
                           _alternativeContactNumberController.text),
                       const SizedBox(height: 6),
                       _buildDataRow('Email:', _emailController.text),

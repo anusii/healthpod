@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Thursday 2025-05-01 12:05:27 +1000 Graham Williams>
+// Time-stamp: <Thursday 2025-05-08 17:15:58 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -69,7 +69,7 @@ final List<Map<String, dynamic>> homeTabs = [
     ''',
   },
   {
-    'title': 'Add',
+    'title': 'New',
     'icon': Icons.assignment,
     'color': null,
     'content': const SurveyTab(),
