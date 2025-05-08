@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Thursday 2025-05-01 12:05:27 +1000 Graham Williams>
+// Time-stamp: <Thursday 2025-05-08 12:18:58 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -65,6 +65,20 @@ final List<Map<String, dynamic>> homeTabs = [
     'tooltip': '''
 
     **Home:** Tap here to view your HealthPod overview and dashboard.
+
+    ''',
+  },
+  {
+    'title': 'Diary',
+    'icon': Icons.calendar_today,
+    'color': null,
+    'content': const DiaryTab(),
+    'tooltip': '''
+
+    **Diary:** Tap here to access and manage your appointments. You can enter
+    previous appointments for the record and update the calendar when you
+    recieve a new appointment. To load appointments from other sources via a
+    *CSV* file into your calendar visit the **Files** tab.
 
     ''',
   },
