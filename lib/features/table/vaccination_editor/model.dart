@@ -78,13 +78,15 @@ class VaccinationObservation {
   /// stored under 'responses' key.
 
   factory VaccinationObservation.fromJson(Map<String, dynamic> json) {
-    // Handle both 'date' and 'timestamp' fields
+    // Handle both 'date' and 'timestamp' fields.
+
     final timestamp = json['date'] ?? json['timestamp'];
     if (timestamp == null) {
       throw FormatException('Missing date/timestamp field in vaccination data');
     }
 
-    // Get responses map, defaulting to empty map if null
+    // Get responses map, defaulting to empty map if null.
+
     final responses = json['responses'] as Map<String, dynamic>? ?? {};
 
     return VaccinationObservation(
@@ -123,13 +125,15 @@ class VaccinationObservation {
 
   static VaccinationObservation parse(dynamic data) {
     if (data is Map<String, dynamic>) {
-      // Check if it's a CSV format by looking for 'date' and 'vaccine' keys
+      // Check if it's a CSV format by looking for 'date' and 'vaccine' keys.
+
       if (data.containsKey('date') && data.containsKey('vaccine')) {
         return VaccinationObservation.fromCsv(
           Map<String, String>.from(data),
         );
       }
-      // Otherwise treat as JSON
+      // Otherwise treat as JSON.
+
       return VaccinationObservation.fromJson(data);
     }
     throw FormatException('Unsupported data format');

@@ -75,7 +75,8 @@ class VaccinationImporter extends HealthDataImporterBase {
     Map<String, dynamic> responses,
     int rowIndex,
   ) {
-    // Ensure value is not null, use empty string if it is
+    // Ensure value is not null, use empty string if it is.
+
     final safeValue = value;
 
     switch (header) {

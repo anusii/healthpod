@@ -70,13 +70,15 @@ class VaccinationEditorService {
       }
 
       try {
-        // Try parsing as JSON first
+        // Try parsing as JSON first.
+
         try {
           final data = json.decode(content.toString());
           final observation = VaccinationObservation.fromJson(data);
           loadedObservations.add(observation);
         } catch (jsonError) {
-          // If JSON parsing fails, try parsing as CSV
+          // If JSON parsing fails, try parsing as CSV.
+
           final lines = content.toString().split('\n');
           if (lines.isNotEmpty) {
             final headers = lines[0].split(',');
@@ -94,12 +96,14 @@ class VaccinationEditorService {
       } catch (e) {
         debugPrint('Error parsing file $file: $e');
         debugPrint('Content: $content');
-        // Continue with next file instead of failing completely
+        // Continue with next file instead of failing completely.
+
         continue;
       }
     }
 
-    // Sort observations by timestamp (most recent first)
+    // Sort observations by timestamp (most recent first).
+
     loadedObservations.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     return loadedObservations;
