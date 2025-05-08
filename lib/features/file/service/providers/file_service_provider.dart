@@ -39,6 +39,8 @@ import 'package:healthpod/constants/feature.dart';
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
+import 'package:healthpod/features/diary/exporter.dart';
+import 'package:healthpod/features/diary/importer.dart';
 import 'package:healthpod/features/file/service/models/file_state.dart';
 import 'package:healthpod/features/medication/exporter.dart';
 import 'package:healthpod/features/medication/importer.dart';
@@ -380,10 +382,12 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     state = state.copyWith(showPreview: !state.showPreview);
   }
 
-  /// Handles the import of BP, Vaccination, or Medication data from CSV format.
+  /// Handles the import of BP, Vaccination, Medication or Diary data from CSV format.
 
   Future<void> handleCsvImport(BuildContext context,
-      {bool isVaccination = false, bool isMedication = false}) async {
+      {bool isVaccination = false,
+      bool isMedication = false,
+      bool isDiary = false}) async {
     try {
       state = state.copyWith(importInProgress: true);
 
@@ -419,6 +423,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                 ),
               );
             }
+
           } else if (isMedication) {
             success = await MedicationImporter.importCsv(
               file.path!,
@@ -454,6 +459,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
+
             }
           }
         }
@@ -462,7 +468,11 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       if (context.mounted) {
         final feature = isVaccination
             ? Feature.vaccination
-            : (isMedication ? Feature.medication : Feature.bloodPressure);
+            : isMedication
+                ? Feature.medication
+                : isDiary
+                    ? Feature.diary
+                    : Feature.bloodPressure;
         showAlert(context,
             'Failed to import ${feature.displayName} data: ${e.toString()}');
       }
@@ -473,20 +483,29 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     }
   }
 
-  /// Handles the export of BP, Vaccination, or Medication data to CSV format.
+  /// Handles the export of BP, Vaccination, Diary or Medication data to CSV format.
 
   Future<void> handleCsvExport(BuildContext context,
-      {bool isVaccination = false, bool isMedication = false}) async {
+      {bool isVaccination = false,
+      bool isDiary = false,
+      bool isMedication = false}) async {
     try {
       state = state.copyWith(exportInProgress: true);
 
-      final feature = isVaccination
-          ? Feature.vaccination
-          : (isMedication ? Feature.medication : Feature.bloodPressure);
+      // 1) pick  feature based on all the flags.
 
-      final fileName = isVaccination
-          ? 'vaccination_data.csv'
-          : (isMedication ? 'medication_data.csv' : 'blood_pressure_data.csv');
+      final Feature feature = isVaccination
+          ? Feature.vaccination
+          : isMedication
+              ? Feature.medication
+              : isDiary
+                  ? Feature.diary
+                  : Feature.bloodPressure;
+
+      // 2) generate the filename from its displayName.
+
+      final String fileName =
+          '${feature.displayName.toLowerCase().replaceAll(' ', '_')}_data.csv';
 
       final String? outputFile = await FilePicker.platform.saveFile(
         dialogTitle: 'Save ${feature.displayName} data as CSV:',
@@ -500,6 +519,12 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
         if (isVaccination) {
           success = await VaccinationExporter.exportCsv(
+            outputFile,
+            state.currentPath ?? basePath,
+            context,
+          );
+        } else if (isDiary) {
+          success = await DiaryExporter.exportCsv(
             outputFile,
             state.currentPath ?? basePath,
             context,
@@ -536,7 +561,11 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       if (context.mounted) {
         final feature = isVaccination
             ? Feature.vaccination
-            : (isMedication ? Feature.medication : Feature.bloodPressure);
+            : isMedication
+                ? Feature.medication
+                : isDiary
+                    ? Feature.diary
+                    : Feature.bloodPressure;
         showAlert(context,
             'Failed to export ${feature.displayName} data: ${e.toString()}');
       }

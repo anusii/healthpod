@@ -127,7 +127,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
           index: index,
           controller: _formController,
         ),
-      HealthDataType.date => HealthSurveyDateInput(
+      HealthDataType.date || HealthDataType.datetime => HealthSurveyDateInput(
           question: question,
           index: index,
           controller: _formController,
