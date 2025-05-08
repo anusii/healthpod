@@ -30,13 +30,14 @@ import 'package:solidpod/solidpod.dart';
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/create_feature_folder.dart';
 import 'package:healthpod/utils/initialise_profile_data.dart';
+import 'package:healthpod/utils/initialise_health_plan_data.dart';
 
 /// Initialises required feature folders in the user's POD.
 ///
 /// This function checks for the existence of essential feature folders and creates
 /// them if they don't exist. Currently handles 'profile', 'blood_pressure', 'pathology',
-/// 'vaccination', 'medication' and 'diary' folders. Returns a [Future<void>] that completes when all folders
-/// are verified/created.
+/// 'vaccination', 'medication', 'diary', and 'health_plan' folders.
+/// Returns a [Future<void>] that completes when all folders are verified/created.
 ///
 /// Parameters:
 /// - [context]: The BuildContext for showing progress indicators and error messages
@@ -59,6 +60,7 @@ Future<void> initialiseFeatureFolders({
       'vaccination',
       'medication',
       'diary',
+      'health_plan',
     ];
 
     // Check current resources.
@@ -100,6 +102,17 @@ Future<void> initialiseFeatureFolders({
       onProgress: onProgress,
       onComplete: () {
         debugPrint('Successfully initialised profile data');
+      },
+    );
+
+    // Initialise health plan data with default values if needed.
+
+    if (!context.mounted) return;
+    await initialiseHealthPlanData(
+      context: context,
+      onProgress: onProgress,
+      onComplete: () {
+        debugPrint('Successfully initialised health plan data');
       },
     );
 
