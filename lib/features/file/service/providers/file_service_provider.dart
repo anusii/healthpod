@@ -40,6 +40,7 @@ import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/features/diary/exporter.dart';
+import 'package:healthpod/features/diary/importer.dart';
 import 'package:healthpod/features/file/service/models/file_state.dart';
 import 'package:healthpod/features/medication/exporter.dart';
 import 'package:healthpod/features/medication/importer.dart';
@@ -422,6 +423,13 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                 ),
               );
             }
+          } else if (isDiary) {
+            // feature = Feature.diary;
+            success = await DiaryImporter.importCsv(
+              file.path!,
+              state.currentPath ?? basePath,
+              context,
+            );
           } else if (isMedication) {
             success = await MedicationImporter.importCsv(
               file.path!,
@@ -446,10 +454,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               state.currentPath ?? basePath,
               context,
             );
+          }
 
-            // Use the feature in success message.
-
-            if (context.mounted && success) {
+          if (context.mounted) {
+            if (success) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
