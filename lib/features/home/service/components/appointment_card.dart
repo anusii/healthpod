@@ -33,7 +33,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/theme/card_style.dart';
 
-// Add this global variable if it doesn't exist elsewhere
+// Global flag to track if transport audio is currently playing.
 bool transportAudioIn = false;
 
 /// A widget that displays both next appointment details and appointment summary.
@@ -49,19 +49,48 @@ class AppointmentCard extends StatefulWidget {
 }
 
 class _AppointmentCardState extends State<AppointmentCard> {
-  /// Status of playing of the audio.
+  // Flag indicating whether audio is currently playing.
+
   bool _isPlaying = false;
+
+  // Audio player instance for handling transport eligibility audio.
+
   final AudioPlayer _audioPlayer = AudioPlayer();
 
-  // Appointment data
+  // Card title displayed at the top of the component.
+
   String title = 'Medical Appointments';
+
+  // Subtitle shown when displaying next appointment details.
+
   String subtitle = 'Next Appointment Details';
+
+  // Date and time of the next appointment.
+
   DateTime appointmentDate = DateTime(2023, 3, 13, 14, 30);
+
+  // Location where the appointment will take place.
+
   String location = 'Gurriny Yealamucka';
+
+  // Flag indicating if transport assistance is needed.
+
   bool needsTransport = true;
+
+  // Phone number to call for transport assistance.
+
   String transportPhone = '(07) 4226 4100';
+
+  // Additional note about transport service availability.
+
   String transportNote = '(only during office hours)';
+
+  // Flag indicating if clinic bus service is available.
+
   bool useClinicBus = true;
+
+  // List of all upcoming appointments with their details.
+
   List<Map<String, dynamic>> appointments = [
     {
       'title': 'General Checkup',
@@ -72,9 +101,14 @@ class _AppointmentCardState extends State<AppointmentCard> {
   ];
 
   /// Toggles the audio playback state.
+  ///
+  /// Stops playback if currently playing, or starts playback if stopped.
+  /// Ensures only one audio instance plays at a time.
+
   Future<void> _toggleAudio() async {
     if (_isPlaying) {
       await _audioPlayer.stop();
+
       setState(() {
         _isPlaying = false;
         transportAudioIn = false;
@@ -82,6 +116,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
     } else {
       if (!transportAudioIn) {
         await _audioPlayer.play(AssetSource('audio/transport_eligibility.mp3'));
+
         setState(() {
           _isPlaying = !_isPlaying;
           transportAudioIn = true;
@@ -91,6 +126,9 @@ class _AppointmentCardState extends State<AppointmentCard> {
   }
 
   /// Handles the completion of audio playback.
+  ///
+  /// Resets the playing state and global audio flag when playback finishes.
+
   void _onAudioComplete() {
     setState(() {
       _isPlaying = false;
@@ -114,6 +152,10 @@ class _AppointmentCardState extends State<AppointmentCard> {
   }
 
   /// Opens a dialog to manage all appointments.
+  ///
+  /// Displays a list of current appointments with options to add, delete,
+  /// import, or export appointments.
+
   void _manageAppointments() {
     showDialog(
       context: context,
@@ -214,7 +256,8 @@ class _AppointmentCardState extends State<AppointmentCard> {
                 ElevatedButton(
                   onPressed: () {
                     this.setState(() {
-                      // Update the next appointment if there are any appointments
+                      // Update the next appointment if there are any appointments.
+
                       if (appointments.isNotEmpty) {
                         final nextAppointment = appointments.first;
                         appointmentDate = nextAppointment['date'];
@@ -234,6 +277,10 @@ class _AppointmentCardState extends State<AppointmentCard> {
   }
 
   /// Shows a dialog to add a new appointment.
+  ///
+  /// Provides form fields for appointment title, doctor name, location,
+  /// date, and time selection.
+
   void _showAddAppointmentDialog(
       BuildContext context, void Function(void Function()) parentSetState) {
     final titleController = TextEditingController();
@@ -417,22 +464,26 @@ class _AppointmentCardState extends State<AppointmentCard> {
               ),
             ),
             const SizedBox(height: 16),
-            // Date
+            // Date.
+
             _buildInfoRow(
               'Date:',
               'Monday, ${DateFormat('d MMMM').format(appointmentDate)}',
             ),
             const SizedBox(height: 8),
-            // Time
+            // Time.
+
             _buildInfoRow(
               'Time:',
               DateFormat('h:mm a').format(appointmentDate),
             ),
             const SizedBox(height: 8),
-            // Location
+            // Location.
+
             _buildInfoRow('Where:', location),
             const SizedBox(height: 16),
-            // Transport
+            // Transport.
+
             if (useClinicBus)
               Row(
                 children: [
@@ -505,6 +556,10 @@ class _AppointmentCardState extends State<AppointmentCard> {
   }
 
   /// Helper method to build consistent information rows.
+  ///
+  /// Creates a row with a label and value, maintaining consistent styling
+  /// and layout across the card.
+
   Widget _buildInfoRow(String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
