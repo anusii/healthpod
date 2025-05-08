@@ -40,7 +40,6 @@ import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/features/diary/exporter.dart';
-import 'package:healthpod/features/diary/importer.dart';
 import 'package:healthpod/features/file/service/models/file_state.dart';
 import 'package:healthpod/features/medication/exporter.dart';
 import 'package:healthpod/features/medication/importer.dart';
@@ -423,7 +422,6 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                 ),
               );
             }
-
           } else if (isMedication) {
             success = await MedicationImporter.importCsv(
               file.path!,
@@ -459,7 +457,6 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
-
             }
           }
         }
