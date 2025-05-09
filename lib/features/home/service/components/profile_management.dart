@@ -25,9 +25,12 @@
 
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/features/home/service/components/profile_details.dart';
+import 'package:healthpod/utils/profile_photo_handler.dart';
 
 /// A profile management widget that displays and allows editing of user identity and personal details.
 
@@ -94,7 +97,7 @@ class _ProfileManagementState extends State<ProfileManagement> {
                 ),
                 const SizedBox(height: 24),
 
-                // Combined Profile Details Section (replaces separate Identity and Personal Details sections).
+                // Combined Profile Details Section with photo editing capability
 
                 _buildSection(
                   title: 'Profile Details',

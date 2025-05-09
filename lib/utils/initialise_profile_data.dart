@@ -55,14 +55,44 @@ Future<void> initialiseProfileData({
     final dirUrl = await getDirUrl('$basePath/profile');
     final resources = await getResourcesInContainer(dirUrl);
 
-    // Look for any file that starts with 'profile_' and ends with '.json.enc.ttl'.
-    final hasProfileFile = resources.files.any((file) =>
-        file.startsWith('profile_') && file.endsWith('.json.enc.ttl'));
+    debugPrint('Profile dir contents: ${resources.files}');
 
-    if (!hasProfileFile) {
+    // Look for any profile data file (profile_*.json.enc.ttl)
+    final profileFiles = resources.files
+        .where((file) =>
+            file.startsWith('profile_') &&
+            !file.startsWith('profile_photo_') && // Exclude photo files
+            file.endsWith('.json.enc.ttl'))
+        .toList();
+
+    // Also look for photo files to check for potential confusion
+    final photoFiles = resources.files
+        .where((file) =>
+            file.startsWith('profile_photo_') &&
+            (file.endsWith('.photo.enc.ttl') || file.endsWith('.enc.ttl')))
+        .toList();
+
+    if (photoFiles.isNotEmpty) {
+      debugPrint('Found ${photoFiles.length} profile photo files');
+    }
+
+    // Check for existence of properly formatted profile data file
+    if (profileFiles.isNotEmpty) {
+      debugPrint('Found ${profileFiles.length} existing profile data files');
+
+      // If we have profile data, check if it has all required fields.
+      if (context.mounted) {
+        // Here we only want to add missing fields, never replace existing data
+        await _ensureRequiredFields(context);
+      }
+    } else {
+      debugPrint('No profile data file found - will create initial profile');
+      debugPrint('Default profile data: ${defaultProfileData['data']}');
+
       if (!context.mounted) return;
 
-      // Save blank profile data.
+      // Create initial profile only if no profile exists
+      // Use the structure expected by fetchProfileData - profile data is the responses
       await saveResponseToPod(
         context: context,
         responses: defaultProfileData['data'],
@@ -72,15 +102,10 @@ Future<void> initialiseProfileData({
       );
 
       debugPrint(
-          '✅ Successfully created profile_{timestamp}.json with blank values');
-    } else {
-      // Even if profile exists, check if it has all required fields.
-
-      if (context.mounted) {
-        await _validateAndUpdateProfile(context);
-      }
+          '✅ Successfully created initial profile_{timestamp}.json.enc.ttl with blank values');
     }
 
+    debugPrint('Successfully initialised profile data');
     onComplete.call();
   } catch (e) {
     debugPrint('❌ Error initializing profile data: $e');
@@ -89,40 +114,64 @@ Future<void> initialiseProfileData({
   }
 }
 
-/// Validates the existing profile and updates it if missing fields are found.
+/// Ensures the profile has all required fields without overwriting existing data.
+/// Only adds missing fields from the default profile template.
 
-Future<void> _validateAndUpdateProfile(BuildContext context) async {
+Future<void> _ensureRequiredFields(BuildContext context) async {
   try {
     // Fetch the current profile data.
-
+    debugPrint('Validating existing profile data for missing fields');
     final existingData = await fetchProfileData(context);
-    bool needsUpdate = false;
 
-    // Create a map with all required fields from default profile.
+    debugPrint(
+        'Existing profile data contains keys: ${existingData.keys.join(', ')}');
 
-    final Map<String, dynamic> updatedData = {};
-
-    // Check each field and use existing value if present, otherwise use default.
-
-    for (final key in defaultProfileData['data'].keys) {
-      if (!existingData.containsKey(key) || existingData[key] == null) {
-        updatedData[key] = defaultProfileData['data'][key];
-        needsUpdate = true;
-      } else {
-        updatedData[key] = existingData[key];
-      }
+    // Check if the data contains imageData - this shouldn't happen but let's check
+    if (existingData.containsKey('imageData')) {
+      debugPrint(
+          'WARNING: Profile data contains imageData - this indicates data mixing');
     }
 
-    // Only save if updates are needed.
+    // Keep track of any fields that are completely missing
+    final missingFields = <String>[];
 
-    if (needsUpdate && context.mounted) {
+    // Create a map that starts with the existing data
+    final Map<String, dynamic> updatedData =
+        Map<String, dynamic>.from(existingData);
+
+    // Only add fields that don't exist at all
+    for (final key in defaultProfileData['data'].keys) {
+      if (!existingData.containsKey(key) || existingData[key] == null) {
+        // Add the default for this missing field
+        updatedData[key] = defaultProfileData['data'][key];
+        missingFields.add(key);
+        debugPrint('Adding missing field to profile: $key');
+      }
+      // NEVER replace existing values with defaults
+    }
+
+    // Only save if we added missing fields
+    if (missingFields.isNotEmpty && context.mounted) {
+      debugPrint(
+          'Saving profile with ${missingFields.length} added fields: ${missingFields.join(", ")}');
+
+      // Ensure we don't include any photo data that might have gotten mixed in
+      updatedData.remove('imageData');
+      updatedData.remove('format');
+
+      // When saving, make sure we use the correct structure
+      // The data itself is the responses, not wrapped in a 'data' field
       await saveResponseToPod(
         context: context,
-        responses: updatedData,
+        responses: updatedData, // This is the data object
         podPath: '/profile',
         filePrefix: 'profile',
+        additionalData: {'timestamp': DateTime.now().toIso8601String()},
       );
-      debugPrint('✅ Updated profile with missing fields');
+      debugPrint(
+          '✅ Updated profile with missing fields while preserving existing data');
+    } else {
+      debugPrint('No missing fields found in profile - no update needed');
     }
   } catch (e) {
     debugPrint('❌ Error validating profile data: $e');

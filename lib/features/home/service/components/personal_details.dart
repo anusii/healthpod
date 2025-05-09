@@ -185,17 +185,16 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     debugPrint('Saving profile using uploadJsonToPod utility...');
 
     try {
-      // Create a proper JSON structure with timestamp and data.
-
-      final jsonData = {
-        'timestamp': DateTime.now().toIso8601String(),
-        'data': updatedData,
-      };
+      // Create a structure for uploadJsonToPod that matches what saveResponseToPod expects
+      // The profile data should be passed as the 'responses' parameter, not wrapped in 'data'
 
       // Use uploadJsonToPod which is used by other components successfully.
-
       final result = await uploadJsonToPod(
-        data: jsonData,
+        data: {
+          'timestamp': DateTime.now().toIso8601String(),
+          'responses':
+              updatedData, // This matches the expected structure in fetchProfileData
+        },
         targetPath: 'profile',
         fileNamePrefix: 'profile',
         context: context,

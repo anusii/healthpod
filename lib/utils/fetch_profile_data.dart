@@ -57,12 +57,15 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     final resources = await getResourcesInContainer(dirUrl);
     debugPrint('Profile dir contents: ${resources.files}');
 
-    // Look for profile files with .enc.ttl extension (encrypted files).
-
     final profileFiles = resources.files
-        .where(
-            (file) => file.startsWith('profile_') && file.endsWith('.enc.ttl'))
+        .where((file) =>
+            file.startsWith('profile_') &&
+            !file.startsWith('profile_photo_') && // Exclude photo files
+            (file.endsWith('.enc.ttl') || file.endsWith('.json.enc.ttl')))
         .toList();
+
+    debugPrint(
+        'Found ${profileFiles.length} potential profile data files: $profileFiles');
 
     if (profileFiles.isEmpty) {
       debugPrint('No profile files found. Using default profile data.');
@@ -74,6 +77,12 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     profileFiles.sort((a, b) => b.compareTo(a));
     final latestProfileFile = profileFiles.first;
     debugPrint('Found latest profile file: $latestProfileFile');
+
+    // Double-check that we're not using a photo file.
+
+    if (latestProfileFile.startsWith('profile_photo_')) {
+      return defaultProfileData['data'] as Map<String, dynamic>;
+    }
 
     // Read the file contents.
 
@@ -138,19 +147,85 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
           'Successfully parsed profile JSON with keys: ${jsonData.keys.join(', ')}');
 
       // Check for nested data structures.
+      Map<String, dynamic> profileData = <String, dynamic>{};
 
       if (jsonData.containsKey('data')) {
         debugPrint('Found data key in profile, returning data object');
-        return jsonData['data'] as Map<String, dynamic>;
+        profileData = jsonData['data'] as Map<String, dynamic>;
+      } else if (jsonData.containsKey('responses')) {
+        // Most recent format - profile data is in 'responses'.
+
+        debugPrint(
+            'Found responses key in profile, returning responses object');
+        final responses = jsonData['responses'] as Map<String, dynamic>;
+
+        // Check if responses contains actual profile data or just imageData.
+        // Filter out imageData and only keep actual profile fields.
+
+        profileData = <String, dynamic>{};
+        for (final key in responses.keys) {
+          // Skip imageData, format or internal timestamp, but keep all profile fields.
+
+          if (key != 'imageData' && key != 'format' && key != 'timestamp') {
+            profileData[key] = responses[key];
+          }
+        }
+
+        // If we've filtered everything out (only photo data was found),
+        // check for profile fields in the main object.
+
+        if (profileData.isEmpty) {
+          for (final key in jsonData.keys) {
+            if (key != 'responses' &&
+                key != 'timestamp' &&
+                key != 'imageData' &&
+                key != 'format') {
+              profileData[key] = jsonData[key];
+            }
+          }
+        }
       } else if (jsonData.containsKey('timestamp') &&
           jsonData.containsKey('data')) {
         debugPrint('Found timestamp and data keys, returning data object');
-        return jsonData['data'] as Map<String, dynamic>;
+        profileData = jsonData['data'] as Map<String, dynamic>;
+      } else {
+        // Check for direct profile fields at the top level.
+
+        final profileKeys = [
+          'name',
+          'address',
+          'bestContactPhone',
+          'alternativeContactNumber',
+          'email',
+          'dateOfBirth',
+          'gender'
+        ];
+
+        // Copy only profile-related fields.
+
+        for (final key in profileKeys) {
+          if (jsonData.containsKey(key)) {
+            profileData[key] = jsonData[key];
+          }
+        }
+
+        if (profileData.isEmpty) {
+          // No profile data found at any level, return the whole object excluding photo data.
+
+          profileData = Map<String, dynamic>.from(jsonData);
+          profileData.remove('imageData');
+          profileData.remove('format');
+        }
       }
 
-      // Return the whole object if it doesn't have the expected structure.
+      // Ensure we have actual profile data.
 
-      return jsonData;
+      if (profileData.isEmpty) {
+        debugPrint('No valid profile data found, using defaults');
+        return defaultProfileData['data'] as Map<String, dynamic>;
+      }
+
+      return profileData;
     } catch (e) {
       debugPrint('Error parsing profile JSON: $e');
       debugPrint(
