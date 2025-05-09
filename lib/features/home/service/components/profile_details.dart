@@ -123,11 +123,13 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
     try {
       // Fetch profile data using utility function.
+
       final profileData = await fetchProfileData(context);
       _profileData = profileData;
 
       setState(() {
         // Populate controllers with profile data or defaults.
+
         _nameController.text = profileData['name'] ?? userName;
         _addressController.text = profileData['address'] ?? '';
         _bestContactPhoneController.text =
@@ -142,6 +144,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     } catch (e) {
       setState(() {
         // Set defaults in case of failure.
+
         _nameController.text = userName;
         _addressController.text = '';
         _bestContactPhoneController.text = '';
@@ -279,7 +282,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
       return result;
     } catch (e) {
-      debugPrint('Error saving profile: $e');
+      //debugPrint('Error saving profile: $e');
       return SolidFunctionCallStatus.fail;
     }
   }
@@ -331,7 +334,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         await deleteFile(filePath);
       }
     } catch (e) {
-      debugPrint('Error cleaning up profile files: $e');
+      //debugPrint('Error cleaning up profile files: $e');
     }
   }
 
@@ -639,7 +642,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
       }
     } catch (e) {
-      debugPrint('Error parsing date: $e');
+      //debugPrint('Error parsing date: $e');
     }
     // Return a default date (30 years ago)
     return DateTime.now().subtract(const Duration(days: 365 * 30));
@@ -930,7 +933,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                           ),
                         ),
 
-                        // Edit photo indicator
+                        // Edit photo indicator.
+
                         if (!_isLoadingPhoto && !_isUploadingPhoto)
                           Positioned(
                             top: -2,

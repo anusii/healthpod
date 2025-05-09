@@ -192,8 +192,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       final result = await uploadJsonToPod(
         data: {
           'timestamp': DateTime.now().toIso8601String(),
-          'responses':
-              updatedData, // This matches the expected structure in fetchProfileData
+          'responses': updatedData,
         },
         targetPath: 'profile',
         fileNamePrefix: 'profile',

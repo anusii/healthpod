@@ -27,8 +27,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
@@ -54,7 +55,8 @@ class ProfilePhotoHandler {
     return '$_profileDirectoryRelative/$filename';
   }
 
-  /// Gets the directory URL for the profile directory
+  /// Gets the directory URL for the profile directory.
+
   static Future<String> _getProfileDirectoryUrl() async {
     // For directory operations we need the full path.
 
@@ -79,7 +81,7 @@ class ProfilePhotoHandler {
       }
       return null;
     } catch (e) {
-      debugPrint('Error picking profile photo: $e');
+      //debugPrint('Error picking profile photo: $e');
       return null;
     }
   }
@@ -130,10 +132,6 @@ class ProfilePhotoHandler {
 
       final filePath = _buildProfilePath(filename);
 
-      debugPrint('Uploading profile photo to relative path: $filePath');
-      debugPrint(
-          'Expected full path after SolidPod processing: healthpod/data/$filePath');
-
       if (!context.mounted) return false;
 
       // Upload with encryption.
@@ -146,23 +144,9 @@ class ProfilePhotoHandler {
         encrypted: true,
       );
 
-      if (status == SolidFunctionCallStatus.success) {
-        debugPrint('Profile photo uploaded successfully');
-      } else {
-        debugPrint('Failed to upload profile photo: $status');
-      }
-
       return status == SolidFunctionCallStatus.success;
     } catch (e) {
-      debugPrint('Error uploading profile photo: $e');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error uploading profile photo: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      //debugPrint('Error uploading profile photo: $e');
       return false;
     }
   }
@@ -179,10 +163,8 @@ class ProfilePhotoHandler {
       // Get directory URL and list files using the full path.
 
       final dirUrl = await _getProfileDirectoryUrl();
-      debugPrint('Looking for profile photos in: $dirUrl');
 
       final resources = await getResourcesInContainer(dirUrl);
-      debugPrint('Found files in directory: ${resources.files}');
 
       final List<String> photoFiles = [];
 
@@ -194,7 +176,6 @@ class ProfilePhotoHandler {
         if (file.startsWith('profile_photo_') &&
             (file.endsWith('.photo.enc.ttl') || file.endsWith('.enc.ttl'))) {
           photoFiles.add(file);
-          debugPrint('Found profile photo: $file');
         }
       }
 
@@ -228,7 +209,6 @@ class ProfilePhotoHandler {
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
-        debugPrint('Failed to read profile photo: $fileContent');
         throw Exception('Failed to load profile photo');
       }
 
@@ -239,7 +219,6 @@ class ProfilePhotoHandler {
       // Verify this is indeed a photo file by checking for imageData.
 
       if (!jsonData.containsKey('imageData')) {
-        debugPrint('File does not contain image data, skipping');
         return null;
       }
 
@@ -248,13 +227,10 @@ class ProfilePhotoHandler {
       final base64Image = jsonData['imageData'] as String;
       final imageBytes = base64Decode(base64Image);
 
-      debugPrint('Successfully loaded profile photo');
-
       // Return as memory image.
 
       return MemoryImage(Uint8List.fromList(imageBytes));
     } catch (e) {
-      debugPrint('Error getting profile photo: $e');
       return null;
     }
   }
@@ -271,7 +247,6 @@ class ProfilePhotoHandler {
       // Get directory URL and list files using the full path.
 
       final dirUrl = await _getProfileDirectoryUrl();
-      debugPrint('Cleaning up profile photos in: $dirUrl');
 
       final resources = await getResourcesInContainer(dirUrl);
 
@@ -289,15 +264,12 @@ class ProfilePhotoHandler {
       if (photoFiles.length <= 1) {
         // No cleanup needed.
 
-        debugPrint(
-            'No cleanup needed (${photoFiles.length} profile photos found)');
         return true;
       }
 
       // Sort by timestamp (newest first).
 
       photoFiles.sort((a, b) => b.compareTo(a));
-      debugPrint('Keeping newest profile photo: ${photoFiles.first}');
 
       // Keep the most recent, remove others.
 
@@ -306,15 +278,13 @@ class ProfilePhotoHandler {
         // For deleting, we need to use the full path.
 
         final filePath = '$_profileDirectoryFull/${photoFiles[i]}';
-        debugPrint('Deleting old profile photo: $filePath');
         await deleteFile(filePath);
         deleteCount++;
       }
 
-      debugPrint('Successfully deleted $deleteCount old profile photos');
       return true;
     } catch (e) {
-      debugPrint('Error cleaning up old profile photos: $e');
+      //debugPrint('Error cleaning up old profile photos: $e');
       return false;
     }
   }
@@ -331,7 +301,6 @@ class ProfilePhotoHandler {
       // Get directory URL and list files using the full path.
 
       final dirUrl = await _getProfileDirectoryUrl();
-      debugPrint('Finding profile photo to delete in: $dirUrl');
 
       final resources = await getResourcesInContainer(dirUrl);
 
@@ -349,7 +318,6 @@ class ProfilePhotoHandler {
       if (photoFiles.isEmpty) {
         // No photo to delete.
 
-        debugPrint('No profile photos to delete');
         return true;
       }
 
@@ -360,13 +328,11 @@ class ProfilePhotoHandler {
       // Delete the most recent photo using the full path.
 
       final filePath = '$_profileDirectoryFull/${photoFiles.first}';
-      debugPrint('Deleting profile photo: $filePath');
       await deleteFile(filePath);
-      debugPrint('Successfully deleted profile photo');
 
       return true;
     } catch (e) {
-      debugPrint('Error deleting profile photo: $e');
+      //debugPrint('Error deleting profile photo: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
