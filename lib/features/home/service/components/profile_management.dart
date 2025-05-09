@@ -25,12 +25,9 @@
 
 library;
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/features/home/service/components/profile_details.dart';
-import 'package:healthpod/utils/profile_photo_handler.dart';
 
 /// A profile management widget that displays and allows editing of user identity and personal details.
 

@@ -273,13 +273,11 @@ class ProfilePhotoHandler {
 
       // Keep the most recent, remove others.
 
-      int deleteCount = 0;
       for (int i = 1; i < photoFiles.length; i++) {
         // For deleting, we need to use the full path.
 
         final filePath = '$_profileDirectoryFull/${photoFiles[i]}';
         await deleteFile(filePath);
-        deleteCount++;
       }
 
       return true;
