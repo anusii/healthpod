@@ -32,6 +32,8 @@ import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/theme/card_style.dart';
+import 'package:healthpod/features/diary/service.dart';
+import 'package:healthpod/features/diary/models/appointment.dart';
 
 // Global flag to track if transport audio is currently playing.
 
@@ -92,14 +94,11 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
   // List of all upcoming appointments with their details.
 
-  List<Map<String, dynamic>> appointments = [
-    {
-      'title': 'General Checkup',
-      'date': DateTime(2023, 3, 13, 14, 30),
-      'location': 'Gurriny Yealamucka',
-      'doctor': 'Dr. Smith',
-    }
-  ];
+  List<Appointment> appointments = [];
+
+  // Flag indicating if appointments are currently loading.
+
+  bool _isLoading = true;
 
   /// Toggles the audio playback state.
   ///
@@ -140,9 +139,30 @@ class _AppointmentCardState extends State<AppointmentCard> {
   @override
   void initState() {
     super.initState();
+    _loadAppointments();
     _audioPlayer.onPlayerComplete.listen((event) {
       _onAudioComplete();
     });
+  }
+
+  Future<void> _loadAppointments() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    if (!mounted) return;
+    final loadedAppointments = await DiaryService.loadAppointments(context);
+
+    debugPrint('Loaded appointments: $loadedAppointments');
+
+    if (mounted) {
+      setState(() {
+        appointments = loadedAppointments;
+        debugPrint('Appointments: $appointments');
+        appointments.sort((a, b) => b.date.compareTo(a.date));
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -185,16 +205,21 @@ class _AppointmentCardState extends State<AppointmentCard> {
                           return Card(
                             margin: const EdgeInsets.only(bottom: 8),
                             child: ListTile(
-                              title: Text(appointment['title']),
+                              title: Text(appointment.title),
                               subtitle: Text(
-                                '${DateFormat('MMM d, yyyy').format(appointment['date'])} at ${DateFormat('h:mm a').format(appointment['date'])}\n${appointment['doctor']} - ${appointment['location']}',
+                                '${DateFormat('MMM d, yyyy').format(appointment.date)} at ${DateFormat('h:mm a').format(appointment.date)}\n${appointment.description}',
                               ),
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  setState(() {
-                                    appointments.removeAt(index);
-                                  });
+                                onPressed: () async {
+                                  final success =
+                                      await DiaryService.deleteAppointment(
+                                          context, appointment);
+                                  if (success) {
+                                    setState(() {
+                                      appointments.removeAt(index);
+                                    });
+                                  }
                                 },
                               ),
                               isThreeLine: true,
@@ -271,8 +296,8 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
                       if (appointments.isNotEmpty) {
                         final nextAppointment = appointments.first;
-                        appointmentDate = nextAppointment['date'];
-                        location = nextAppointment['location'];
+                        appointmentDate = nextAppointment.date;
+                        location = nextAppointment.description;
                       }
                     });
                     Navigator.pop(context);
@@ -295,8 +320,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
   void _showAddAppointmentDialog(
       BuildContext context, void Function(void Function()) parentSetState) {
     final titleController = TextEditingController();
-    final doctorController = TextEditingController();
-    final locationController = TextEditingController();
+    final descriptionController = TextEditingController();
     DateTime selectedDate = DateTime.now();
     TimeOfDay selectedTime = TimeOfDay.now();
 
@@ -318,17 +342,9 @@ class _AppointmentCardState extends State<AppointmentCard> {
                 ),
                 const SizedBox(height: 16),
                 TextField(
-                  controller: doctorController,
+                  controller: descriptionController,
                   decoration: const InputDecoration(
-                    labelText: 'Doctor Name',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: locationController,
-                  decoration: const InputDecoration(
-                    labelText: 'Location',
+                    labelText: 'Description',
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -394,7 +410,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (titleController.text.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -404,16 +420,21 @@ class _AppointmentCardState extends State<AppointmentCard> {
                   return;
                 }
 
-                parentSetState(() {
-                  appointments.add({
-                    'title': titleController.text,
-                    'date': selectedDate,
-                    'location': locationController.text,
-                    'doctor': doctorController.text,
-                  });
-                });
+                final newAppointment = Appointment(
+                  date: selectedDate,
+                  title: titleController.text,
+                  description: descriptionController.text,
+                  isPast: selectedDate.isBefore(DateTime.now()),
+                );
 
-                Navigator.pop(context);
+                final success =
+                    await DiaryService.saveAppointment(context, newAppointment);
+                if (success) {
+                  parentSetState(() {
+                    appointments.add(newAppointment);
+                  });
+                  Navigator.pop(context);
+                }
               },
               child: const Text('Add'),
             ),
@@ -479,19 +500,19 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
             _buildInfoRow(
               'Date:',
-              'Monday, ${DateFormat('d MMMM').format(appointmentDate)}',
+              'Monday, ${DateFormat('d MMMM').format(appointments.first.date)}',
             ),
             const SizedBox(height: 8),
             // Time.
 
             _buildInfoRow(
               'Time:',
-              DateFormat('h:mm a').format(appointmentDate),
+              DateFormat('h:mm a').format(appointments.first.date),
             ),
             const SizedBox(height: 8),
-            // Location.
+            // Description.
 
-            _buildInfoRow('Where:', location),
+            _buildInfoRow('Description:', appointments.first.description),
             const SizedBox(height: 16),
             // Transport.
 
