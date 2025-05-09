@@ -157,9 +157,12 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
     if (mounted) {
       setState(() {
-        appointments = loadedAppointments;
-        debugPrint('Appointments: $appointments');
-        appointments.sort((a, b) => b.date.compareTo(a.date));
+        // Filter out past appointments and sort by date
+        appointments = loadedAppointments
+            .where((appointment) => !appointment.isPast)
+            .toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
+        debugPrint('Future appointments: $appointments');
         _isLoading = false;
       });
     }
@@ -522,7 +525,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                   const Icon(Icons.directions_bus, color: Colors.green),
                   const SizedBox(width: 8),
                   const Text(
-                    'Clinic Bus:',
+                    'Transport:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const Icon(Icons.check, color: Colors.green),
@@ -597,7 +600,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 60,
+          width: 90,
           child: Text(
             label,
             style: const TextStyle(
