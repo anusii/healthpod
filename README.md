@@ -1,3 +1,22 @@
+[![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+
+[![Last Updated](https://img.shields.io/github/last-commit/anusii/healthpod?label=last%20updated)](https://github.com/anusii/healthpod/commits/dev/)
+[![Flutter Version](https://img.shields.io/badge/dynamic/yaml?url=https://raw.githubusercontent.com/anusii/healthpod/master/pubspec.yaml&query=$.version&label=version)](https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md)
+[![GitHub Issues](https://img.shields.io/github/issues/anusii/healthpod)](https://github.com/anusii/healthpod/issues)
+[![GitHub License](https://img.shields.io/github/license/anusii/healthpod)](https://raw.githubusercontent.com/anusii/healthpod/main/LICENSE)
+[![GitHub commit activity (dev)](https://img.shields.io/github/commit-activity/w/anusii/healthpod/dev)](https://github.com/gjwgit/rattle/commits/dev/)
+
+Binaries to download latest version:
+[**GNU/Linux**](https://solidcommunity.au/healthpod-dev-linux.zip) -
+[**Debian/Ubuntu**](https://solidcommunity.au/healthpod_amd64.deb) -
+[**MacOS**](https://solidcommunity.au/healthpod-dev-macos.zip) -
+[**Windows**](https://solidcommunity.au/healthpod-dev-windows-inno.exe).
+
+Visit [togaware](https://healthpod.togaware.com) for details.
+
+
+
 # Health Pod
 
 The Health Pod collects into one private and secure location all of

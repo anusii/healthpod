@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Thursday 2025-05-08 17:15:58 +1000 Graham Williams>
+// Time-stamp: <Friday 2025-05-09 15:05:00 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -109,7 +109,7 @@ final List<Map<String, dynamic>> homeTabs = [
     ''',
   },
   {
-    'title': 'Files',
+    'title': 'Browse',
     'icon': Icons.folder,
     'color': null,
     'content': const FileService(),
