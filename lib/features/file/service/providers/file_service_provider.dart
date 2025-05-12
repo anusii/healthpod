@@ -59,7 +59,17 @@ import 'package:healthpod/utils/show_alert.dart';
 /// and deletion, while maintaining the state of these operations.
 
 class FileServiceNotifier extends StateNotifier<FileState> {
-  FileServiceNotifier() : super(FileState());
+  final bool isVaccination;
+  final bool isDiary;
+  final bool isMedication;
+  final bool isBloodPressure;
+
+  FileServiceNotifier({
+    required this.isVaccination,
+    required this.isDiary,
+    required this.isMedication,
+    required this.isBloodPressure,
+  }) : super(FileState());
 
   // Add callback for browser refresh .
 
@@ -404,15 +414,12 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           bool success = false;
 
           // Import based on the type.
-
           if (isVaccination) {
             success = await VaccinationImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
-
-            // Use the feature in success message.
 
             if (context.mounted && success) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -424,20 +431,27 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               );
             }
           } else if (isDiary) {
-            // feature = Feature.diary;
             success = await DiaryImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
+
+            if (context.mounted && success) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                      '${Feature.diary.displayName} data imported and converted successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+            }
           } else if (isMedication) {
             success = await MedicationImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
-
-            // Use the feature in success message.
 
             if (context.mounted && success) {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -448,16 +462,14 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                 ),
               );
             }
-          } else {
+          } else if (isBloodPressure) {
             success = await BPImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
               context,
             );
-          }
 
-          if (context.mounted) {
-            if (success) {
+            if (context.mounted && success) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -701,5 +713,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
 final fileServiceProvider =
     StateNotifierProvider<FileServiceNotifier, FileState>((ref) {
-  return FileServiceNotifier();
+  return FileServiceNotifier(
+    isVaccination: false,
+    isDiary: false,
+    isMedication: false,
+    isBloodPressure: false,
+  );
 });
