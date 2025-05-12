@@ -429,6 +429,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
+              // Refresh the file browser after successful import
+              _refreshCallback?.call();
             }
           } else if (isDiary) {
             success = await DiaryImporter.importCsv(
@@ -445,6 +447,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
+              // Refresh the file browser after successful import
+              _refreshCallback?.call();
             }
           } else if (isMedication) {
             success = await MedicationImporter.importCsv(
@@ -461,6 +465,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
+              // Refresh the file browser after successful import
+              _refreshCallback?.call();
             }
           } else if (isBloodPressure) {
             success = await BPImporter.importCsv(
@@ -477,6 +483,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
+              // Refresh the file browser after successful import
+              _refreshCallback?.call();
             }
           }
         }
