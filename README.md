@@ -13,10 +13,6 @@ Binaries to download latest version:
 [**MacOS**](https://solidcommunity.au/healthpod-dev-macos.zip) -
 [**Windows**](https://solidcommunity.au/healthpod-dev-windows-inno.exe).
 
-Visit [togaware](https://healthpod.togaware.com) for details.
-
-
-
 # Health Pod
 
 The Health Pod collects into one private and secure location all of
