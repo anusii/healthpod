@@ -1,6 +1,6 @@
 /// File service widget that provides file upload, download, and preview functionality.
 ///
-// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-05-09 14:52:03 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -102,7 +102,7 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
               _browserKey.currentState?.navigateToPath(rootPath);
             },
             icon: const Icon(Icons.arrow_back),
-            label: const Text('Back to Data Folder'),
+            label: const Text('Back to Home Folder'),
           ),
         ),
         // Main content area.
