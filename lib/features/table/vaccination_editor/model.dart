@@ -78,17 +78,65 @@ class VaccinationObservation {
   /// stored under 'responses' key.
 
   factory VaccinationObservation.fromJson(Map<String, dynamic> json) {
+    // Handle both 'date' and 'timestamp' fields.
+
+    final timestamp = json['date'] ?? json['timestamp'];
+    if (timestamp == null) {
+      throw FormatException('Missing date/timestamp field in vaccination data');
+    }
+
+    // Get responses map, defaulting to empty map if null.
+
+    final responses = json['responses'] as Map<String, dynamic>? ?? {};
+
     return VaccinationObservation(
-      timestamp: DateTime.parse(json['timestamp']),
+      timestamp: DateTime.parse(timestamp),
       vaccineName:
-          json['responses'][VaccinationSurveyConstants.fieldVaccineName] ?? '',
+          responses[VaccinationSurveyConstants.fieldVaccineName]?.toString() ??
+              '',
       provider:
-          json['responses'][VaccinationSurveyConstants.fieldProvider] ?? '',
+          responses[VaccinationSurveyConstants.fieldProvider]?.toString() ?? '',
       professional:
-          json['responses'][VaccinationSurveyConstants.fieldProfessional] ?? '',
-      cost: json['responses'][VaccinationSurveyConstants.fieldCost] ?? '',
-      notes: json['responses'][VaccinationSurveyConstants.fieldNotes] ?? '',
+          responses[VaccinationSurveyConstants.fieldProfessional]?.toString() ??
+              '',
+      cost: responses[VaccinationSurveyConstants.fieldCost]?.toString() ?? '',
+      notes: responses[VaccinationSurveyConstants.fieldNotes]?.toString() ?? '',
     );
+  }
+
+  /// Creates a VaccinationObservation from CSV data.
+  ///
+  /// Expects a map with CSV headers as keys and corresponding values.
+
+  factory VaccinationObservation.fromCsv(Map<String, String> csvData) {
+    return VaccinationObservation(
+      timestamp: DateTime.parse(csvData['date'] ?? ''),
+      vaccineName: csvData['vaccine'] ?? '',
+      provider: csvData['provider'] ?? '',
+      professional: csvData['professional'] ?? '',
+      cost: csvData['cost'] ?? '',
+      notes: csvData['notes'] ?? '',
+    );
+  }
+
+  /// Creates a VaccinationObservation from either JSON or CSV data.
+  ///
+  /// Automatically detects the format and parses accordingly.
+
+  static VaccinationObservation parse(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      // Check if it's a CSV format by looking for 'date' and 'vaccine' keys.
+
+      if (data.containsKey('date') && data.containsKey('vaccine')) {
+        return VaccinationObservation.fromCsv(
+          Map<String, String>.from(data),
+        );
+      }
+      // Otherwise treat as JSON.
+
+      return VaccinationObservation.fromJson(data);
+    }
+    throw FormatException('Unsupported data format');
   }
 
   /// Converts observation to JSON format matching survey response structure.
@@ -104,6 +152,23 @@ class VaccinationObservation {
         VaccinationSurveyConstants.fieldProfessional: professional,
         VaccinationSurveyConstants.fieldCost: cost,
         VaccinationSurveyConstants.fieldNotes: notes,
+      },
+    };
+  }
+
+  /// Converts observation to the format expected by the visualization component.
+  ///
+  /// This ensures consistent data format across the application.
+
+  Map<String, dynamic> toVisualizationFormat() {
+    return {
+      'timestamp': timestamp.toIso8601String(),
+      'responses': {
+        'vaccine': vaccineName,
+        'provider': provider,
+        'professional': professional,
+        'cost': cost,
+        'notes': notes,
       },
     };
   }

@@ -1,6 +1,6 @@
 /// Combined appointment card widget.
 //
-// Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
+// Time-stamp: <Monday 2025-05-12 16:12:15 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -82,7 +82,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
   // Phone number to call for transport assistance.
 
-  String transportPhone = '(07) 4226 4100';
+  String transportPhone = '(01) 2345 6789';
 
   // Additional note about transport service availability.
 

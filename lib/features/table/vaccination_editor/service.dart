@@ -63,18 +63,48 @@ class VaccinationEditorService {
         context,
         const Text('Loading file'),
       );
+
       if (content == SolidFunctionCallStatus.fail.toString() ||
           content == SolidFunctionCallStatus.notLoggedIn.toString()) {
         continue;
       }
 
       try {
-        final data = json.decode(content.toString());
-        loadedObservations.add(VaccinationObservation.fromJson(data));
+        // Try parsing as JSON first.
+
+        try {
+          final data = json.decode(content.toString());
+          final observation = VaccinationObservation.fromJson(data);
+          loadedObservations.add(observation);
+        } catch (jsonError) {
+          // If JSON parsing fails, try parsing as CSV.
+
+          final lines = content.toString().split('\n');
+          if (lines.isNotEmpty) {
+            final headers = lines[0].split(',');
+            for (var i = 1; i < lines.length; i++) {
+              if (lines[i].trim().isEmpty) continue;
+              final values = lines[i].split(',');
+              if (values.length == headers.length) {
+                final csvData = Map.fromIterables(headers, values);
+                final observation = VaccinationObservation.fromCsv(csvData);
+                loadedObservations.add(observation);
+              }
+            }
+          }
+        }
       } catch (e) {
         debugPrint('Error parsing file $file: $e');
+        debugPrint('Content: $content');
+        // Continue with next file instead of failing completely.
+
+        continue;
       }
     }
+
+    // Sort observations by timestamp (most recent first).
+
+    loadedObservations.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     return loadedObservations;
   }

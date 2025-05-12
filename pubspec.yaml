@@ -47,7 +47,7 @@ dependencies:
   rdflib: ^0.2.9
   riverpod: ^2.6.1
   shared_preferences: ^2.5.2
-  solidpod: ^0.6.5
+  solidpod: ^0.6.6
   syncfusion_flutter_pdf: ^29.1.38
   table_calendar: ^3.0.9
   timeline_tile: ^2.0.0
