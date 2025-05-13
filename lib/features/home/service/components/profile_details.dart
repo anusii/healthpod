@@ -34,6 +34,7 @@ import 'package:healthpod/constants/appointment.dart';
 import 'package:healthpod/theme/card_style.dart';
 import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/fetch_profile_data.dart';
+import 'package:healthpod/utils/profile_photo_handler.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
 
 /// A widget that combines user avatar and name with personal identification details.
@@ -85,6 +86,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _isLoadingPhoto = true;
+  bool _isUploadingPhoto = false;
+  ImageProvider? _profilePhoto;
 
   // Holds full profile data.
 
@@ -95,6 +99,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     super.initState();
     _initializeControllers();
     _loadProfileData();
+    _loadProfilePhoto();
   }
 
   /// Initialise all text controllers.
@@ -137,7 +142,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         _isLoading = false;
       });
     } catch (e) {
-      debugPrint('Error loading profile data: $e');
       setState(() {
         // Set defaults in case of failure.
 
@@ -149,6 +153,27 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         _dateOfBirthController.text = '';
         _genderController.text = '';
         _isLoading = false;
+      });
+    }
+  }
+
+  /// Load profile photo from pod.
+
+  Future<void> _loadProfilePhoto() async {
+    setState(() {
+      _isLoadingPhoto = true;
+    });
+
+    try {
+      final photoProvider = await ProfilePhotoHandler.getProfilePhoto(context);
+      setState(() {
+        _profilePhoto = photoProvider;
+        _isLoadingPhoto = false;
+      });
+    } catch (e) {
+      setState(() {
+        _profilePhoto = null;
+        _isLoadingPhoto = false;
       });
     }
   }
@@ -219,7 +244,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         );
       }
     } catch (e) {
-      debugPrint('Error saving profile data: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error updating profile: $e')),
@@ -238,44 +262,27 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
   Future<SolidFunctionCallStatus> _saveProfileDataUsingUploadUtil(
       Map<String, dynamic> updatedData) async {
-    debugPrint('Saving profile using uploadJsonToPod utility...');
-
     try {
-      // Create a structured JSON object with timestamp.
+      // Create a structure for uploadJsonToPod that matches what saveResponseToPod expects
+      // The profile data should be passed as the 'responses' parameter, not wrapped in 'data'
 
-      final jsonData = {
-        'timestamp': DateTime.now().toIso8601String(),
-        'data': updatedData,
-      };
-
-      // Save to pod using utility.
+      // Save to pod using utility that expects 'responses' as the top-level parameter.
 
       final result = await uploadJsonToPod(
-        data: jsonData,
+        data: {
+          'timestamp': DateTime.now().toIso8601String(),
+          'responses': updatedData,
+        },
         targetPath: 'profile',
         fileNamePrefix: 'profile',
         context: context,
-        onSuccess: () {
-          debugPrint('Successfully uploaded profile data');
-        },
       );
 
       // Verify save by checking directory contents.
 
-      if (result == SolidFunctionCallStatus.success) {
-        try {
-          final dirUrl = await getDirUrl(constructPodPath('profile', ''));
-          final resources = await getResourcesInContainer(dirUrl);
-          debugPrint(
-              'After save - Files in profile directory: ${resources.files}');
-        } catch (e) {
-          debugPrint('Error checking directory after save: $e');
-        }
-      }
-
       return result;
     } catch (e) {
-      debugPrint('Error saving profile: $e');
+      //debugPrint('Error saving profile: $e');
       return SolidFunctionCallStatus.fail;
     }
   }
@@ -302,11 +309,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   Future<void> _deleteExistingProfileFiles() async {
     try {
       final dirUrl = await getDirUrl(constructPodPath('profile', ''));
-      debugPrint(
-          'Looking for profile files to delete in: ${constructPodPath('profile', '')}');
 
       final resources = await getResourcesInContainer(dirUrl);
-      debugPrint('Files in profile directory: ${resources.files}');
 
       // Find all profile files with the expected extension.
 
@@ -316,7 +320,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
           .toList();
 
       if (profileFiles.isEmpty) {
-        debugPrint('No existing profile files to clean up');
         return;
       }
 
@@ -326,21 +329,12 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
       // Delete all profile files to create a clean slate.
 
-      int deletedCount = 0;
       for (final file in profileFiles) {
-        try {
-          final filePath = constructPodPath('profile', file);
-          debugPrint('Deleting profile file: $filePath');
-          await deleteFile(filePath);
-          deletedCount++;
-        } catch (e) {
-          debugPrint('Error deleting profile file $file: $e');
-        }
+        final filePath = constructPodPath('profile', file);
+        await deleteFile(filePath);
       }
-
-      debugPrint('Successfully deleted $deletedCount profile files');
     } catch (e) {
-      debugPrint('Error cleaning up profile files: $e');
+      //debugPrint('Error cleaning up profile files: $e');
     }
   }
 
@@ -366,6 +360,12 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
     if (oldWidget.isEditing && !widget.isEditing) {
       _saveProfileData();
+    }
+
+    // Reload photo if widget is updated.
+
+    if (oldWidget != widget) {
+      _loadProfilePhoto();
     }
   }
 
@@ -642,7 +642,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
       }
     } catch (e) {
-      debugPrint('Error parsing date: $e');
+      //debugPrint('Error parsing date: $e');
     }
     // Return a default date (30 years ago)
     return DateTime.now().subtract(const Duration(days: 365 * 30));
@@ -681,9 +681,167 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     return null;
   }
 
+  /// Show dialog for selecting profile photo options.
+
+  Future<void> _showPhotoOptionsDialog() async {
+    if (_isLoading || _isSaving || _isLoadingPhoto || _isUploadingPhoto) {
+      return;
+    }
+
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Profile Photo'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Display current photo or avatar.
+
+                SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: ProfilePhotoHandler.buildProfileAvatar(
+                    context: context,
+                    photo: _profilePhoto,
+                    name: _nameController.text,
+                    radius: 50,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Photo action buttons.
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _handlePhotoUpload();
+                      },
+                      icon: const Icon(Icons.photo_camera),
+                      label: const Text('Upload New'),
+                    ),
+                    if (_profilePhoto != null)
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _handlePhotoDelete();
+                        },
+                        icon: const Icon(Icons.delete),
+                        label: const Text('Remove'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onError,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Handle photo upload process.
+
+  Future<void> _handlePhotoUpload() async {
+    setState(() {
+      _isUploadingPhoto = true;
+    });
+
+    try {
+      final imageFile = await ProfilePhotoHandler.pickProfilePhoto();
+
+      if (imageFile != null && mounted) {
+        final success = await ProfilePhotoHandler.uploadProfilePhoto(
+          imageFile,
+          context,
+        );
+
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Profile photo uploaded successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Cleanup old photos.
+
+          await ProfilePhotoHandler.cleanupOldProfilePhotos(context);
+
+          // Reload the photo.
+
+          await _loadProfilePhoto();
+
+          // Notify parent of data change.
+
+          widget.onDataChanged();
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploadingPhoto = false;
+        });
+      }
+    }
+  }
+
+  /// Handle photo deletion.
+
+  Future<void> _handlePhotoDelete() async {
+    setState(() {
+      _isUploadingPhoto = true;
+    });
+
+    try {
+      if (mounted) {
+        final success = await ProfilePhotoHandler.deleteProfilePhoto(context);
+
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Profile photo removed'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          // Reset the photo.
+
+          setState(() {
+            _profilePhoto = null;
+          });
+
+          // Notify parent of data change.
+
+          widget.onDataChanged();
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploadingPhoto = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    const int notificationCount = 2;
 
     return Container(
       constraints: const BoxConstraints(
@@ -746,13 +904,18 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     Stack(
                       clipBehavior: Clip.none,
                       children: [
-                        const CircleAvatar(
-                          radius: 24,
-                          backgroundImage: AssetImage(
-                              'assets/images/sample_avatar_image.png'),
-                        ),
-                        // Security lock indicator.
+                        // Profile photo with loading indicator or initials.
 
+                        ProfilePhotoHandler.buildProfileAvatar(
+                          context: context,
+                          photo: _profilePhoto,
+                          name: _nameController.text,
+                          radius: 24,
+                          isLoading: _isLoadingPhoto || _isUploadingPhoto,
+                          onTap: _showPhotoOptionsDialog,
+                        ),
+
+                        // Security lock indicator.
                         Positioned(
                           bottom: -2,
                           right: -2,
@@ -769,6 +932,30 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                             ),
                           ),
                         ),
+
+                        // Edit photo indicator.
+
+                        if (!_isLoadingPhoto && !_isUploadingPhoto)
+                          Positioned(
+                            top: -2,
+                            left: -2,
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: theme.colorScheme.primary,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.edit,
+                                color: theme.colorScheme.primary,
+                                size: 12,
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                     const SizedBox(width: 12),

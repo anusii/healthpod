@@ -43,6 +43,7 @@ app.
 ## Milestones
 
 - [X] Basic Icon-Based GUI with Solid Pod login
+- [X] Profile management with personalized profile photo upload
 - [ ] File browse my medical reports
 - [ ] Daily entry of Blood Pressure with visualisations
 - [ ] Your latest clinic data - appointments and medicines
