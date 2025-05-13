@@ -157,7 +157,8 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
     if (mounted) {
       setState(() {
-        // Filter out past appointments and sort by date
+        // Filter out past appointments and sort by date.
+
         appointments = loadedAppointments
             .where((appointment) => !appointment.isPast)
             .toList()

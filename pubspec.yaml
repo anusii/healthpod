@@ -21,7 +21,6 @@ dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  dio: ^5.4.0
 
   audioplayers: ^6.2.0
   badges: ^3.1.2
