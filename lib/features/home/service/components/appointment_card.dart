@@ -330,7 +330,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
 
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Add New Appointment'),
           content: SingleChildScrollView(
@@ -359,7 +359,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                       child: OutlinedButton.icon(
                         onPressed: () async {
                           final DateTime? picked = await showDatePicker(
-                            context: context,
+                            context: dialogContext,
                             initialDate: selectedDate,
                             firstDate: DateTime.now(),
                             lastDate: DateTime(2100),
@@ -383,7 +383,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                       child: OutlinedButton.icon(
                         onPressed: () async {
                           final TimeOfDay? picked = await showTimePicker(
-                            context: context,
+                            context: dialogContext,
                             initialTime: selectedTime,
                           );
                           if (picked != null) {
@@ -409,14 +409,14 @@ class _AppointmentCardState extends State<AppointmentCard> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
               },
               child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () async {
                 if (titleController.text.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(dialogContext).showSnackBar(
                     const SnackBar(
                       content: Text('Please enter an appointment title'),
                     ),
@@ -431,13 +431,18 @@ class _AppointmentCardState extends State<AppointmentCard> {
                   isPast: selectedDate.isBefore(DateTime.now()),
                 );
 
+                final dialogCtx = dialogContext;
                 final success =
                     await DiaryService.saveAppointment(context, newAppointment);
                 if (success) {
-                  parentSetState(() {
-                    appointments.add(newAppointment);
-                  });
-                  Navigator.pop(context);
+                  if (mounted) {
+                    parentSetState(() {
+                      appointments.add(newAppointment);
+                    });
+                  }
+                  if (dialogCtx.mounted) {
+                    Navigator.pop(dialogCtx);
+                  }
                 }
               },
               child: const Text('Add'),
@@ -491,7 +496,9 @@ class _AppointmentCardState extends State<AppointmentCard> {
             style: const TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 16),
-          if (appointments.isNotEmpty) ...[
+          if (_isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (appointments.isNotEmpty) ...[
             Text(
               subtitle,
               style: const TextStyle(
