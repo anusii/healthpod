@@ -211,7 +211,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                             child: ListTile(
                               title: Text(appointment.title),
                               subtitle: Text(
-                                '${DateFormat('MMM d, yyyy').format(appointment.date)} at ${DateFormat('h:mm a').format(appointment.date)}\n${appointment.description}',
+                                '${DateFormat('d MMM yyyy').format(appointment.date)} at ${DateFormat('h:mm a').format(appointment.date)}\n${appointment.description}',
                               ),
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete),
