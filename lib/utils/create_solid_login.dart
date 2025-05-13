@@ -329,12 +329,13 @@ Future<AutoLoginStatus> _performAutoLogin(
     debugPrint(
         'ℹ️ ChromeDriver not available or failed to initialize. Auto-login via ChromeDriver will be skipped.');
     await loginService.dispose();
-    return AutoLoginStatus.chromeDriverNotAvailable; // Returns quickly
+    return AutoLoginStatus.chromeDriverNotAvailable;
   }
 
   if (!context.mounted) return AutoLoginStatus.generalFailure;
 
   // ChromeDriver IS ready. Proceed with attempt and ensure minimum display time for this path.
+
   try {
     final attemptLogicFuture = Future.any([
       _attemptLogin(serverUrl, username, password, context, loginService),
@@ -379,7 +380,6 @@ Future<bool> _attemptLogin(
 ) async {
   try {
     // No need to check chromeDriverReady here anymore, as _performAutoLogin handles it.
-    // debugPrint('ChromeDriver not ready. ChromeDriver-specific login actions will be skipped.');
 
     final webId = await loginService.login(serverUrl, username, password);
     if (webId != null) {

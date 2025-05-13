@@ -73,7 +73,6 @@ class ChromeLoginService {
       debugPrint('✅ ChromeDriver initialized successfully');
       return true;
     } catch (e) {
-      debugPrint('❌ Failed to initialize ChromeDriver: $e');
       debugPrint(
           'ℹ️ Auto-login may not work if ChromeDriver is not running or configured correctly. Ensure ChromeDriver is executing by running `chromedriver` in your terminal (it should listen on port 9515 by default).');
       return false;
