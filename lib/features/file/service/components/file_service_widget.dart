@@ -33,6 +33,8 @@ import 'package:path/path.dart' as path;
 import 'package:healthpod/features/file/browser/page.dart';
 import 'package:healthpod/features/file/service/components/file_upload_section.dart';
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
+import 'package:healthpod/features/update/tab.dart';
+import 'package:healthpod/providers/tab_state.dart';
 
 /// The main file service widget that provides file upload, download, and preview functionality.
 ///
@@ -52,13 +54,63 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
   /// Navigate to the appropriate folder based on the selected tab.
 
   void _navigateToFeatureFolder() {
-    // Navigate directly to the parent data folder instead of feature-specific folder.
+    // Read the selected tab index from the provider.
 
-    const path = 'healthpod/data';
+    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
+
+    // Map the index to the corresponding directory name.
+    // Note: Ensure these directory names match the actual folder names in the Pod.
+    // Using surveyPanels as the source for titles/order.
+
+    String featureDir;
+    if (selectedIndex >= 0 && selectedIndex < surveyPanels.length) {
+      final title = surveyPanels[selectedIndex]['title'] as String;
+      switch (title) {
+        case 'Appointments':
+          featureDir = 'diary';
+          break;
+        case 'Blood Pressure':
+          featureDir = 'blood_pressure';
+          break;
+        case 'Medications':
+          featureDir = 'medication';
+          break;
+        case 'Vaccinations':
+          featureDir = 'vaccination';
+          break;
+        // Default to root if title doesn't match.
+
+        default:
+          featureDir = '';
+          break;
+      }
+    } else {
+      // Default to root if index is out of bounds.
+
+      featureDir = '';
+    }
+
+    // Construct the full path using forward slashes for Pod compatibility.
+
+    final targetPath =
+        featureDir.isNotEmpty ? 'healthpod/data/$featureDir' : 'healthpod/data';
+
+    // Use WidgetsBinding to ensure the browser state is ready.
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
-      _browserKey.currentState?.navigateToPath(path);
+      // Only update and navigate if the current path is different
+      // or if the browser state is available and needs update.
+
+      final currentPath = ref.read(fileServiceProvider).currentPath;
+      if (currentPath != targetPath && _browserKey.currentState != null) {
+        ref.read(fileServiceProvider.notifier).updateCurrentPath(targetPath);
+        _browserKey.currentState?.navigateToPath(targetPath);
+      } else if (currentPath != targetPath) {
+        // If browser state isn't ready yet, just update the path provider.
+        // The browser should pick it up when it initialises.
+
+        ref.read(fileServiceProvider.notifier).updateCurrentPath(targetPath);
+      }
     });
   }
 
