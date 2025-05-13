@@ -147,33 +147,34 @@ class VaccinationExporter extends HealthDataExporterBase {
           }
 
           // Parse the JSON content from the file.
-
           final jsonData = json.decode(content);
 
-          // Normalize the timestamp to ISO format.
+          // Get date from either timestamp or date field
+          final dateStr = jsonData['timestamp'] ?? jsonData['date'];
+          if (dateStr == null) {
+            debugPrint('No date found in file $fileName');
+            continue;
+          }
 
-          var timestamp = normaliseTimestamp(
-              jsonData[VaccinationSurveyConstants.fieldDate],
-              toIso: true);
+          // Normalize the timestamp to ISO format.
+          var timestamp = normaliseTimestamp(dateStr, toIso: true);
 
           // Extract the responses section containing vaccination details.
+          final responses = jsonData['responses'] ?? {};
 
-          final responses = jsonData['responses'];
-
-          // Add the record with all fields to the collection.
-
+          // Add the record with all fields to the collection, using empty string for null values.
           allRecords.add({
             VaccinationSurveyConstants.fieldDate: timestamp,
             VaccinationSurveyConstants.fieldVaccineName:
-                responses[VaccinationSurveyConstants.fieldVaccineName],
+                responses[VaccinationSurveyConstants.fieldVaccineName] ?? '',
             VaccinationSurveyConstants.fieldProvider:
-                responses[VaccinationSurveyConstants.fieldProvider],
+                responses[VaccinationSurveyConstants.fieldProvider] ?? '',
             VaccinationSurveyConstants.fieldProfessional:
-                responses[VaccinationSurveyConstants.fieldProfessional],
+                responses[VaccinationSurveyConstants.fieldProfessional] ?? '',
             VaccinationSurveyConstants.fieldCost:
-                responses[VaccinationSurveyConstants.fieldCost],
+                responses[VaccinationSurveyConstants.fieldCost] ?? '',
             VaccinationSurveyConstants.fieldNotes:
-                responses[VaccinationSurveyConstants.fieldNotes],
+                responses[VaccinationSurveyConstants.fieldNotes] ?? '',
           });
         } catch (e) {
           // Log error and continue with next file if current file fails.
