@@ -41,7 +41,7 @@ void showVaccinationDetails(BuildContext context, VaccinationRecord record) {
           children: [
             MarkdownBody(
               data:
-                  '**Date:** ${DateFormat('MMMM dd, yyyy').format(record.date)}',
+                  '**Date:** ${DateFormat('dd MMM yyyy').format(record.date)}',
               styleSheet: MarkdownStyleSheet(
                 p: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
