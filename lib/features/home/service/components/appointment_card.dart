@@ -31,9 +31,9 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
-import 'package:healthpod/theme/card_style.dart';
-import 'package:healthpod/features/diary/service.dart';
 import 'package:healthpod/features/diary/models/appointment.dart';
+import 'package:healthpod/features/diary/service.dart';
+import 'package:healthpod/theme/card_style.dart';
 
 // Global flag to track if transport audio is currently playing.
 
