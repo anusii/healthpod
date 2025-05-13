@@ -66,6 +66,10 @@ class PathBar extends StatelessWidget {
 
   final int currentDirFileCount;
 
+  /// Friendly folder name.
+
+  final String friendlyFolderName;
+
   const PathBar({
     super.key,
     required this.currentPath,
@@ -74,6 +78,7 @@ class PathBar extends StatelessWidget {
     required this.onRefresh,
     required this.isLoading,
     required this.currentDirFileCount,
+    required this.friendlyFolderName,
   });
 
   @override
@@ -91,6 +96,19 @@ class PathBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Display friendly folder name first.
+
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              friendlyFolderName,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
           Row(
             children: [
               // Show back button if we're not at the root directory.

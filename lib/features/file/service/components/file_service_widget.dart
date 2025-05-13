@@ -1,6 +1,6 @@
 /// File service widget that provides file upload, download, and preview functionality.
 ///
-// Time-stamp: <Friday 2025-05-09 14:52:03 +1000 Graham Williams>
+// Time-stamp: <Monday 2025-05-13 10:00:00 +1000 Your Name>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -114,6 +114,45 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
     });
   }
 
+  // Helper function to get a user-friendly name from the path.
+
+  String _getFriendlyFolderName(String pathValue) {
+    const String root = 'healthpod/data';
+    if (pathValue.isEmpty || pathValue == root) {
+      return 'Home Folder';
+    }
+
+    // Use path.basename to safely get the last component.
+
+    final dirName = path.basename(pathValue);
+
+    switch (dirName) {
+      case 'diary':
+        return 'Appointments Data';
+      case 'blood_pressure':
+        return 'Blood Pressure Data';
+      case 'medication':
+        return 'Medication Data';
+      case 'vaccination':
+        return 'Vaccination Data';
+      case 'profile':
+        return 'Profile Data';
+      case 'health_plan':
+        return 'Health Plan Data';
+      case 'pathology':
+        return 'Pathology Data';
+
+      default:
+        // Basic formatting for unknown folders: capitalize first letter, replace underscores.
+
+        if (dirName.isEmpty) return 'Folder';
+        String formattedName = dirName.replaceAll('_', ' ');
+        formattedName =
+            formattedName[0].toUpperCase() + formattedName.substring(1);
+        return '$formattedName Data';
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -138,20 +177,28 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
 
     final isWideScreen = MediaQuery.of(context).size.width > 800;
 
+    // Get current path and friendly name.
+
+    final currentPath =
+        ref.watch(fileServiceProvider).currentPath ?? 'healthpod/data';
+    final String friendlyFolderName = _getFriendlyFolderName(currentPath);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Back button to root folder.
+        // Back button to root folder (now only the button).
 
         Padding(
-          padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
+          padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
           child: TextButton.icon(
             onPressed: () {
               const rootPath = 'healthpod/data';
-              ref
-                  .read(fileServiceProvider.notifier)
-                  .updateCurrentPath(rootPath);
-              _browserKey.currentState?.navigateToPath(rootPath);
+              if (ref.read(fileServiceProvider).currentPath != rootPath) {
+                ref
+                    .read(fileServiceProvider.notifier)
+                    .updateCurrentPath(rootPath);
+                _browserKey.currentState?.navigateToPath(rootPath);
+              }
             },
             icon: const Icon(Icons.arrow_back),
             label: const Text('Back to Home Folder'),
@@ -176,6 +223,7 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                             child: FileBrowser(
                               key: _browserKey,
                               browserKey: _browserKey,
+                              friendlyFolderName: friendlyFolderName,
                               onFileSelected: (fileName, filePath) {
                                 ref.read(fileServiceProvider.notifier)
                                   ..setDownloadFile(filePath)
@@ -226,9 +274,11 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                                 // Handle CSV import if needed.
                               },
                               onDirectoryChanged: (path) {
-                                ref
-                                    .read(fileServiceProvider.notifier)
-                                    .updateCurrentPath(path);
+                                if (mounted) {
+                                  ref
+                                      .read(fileServiceProvider.notifier)
+                                      .updateCurrentPath(path);
+                                }
                               },
                             ),
                           ),
@@ -261,6 +311,7 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                           child: FileBrowser(
                             key: _browserKey,
                             browserKey: _browserKey,
+                            friendlyFolderName: friendlyFolderName,
                             onFileSelected: (fileName, filePath) {
                               ref.read(fileServiceProvider.notifier)
                                 ..setDownloadFile(filePath)
@@ -311,9 +362,11 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                               // Handle CSV import if needed.
                             },
                             onDirectoryChanged: (path) {
-                              ref
-                                  .read(fileServiceProvider.notifier)
-                                  .updateCurrentPath(path);
+                              if (mounted) {
+                                ref
+                                    .read(fileServiceProvider.notifier)
+                                    .updateCurrentPath(path);
+                              }
                             },
                           ),
                         ),
