@@ -45,6 +45,14 @@ import 'package:healthpod/providers/settings.dart';
 import 'package:healthpod/services/chrome_login_service.dart';
 import 'package:healthpod/utils/platform/helper.dart';
 
+/// Enum to represent the outcome of an auto-login attempt.
+
+enum AutoLoginStatus {
+  success,
+  chromeDriverNotAvailable,
+  generalFailure,
+}
+
 /// Solid POD Authentication Widget Creator
 ///
 /// This file provides functionality to create authentication widgets for Solid POD
@@ -200,25 +208,22 @@ Widget createSolidLogin(BuildContext context) {
         // If we have saved credentials, try auto-login.
 
         if (email.isNotEmpty && password.isNotEmpty) {
-          debugPrint('✨ Attempting auto-login with saved credentials');
-
-          // Create two futures - one for auto-login and one for minimum display time.
+          // The _performAutoLogin future will now internally handle minimum splash time
+          // if a real attempt is made.
 
           final autoLoginFuture =
               _performAutoLogin(serverUrl, email, password, context);
-          final minimumSplashDuration =
-              Future.delayed(const Duration(seconds: 1), () => true);
 
-          return FutureBuilder(
-            // Wait for both futures to complete.
+          return FutureBuilder<AutoLoginStatus>(
+            // Wait for autoLoginFuture which now incorporates necessary delays.
 
-            future: Future.wait([autoLoginFuture, minimumSplashDuration]),
-            builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+            future: autoLoginFuture,
+            builder: (context, AsyncSnapshot<AutoLoginStatus> snapshot) {
+              // Changed snapshot type
               // Always show the splash screen while waiting.
 
               if (snapshot.connectionState == ConnectionState.waiting) {
-                debugPrint(
-                    '⏳ Auto-login or minimum display time in progress...');
+                debugPrint('⏳ Auto-login process initiated...');
                 // Show an elegant splash screen with app logo and subtle loading indicator.
 
                 return Container(
@@ -267,20 +272,30 @@ Widget createSolidLogin(BuildContext context) {
                 );
               }
 
-              // Once both futures complete, check login result (first element in list).
+              // Once the future completes, check login result.
 
-              if (snapshot.hasData && snapshot.data![0] == true) {
-                debugPrint('✅ Auto-login successful!');
-                return const HealthPodHome();
+              if (snapshot.hasData) {
+                final autoLoginStatus = snapshot.data!;
+                if (autoLoginStatus == AutoLoginStatus.success) {
+                  debugPrint('✅ Auto-login successful!');
+                  return const HealthPodHome();
+                } else {
+                  // Auto-login did not succeed.
+                  // Only print generic failure if it wasn't a ChromeDriver-specific skip,
+                  // as that case is already logged in detail by _performAutoLogin.
+
+                  if (autoLoginStatus == AutoLoginStatus.generalFailure) {
+                    debugPrint('⚠️ Auto-login failed, showing login screen');
+                  }
+                  // For AutoLoginStatus.chromeDriverNotAvailable, _performAutoLogin has logged enough.
+                  // Fall through to show normal login screen.
+                }
+              } else if (snapshot.hasError) {
+                // Handle errors from Future.wait itself or from one of the futures.
+
+                debugPrint('❌ Auto-login process error: ${snapshot.error}');
               }
-
-              // For all other cases (error or failed login), show normal login screen
-
-              if (snapshot.hasError) {
-                debugPrint('❌ Auto-login failed: ${snapshot.error}');
-              } else {
-                debugPrint('⚠️ Auto-login failed, showing login screen');
-              }
+              // For all other cases (error or failed login), show normal login screen.
 
               return _buildNormalLogin(serverUrl);
             },
@@ -296,24 +311,60 @@ Widget createSolidLogin(BuildContext context) {
 
 /// Perform automated login using ChromeDriver.
 
-Future<bool> _performAutoLogin(
+Future<AutoLoginStatus> _performAutoLogin(
   String serverUrl,
   String username,
   String password,
   BuildContext context,
 ) async {
+  final loginService = ChromeLoginService.instance;
+  debugPrint('ℹ️ Checking ChromeDriver availability for auto-login...');
+
+  final bool chromeDriverReady = await loginService.initialize();
+
+  debugPrint(
+      '✨ Attempting auto-login with saved credentials (ChromeDriver ready: $chromeDriverReady)');
+
+  if (!chromeDriverReady) {
+    debugPrint(
+        'ℹ️ ChromeDriver not available or failed to initialize. Auto-login via ChromeDriver will be skipped.');
+    await loginService.dispose();
+    return AutoLoginStatus.chromeDriverNotAvailable; // Returns quickly
+  }
+
+  if (!context.mounted) return AutoLoginStatus.generalFailure;
+
+  // ChromeDriver IS ready. Proceed with attempt and ensure minimum display time for this path.
   try {
-    // Add timeout to prevent hanging if login process takes too long.
-
-    return await Future.any([
-      _attemptLogin(serverUrl, username, password, context),
-      // Timeout after 5 seconds to prevent long waits.
-
+    final attemptLogicFuture = Future.any([
+      _attemptLogin(serverUrl, username, password, context, loginService),
+      // Timeout for login attempt after 5 seconds.
       Future.delayed(const Duration(seconds: 5), () => false),
     ]);
+
+    // Minimum splash screen duration, runs in parallel with attemptLogicFuture.
+
+    final minDisplayFuture =
+        Future.delayed(const Duration(seconds: 1), () => true);
+
+    // Wait for both the attempt (which includes its own timeout) and the minimum display duration.
+
+    final results = await Future.wait([attemptLogicFuture, minDisplayFuture]);
+    final bool attemptSuccess = results[0]; // Result of attemptLogicFuture
+
+    // _attemptLogin disposes the loginService instance it's given.
+
+    return attemptSuccess
+        ? AutoLoginStatus.success
+        : AutoLoginStatus.generalFailure;
   } catch (e) {
-    debugPrint('❌ Auto-login error: $e');
-    return false;
+    debugPrint(
+        '❌ Error during auto-login sequence (after ChromeDriver check): $e');
+    // Ensure disposal if an error occurred before _attemptLogin could dispose it,
+    // or if Future.wait itself threw. loginService.dispose() is idempotent.
+
+    await loginService.dispose();
+    return AutoLoginStatus.generalFailure;
   }
 }
 
@@ -324,10 +375,11 @@ Future<bool> _attemptLogin(
   String username,
   String password,
   BuildContext context,
+  ChromeLoginService loginService,
 ) async {
   try {
-    final loginService = ChromeLoginService.instance;
-    await loginService.initialize();
+    // No need to check chromeDriverReady here anymore, as _performAutoLogin handles it.
+    // debugPrint('ChromeDriver not ready. ChromeDriver-specific login actions will be skipped.');
 
     final webId = await loginService.login(serverUrl, username, password);
     if (webId != null) {
@@ -337,8 +389,12 @@ Future<bool> _attemptLogin(
       }
     }
     return false;
+  } catch (e) {
+    debugPrint('❌ Error during specific login attempt execution: $e');
+    return false;
   } finally {
-    await ChromeLoginService.instance.dispose();
+    await loginService.dispose();
+    debugPrint('ℹ️ ChromeLoginService disposed after login attempt.');
   }
 }
 
