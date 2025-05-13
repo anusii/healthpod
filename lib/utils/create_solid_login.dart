@@ -340,6 +340,7 @@ Future<AutoLoginStatus> _performAutoLogin(
     final attemptLogicFuture = Future.any([
       _attemptLogin(serverUrl, username, password, context, loginService),
       // Timeout for login attempt after 5 seconds.
+
       Future.delayed(const Duration(seconds: 5), () => false),
     ]);
 
