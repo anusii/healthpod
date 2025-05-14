@@ -67,41 +67,52 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
     });
 
     try {
+      debugPrint('Starting to fetch vaccination data...');
       // Fetch data from the server.
-
       final data = await VaccinationData.fetchAllVaccinationData(context);
 
-      if (mounted) {
-        // If no data is found, use sample data.
+      debugPrint('Data fetched successfully');
+      debugPrint('Data: $data');
 
+      if (mounted) {
+        debugPrint('Data length: ${data.length}');
         if (data.isEmpty) {
+          debugPrint('No vaccination data found, using sample data');
           setState(() {
             _records = _getSampleData();
             _isLoading = false;
           });
         } else {
+          debugPrint('Converting data to VaccinationRecord objects...');
           // Convert JSON data to VaccinationRecord objects.
-
           setState(() {
-            _records =
-                data.map((item) => VaccinationRecord.fromJson(item)).toList();
-            _isLoading = false;
+            try {
+              _records = data.map((item) {
+                debugPrint('Processing item: $item');
+                return VaccinationRecord.fromJson(item);
+              }).toList();
+              _isLoading = false;
+            } catch (e) {
+              debugPrint('Error converting data: $e');
+              _records = _getSampleData();
+              _isLoading = false;
+            }
           });
         }
       }
     } catch (e) {
+      debugPrint('Error in _loadData: $e');
       if (mounted) {
         setState(() {
-          _error = 'Error loading vaccination data: $e';
           _isLoading = false;
-          // Fall back to sample data on error.
-
           _records = _getSampleData();
         });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading data: $e')),
-        );
+        // Only show error if we couldn't load any data
+        if (_records.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error loading data: $e')),
+          );
+        }
       }
     }
   }
