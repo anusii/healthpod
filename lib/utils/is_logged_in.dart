@@ -25,8 +25,6 @@
 
 library;
 
-import 'package:flutter/material.dart';
-
 import 'package:solidpod/solidpod.dart';
 
 /// Checks if the user is currently logged in
