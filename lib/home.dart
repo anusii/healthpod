@@ -190,6 +190,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
     await _initialiseFooterData(context);
 
     // Then initialise feature folders if user is logged in.
+    // _webId will only be non-null if the user is actively logged in
+    // thanks to our updated fetchWebId function
 
     if (_webId != null) {
       setState(() {});
@@ -203,7 +205,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
             }
           },
           onComplete: () {
-            // debugPrint('Feature folder initialization complete');
+            debugPrint('Feature folder initialization complete');
           },
         );
       }
@@ -214,7 +216,14 @@ class HealthPodHomeState extends State<HealthPodHome> {
 
   Future<void> _initialiseFooterData(context) async {
     final webId = await fetchWebId();
-    final isKeySaved = await fetchKeySavedStatus(context);
+
+    // Only fetch key status if webId is not null (user is logged in)
+    // This prevents the login prompt for users who clicked CONTINUE
+
+    bool isKeySaved = false;
+    if (webId != null) {
+      isKeySaved = await fetchKeySavedStatus(context);
+    }
 
     setState(() {
       _webId = webId;

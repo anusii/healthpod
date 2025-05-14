@@ -25,14 +25,33 @@
 
 library;
 
-import 'package:solidpod/solidpod.dart' show getWebId;
+import 'package:flutter/material.dart';
+
+import 'package:solidpod/solidpod.dart' show getWebId, checkLoggedIn;
 
 /// Fetch the user's WebID from the Solid server.
+///
+/// Returns the WebID only if the user is actively logged in with a valid token.
+/// Returns null if the user is not logged in or the token is invalid/expired.
 
 Future<String?> fetchWebId() async {
   try {
-    return await getWebId();
+    // First check if the user is actively logged in with a valid token.
+
+    final isLoggedIn = await checkLoggedIn();
+
+    if (!isLoggedIn) {
+      debugPrint('User not actively logged in, returning null WebID');
+      return null;
+    }
+
+    // If logged in, get the WebID.
+
+    final webId = await getWebId();
+    debugPrint('User is logged in, WebID: $webId');
+    return webId;
   } catch (e) {
+    debugPrint('Error fetching WebID: $e');
     return null;
   }
 }
