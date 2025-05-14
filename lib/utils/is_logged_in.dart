@@ -1,6 +1,6 @@
-/// Fetch the key saved status.
+/// Utility to check if the user is logged in.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Thursday 2024-05-16 13:33:06 +1100 Ashley Tang>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -27,30 +27,30 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:solidpod/solidpod.dart' show KeyManager;
+import 'package:solidpod/solidpod.dart';
 
-/// This function checks if an encryption key is available for the user.
+/// Checks if the user is currently logged in
 ///
-/// Instead of directly triggering a key prompt, it now uses the CentralKeyManager
-/// to ensure the prompt only shows once across the application.
-///
-/// If a key exists, it triggers a callback to update the UI.
+/// Returns true if the user has a valid WebID and is logged in, false otherwise.
+/// This function should be used before accessing any pod data that requires authentication.
 
-Future<bool> fetchKeySavedStatus(BuildContext context,
-    [Function(bool)? onKeyStatusChanged]) async {
+Future<bool> isLoggedIn() async {
   try {
-    // Simply check if the security key exists in memory.
+    // Check for a WebID.
 
-    final hasKey = await KeyManager.hasSecurityKey();
-
-    // Call the callback if provided.
-
-    if (onKeyStatusChanged != null) {
-      onKeyStatusChanged(hasKey);
+    final webId = await getWebId();
+    if (webId == null || webId.isEmpty) {
+      //debugPrint('⚠️ No WebID found, user is not logged in');
+      return false;
     }
 
-    return hasKey;
+    // Check if the user is logged in.
+
+    final loggedIn = await checkLoggedIn();
+
+    return loggedIn;
   } catch (e) {
+    //debugPrint('⚠️ Error checking login status: $e');
     return false;
   }
 }
