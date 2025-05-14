@@ -67,8 +67,8 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
     });
 
     try {
-      debugPrint('Starting to fetch vaccination data...');
       // Fetch data from the server.
+
       final data = await VaccinationData.fetchAllVaccinationData(context);
 
       debugPrint('Data fetched successfully');
@@ -77,18 +77,16 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
       if (mounted) {
         debugPrint('Data length: ${data.length}');
         if (data.isEmpty) {
-          debugPrint('No vaccination data found, using sample data');
           setState(() {
             _records = _getSampleData();
             _isLoading = false;
           });
         } else {
-          debugPrint('Converting data to VaccinationRecord objects...');
           // Convert JSON data to VaccinationRecord objects.
+
           setState(() {
             try {
               _records = data.map((item) {
-                debugPrint('Processing item: $item');
                 return VaccinationRecord.fromJson(item);
               }).toList();
               _isLoading = false;
@@ -107,7 +105,8 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
           _isLoading = false;
           _records = _getSampleData();
         });
-        // Only show error if we couldn't load any data
+        // Only show error if we couldn't load any data.
+
         if (_records.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error loading data: $e')),

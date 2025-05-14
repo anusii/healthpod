@@ -35,9 +35,11 @@ class VaccinationRecord {
 
   factory VaccinationRecord.fromJson(Map<String, dynamic> json) {
     // Extract the responses object which contains the actual vaccination details.
+
     final responses = json['responses'] as Map<String, dynamic>? ?? {};
 
-    // Get the date from either timestamp or date field, with fallback to current time
+    // Get the date from either timestamp or date field, with fallback to current time.
+
     final dateStr =
         json['timestamp'] ?? json['date'] ?? DateTime.now().toIso8601String();
     DateTime date;
@@ -48,7 +50,8 @@ class VaccinationRecord {
       date = DateTime.now();
     }
 
-    // Get vaccine name from responses or top level, with fallback to Unknown
+    // Get vaccine name from responses or top level, with fallback to Unknown.
+
     final vaccineName = responses['vaccine_name'] ??
         responses['vaccine'] ??
         json['vaccine'] ??

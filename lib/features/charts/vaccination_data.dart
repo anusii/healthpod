@@ -75,8 +75,6 @@ class VaccinationData {
       return DateTime.parse(bTimestamp).compareTo(DateTime.parse(aTimestamp));
     });
 
-    debugPrint('All data: $allData');
-
     return allData;
   }
 
