@@ -153,8 +153,6 @@ class _AppointmentCardState extends State<AppointmentCard> {
     if (!mounted) return;
     final loadedAppointments = await DiaryService.loadAppointments(context);
 
-    debugPrint('Loaded appointments: $loadedAppointments');
-
     if (mounted) {
       setState(() {
         // Filter out past appointments and sort by date.
@@ -163,7 +161,6 @@ class _AppointmentCardState extends State<AppointmentCard> {
             .where((appointment) => !appointment.isPast)
             .toList()
           ..sort((a, b) => b.date.compareTo(a.date));
-        debugPrint('Future appointments: $appointments');
         _isLoading = false;
       });
     }
