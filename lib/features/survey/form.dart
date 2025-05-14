@@ -199,7 +199,15 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
       child: SizedBox(
         width: 200,
         child: ElevatedButton.icon(
-          onPressed: _formController.submitForm,
+          onPressed: () async {
+            _formController.submitForm();
+            // Wait for 5 seconds before resetting the form.
+
+            await Future.delayed(const Duration(seconds: 5));
+            if (mounted) {
+              _formController.reset();
+            }
+          },
           icon: const Icon(Icons.send),
           label: Text(widget.submitButtonText),
           style: ElevatedButton.styleFrom(
