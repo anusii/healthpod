@@ -28,15 +28,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart'
-    show
-        SolidFunctionCallStatus,
-        getResourcesInContainer,
-        getDirUrl,
-        readPod,
-        getKeyFromUserIfRequired;
+    show SolidFunctionCallStatus, getResourcesInContainer, getDirUrl, readPod;
 
 import 'package:healthpod/constants/profile.dart';
 import 'package:healthpod/utils/construct_pod_path.dart';
+import 'package:healthpod/utils/security_key/central_key_manager.dart';
 
 /// Fetches the most recent profile data from the pod.
 ///
@@ -89,7 +85,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
     // Prompt for security key if needed.
 
-    await getKeyFromUserIfRequired(
+    await CentralKeyManager.instance.ensureSecurityKey(
       context,
       const Text('Please enter your security key to access your profile data'),
     );
