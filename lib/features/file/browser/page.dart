@@ -73,6 +73,10 @@ class FileBrowser extends StatefulWidget {
 
   final GlobalKey<FileBrowserState> browserKey;
 
+  /// Add friendly folder name.
+
+  final String friendlyFolderName;
+
   const FileBrowser({
     super.key,
     required this.onFileSelected,
@@ -81,6 +85,7 @@ class FileBrowser extends StatefulWidget {
     required this.browserKey,
     required this.onImportCsv,
     required this.onDirectoryChanged,
+    required this.friendlyFolderName,
   });
 
   @override
@@ -251,6 +256,7 @@ class FileBrowserState extends State<FileBrowser> {
               onRefresh: refreshFiles,
               isLoading: isLoading,
               currentDirFileCount: currentDirFileCount,
+              friendlyFolderName: widget.friendlyFolderName,
             ),
 
             const SizedBox(height: 12),
