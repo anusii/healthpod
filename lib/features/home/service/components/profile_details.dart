@@ -34,6 +34,7 @@ import 'package:healthpod/constants/appointment.dart';
 import 'package:healthpod/theme/card_style.dart';
 import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/fetch_profile_data.dart';
+import 'package:healthpod/utils/is_logged_in.dart';
 import 'package:healthpod/utils/profile_photo_handler.dart';
 import 'package:healthpod/utils/upload_json_to_pod.dart';
 
@@ -78,6 +79,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   late TextEditingController _nameController;
   late TextEditingController _addressController;
   late TextEditingController _bestContactPhoneController;
+  late TextEditingController _bestContactEmailController;
+  late TextEditingController _emergencyNameController;
+  late TextEditingController _emergencyPhoneController;
   late TextEditingController _alternativeContactNumberController;
   late TextEditingController _emailController;
   late TextEditingController _dateOfBirthController;
@@ -108,6 +112,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     _nameController = TextEditingController();
     _addressController = TextEditingController();
     _bestContactPhoneController = TextEditingController();
+    _bestContactEmailController = TextEditingController();
+    _emergencyNameController = TextEditingController();
+    _emergencyPhoneController = TextEditingController();
     _alternativeContactNumberController = TextEditingController();
     _emailController = TextEditingController();
     _dateOfBirthController = TextEditingController();
@@ -122,36 +129,54 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     });
 
     try {
-      // Fetch profile data using utility function.
+      // First check if user is logged in.
 
-      final profileData = await fetchProfileData(context);
-      _profileData = profileData;
+      final loggedIn = await isLoggedIn();
 
-      setState(() {
-        // Populate controllers with profile data or defaults.
+      if (loggedIn) {
+        if (!mounted) return;
+        // Fetch profile data using utility function.
 
-        _nameController.text = profileData['name'] ?? userName;
-        _addressController.text = profileData['address'] ?? '';
-        _bestContactPhoneController.text =
-            profileData['bestContactPhone'] ?? '';
-        _alternativeContactNumberController.text =
-            profileData['alternativeContactNumber'] ?? '';
-        _emailController.text = profileData['email'] ?? '';
-        _dateOfBirthController.text = profileData['dateOfBirth'] ?? '';
-        _genderController.text = profileData['gender'] ?? '';
-        _isLoading = false;
-      });
+        final profileData = await fetchProfileData(context);
+        _profileData = profileData;
+
+        setState(() {
+          // Populate controllers with profile data or defaults.
+
+          _nameController.text = profileData['name'] ?? userName;
+          _addressController.text = profileData['address'] ?? '';
+          _bestContactPhoneController.text =
+              profileData['bestContactPhone'] ?? '';
+          _bestContactEmailController.text =
+              profileData['bestContactEmail'] ?? '';
+          _emergencyNameController.text = profileData['emergencyName'] ?? '';
+          _emergencyPhoneController.text = profileData['emergencyPhone'] ?? '';
+          _alternativeContactNumberController.text =
+              profileData['alternativeContactNumber'] ?? '';
+          _emailController.text = profileData['email'] ?? '';
+          _dateOfBirthController.text = profileData['dateOfBirth'] ?? '';
+          _genderController.text = profileData['gender'] ?? '';
+          _isLoading = false;
+        });
+      } else {
+        // User not logged in, just use default values.
+
+        setState(() {
+          _nameController.text = userName;
+          _addressController.text = '';
+          _bestContactPhoneController.text = '';
+          _bestContactEmailController.text = '';
+          _emergencyNameController.text = '';
+          _emergencyPhoneController.text = '';
+          _alternativeContactNumberController.text = '';
+          _emailController.text = '';
+          _dateOfBirthController.text = '';
+          _genderController.text = '';
+          _isLoading = false;
+        });
+      }
     } catch (e) {
       setState(() {
-        // Set defaults in case of failure.
-
-        _nameController.text = userName;
-        _addressController.text = '';
-        _bestContactPhoneController.text = '';
-        _alternativeContactNumberController.text = '';
-        _emailController.text = '';
-        _dateOfBirthController.text = '';
-        _genderController.text = '';
         _isLoading = false;
       });
     }
@@ -214,6 +239,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         'name': _nameController.text.trim(),
         'address': _addressController.text.trim(),
         'bestContactPhone': _bestContactPhoneController.text.trim(),
+        'bestContactEmail': _bestContactEmailController.text.trim(),
+        'emergencyName': _emergencyNameController.text.trim(),
+        'emergencyPhone': _emergencyPhoneController.text.trim(),
         'alternativeContactNumber':
             _alternativeContactNumberController.text.trim(),
         'email': _emailController.text.trim(),
@@ -294,6 +322,12 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         _addressController.text.trim() != (_profileData['address'] ?? '') ||
         _bestContactPhoneController.text.trim() !=
             (_profileData['bestContactPhone'] ?? '') ||
+        _bestContactEmailController.text.trim() !=
+            (_profileData['bestContactEmail'] ?? '') ||
+        _emergencyNameController.text.trim() !=
+            (_profileData['emergencyName'] ?? '') ||
+        _emergencyPhoneController.text.trim() !=
+            (_profileData['emergencyPhone'] ?? '') ||
         _alternativeContactNumberController.text.trim() !=
             (_profileData['alternativeContactNumber'] ?? '') ||
         _emailController.text.trim() != (_profileData['email'] ?? '') ||
@@ -345,6 +379,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     _nameController.dispose();
     _addressController.dispose();
     _bestContactPhoneController.dispose();
+    _bestContactEmailController.dispose();
+    _emergencyNameController.dispose();
+    _emergencyPhoneController.dispose();
     _alternativeContactNumberController.dispose();
     _emailController.dispose();
     _dateOfBirthController.dispose();
@@ -380,6 +417,12 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         TextEditingController(text: _addressController.text);
     final tempBestContactPhoneController =
         TextEditingController(text: _bestContactPhoneController.text);
+    final tempBestContactEmailController =
+        TextEditingController(text: _bestContactEmailController.text);
+    final tempEmergencyNameController =
+        TextEditingController(text: _emergencyNameController.text);
+    final tempEmergencyPhoneController =
+        TextEditingController(text: _emergencyPhoneController.text);
     final tempAlternativeContactNumberController =
         TextEditingController(text: _alternativeContactNumberController.text);
     final tempEmailController =
@@ -447,6 +490,43 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     ''',
                     child: TextFormField(
                       controller: tempBestContactPhoneController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        hintText: 'e.g. +61 4 1234 5678 or 04 1234 5678',
+                        suffixIcon: Icon(Icons.info_outline),
+                      ),
+                      validator: _validatePhone,
+                      keyboardType: TextInputType.phone,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text('Emergency Name'),
+                  TextFormField(
+                    controller: tempEmergencyNameController,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text('Emergency Phone'),
+                  MarkdownTooltip(
+                    message: '''
+
+                    **Valid Phone Number Formats:**
+
+                    - **Australian Mobile:** +61 4XX XXX XXX or 04XX XXX XXX
+                    - **Australian Landline:** +61 X XXXX XXXX or 0X XXXX XXXX
+                    - **International:** +[country code] followed by number
+
+                    Spaces, dashes and parentheses are allowed.
+
+                    ''',
+                    child: TextFormField(
+                      controller: tempEmergencyPhoneController,
                       decoration: const InputDecoration(
                         border: OutlineInputBorder(),
                         contentPadding:
@@ -611,6 +691,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         _nameController.text = tempNameController.text;
         _addressController.text = tempAddressController.text;
         _bestContactPhoneController.text = tempBestContactPhoneController.text;
+        _bestContactEmailController.text = tempBestContactEmailController.text;
+        _emergencyNameController.text = tempEmergencyNameController.text;
+        _emergencyPhoneController.text = tempEmergencyPhoneController.text;
         _alternativeContactNumberController.text =
             tempAlternativeContactNumberController.text;
         _emailController.text = tempEmailController.text;
@@ -626,6 +709,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     tempNameController.dispose();
     tempAddressController.dispose();
     tempBestContactPhoneController.dispose();
+    tempBestContactEmailController.dispose();
+    tempEmergencyNameController.dispose();
+    tempEmergencyPhoneController.dispose();
     tempAlternativeContactNumberController.dispose();
     tempEmailController.dispose();
     tempDateOfBirthController.dispose();
@@ -1024,6 +1110,12 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       _buildDataRow('Address:', _addressController.text),
                       const SizedBox(height: 6),
                       _buildDataRow('Phone:', _bestContactPhoneController.text),
+                      const SizedBox(height: 6),
+                      _buildDataRow(
+                          'Emergency Name:', _emergencyNameController.text),
+                      const SizedBox(height: 6),
+                      _buildDataRow(
+                          'Emergency Phone:', _emergencyPhoneController.text),
                       const SizedBox(height: 6),
                       _buildDataRow('Alternative:',
                           _alternativeContactNumberController.text),

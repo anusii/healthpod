@@ -39,11 +39,12 @@ import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/features/update/tab.dart';
 import 'package:healthpod/settings/dialog.dart';
-import 'package:healthpod/utils/fetch_key_saved_status.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
 import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/initialise_feature_folders.dart';
+import 'package:healthpod/utils/is_logged_in.dart';
+import 'package:healthpod/utils/security_key/central_key_manager.dart';
 import 'package:healthpod/widgets/footer.dart';
 import 'package:healthpod/widgets/home_page.dart';
 import 'package:healthpod/widgets/theme_toggle.dart';
@@ -190,9 +191,20 @@ class HealthPodHomeState extends State<HealthPodHome> {
     await _initialiseFooterData(context);
 
     // Then initialise feature folders if user is logged in.
+    // _webId will only be non-null if the user is actively logged in
+    // thanks to our updated fetchWebId function
 
     if (_webId != null) {
       setState(() {});
+
+      // Check security key once for the entire session.
+
+      if (context.mounted) {
+        await CentralKeyManager.instance.ensureSecurityKey(
+          context,
+          const Text('Security verification is required to access your data'),
+        );
+      }
 
       if (context.mounted) {
         await initialiseFeatureFolders(
@@ -203,7 +215,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
             }
           },
           onComplete: () {
-            // debugPrint('Feature folder initialization complete');
+            // Feature folders initialized
           },
         );
       }
@@ -213,8 +225,23 @@ class HealthPodHomeState extends State<HealthPodHome> {
   /// Initialises the footer data by fetching the Web ID and encryption key status.
 
   Future<void> _initialiseFooterData(context) async {
-    final webId = await fetchWebId();
-    final isKeySaved = await fetchKeySavedStatus(context);
+    // Check if user is logged in with valid session
+    final loggedIn = await isLoggedIn();
+    final webId = loggedIn ? await fetchWebId() : null;
+
+    // Only fetch key status if webId is not null (user is logged in)
+    // This prevents the login prompt for users who clicked CONTINUE.
+
+    bool isKeySaved = false;
+    if (webId != null && context.mounted) {
+      // Let the central key manager check for security key status.
+      // This prevents multiple prompts across the app.
+
+      isKeySaved = await CentralKeyManager.instance.ensureSecurityKey(
+        context,
+        const Text('Security verification is required for Health Pod'),
+      );
+    }
 
     setState(() {
       _webId = webId;
