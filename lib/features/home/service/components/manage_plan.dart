@@ -33,6 +33,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/features/resources/service/resource_service.dart';
 import 'package:healthpod/theme/card_style.dart';
 import 'package:healthpod/utils/fetch_health_plan_data.dart';
+import 'package:healthpod/utils/is_logged_in.dart';
 import 'package:healthpod/utils/save_health_plan_data.dart';
 
 /// A widget to display and edit a health management plan.
@@ -67,28 +68,39 @@ class _ManagePlanState extends State<ManagePlan> {
     });
 
     try {
-      final healthPlanData = await fetchHealthPlanData(context);
+      // First check if user is logged in.
 
-      // Check if the returned data has planItems list.
+      final loggedIn = await isLoggedIn();
 
-      final List<String> loadedPlanItems =
-          (healthPlanData['planItems'] as List?)?.cast<String>() ?? [];
+      if (loggedIn) {
+        if (!mounted) return;
+        final healthPlanData = await fetchHealthPlanData(context);
 
-      setState(() {
-        title =
-            healthPlanData['title'] as String? ?? 'My Health Management Plan';
-        planItems =
-            loadedPlanItems; // Use the loaded items, which might be empty
-        isLoading = false;
-      });
+        // Check if the returned data has planItems list.
+
+        final List<String> loadedPlanItems =
+            (healthPlanData['planItems'] as List?)?.cast<String>() ?? [];
+
+        setState(() {
+          title =
+              healthPlanData['title'] as String? ?? 'My Health Management Plan';
+          planItems = loadedPlanItems;
+          isLoading = false;
+        });
+      } else {
+        // User not logged in, use default values.
+
+        setState(() {
+          title = 'My Health Management Plan';
+          planItems = [];
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      debugPrint('Error loading health plan: $e');
-
-      // Use empty list on error.
+      // In case of error, show the default title.
 
       setState(() {
         title = 'My Health Management Plan';
-        planItems = [];
         isLoading = false;
       });
     }

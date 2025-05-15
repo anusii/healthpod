@@ -35,6 +35,7 @@ import 'package:healthpod/providers/theme_provider.dart';
 import 'package:healthpod/theme/app_theme.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
+import 'package:healthpod/utils/security_key/central_key_manager.dart';
 
 void main() async {
   // This is the main entry point for the app. The [async] is required because
@@ -43,6 +44,10 @@ void main() async {
 
   // Ensure Flutter bindings are initialized for async operations
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize CentralKeyManager to handle all security key requests
+  CentralKeyManager.instance;
+  debugPrint('⚠️ CentralKeyManager initialized at app startup');
 
   if (isDesktop(PlatformWrapper())) {
     // Support [windowManager] options for the desktop. We do this here before

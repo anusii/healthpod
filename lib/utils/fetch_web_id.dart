@@ -25,14 +25,46 @@
 
 library;
 
+import 'package:flutter/material.dart';
+
 import 'package:solidpod/solidpod.dart' show getWebId;
 
-/// Fetch the user's WebID from the Solid server.
+import 'package:healthpod/utils/is_logged_in.dart';
+
+/// Fetch the user's WebID from the SolidPod package.
+///
+/// Returns the WebID if the user is actively logged in, otherwise returns null.
+/// This ensures that the CONTINUE flow doesn't try to access pod resources.
 
 Future<String?> fetchWebId() async {
   try {
-    return await getWebId();
+    // First check if the user is actively logged in.
+
+    final userLoggedIn = await isLoggedIn();
+
+    if (!userLoggedIn) {
+      // User is not logged in, so return null to indicate CONTINUE flow.
+
+      debugPrint('⚠️ User not actively logged in, treating as CONTINUE flow');
+      return null;
+    }
+
+    // User is logged in, fetch the WebID.
+
+    final webId = await getWebId();
+    debugPrint('WebID webId: $webId');
+
+    // Only return the WebID if it exists and the user is logged in.
+
+    if (webId != null && webId.isNotEmpty) {
+      return webId;
+    } else {
+      return null;
+    }
   } catch (e) {
+    // Return null if there's an error.
+
+    debugPrint('Error fetching WebID: $e');
     return null;
   }
 }
