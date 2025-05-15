@@ -119,6 +119,10 @@ class SettingField extends ConsumerWidget {
                   decoration: InputDecoration(
                     border: const OutlineInputBorder(),
                     hintText: hint,
+                    hintStyle: TextStyle(
+                      color: Colors.grey[400],
+                      fontStyle: FontStyle.italic,
+                    ),
                     suffixIcon: isPassword
                         ? IconButton(
                             icon: MarkdownTooltip(
