@@ -1,6 +1,6 @@
 /// BP combined visualisation widget.
 //
-// Time-stamp: <Friday 2025-04-25 07:02:02 +1000 Graham Williams>
+// Time-stamp: <Thursday 2025-06-26 17:00:52 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -411,7 +411,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
 
                     lineTouchData: LineTouchData(
                       touchTooltipData: LineTouchTooltipData(
-                        tooltipRoundedRadius: 8,
+                        // tooltipRoundedRadius: 8,
                         getTooltipColor: (touchedSpots) =>
                             theme.colorScheme.surfaceContainerHighest,
                         tooltipBorder: BorderSide(
