@@ -13,8 +13,9 @@ Binaries to download latest version:
 
 Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 
-## 1.0 First stable release
+## 0.2 First stable release
 
++ CARD: Flutter breaking change fixed [0.1.15 20250626 gjw]
 + MEDICATION: import/export [0.1.14 20250508 atangster]
 + DIARY: Collapse into tabs rather then separate tab [0.1.13 20250508 kev]
 + DIARY: import/export [0.1.12 20250508 kev]
