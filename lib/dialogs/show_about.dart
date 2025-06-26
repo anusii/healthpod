@@ -1,6 +1,6 @@
 /// An About dialog for the app.
 ///
-// Time-stamp: <Wednesday 2025-03-26 09:39:04 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-06-27 08:34:12 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -39,7 +39,7 @@ void showAbout(BuildContext context, {String? webId}) async {
       context: context,
       applicationLegalese: '© 2025 Software Innovation Institute ANU',
       applicationIcon: Image.asset(
-        'assets/images/healthpod_logo.png',
+        'assets/images/app_logo.png',
         width: 100,
         height: 100,
       ),

@@ -1,6 +1,6 @@
 /// Create Solid Login Widget.
 //
-// Time-stamp: <Thursday 2025-04-17 10:52:11 +1000 Graham Williams>
+// Time-stamp: <Friday 2025-06-27 08:33:44 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -235,8 +235,7 @@ Widget createSolidLogin(BuildContext context) {
                         // App logo with larger size.
 
                         Image(
-                          image: const AssetImage(
-                              'assets/images/healthpod_icon.png'),
+                          image: const AssetImage('assets/images/app_icon.png'),
                           width: 120,
                           height: 120,
                         ),
@@ -411,8 +410,8 @@ Widget _buildNormalLogin(String serverUrl) {
         webID: serverUrl.isNotEmpty
             ? serverUrl
             : 'https://pods.dev.solidcommunity.au',
-        image: const AssetImage('assets/images/healthpod_image.png'),
-        logo: const AssetImage('assets/images/healthpod_icon.png'),
+        image: const AssetImage('assets/images/app_image.png'),
+        logo: const AssetImage('assets/images/app_icon.png'),
         link: 'https://github.com/anusii/healthpod/blob/main/README.md',
         child: const HealthPodHome(),
       );
