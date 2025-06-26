@@ -11,15 +11,15 @@ Visit the
 for the latest updates.
 
 Binaries to download latest version:
-[**GNU/Linux**](https://solidcommunity.au/installers/notepod-dev-linux.zip) -
-[**Debian/Ubuntu**](https://solidcommunity.au/installers/notepod_amd64.deb) -
-[**Android**](https://solidcommunity.au/installers/notepod.apk) -
-[**MacOS**](https://solidcommunity.au/installers/notepod-dev-macos.zip) -
+[**GNU/Linux**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
+[**Debian/Ubuntu**](https://solidcommunity.au/installers/healthpod_amd64.deb) -
+[**Android**](https://solidcommunity.au/installers/healthpod.apk) -
+[**MacOS**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
 Windows
-[**zip**](https://solidcommunity.au/installers/notepod-dev-windows.zip) or
-[**inno**](https://solidcommunity.au/installers/notepod-dev-windows-inno.exe).
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
+[**inno**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
 
-Run in a browser: [**Web**](https://notepod.solidcommunity.au).
+Run in a browser: [**Web**](https://healthpod.solidcommunity.au).
 
 ## Prerequisite
 
@@ -29,10 +29,10 @@ HealthPod.
 ## Android
 
 You can side load the latest version of the app by downloading the
-[installer](https://solidcommunity.au/installers/notepod.apk) through
+[installer](https://solidcommunity.au/installers/healthpod.apk) through
 your Android device's browser. This will download the app to your
 Android device. Then visit the Downloads folder where you can click on
-the `notepod.apk` file. Your browser will ask if you are okay with
+the `healthpod.apk` file. Your browser will ask if you are okay with
 installing the app locally.
 
 ## Linux
@@ -42,8 +42,8 @@ installing the app locally.
 Download and install the deb package:
 
 ```bash
-wget https://solidcommunity.au/installers/notepod_amd64.dev -O notepod_amd64.deb
-sudo dpkg --install notepod_amd64.deb
+wget https://solidcommunity.au/installers/healthpod_amd64.dev -O healthpod_amd64.deb
+sudo dpkg --install healthpod_amd64.deb
 ```
 
 ### Zip Install
@@ -79,10 +79,10 @@ wget https://github.com/gjwgit/healthpod/raw/dev/installers/healthpod.png -O ${H
 To install for any user on the computer:
 
 ```bash
-sudo unzip notepod-dev-linux.zip -d /opt/notepod
-sudo ln -s /opt/notepod/notepod /usr/local/bin/
-wget https://raw.githubusercontent.com/anusii/notepod/dev/installers/notepod.desktop -O ${HOME}/usr/local/share/applications/notepod.desktop
-wget https://github.com/anusii/notepod/raw/dev/installers/notepod.png -O ${HOME}/use/local/share/icons/notepod.png
+sudo unzip healthpod-dev-linux.zip -d /opt/healthpod
+sudo ln -s /opt/healthpod/healthpod /usr/local/bin/
+wget https://raw.githubusercontent.com/anusii/healthpod/dev/installers/healthpod.desktop -O ${HOME}/usr/local/share/applications/healthpod.desktop
+wget https://github.com/anusii/healthpod/raw/dev/installers/healthpod.png -O ${HOME}/use/local/share/icons/healthpod.png
 ```
 
 Once installed you can run the app from the GNOME desktop through
