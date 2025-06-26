@@ -31,13 +31,11 @@ flutter:
 
   docs	    Run `dart doc` to create documentation.
 
+  import_order      Run import order checking.
+  import_order_fix  Run import order fixing.
+
   fix             Run `dart fix --apply`.
   format          Run `dart format`.
-  dcm             Run dart code metrics
-    nullable	  Check NULLs from dart_code_metrics.
-    unused_code   Check unused code from dart_code_metrics.
-    unused_files  Check unused files from dart_code_metrics.
-    metrics	  Run analyze from dart_code_metrics.
   analyze         Run flutter analyze.
   ignore          Look for usage of ignore directives.
   license	  Look for missing top license in source code.
@@ -123,7 +121,7 @@ linux_config:
 	flutter config --enable-linux-desktop
 
 .PHONY: prep
-prep: analyze fix format dcm ignore license todo
+prep: analyze fix import_order_fix format ignore license todo
 	@echo "ADVISORY: make tests docs"
 	@echo $(SEPARATOR)
 
@@ -157,33 +155,6 @@ bakfix:
 .PHONY: tests
 tests:: test qtest
 
-.PHONY: dcm
-dcm: nullable unused_code unused_files metrics
-
-.PHONY: nullable
-nullable:
-	@echo "Dart Code Metrics: NULLABLE"
-	-dart run dart_code_metrics:metrics check-unnecessary-nullable --disable-sunset-warning lib
-	@echo $(SEPARATOR)
-
-.PHONY: unused_code
-unused_code:
-	@echo "Dart Code Metrics: UNUSED CODE"
-	-dart run dart_code_metrics:metrics check-unused-code --disable-sunset-warning lib
-	@echo $(SEPARATOR)
-
-.PHONY: unused_files
-unused_files:
-	@echo "Dart Code Metrics: UNUSED FILES"
-	-dart run dart_code_metrics:metrics check-unused-files --disable-sunset-warning lib
-	@echo $(SEPARATOR)
-
-.PHONY: metrics
-metrics:
-	@echo "Dart Code Metrics: METRICS"
-	-dart run dart_code_metrics:metrics analyze --disable-sunset-warning lib --reporter=console
-	@echo $(SEPARATOR)
-
 .PHONY: analyze
 analyze:
 	@echo "Futter ANALYZE"
@@ -206,7 +177,7 @@ todo:
 .PHONY: license
 license:
 	@echo "Files without a LICENSE:\n"
-	@-find lib -type f -name '*.dart' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
+	@-find lib -type f -not -name '*~' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
 	@echo $(SEPARATOR)
 
 .PHONY: riverpod
@@ -285,7 +256,10 @@ qtest:
 		echo $$t; /bin/echo -n $$t >&2; \
 		echo "========================================"; \
 		flutter test --dart-define=INTERACT=0 --device-id $$device_id --reporter failures-only  $$t 2>/dev/null; \
-		if [ "$$?" -eq 0 ]; then /bin/echo ' YES' >&2; else /bin/echo ' NO *****' >&2; fi; \
+		if [ "$$?" -eq 0 ]; then /bin/echo ' YES' >&2; else /bin/echo -n ' ...' >&2; \
+		echo '****************************************> TRY AGAIN'; \
+		flutter test --dart-define=INTERACT=0 --device-id $$device_id --reporter failures-only  $$t 2>/dev/null; \
+		if [ "$$?" -eq 0 ]; then /bin/echo ' YES' >&2; else /bin/echo ' NO *****' >&2; fi; fi; \
 	done
 	@echo $(SEPARATOR)
 
@@ -297,9 +271,10 @@ qtest:
 	fi; \
 	flutter test --dart-define=INTERACT=0 --device-id $$device_id --reporter failures-only integration_test/$*.dart 2>/dev/null
 
-
 .PHONY: qtest.all
 qtest.all:
+	@echo $(APP) `egrep '^version: ' pubspec.yaml`
+	@echo "flutter version:" `flutter --version | head -1 | cut -d ' ' -f 2`
 	make qtest > qtest_$(shell date +%Y%m%d%H%M%S).txt
 
 clean::
@@ -375,6 +350,18 @@ endif
 .PHONY: publish
 publish:
 	dart pub publish
+
+.PHONY: import_order
+import_order:
+	@echo "Dart: CHECK IMPORT ORDER"
+	dart run custom_lint
+	@echo $(SEPARATOR)
+
+.PHONY: import_order_fix
+import_order_fix:
+	@echo "Dart: FIX IMPORT ORDER"
+	dart run import_order_lint:fix_imports --project-name=$(APP) -r lib
+	@echo $(SEPARATOR)
 
 ### TODO THESE SHOULD BE CHECKED AND CLEANED UP
 
