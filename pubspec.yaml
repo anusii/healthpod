@@ -78,7 +78,7 @@ flutter:
 # (gjw 20250429)
 
 flutter_launcher_icons:
-  image_path: "assets/images/healthpod_icon.png"
+  image_path: "assets/images/app_icon.png"
   android: true
   min_sdk_android: 21
   ios: true

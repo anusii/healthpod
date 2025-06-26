@@ -12,7 +12,8 @@ on:
       - dev
 
 env:
-  FLUTTER_VERSION: '3.29.3'
+  APP: healthpod
+  FLUTTER_VERSION: '3.32.5'
 
 jobs:
 
@@ -72,14 +73,14 @@ jobs:
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          filename: healthpod-${{ github.ref_name }}-linux.zip
+          filename: ${{ env.APP }}-${{ github.ref_name }}-linux.zip
           directory: build/linux/x64/release/bundle
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: healthpod-linux-zip
-          path: build/linux/x64/release/bundle/healthpod-${{ github.ref_name }}-linux.zip
+          name: ${{ env.APP }}-linux-zip
+          path: build/linux/x64/release/bundle/${{ env.APP }}-${{ github.ref_name }}-linux.zip
 
   ########################################################################
 
@@ -111,7 +112,7 @@ jobs:
         run: flutter build windows
 
       - name: Check the DLLs for Inclusion in the .iss script
-        run: dir D:\a\healthpod\healthpod\build\windows\x64\runner\Release\
+        run: dir D:\a\${{ env.APP }}\${{ env.APP }}\build\windows\x64\runner\Release\
 
       - name: Get Version from pubspec.yaml
         run: |
@@ -130,14 +131,14 @@ jobs:
         # uses: gjwgit/Inno-Setup-Action@v1.2.5
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
         with:
-          path: installers/healthpod-windows.iss
+          path: installers/${{ env.APP }}-windows.iss
           options: /O+
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: healthpod-windows-inno
-          path: D:\a\healthpod\healthpod\installers\installers\healthpod-dev-windows-inno.exe
+          name: ${{ env.APP }}-windows-inno
+          path: D:\a\${{ env.APP }}\${{ env.APP }}\installers\installers\${{ env.APP }}-dev-windows-inno.exe
 
   ########################################################################
 
@@ -174,14 +175,14 @@ jobs:
         uses: thedoctor0/zip-release@master
         with:
           type: 'zip'
-          filename: healthpod-${{github.ref_name}}-windows.zip
+          filename: ${{ env.APP }}-${{github.ref_name}}-windows.zip
           directory: build/windows/x64/runner/Release
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: healthpod-windows-zip
-          path: build/windows/x64/runner/Release/healthpod-${{github.ref_name}}-windows.zip
+          name: ${{ env.APP }}-windows-zip
+          path: build/windows/x64/runner/Release/${{ env.APP }}-${{github.ref_name}}-windows.zip
 
   ########################################################################
 
@@ -219,8 +220,8 @@ jobs:
         with:
           type: 'zip'
           directory: build/macos/Build/Products/Release
-          path: healthpod.app
-          filename: healthpod-${{github.ref_name}}-macos.zip
+          path: ${{ env.APP }}.app
+          filename: ${{ env.APP }}-${{github.ref_name}}-macos.zip
 
       - name: Review Bundle Contents
         run: ls -lh build/macos/Build/Products/Release
@@ -228,8 +229,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: healthpod-macos-zip
-          path: build/macos/Build/Products/Release/healthpod-${{github.ref_name}}-macos.zip
+          name: ${{ env.APP }}-macos-zip
+          path: build/macos/Build/Products/Release/${{ env.APP }}-${{github.ref_name}}-macos.zip
 
   ########################################################################
 
@@ -267,8 +268,8 @@ jobs:
   #       with:
   #         type: 'zip'
   #         directory: build/macos/Build/Products/Release
-  #         path: healthpod.app
-  #         filename: healthpod-${{github.ref_name}}-macos.zip
+  #         path: ${{ env.APP }}.app
+  #         filename: ${{ env.APP }}-${{github.ref_name}}-macos.zip
 
   #     - name: Review Bundle Contents
   #       run: ls -lh build/macos/Build/Products/Release
@@ -276,8 +277,8 @@ jobs:
   #     - name: Upload Artifact
   #       uses: actions/upload-artifact@v4
   #       with:
-  #         name: healthpod-macos-zip
-  #         path: build/macos/Build/Products/Release/healthpod-${{github.ref_name}}-macos.zip
+  #         name: ${{ env.APP }}-macos-zip
+  #         path: build/macos/Build/Products/Release/${{ env.APP }}-${{github.ref_name}}-macos.zip
 
   # ########################################################################
 
@@ -315,8 +316,8 @@ jobs:
   #       with:
   #         type: 'zip'
   #         directory: build/macos/Build/Products/Release
-  #         path: healthpod.app
-  #         filename: healthpod-${{github.ref_name}}-ios.zip
+  #         path: ${{ env.APP }}.app
+  #         filename: ${{ env.APP }}-${{github.ref_name}}-ios.zip
 
   #     - name: Review Bundle Contents
   #       run: ls -lh build/macos/Build/Products/Release
@@ -324,5 +325,5 @@ jobs:
   #     - name: Upload Artifact
   #       uses: actions/upload-artifact@v4
   #       with:
-  #         name: healthpod-macos-zip
-  #         path: build/macos/Build/Products/Release/healthpod-${{github.ref_name}}-macos.zip
+  #         name: ${{ env.APP }}-macos-zip
+  #         path: build/macos/Build/Products/Release/${{ env.APP }}-${{github.ref_name}}-macos.zip
