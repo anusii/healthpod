@@ -1,6 +1,6 @@
 /// Theme configuration for the application.
 //
-// Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
+// Time-stamp: <Thursday 2025-06-26 13:21:13 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -105,7 +105,7 @@ class AppTheme {
           letterSpacing: 0.15,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.cardBackground,
         elevation: 2,
         shadowColor: AppColors.textPrimary.withValues(alpha: 0.1),
@@ -197,7 +197,7 @@ class AppTheme {
           letterSpacing: 0.15,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.cardBackgroundDark,
         elevation: 1,
         shadowColor: AppColors.textPrimaryDark.withValues(alpha: 0.2),
