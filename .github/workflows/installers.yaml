@@ -17,10 +17,10 @@ env:
 jobs:
 
   ########################################################################
-  # 20250110 gjw Originally for rattle I was building on Ubuntu 22.04
-  # since my 24.04 version would not run on Mint 21.3. Then moved even
-  # older to Ubuntu 20.04 to get it more widely available. Seems to
-  # work on 22.04 and 24.04. Backwards the error was: "rattle:
+  # 20250110 gjw Originally I was building on Ubuntu 22.04 since my
+  # 24.04 version would not run on Mint 21.3. Then moved even older to
+  # Ubuntu 20.04 to get it more widely available. Seems to work on
+  # 22.04 and 24.04. Backwards the error was: "rattle:
   # /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.34' not found
   # (required by rattle)" On Ubuntu 20.04 the highest version of GLIBC
   # is GLIBC2.30.
