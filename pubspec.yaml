@@ -51,34 +51,17 @@ dependencies:
   timeline_tile: ^2.0.0
   universal_io: ^2.2.2
   url_launcher: ^6.3.1
-  #version_widget: ^0.0.6
-  version_widget:
-    git:
-      url: https://github.com/anusii/version_widget.git
-      ref: main
+  version_widget: ^1.0.2
   webdriver: ^3.0.3
   window_manager: ^0.4.3
 
 dev_dependencies:
-
   flutter_test:
     sdk: flutter
 
-  import_order_lint:
-    git:
-      url: https://github.com/anusii/import-order-lint.git
-      ref: main
-
+  import_order_lint: ^0.1.1
   test: ^1.25.15
   ubuntu_lints: ^0.4.0
-
-dependency_overrides:
-
-  # Why? See https://???? (gjw 20250429)
-
-  flutter_secure_storage_linux: ^2.0.1
-  flutter_secure_storage_platform_interface: ^2.0.0
-
 
 flutter:
   uses-material-design: true
