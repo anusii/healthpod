@@ -4,16 +4,22 @@
 [![Last Updated](https://img.shields.io/github/last-commit/anusii/healthpod?label=last%20updated)](https://github.com/anusii/healthpod/commits/dev/)
 [![Flutter Version](https://img.shields.io/badge/dynamic/yaml?url=https://raw.githubusercontent.com/anusii/healthpod/master/pubspec.yaml&query=$.version&label=version)](https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md)
 [![GitHub Issues](https://img.shields.io/github/issues/anusii/healthpod)](https://github.com/anusii/healthpod/issues)
-[![GitHub License](https://img.shields.io/github/license/anusii/healthpod)](https://raw.githubusercontent.com/anusii/healthpod/main/LICENSE)
-[![GitHub commit activity (dev)](https://img.shields.io/github/commit-activity/w/anusii/healthpod/dev)](https://github.com/gjwgit/rattle/commits/dev/)
+[![GitHub License](https://img.shields.io/github/license/anusii/healthpod)](https://github.com/anusii/healthpod/blob/dev/LICENSE)
+[![GitHub commit activity (dev)](https://img.shields.io/github/commit-activity/w/anusii/healthpod/dev)](https://github.com/anusii/healthpod/commits/dev/)
 
-Binaries to download latest version:
-[**GNU/Linux**](https://solidcommunity.au/healthpod-dev-linux.zip) -
-[**Debian/Ubuntu**](https://solidcommunity.au/healthpod_amd64.deb) -
-[**MacOS**](https://solidcommunity.au/healthpod-dev-macos.zip) -
-[**Windows**](https://solidcommunity.au/healthpod-dev-windows-inno.exe).
+Run the app online: [**web**](https://healthpod.solidcommunity.au).
 
-Run in browser: [**Web**](https://healthpod.solidcommunity.au).
+Download the latest version:
+GNU/Linux
+[**deb**](https://solidcommunity.au/installers/healthpod_amd64.deb) or
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
+Android
+[**apk**](https://solidcommunity.au/installers/healthpod.apk) -
+macOS
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
+Windows
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
+[**inno**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
 
 # Health Pod
 

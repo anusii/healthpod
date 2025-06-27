@@ -10,16 +10,19 @@ Visit the
 [CHANGELOG](https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md)
 for the latest updates.
 
-Binaries to download latest version:
-[**GNU/Linux**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
-[**Debian/Ubuntu**](https://solidcommunity.au/installers/healthpod_amd64.deb) -
-[**Android**](https://solidcommunity.au/installers/healthpod.apk) -
-[**MacOS**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
+Run the app online: [**web**](https://healthpod.solidcommunity.au).
+
+Download the latest version:
+GNU/Linux
+[**deb**](https://solidcommunity.au/installers/healthpod_amd64.deb) or
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
+Android
+[**apk**](https://solidcommunity.au/installers/healthpod.apk) -
+macOS
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
 Windows
 [**zip**](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
 [**inno**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
-
-Run in a browser: [**Web**](https://healthpod.solidcommunity.au).
 
 ## Prerequisite
 

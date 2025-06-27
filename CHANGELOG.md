@@ -4,14 +4,22 @@ Recorded here are the high level changes for the HealthPod app.
 
 Guide: Each version update is recorded here with a short user-oriented
 description of the update. Updates in the 0.1.n series are heading
-toward a 0.2 release.
+toward a 0.2 release. The `[version timestamp user]` string is
+utilised by the flutter version_widget package.
 
-Binaries to download latest version:
-[**GNU/Linux**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
-[**MacOS**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
-[**Windows**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
+Run the app online: [**web**](https://healthpod.solidcommunity.au).
 
-Run in browser: [**Web**](https://healthpod.solidcommunity.au).
+Download the latest version:
+GNU/Linux
+[**deb**](https://solidcommunity.au/installers/healthpod_amd64.deb) or
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
+Android
+[**apk**](https://solidcommunity.au/installers/healthpod.apk) -
+macOS
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
+Windows
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
+[**inno**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
 
 ## 0.2 First stable release
 

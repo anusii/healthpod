@@ -30,13 +30,16 @@ installers/*-macos.zip
 installers/*-windows.zip
 tools/chromedriver/
 
-# ORIGINAL
+# Generated
 
 *generated*
 *Generated*
 *#*
 
+########################################################################
+# From https://github.com/flutter/flutter/blob/master/.gitignore
 # See https://www.dartlang.org/guides/libraries/private-files
+########################################################################
 
 # Files and directories created by pub
 .dart_tool/
@@ -66,8 +69,12 @@ doc/api/
 .flutter-plugins
 .flutter-plugins-dependencies
 
+#-----------------------------------------------------------------------
 # Miscellaneous
+#-----------------------------------------------------------------------
+
 *.class
+*.lock
 *.log
 *.pyc
 *.swp
@@ -85,15 +92,26 @@ migrate_working_dir/
 /solidpod/
 /solid_auth/
 
+#-----------------------------------------------------------------------
 # IntelliJ related
+#-----------------------------------------------------------------------
+
 *.iml
 *.ipr
 *.iws
 .idea/
 
+#-----------------------------------------------------------------------
+# Visual Studio Code related
+#
 # The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
+# VS Code which you may wish to be included in version control, so that line
+# can be commented out as it is by default.
+#-----------------------------------------------------------------------
+
+.classpath
+.project
+.settings/
 .vscode/
 
 # Mac

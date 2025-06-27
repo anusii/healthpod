@@ -66,7 +66,7 @@ chmod 755 ${APP}_${VER}_amd64/usr/lib/${APP}/${APP}
 
 # Build the debian package.
 
-dpkg-deb --build ${APP}_${VER}_amd64
+dpkg-deb --build --root-owner-group ${APP}_${VER}_amd64
 
 # Cleanup.
 
