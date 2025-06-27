@@ -12,11 +12,11 @@ Run the app online: [**web**](https://healthpod.solidcommunity.au).
 Download the latest version:
 **GNU/Linux**
 [deb](https://solidcommunity.au/installers/healthpod_amd64.deb) or
-[zip](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
+[zip](https://solidcommunity.au/installers/healthpod-dev-linux.zip);
 **Android**
-[apk](https://solidcommunity.au/installers/healthpod.apk) -
+[apk](https://solidcommunity.au/installers/healthpod.apk);
 **macOS**
-[zip](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
+[zip](https://solidcommunity.au/installers/healthpod-dev-macos.zip);
 **Windows**
 [zip](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
 [inno](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
