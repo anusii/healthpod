@@ -131,7 +131,7 @@ jobs:
         # uses: gjwgit/Inno-Setup-Action@v1.2.5
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
         with:
-          path: installers/${{ env.APP }}-windows.iss
+          path: installers/app-windows.iss
           options: /O+
 
       - name: Upload Artifact

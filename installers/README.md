@@ -7,7 +7,7 @@ identical across all platforms so the experience across different
 platforms will be very similar.
 
 Visit the
-[CHANGELOG](https://github.com/gjwgit/healthpod/blob/dev/CHANGELOG.md)
+[CHANGELOG](https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md)
 for the latest updates.
 
 Binaries to download latest version:
@@ -70,10 +70,10 @@ Then set up your local installation (only required once):
 
 ```bash
 ln -s ${HOME}/.local/share/healthpod/healthpod ${HOME}/.local/bin/
-wget https://raw.githubusercontent.com/gjwgit/healthpod/dev/installers/healthpod.desktop -O ${HOME}/.local/share/applications/healthpod.desktop
+wget https://raw.githubusercontent.com/anusii/healthpod/dev/installers/app.desktop -O ${HOME}/.local/share/applications/healthpod.desktop
 sed -i "s/USER/$(whoami)/g" ${HOME}/.local/share/applications/healthpod.desktop
 mkdir -p ${HOME}/.local/share/icons/hicolor/256x256/apps/
-wget https://github.com/gjwgit/healthpod/raw/dev/installers/healthpod.png -O ${HOME}/.local/share/icons/hicolor/256x256/apps/healthpod.png
+wget https://github.com/anusii/healthpod/raw/dev/installers/app.png -O ${HOME}/.local/share/icons/hicolor/256x256/apps/healthpod.png
 ```
 
 To install for any user on the computer:
@@ -81,8 +81,8 @@ To install for any user on the computer:
 ```bash
 sudo unzip healthpod-dev-linux.zip -d /opt/healthpod
 sudo ln -s /opt/healthpod/healthpod /usr/local/bin/
-wget https://raw.githubusercontent.com/anusii/healthpod/dev/installers/healthpod.desktop -O ${HOME}/usr/local/share/applications/healthpod.desktop
-wget https://github.com/anusii/healthpod/raw/dev/installers/healthpod.png -O ${HOME}/use/local/share/icons/healthpod.png
+wget https://raw.githubusercontent.com/anusii/healthpod/dev/installers/app.desktop -O ${HOME}/usr/local/share/applications/healthpod.desktop
+wget https://github.com/anusii/healthpod/raw/dev/installers/app.png -O ${HOME}/use/local/share/icons/healthpod.png
 ```
 
 Once installed you can run the app from the GNOME desktop through

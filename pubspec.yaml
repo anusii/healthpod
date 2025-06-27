@@ -24,7 +24,6 @@ dependencies:
 
   audioplayers: ^6.2.0
   badges: ^3.1.2
-  build_runner: ^2.4.14
   csv: ^6.0.0
   editable: ^2.0.0
   encrypt: ^5.0.3
@@ -60,12 +59,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.7
   import_order_lint: ^0.1.1
   test: ^1.25.15
   ubuntu_lints: ^0.4.0
 
 flutter:
   uses-material-design: true
+
   assets:
     - assets/audio/
     - assets/images/

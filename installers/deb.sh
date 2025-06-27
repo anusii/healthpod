@@ -36,7 +36,7 @@ EOL
 cat > ${APP}_${VER}_amd64/usr/share/applications/${APP}.desktop << EOL
 [Desktop Entry]
 Name=Healthpod
-Comment=Healthpod health data
+Comment=Healthpod data wallet
 Exec=/usr/bin/${APP}
 Icon=${APP}
 Terminal=false
