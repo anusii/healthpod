@@ -1,7 +1,7 @@
-/// Your health data in your POD.
-//
-// Time-stamp: <Tuesday 2025-01-07 14:10:07 +1100 Graham Williams>
-//
+/// HealthPod - Collect and analyse health data preserving privacy using PODs.
+///
+// Time-stamp: <Wednesday 2025-07-16 10:28:21 +1000 Graham Williams>
+///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
@@ -40,14 +40,21 @@ import 'package:healthpod/utils/security_key/central_key_manager.dart';
 void main() async {
   // This is the main entry point for the app. The [async] is required because
   // we asynchronously [await] the window manager below. Often, `main()` will
-  // simply include just [runApp].
+  // include only [runApp].
+
+  // Globally remove [debugPrint] messages.
+
+  // debugPrint = (String? message, {int? wrapWidth}) {
+  //   null;
+  // };
 
   // Ensure Flutter bindings are initialized for async operations
+
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize CentralKeyManager to handle all security key requests
+  // Initialize CentralKeyManager to handle all user security key requests.
+
   CentralKeyManager.instance;
-  debugPrint('⚠️ CentralKeyManager initialized at app startup');
 
   if (isDesktop(PlatformWrapper())) {
     // Support [windowManager] options for the desktop. We do this here before
@@ -57,13 +64,12 @@ void main() async {
     await windowManager.ensureInitialized();
 
     const windowOptions = WindowOptions(
-      // We can set various desktop window options here.
+      // Set various desktop window options here.
 
       // Setting [alwaysOnTop] here will ensure the app starts on top of other
-      // apps on the desktop so that it is visible (otherwise, Ubuuntu with
-      // GNOME it is often lost below other windows on startup which can be a
-      // little disconcerting). We later turn it off as we don't want to force
-      // it always on top.
+      // apps on the desktop so that it is visible (otherwise, with GNOME on
+      // Ubuntu the app is often lost below other windows on startup).
+      // We later turn it off as we don't want to force it always on top.
 
       alwaysOnTop: true,
 
@@ -81,13 +87,10 @@ void main() async {
     });
   }
 
-  // Ready to run the app.
+  // The runApp() function takes the given Widget and makes it the root of the
+  // widget tree.
 
-  runApp(
-    const ProviderScope(
-      child: HealthPod(),
-    ),
-  );
+  runApp(const ProviderScope(child: HealthPod()));
 }
 
 // The main widget could be in a separate file, but handy having it in main and
@@ -95,6 +98,8 @@ void main() async {
 // of other widgets. Generically we set up to build a `Home()` widget containing
 // the App. For SolidPod we wrap the `Home()` widget within the `SolidLogin()`
 // widget so we start with a login screen, though this is optional.
+
+/// The root widget of the HealthPod application.
 
 class HealthPod extends ConsumerStatefulWidget {
   const HealthPod({super.key});
