@@ -21,6 +21,9 @@ Windows
 [**zip**](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
 [**inno**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
 
+Coding documentation is available from [solid community
+au](https://solidcommunity.au/docs/healthpod)
+
 ## 0.2 First stable release
 
 + CARD: Flutter breaking change fixed [0.1.15 20250626 gjw]

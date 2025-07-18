@@ -1,3 +1,13 @@
+# Health Pod &mdash; Collect Your Health Data in your Data Vault
+
+**An ANU Software Innovation Institute demonstrator for your Data Vault**.
+
+*Authors: Ashley Tang, Graham Williams, Zheyuan Xu, Kevin Wang*
+
+*[ANU Software Innovation Institute](https://sii.anu.edu.au)*
+
+*License: GNU GPL V3*
+
 [![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 
@@ -21,7 +31,8 @@ Download the latest version:
 [zip](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
 [inno](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
 
-# Health Pod
+Coding documentation is available from [solid community
+au](https://solidcommunity.au/docs/healthpod)
 
 The Health Pod collects into one private and secure location all of
 your health data and medical records. Value is added to the data
