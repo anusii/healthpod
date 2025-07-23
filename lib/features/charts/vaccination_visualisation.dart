@@ -27,7 +27,6 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_markdown/flutter_markdown.dart';
-
 import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:timeline_tile/timeline_tile.dart';

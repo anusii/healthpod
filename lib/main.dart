@@ -1,6 +1,6 @@
 /// HealthPod - Collect and analyse health data preserving privacy using PODs.
 ///
-// Time-stamp: <Wednesday 2025-07-16 10:28:21 +1000 Graham Williams>
+// Time-stamp: <Wednesday 2025-07-23 16:34:25 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -30,12 +30,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
-import 'package:healthpod/providers/settings.dart';
-import 'package:healthpod/providers/theme_provider.dart';
-import 'package:healthpod/theme/app_theme.dart';
-import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/is_desktop.dart';
 import 'package:healthpod/utils/security_key/central_key_manager.dart';
+
+import 'healthpod.dart';
+
+/// Main entry point for the [HealthPod] application.
 
 void main() async {
   // This is the main entry point for the app. The [async] is required because
@@ -91,52 +91,4 @@ void main() async {
   // widget tree.
 
   runApp(const ProviderScope(child: HealthPod()));
-}
-
-// The main widget could be in a separate file, but handy having it in main and
-// the file is not too large. The widget essentially orchestrates the building
-// of other widgets. Generically we set up to build a `Home()` widget containing
-// the App. For SolidPod we wrap the `Home()` widget within the `SolidLogin()`
-// widget so we start with a login screen, though this is optional.
-
-/// The root widget of the HealthPod application.
-
-class HealthPod extends ConsumerStatefulWidget {
-  const HealthPod({super.key});
-
-  @override
-  ConsumerState<HealthPod> createState() => _HealthPodState();
-}
-
-class _HealthPodState extends ConsumerState<HealthPod> {
-  Widget? _loginWidget;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        _loginWidget = createSolidLogin(context);
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final themeMode = ref.watch(themeProvider);
-
-    // Initialise settings.
-
-    ref.watch(settingsInitializerProvider);
-
-    return MaterialApp(
-      title: 'Solid Health Pod',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
-      home: SelectionArea(
-        child: _loginWidget ?? createSolidLogin(context),
-      ),
-    );
-  }
 }

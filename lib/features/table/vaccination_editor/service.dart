@@ -32,7 +32,6 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/table/vaccination_editor/model.dart';
-
 import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/get_feature_path.dart';

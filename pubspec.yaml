@@ -8,42 +8,30 @@ environment:
 
 # To automatically upgrade package dependencies:
 #
-# `flutter pub upgrade --major-versions`.
+#   flutter pub upgrade --major-versions
 #
 # To see which dependencies have newer versions available:
 #
-# `flutter pub outdated`.
+#   flutter pub outdated
 #
-# (gjw 20250429)
+# (gjw 20250722)
 
 dependencies:
   flutter:
     sdk: flutter
-  integration_test:
-    sdk: flutter
-
   audioplayers: ^6.2.0
-  badges: ^3.1.2
   csv: ^6.0.0
-  editable: ^2.0.0
-  encrypt: ^5.0.3
   file_picker: ^10.1.2
   fl_chart: ^1.0.0
   flutter_inappwebview: ^6.1.5
-  flutter_launcher_icons: ^0.14.2
   flutter_markdown: ^0.7.3
   flutter_riverpod: ^2.4.9
-  http: ^1.2.2
-  intl: ^0.20.2
-  logger: ^2.5.0
+  intl: any
   markdown_tooltip: ^0.0.7
   path: ^1.9.0
-  path_provider: ^2.1.5
   pdf: ^3.11.3
   printing: ^5.11.0
-  process_run: ^1.2.2+1
   rdflib: ^0.2.9
-  riverpod: ^2.6.1
   shared_preferences: ^2.5.2
   solidpod: ^0.6.7
   syncfusion_flutter_pdf: ^30.1.37
@@ -56,21 +44,24 @@ dependencies:
   window_manager: ^0.5.0
 
 dev_dependencies:
+  build_runner: ^2.4.14
+  encrypt: ^5.0.3
+  flutter_launcher_icons: ^0.14.2
   flutter_test:
     sdk: flutter
-
   flutter_lints: ^5.0.0
-  build_runner: ^2.4.7
   import_order_lint: ^0.1.1
+  integration_test:
+    sdk: flutter
+  process_run: ^1.2.2+1
   test: ^1.25.15
   ubuntu_lints: ^0.4.0
 
 flutter:
-  uses-material-design: true
-
   assets:
     - assets/audio/
     - assets/images/
+  uses-material-design: true
 
 # Define launcher icons for all platforms (except Linux) so icons for
 # the apps can be automatically updated using:

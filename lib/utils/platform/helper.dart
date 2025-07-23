@@ -27,8 +27,6 @@ library;
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-// Conditional import based on platform.
-
 import 'package:healthpod/utils/platform/io.dart'
     if (dart.library.html) 'package:healthpod/utils/platform/web.dart';
 

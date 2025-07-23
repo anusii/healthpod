@@ -22,6 +22,7 @@ linter:
   rules:
      avoid_print: true
      prefer_single_quotes: true
+     implementation_imports: false
 
 custom_lint:
   rules:

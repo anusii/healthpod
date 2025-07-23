@@ -28,7 +28,6 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/vaccination_survey.dart';
-
 import 'package:healthpod/utils/health_data_importer_base.dart';
 
 /// Handles importing vaccination data from CSV files into JSON format.

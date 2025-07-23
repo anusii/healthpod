@@ -37,7 +37,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solidpod/solidpod.dart';
-// ignore: implementation_imports
 import 'package:solidpod/src/solid/authenticate.dart' show solidAuthenticate;
 
 import 'package:healthpod/home.dart';
