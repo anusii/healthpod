@@ -20,6 +20,7 @@ REMOVE
 !integration_test/data/*.json
 solidpod
 import_order_lint
+pubspec.yaml.*
 
 installers/*.apk
 installers/*.exe
@@ -30,7 +31,7 @@ installers/*-macos.zip
 installers/*-windows.zip
 tools/chromedriver/
 
-# Generated
+# ORIGINAL
 
 *generated*
 *Generated*
