@@ -76,23 +76,32 @@ class FileOperations {
 
       if (!context.mounted) continue;
 
-      // Read file metadata.
+      try {
+        // Read file metadata with individual error handling.
 
-      final metadata = await readPod(
-        relativePath,
-        context,
-        const Text('Reading file info'),
-      );
+        final metadata = await readPod(
+          relativePath,
+          context,
+          const Text('Reading file info'),
+        );
 
-      // Add valid files to the processed list.
+        // Add valid files to the processed list.
 
-      if (metadata != SolidFunctionCallStatus.fail.toString() &&
-          metadata != SolidFunctionCallStatus.notLoggedIn.toString()) {
-        processedFiles.add(FileItem(
-          name: fileName,
-          path: relativePath,
-          dateModified: DateTime.now(),
-        ));
+        if (metadata != SolidFunctionCallStatus.fail.toString() &&
+            metadata != SolidFunctionCallStatus.notLoggedIn.toString()) {
+          processedFiles.add(FileItem(
+            name: fileName,
+            path: relativePath,
+            dateModified: DateTime.now(),
+          ));
+        } else {
+          // File exists in directory listing but can't be read - skip silently
+          debugPrint('Skipping unreadable file: $fileName');
+        }
+      } catch (e) {
+        // Handle individual file read errors gracefully
+        debugPrint('Error reading file $fileName: $e');
+        // Continue processing other files instead of failing completely
       }
     }
     return processedFiles;

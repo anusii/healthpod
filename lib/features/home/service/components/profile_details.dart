@@ -25,6 +25,8 @@
 
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
@@ -32,11 +34,11 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/appointment.dart';
 import 'package:healthpod/theme/card_style.dart';
-import 'package:healthpod/utils/construct_pod_path.dart';
+
 import 'package:healthpod/utils/fetch_profile_data.dart';
+import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/is_logged_in.dart';
 import 'package:healthpod/utils/profile_photo_handler.dart';
-import 'package:healthpod/utils/upload_json_to_pod.dart';
 
 /// A widget that combines user avatar and name with personal identification details.
 /// This integrated component displays all user profile information in a single card.
@@ -284,33 +286,35 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     }
   }
 
-  /// Save profile data using the uploadJsonToPod utility.
-  ///
-  /// Wraps the data in a timestamped structure before saving.
+  /// Save profile data using direct writePod call to avoid file system operations
+  /// that don't work on web platforms.
 
   Future<SolidFunctionCallStatus> _saveProfileDataUsingUploadUtil(
       Map<String, dynamic> updatedData) async {
     try {
-      // Create a structure for uploadJsonToPod that matches what saveResponseToPod expects
-      // The profile data should be passed as the 'responses' parameter, not wrapped in 'data'
+      // Create JSON data structure matching other successful implementations
+      final profileData = {
+        'timestamp': DateTime.now().toIso8601String(),
+        'responses': updatedData,
+      };
 
-      // Save to pod using utility that expects 'responses' as the top-level parameter.
+      // Create filename with timestamp
+      final timestamp = formatTimestampForFilename(DateTime.now());
+      final filename = 'profile_$timestamp.json.enc.ttl';
 
-      final result = await uploadJsonToPod(
-        data: {
-          'timestamp': DateTime.now().toIso8601String(),
-          'responses': updatedData,
-        },
-        targetPath: 'profile',
-        fileNamePrefix: 'profile',
-        context: context,
+      // Use direct writePod call with relative path (writePod DOES normalise on web).
+
+      final result = await writePod(
+        'profile/$filename',
+        json.encode(profileData),
+        context,
+        const Text('Saving profile data'),
+        encrypted: true,
       );
-
-      // Verify save by checking directory contents.
 
       return result;
     } catch (e) {
-      //debugPrint('Error saving profile: $e');
+      debugPrint('Error saving profile: $e');
       return SolidFunctionCallStatus.fail;
     }
   }
@@ -342,7 +346,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
   Future<void> _deleteExistingProfileFiles() async {
     try {
-      final dirUrl = await getDirUrl(constructPodPath('profile', ''));
+      // Use full path for directory operations (SolidPod web bug workaround)
+      final dirUrl = await getDirUrl('healthpod/data/profile');
 
       final resources = await getResourcesInContainer(dirUrl);
 
@@ -364,7 +369,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       // Delete all profile files to create a clean slate.
 
       for (final file in profileFiles) {
-        final filePath = constructPodPath('profile', file);
+        final filePath = 'profile/$file';
         await deleteFile(filePath);
       }
     } catch (e) {

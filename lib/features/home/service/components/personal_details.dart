@@ -25,14 +25,16 @@
 
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/utils/construct_pod_path.dart';
+
 import 'package:healthpod/utils/fetch_profile_data.dart';
-import 'package:healthpod/utils/upload_json_to_pod.dart';
+import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
 /// A widget that displays and allows editing of personal identification information.
 
@@ -177,43 +179,34 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     }
   }
 
-  /// Saves the profile data using the uploadJsonToPod utility which handles file creation
-  /// and proper encryption consistently.
+  /// Saves the profile data using direct writePod call to avoid file system operations
+  /// that don't work on web platforms.
 
   Future<SolidFunctionCallStatus> _saveProfileDataUsingUploadUtil(
       Map<String, dynamic> updatedData) async {
-    debugPrint('Saving profile using uploadJsonToPod utility...');
 
     try {
-      // Create a structure for uploadJsonToPod that matches what saveResponseToPod expects
-      // The profile data should be passed as the 'responses' parameter, not wrapped in 'data'
+      // Create JSON data structure matching other successful implementations
+      final profileData = {
+        'timestamp': DateTime.now().toIso8601String(),
+        'responses': updatedData,
+      };
 
-      // Use uploadJsonToPod which is used by other components successfully.
-      final result = await uploadJsonToPod(
-        data: {
-          'timestamp': DateTime.now().toIso8601String(),
-          'responses': updatedData,
-        },
-        targetPath: 'profile',
-        fileNamePrefix: 'profile',
-        context: context,
-        onSuccess: () {
-          debugPrint('Successfully uploaded profile data');
-        },
+      // Create filename with timestamp
+      final timestamp = formatTimestampForFilename(DateTime.now());
+      final filename = 'profile_$timestamp.json.enc.ttl';
+
+      // Use direct writePod call with relative path (writePod DOES normalise on web).
+
+      final result = await writePod(
+        'profile/$filename',
+        json.encode(profileData),
+        context,
+        const Text('Saving profile data'),
+        encrypted: true,
       );
 
-      // Double-check by logging the directory contents after saving.
 
-      if (result == SolidFunctionCallStatus.success) {
-        try {
-          final dirUrl = await getDirUrl(constructPodPath('profile', ''));
-          final resources = await getResourcesInContainer(dirUrl);
-          debugPrint(
-              'After save - Files in profile directory: ${resources.files}');
-        } catch (e) {
-          debugPrint('Error checking directory after save: $e');
-        }
-      }
 
       return result;
     } catch (e) {
@@ -242,14 +235,10 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   Future<void> _deleteExistingProfileFiles() async {
     try {
       // Get all files in the profile directory.
-      // Note: constructPodPath already includes basePath.
+      // Use full path for directory operations (SolidPod web bug workaround)
 
-      final dirUrl = await getDirUrl(constructPodPath('profile', ''));
-      debugPrint(
-          'Looking for profile files to delete in: ${constructPodPath('profile', '')}');
-
+      final dirUrl = await getDirUrl('healthpod/data/profile');
       final resources = await getResourcesInContainer(dirUrl);
-      debugPrint('Files in profile directory: ${resources.files}');
 
       // Find all profile files.
 
@@ -259,7 +248,6 @@ class _PersonalDetailsState extends State<PersonalDetails> {
           .toList();
 
       if (profileFiles.isEmpty) {
-        debugPrint('No existing profile files to clean up');
         return;
       }
 
@@ -269,19 +257,14 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
       // Delete all profile files - we'll create a new one with the current data.
 
-      int deletedCount = 0;
       for (final file in profileFiles) {
         try {
-          final filePath = constructPodPath('profile', file);
-          debugPrint('Deleting profile file: $filePath');
+          final filePath = 'profile/$file';
           await deleteFile(filePath);
-          deletedCount++;
         } catch (e) {
           debugPrint('Error deleting profile file $file: $e');
         }
       }
-
-      debugPrint('Successfully deleted $deletedCount profile files');
     } catch (e) {
       debugPrint('Error cleaning up profile files: $e');
       // Don't rethrow - we want to continue with saving even if cleanup fails.
