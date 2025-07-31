@@ -32,7 +32,6 @@ import 'package:flutter/material.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:solidpod/solidpod.dart';
 
-
 import 'package:healthpod/utils/fetch_profile_data.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
@@ -184,19 +183,20 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
   Future<SolidFunctionCallStatus> _saveProfileDataUsingUploadUtil(
       Map<String, dynamic> updatedData) async {
-
     try {
-      // Create JSON data structure matching other successful implementations
+      // Create JSON data structure matching other successful implementations.
+
       final profileData = {
         'timestamp': DateTime.now().toIso8601String(),
         'responses': updatedData,
       };
 
-      // Create filename with timestamp
+      // Create filename with timestamp.
+
       final timestamp = formatTimestampForFilename(DateTime.now());
       final filename = 'profile_$timestamp.json.enc.ttl';
 
-      // Use direct writePod call with relative path (writePod DOES normalise on web).
+      // Use direct writ  ePod call with relative path (writePod DOES normalise on web).
 
       final result = await writePod(
         'profile/$filename',
@@ -205,8 +205,6 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         const Text('Saving profile data'),
         encrypted: true,
       );
-
-
 
       return result;
     } catch (e) {

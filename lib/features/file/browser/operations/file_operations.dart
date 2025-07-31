@@ -95,13 +95,15 @@ class FileOperations {
             dateModified: DateTime.now(),
           ));
         } else {
-          // File exists in directory listing but can't be read - skip silently
+          // File exists in directory listing but can't be read - skip silently.
+
           debugPrint('Skipping unreadable file: $fileName');
         }
       } catch (e) {
-        // Handle individual file read errors gracefully
+        // Handle individual file read errors gracefully.
+
         debugPrint('Error reading file $fileName: $e');
-        // Continue processing other files instead of failing completely
+        // Continue processing other files instead of failing completely.
       }
     }
     return processedFiles;

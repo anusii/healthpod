@@ -235,7 +235,8 @@ class FileBrowserState extends State<FileBrowser> {
       debugPrint('Error loading files: $e');
       if (mounted) {
         setState(() {
-          // Set empty state on critical failure but don't crash
+          // Set empty state on critical failure but don't crash.
+
           files = [];
           directories = [];
           directoryCounts = {};

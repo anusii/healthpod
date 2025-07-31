@@ -292,13 +292,15 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   Future<SolidFunctionCallStatus> _saveProfileDataUsingUploadUtil(
       Map<String, dynamic> updatedData) async {
     try {
-      // Create JSON data structure matching other successful implementations
+      // Create JSON data structure matching other successful implementations.
+
       final profileData = {
         'timestamp': DateTime.now().toIso8601String(),
         'responses': updatedData,
       };
 
-      // Create filename with timestamp
+      // Create filename with timestamp.
+
       final timestamp = formatTimestampForFilename(DateTime.now());
       final filename = 'profile_$timestamp.json.enc.ttl';
 
@@ -346,7 +348,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
   Future<void> _deleteExistingProfileFiles() async {
     try {
-      // Use full path for directory operations (SolidPod web bug workaround)
+      // Use full path for directory operations (SolidPod web bug workaround).
+
       final dirUrl = await getDirUrl('healthpod/data/profile');
 
       final resources = await getResourcesInContainer(dirUrl);

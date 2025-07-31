@@ -49,19 +49,24 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
     final fullDirPath = 'healthpod/data/profile';
     final dirUrl = await getDirUrl(fullDirPath);
-    
-    // Try to get fresh directory listing - sometimes cache issues occur
+
+    // Try to get fresh directory listing - sometimes cache issues occur.
+
     var resources = await getResourcesInContainer(dirUrl);
-    
-    // If we don't find any recent files, try refreshing the directory listing
-    final hasRecentFiles = resources.files.any((file) => 
-        file.startsWith('profile_') && 
-        !file.startsWith('profile_photo_') &&
-        (file.endsWith('.enc.ttl') || file.endsWith('.json.enc.ttl')) &&
-        file.contains('2025-07-') || file.contains('2025-08-') || file.contains('2025-09-'));
-    
+
+    // If we don't find any recent files, try refreshing the directory listing.
+
+    final hasRecentFiles = resources.files.any((file) =>
+        file.startsWith('profile_') &&
+            !file.startsWith('profile_photo_') &&
+            (file.endsWith('.enc.ttl') || file.endsWith('.json.enc.ttl')) &&
+            file.contains('2025-07-') ||
+        file.contains('2025-08-') ||
+        file.contains('2025-09-'));
+
     if (!hasRecentFiles) {
-      // Small delay then retry directory listing
+      // Small delay then retry directory listing.
+
       await Future.delayed(const Duration(milliseconds: 500));
       resources = await getResourcesInContainer(dirUrl);
     }
@@ -81,6 +86,11 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
     profileFiles.sort((a, b) => b.compareTo(a));
 
+    if (!context.mounted) {
+      debugPrint('⚠️ Context no longer mounted after sorting files');
+      return defaultProfileData['data'] as Map<String, dynamic>;
+    }
+
     // Prompt for security key if needed (do this once before trying any files).
 
     await CentralKeyManager.instance.ensureSecurityKey(
@@ -88,23 +98,26 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       const Text('Please enter your security key to access your profile data'),
     );
 
-  if (!context.mounted) {
+    if (!context.mounted) {
       debugPrint('⚠️ Context no longer mounted after security key prompt');
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
 
-    // Try reading files in order until we find one that exists and works
+    // Try reading files in order until we find one that exists and works.
+
     String? fileContent;
     String? successfulFile;
-    
+
     for (final profileFile in profileFiles) {
       // Double-check that we're not using a photo file.
+
       if (profileFile.startsWith('profile_photo_')) {
         continue;
       }
 
       try {
-        // Use full path for file operations too (SolidPod web normalization issue)
+        // Use full path for file operations too (SolidPod web normalization issue).
+
         final fullPath = 'healthpod/data/profile/$profileFile';
 
         if (!context.mounted) {
@@ -117,7 +130,8 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
           const Text('Reading profile data'),
         );
 
-        // Check if this file read was successful
+        // Check if this file read was successful.
+
         if (content.isNotEmpty &&
             content != SolidFunctionCallStatus.fail.toString() &&
             content != SolidFunctionCallStatus.notLoggedIn.toString()) {
@@ -126,11 +140,12 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
           break;
         }
       } catch (e) {
-        // Continue to next file
+        // Continue to next file.
       }
     }
 
-    // Check if we successfully read any file
+    // Check if we successfully read any file.
+
     if (fileContent == null || successfulFile == null) {
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
