@@ -116,16 +116,16 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       }
 
       try {
-        // Use full path for file operations too (SolidPod web normalization issue).
+        // Use relative path to match writePod operations (for consistency).
 
-        final fullPath = 'healthpod/data/profile/$profileFile';
+        final relativePath = 'profile/$profileFile';
 
         if (!context.mounted) {
           return defaultProfileData['data'] as Map<String, dynamic>;
         }
 
         final content = await readPod(
-          fullPath,
+          relativePath,
           context,
           const Text('Reading profile data'),
         );

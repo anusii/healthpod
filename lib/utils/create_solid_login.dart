@@ -97,7 +97,7 @@ class SolidLoginTestHelper {
 ///   A Widget configured for the appropriate authentication mode
 
 Widget createSolidLogin(BuildContext context) {
-  final bool isIntegrationTest = PlatformHelper.isIntegrationTest();
+  final bool isIntegrationTest = false; //PlatformHelper.isIntegrationTest();
   debugPrint('🔥 INTEGRATION_TEST: $isIntegrationTest');
 
   if (isIntegrationTest) {

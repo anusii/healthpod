@@ -167,8 +167,27 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     } catch (e) {
       debugPrint('Error saving profile data: $e');
       if (mounted) {
+        String userFriendlyMessage = 'Error updating profile';
+        
+        // Provide more specific error messages for common issues
+        if (e.toString().contains('pathSeparator')) {
+          userFriendlyMessage = 'Profile save failed due to platform compatibility issue. Please try again.';
+        } else if (e.toString().contains('not logged in')) {
+          userFriendlyMessage = 'Please log in to save your profile';
+        } else if (e.toString().contains('network')) {
+          userFriendlyMessage = 'Network error while saving profile. Check your connection and try again.';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating profile: $e')),
+          SnackBar(
+            content: Text(userFriendlyMessage),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: Colors.white,
+              onPressed: () => _saveProfileData(),
+            ),
+          ),
         );
       }
     } finally {
@@ -196,7 +215,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       final timestamp = formatTimestampForFilename(DateTime.now());
       final filename = 'profile_$timestamp.json.enc.ttl';
 
-      // Use direct writ  ePod call with relative path (writePod DOES normalise on web).
+      // Use direct writePod call with relative path to match read operations.
+      // Note: fetchProfileData uses full path for reading, so we need consistency.
 
       final result = await writePod(
         'profile/$filename',
@@ -206,9 +226,16 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         encrypted: true,
       );
 
+      if (result != SolidFunctionCallStatus.success) {
+        debugPrint('writePod returned non-success status: $result');
+      }
+
       return result;
+    } on Exception catch (e) {
+      debugPrint('Exception saving profile: $e');
+      return SolidFunctionCallStatus.fail;
     } catch (e) {
-      debugPrint('Error saving profile: $e');
+      debugPrint('Unexpected error saving profile: $e');
       return SolidFunctionCallStatus.fail;
     }
   }

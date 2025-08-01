@@ -33,7 +33,8 @@ dependencies:
   printing: ^5.11.0
   rdflib: ^0.2.9
   shared_preferences: ^2.5.2
-  solidpod: ^0.7.4
+  solidpod:
+    path: solidpod
   syncfusion_flutter_pdf: ^30.1.37
   table_calendar: ^3.0.9
   timeline_tile: ^2.0.0

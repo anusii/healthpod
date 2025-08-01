@@ -26,18 +26,18 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
+
 
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
-import 'package:healthpod/utils/upload_file_to_pod.dart';
 
-/// Creates a temporary JSON file and uploads it to POD.
+/// Uploads JSON data directly to POD.
 ///
 /// Useful for saving structured data like survey responses.
+/// This version works on both web and non-web platforms by using writePod directly.
 
 Future<SolidFunctionCallStatus> uploadJsonToPod({
   required Map<String, dynamic> data,
@@ -47,48 +47,46 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
   void Function(bool)? onProgressChange,
   void Function()? onSuccess,
 }) async {
-  Directory? tempDir;
-  File? tempFile;
-
   try {
-    // Create temp file with JSON content.
+    onProgressChange?.call(true);
 
-    final timestamp = formatTimestampForFilename(
-        DateTime.now()); // Format timestamp for file name.
-    final fileName = '${fileNamePrefix}_$timestamp.json';
-
-    tempDir = await Directory.systemTemp.createTemp('healthpod_temp');
-    tempFile = File('${tempDir.path}/$fileName');
-
-    // Write formatted JSON.
-
+    // Create the JSON content.
     final jsonString = const JsonEncoder.withIndent('  ').convert(data);
-    await tempFile.writeAsString(jsonString);
+
+    // Create filename with timestamp.
+    final timestamp = formatTimestampForFilename(DateTime.now());
+    final fileName = '${fileNamePrefix}_$timestamp.json.enc.ttl';
+
+    // Clean target path - remove leading slash if present.
+    String cleanTargetPath = targetPath.startsWith('/') ? targetPath.substring(1) : targetPath;
+    
+    // Construct the full file path.
+    final filePath = cleanTargetPath.isEmpty ? fileName : '$cleanTargetPath/$fileName';
 
     // Guard against using context across async gaps.
-
     if (!context.mounted) {
       debugPrint('Widget is no longer mounted, skipping upload.');
       return SolidFunctionCallStatus.fail;
     }
 
-    // Upload the file.
-
-    return await uploadFileToPod(
-      filePath: tempFile.path,
-      targetPath: targetPath,
-      context: context,
-      onProgressChange: onProgressChange,
-      onSuccess: onSuccess,
+    // Use writePod directly with encryption - this works on all platforms.
+    final result = await writePod(
+      filePath,
+      jsonString,
+      context,
+      const Text('Saving data'),
+      encrypted: true,
     );
-  } finally {
-    // Clean up temp files.
 
-    try {
-      if (tempFile != null && tempFile.existsSync()) await tempFile.delete();
-      if (tempDir != null && tempDir.existsSync()) await tempDir.delete();
-    } catch (e) {
-      debugPrint('Error cleaning up temp files: $e');
+    if (result == SolidFunctionCallStatus.success) {
+      onSuccess?.call();
     }
+
+    return result;
+  } catch (e) {
+    debugPrint('Error uploading JSON to POD: $e');
+    return SolidFunctionCallStatus.fail;
+  } finally {
+    onProgressChange?.call(false);
   }
 }
