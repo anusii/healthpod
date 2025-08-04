@@ -145,7 +145,7 @@ Future<void> handleSurveySubmit({
             ),
           );
         }
-        return; // Don't show success message if POD save failed
+        return;
       }
     }
 

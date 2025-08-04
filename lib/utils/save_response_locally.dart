@@ -30,7 +30,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
-import 'package:healthpod/utils/web_download_web.dart';
+
+// Conditional import for web download functionality
+import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
 
 /// Saves survey responses to a local file.
 ///
@@ -67,10 +69,12 @@ Future<void> saveResponseLocally({
     final defaultFileName = '${filePrefix}_$timestamp.json';
 
     if (kIsWeb) {
-      // On web, use the web download function
+      // On web, use the web download function.
+
       downloadJsonFile(jsonString, defaultFileName);
     } else {
-      // On non-web platforms, show a message that local save is not supported
+      // On non-web platforms, show a message that local save is not supported.
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

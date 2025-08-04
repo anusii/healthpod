@@ -25,12 +25,9 @@ library;
 
 import 'package:flutter/foundation.dart';
 
-/// Downloads a JSON file on non-web platforms (stub implementation).
+/// Stub implementation for non-web platforms.
 ///
-/// This is a no-op implementation for non-web platforms since file downloads
-/// are handled differently (via file picker).
-
+/// This function does nothing on non-web platforms.
 void downloadJsonFile(String jsonContent, String fileName) {
-  debugPrint('⚠️ downloadJsonFile: Stub called on non-web platform');
-  // No-op on non-web platforms
+  debugPrint('⚠️ downloadJsonFile: Called on non-web platform');
 }

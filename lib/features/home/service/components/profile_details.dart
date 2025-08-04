@@ -250,7 +250,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         'gender': _genderController.text.trim(),
       };
 
-      // Try to update existing profile file first, create new one only if none exists
+      // Try to update existing profile file first, create new one only if none exists.
+
       final result = await _updateOrCreateProfileFile(updatedData);
 
       if (result != SolidFunctionCallStatus.success) {
@@ -274,7 +275,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       if (mounted) {
         String userFriendlyMessage = 'Error updating profile';
 
-        // Provide more specific error messages for common issues
+        // Provide more specific error messages for common issues.
+
         if (e.toString().contains('pathSeparator')) {
           userFriendlyMessage =
               'Profile save failed due to platform compatibility issue. Please try again.';
@@ -304,23 +306,25 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     }
   }
 
-  /// Updates existing profile file or creates a new one if none exists
+  /// Updates existing profile file or creates a new one if none exists.
+
   Future<SolidFunctionCallStatus> _updateOrCreateProfileFile(
       Map<String, dynamic> updatedData) async {
     try {
-      // First, try to find an existing profile file
+      // First, try to find an existing profile file.
+
       final existingFile = await _findExistingProfileFile();
 
       String filename;
       if (existingFile != null) {
-        // Use the existing filename to update the file
+        // Use the existing filename to update the file.
+
         filename = existingFile;
-        debugPrint('🔄 Updating existing profile file: $filename');
       } else {
-        // Create new filename only if no existing file found
+        // Create new filename only if no existing file found.
+
         final timestamp = formatTimestampForFilename(DateTime.now());
         filename = 'profile_$timestamp.json.enc.ttl';
-        debugPrint('🆕 Creating new profile file: $filename');
       }
 
       // Create JSON data structure matching other successful implementations.
@@ -329,15 +333,15 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         'responses': updatedData,
       };
 
-      debugPrint('💾 Saving profile data: ${json.encode(profileData)}');
+      // Check if context is still valid before using it.
 
-      // Check if context is still valid before using it
       if (!mounted) {
         debugPrint('❌ Context no longer mounted during save');
         return SolidFunctionCallStatus.fail;
       }
 
       // Use direct writePod call with relative path to match read operations.
+
       final result = await writePod(
         'profile/$filename',
         json.encode(profileData),
@@ -346,7 +350,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         encrypted: true,
       );
 
-      debugPrint('📝 WritePod result: $result for file: profile/$filename');
       return result;
     } on Exception catch (e) {
       debugPrint('Exception saving profile: $e');
@@ -357,14 +360,17 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     }
   }
 
-  /// Finds an existing profile file to update, or returns null if none exists
+  /// Finds an existing profile file to update, or returns null if none exists.
+
   Future<String?> _findExistingProfileFile() async {
     try {
-      // Get all files in the profile directory
+      // Get all files in the profile directory.
+
       final dirUrl = await getDirUrl('healthpod/data/profile');
       final resources = await getResourcesInContainer(dirUrl);
 
-      // Find all profile files with the expected extension
+      // Find all profile files with the expected extension.
+
       final profileFiles = resources.files
           .where((file) =>
               file.startsWith('profile_') &&
@@ -376,7 +382,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         return null;
       }
 
-      // Return the most recent profile file (sorted by filename)
+      // Return the most recent profile file (sorted by filename).
+
       profileFiles.sort((a, b) => b.compareTo(a));
       return profileFiles.first;
     } catch (e) {

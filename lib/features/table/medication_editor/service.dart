@@ -70,7 +70,8 @@ class MedicationEditorService {
       for (final fileName in resources.files) {
         if (!fileName.endsWith('.enc.ttl')) continue;
 
-        // Use relative path for file operations to match writePod behavior
+        // Use relative path for file operations to match writePod behaviour.
+
         final filePath = '$feature/$fileName';
         if (!context.mounted) break;
 

@@ -62,7 +62,7 @@ class BPSurvey extends StatelessWidget {
     await saveResponseToPod(
       context: context,
       responses: responses,
-      podPath: 'bp', // Use relative path to match reading operations
+      podPath: 'bp',
       filePrefix: 'blood_pressure',
     );
   }

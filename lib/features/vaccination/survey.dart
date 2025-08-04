@@ -62,7 +62,7 @@ class VaccinationSurvey extends StatelessWidget {
     await saveResponseToPod(
       context: context,
       responses: responses,
-      podPath: 'vaccination', // Use relative path to match reading operations
+      podPath: 'vaccination',
       filePrefix: 'vaccination',
     );
   }

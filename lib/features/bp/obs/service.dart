@@ -47,6 +47,7 @@ import 'package:healthpod/utils/get_feature_path.dart';
 
 class BPEditorService {
   /// The type of data being handled.
+
   static const String feature = 'bp';
 
   /// Load all BP observations from `healthpod/data/blood_pressure` directory.
@@ -63,7 +64,8 @@ class BPEditorService {
 
       if (!context.mounted) continue;
 
-      // Use relative path for file operations to match writePod behavior
+      // Use relative path for file operations to match writePod behaviour.
+
       final filePath = '$feature/$file';
 
       // Prompt for security key if needed.

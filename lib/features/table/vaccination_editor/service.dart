@@ -56,7 +56,8 @@ class VaccinationEditorService {
 
       if (!context.mounted) continue;
 
-      // Use relative path for file operations to match writePod behavior
+      // Use relative path for file operations to match writePod behaviour.
+
       final filePath = '$feature/$file';
       final content = await readPod(
         filePath,

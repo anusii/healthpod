@@ -40,7 +40,6 @@ dependencies:
   universal_io: ^2.2.2
   url_launcher: ^6.3.1
   version_widget: ^1.0.2
-  web: ^1.1.1
   webdriver: ^3.0.3
   window_manager: ^0.5.1
 
