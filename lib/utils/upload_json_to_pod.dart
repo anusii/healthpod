@@ -27,7 +27,6 @@ library;
 
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
@@ -51,23 +50,23 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
     onProgressChange?.call(true);
 
     // Create the JSON content.
+
     final jsonString = const JsonEncoder.withIndent('  ').convert(data);
 
     // Create filename with timestamp.
+
     final timestamp = formatTimestampForFilename(DateTime.now());
     final fileName = '${fileNamePrefix}_$timestamp.json.enc.ttl';
 
     // Clean target path - remove leading slash if present.
-    String cleanTargetPath = targetPath.startsWith('/') ? targetPath.substring(1) : targetPath;
-    
-    // Construct the full file path.
-    final filePath = cleanTargetPath.isEmpty ? fileName : '$cleanTargetPath/$fileName';
 
-    debugPrint('🌐 uploadJsonToPod: Starting upload');
-    debugPrint('🌐 uploadJsonToPod: fileName = $fileName');
-    debugPrint('🌐 uploadJsonToPod: filePath = $filePath');
-    debugPrint('🌐 uploadJsonToPod: kIsWeb = $kIsWeb');
-    debugPrint('🌐 uploadJsonToPod: jsonString length = ${jsonString.length}');
+    String cleanTargetPath =
+        targetPath.startsWith('/') ? targetPath.substring(1) : targetPath;
+
+    // Construct the full file path.
+
+    final filePath =
+        cleanTargetPath.isEmpty ? fileName : '$cleanTargetPath/$fileName';
 
     // Guard against using context across async gaps.
     if (!context.mounted) {
@@ -76,7 +75,7 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
     }
 
     // Use writePod directly with encryption - this works on all platforms.
-    debugPrint('🌐 uploadJsonToPod: Calling writePod...');
+
     final result = await writePod(
       filePath,
       jsonString,
@@ -84,8 +83,6 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
       const Text('Saving data'),
       encrypted: true,
     );
-
-    debugPrint('🌐 uploadJsonToPod: writePod result = $result');
 
     if (result == SolidFunctionCallStatus.success) {
       onSuccess?.call();

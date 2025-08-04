@@ -8,7 +8,7 @@ library;
 import 'package:flutter/foundation.dart';
 
 /// Downloads a JSON file on non-web platforms (stub implementation).
-/// 
+///
 /// This is a no-op implementation for non-web platforms since file downloads
 /// are handled differently (via file picker).
 void downloadJsonFile(String jsonContent, String fileName) {

@@ -6,41 +6,33 @@
 library;
 
 import 'dart:convert';
-import 'dart:html' as html;
+import 'dart:js_interop';
+
 import 'package:flutter/foundation.dart';
+import 'package:web/web.dart' as web;
 
 /// Downloads a JSON file on web platforms using browser APIs.
 /// 
 /// Creates a blob with the JSON content and triggers a download.
 void downloadJsonFile(String jsonContent, String fileName) {
-  debugPrint('🌐 downloadJsonFile: Starting web download');
-  debugPrint('🌐 downloadJsonFile: fileName = $fileName');
-  debugPrint('🌐 downloadJsonFile: kIsWeb = $kIsWeb');
-  
   if (kIsWeb) {
     try {
-      debugPrint('🌐 downloadJsonFile: Encoding content to bytes...');
       // Create a blob with the JSON content
       final bytes = utf8.encode(jsonContent);
-      debugPrint('🌐 downloadJsonFile: Content encoded, creating blob...');
       
-      final blob = html.Blob([bytes], 'application/json');
-      debugPrint('🌐 downloadJsonFile: Blob created, generating URL...');
+      final blob = web.Blob([bytes.toJS].toJS, web.BlobPropertyBag(type: 'application/json'));
       
       // Create a download URL
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      debugPrint('🌐 downloadJsonFile: URL created = $url');
+      final url = web.URL.createObjectURL(blob);
       
       // Create an anchor element and trigger download
-      debugPrint('🌐 downloadJsonFile: Creating anchor element and triggering download...');
-      html.AnchorElement(href: url)
-        ..setAttribute('download', fileName)
-        ..click();
-      debugPrint('🌐 downloadJsonFile: Download triggered successfully');
+      final anchor = web.HTMLAnchorElement();
+      anchor.href = url;
+      anchor.download = fileName;
+      anchor.click();
       
       // Clean up the URL
-      html.Url.revokeObjectUrl(url);
-      debugPrint('🌐 downloadJsonFile: URL cleaned up');
+      web.URL.revokeObjectURL(url);
     } catch (e) {
       debugPrint('💥 downloadJsonFile: ERROR during web download: $e');
       debugPrint('🔍 downloadJsonFile: Error type: ${e.runtimeType}');

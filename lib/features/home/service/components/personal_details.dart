@@ -182,7 +182,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     try {
       // First, try to find an existing profile file
       final existingFile = await _findExistingProfileFile();
-      
+
       String filename;
       if (existingFile != null) {
         // Use the existing filename to update the file
@@ -236,7 +236,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       // Find all profile files
       final profileFiles = resources.files
           .where((file) =>
-              file.startsWith('profile_') && 
+              file.startsWith('profile_') &&
               !file.startsWith('profile_photo_') &&
               file.endsWith('.json.enc.ttl'))
           .toList();
@@ -267,8 +267,6 @@ class _PersonalDetailsState extends State<PersonalDetails> {
             (_profileData['dateOfBirth'] ?? '') ||
         _genderController.text.trim() != (_profileData['gender'] ?? '');
   }
-
-
 
   @override
   void dispose() {

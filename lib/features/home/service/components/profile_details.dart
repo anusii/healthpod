@@ -274,16 +274,18 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     } catch (e) {
       if (mounted) {
         String userFriendlyMessage = 'Error updating profile';
-        
+
         // Provide more specific error messages for common issues
         if (e.toString().contains('pathSeparator')) {
-          userFriendlyMessage = 'Profile save failed due to platform compatibility issue. Please try again.';
+          userFriendlyMessage =
+              'Profile save failed due to platform compatibility issue. Please try again.';
         } else if (e.toString().contains('not logged in')) {
           userFriendlyMessage = 'Please log in to save your profile';
         } else if (e.toString().contains('network')) {
-          userFriendlyMessage = 'Network error while saving profile. Check your connection and try again.';
+          userFriendlyMessage =
+              'Network error while saving profile. Check your connection and try again.';
         }
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(userFriendlyMessage),
@@ -309,7 +311,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     try {
       // First, try to find an existing profile file
       final existingFile = await _findExistingProfileFile();
-      
+
       String filename;
       if (existingFile != null) {
         // Use the existing filename to update the file
@@ -366,7 +368,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       // Find all profile files with the expected extension
       final profileFiles = resources.files
           .where((file) =>
-              file.startsWith('profile_') && 
+              file.startsWith('profile_') &&
               !file.startsWith('profile_photo_') &&
               file.endsWith('.json.enc.ttl'))
           .toList();
@@ -404,8 +406,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             (_profileData['dateOfBirth'] ?? '') ||
         _genderController.text.trim() != (_profileData['gender'] ?? '');
   }
-
-
 
   @override
   void dispose() {
