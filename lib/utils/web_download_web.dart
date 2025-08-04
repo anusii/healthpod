@@ -33,6 +33,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// Creates a blob with the JSON content and triggers a download.
 /// This function is only used on web platforms via conditional imports.
+
 void downloadJsonFile(String jsonContent, String fileName) {
   if (kIsWeb) {
     try {

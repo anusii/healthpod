@@ -28,6 +28,7 @@ import 'package:flutter/foundation.dart';
 /// Stub implementation for non-web platforms.
 ///
 /// This function does nothing on non-web platforms.
+
 void downloadJsonFile(String jsonContent, String fileName) {
   debugPrint('⚠️ downloadJsonFile: Called on non-web platform');
 }
