@@ -28,12 +28,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart'
-    show
-        SolidFunctionCallStatus,
-        getResourcesInContainer,
-        getDirUrl,
-        readPod,
-        KeyManager;
+    show SolidFunctionCallStatus, getResourcesInContainer, getDirUrl, readPod;
 
 import 'package:healthpod/constants/profile.dart';
 import 'package:healthpod/utils/security_key/central_key_manager.dart';
@@ -191,8 +186,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
                 const Text('Reading profile data (retry)'),
               );
 
-              debugPrint(
-                  '🔄 Retry read result length: ${content?.length ?? 0}');
+              debugPrint('🔄 Retry read result length: ${content.length}');
 
               // Check if retry was successful.
 

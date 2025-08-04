@@ -156,16 +156,6 @@ Future<void> handleSurveySubmit({
     String message = 'Survey submitted and saved successfully!';
     if (saveChoice == 'both' && !podSaveSuccess) {
       message = 'Survey saved locally but failed to save to POD.';
-    } else if (saveChoice == 'pod' && !podSaveSuccess) {
-      message = 'Failed to save survey to POD.';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
-        ),
-      );
-      return; // Don't show success for failed saves
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
