@@ -31,7 +31,6 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
-// Conditional import for web download functionality
 import 'web_download_stub.dart' if (dart.library.html) 'web_download_web.dart';
 
 /// Saves survey responses to a local file.
