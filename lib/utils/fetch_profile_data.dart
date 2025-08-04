@@ -28,7 +28,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart'
-    show SolidFunctionCallStatus, getResourcesInContainer, getDirUrl, readPod;
+    show SolidFunctionCallStatus, getResourcesInContainer, getDirUrl, readPod, KeyManager;
 
 import 'package:healthpod/constants/profile.dart';
 import 'package:healthpod/utils/security_key/central_key_manager.dart';
@@ -78,7 +78,10 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
             (file.endsWith('.enc.ttl') || file.endsWith('.json.enc.ttl')))
         .toList();
 
+    debugPrint('Found ${profileFiles.length} profile files: $profileFiles');
+
     if (profileFiles.isEmpty) {
+      debugPrint('No profile files found, returning default data');
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
 
@@ -93,6 +96,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
     // Prompt for security key if needed (do this once before trying any files).
 
+    debugPrint('🔐 Ensuring security key before reading profile data...');
     await CentralKeyManager.instance.ensureSecurityKey(
       context,
       const Text('Please enter your security key to access your profile data'),
@@ -102,6 +106,10 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       debugPrint('⚠️ Context no longer mounted after security key prompt');
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
+
+    // Check if we have a security key after the prompt
+    final hasKey = await KeyManager.hasSecurityKey();
+    debugPrint('🔐 Security key available after prompt: $hasKey');
 
     // Try reading files in order until we find one that exists and works.
 
@@ -117,27 +125,94 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
       try {
         // Use relative path to match writePod operations (for consistency).
+        // Also try full path for backward compatibility with existing files.
 
         final relativePath = 'profile/$profileFile';
+        final fullPath = 'healthpod/data/profile/$profileFile';
 
         if (!context.mounted) {
           return defaultProfileData['data'] as Map<String, dynamic>;
         }
 
-        final content = await readPod(
-          relativePath,
-          context,
-          const Text('Reading profile data'),
-        );
+        // Try relative path first (new format)
+        String? content;
+        try {
+          content = await readPod(
+            relativePath,
+            context,
+            const Text('Reading profile data'),
+          );
+          debugPrint('✅ Successfully read profile using relative path: $relativePath');
+        } catch (e) {
+          // If relative path fails, try full path (backward compatibility)
+          debugPrint('Relative path failed, trying full path: $e');
+          try {
+            content = await readPod(
+              fullPath,
+              context,
+              const Text('Reading profile data (legacy)'),
+            );
+            debugPrint('✅ Successfully read profile using full path: $fullPath');
+          } catch (e2) {
+            debugPrint('Full path also failed: $e2');
+            continue; // Try next file
+          }
+        }
 
         // Check if this file read was successful.
 
-        if (content.isNotEmpty &&
+        if (content != null && 
+            content.isNotEmpty &&
             content != SolidFunctionCallStatus.fail.toString() &&
             content != SolidFunctionCallStatus.notLoggedIn.toString()) {
+          
+          // Check if content is in TTL format (still encrypted)
+          if (content.trim().startsWith('@prefix')) {
+            debugPrint('⚠️ File is still encrypted (TTL format), attempting to re-apply security key...');
+            
+            // Try to re-apply security key and read again
+            try {
+              await CentralKeyManager.instance.ensureSecurityKey(
+                context,
+                const Text('Please enter your security key to access your profile data'),
+              );
+              
+              if (!context.mounted) {
+                continue; // Try next file
+              }
+              
+              // Try reading again with fresh security key
+              content = await readPod(
+                relativePath,
+                context,
+                const Text('Reading profile data (retry)'),
+              );
+              
+              debugPrint('🔄 Retry read result length: ${content?.length ?? 0}');
+              
+              // Check if retry was successful
+              if (content == null || 
+                  content.isEmpty ||
+                  content == SolidFunctionCallStatus.fail.toString() ||
+                  content == SolidFunctionCallStatus.notLoggedIn.toString() ||
+                  content.trim().startsWith('@prefix')) {
+                debugPrint('❌ Retry failed, file still encrypted');
+                continue; // Try next file
+              }
+            } catch (e) {
+              debugPrint('❌ Error during retry: $e');
+              continue; // Try next file
+            }
+          }
+          
           fileContent = content;
           successfulFile = profileFile;
+          debugPrint('Successfully read profile file: $profileFile');
+          debugPrint('📄 File content length: ${content.length} characters');
+          debugPrint('📄 File content preview: ${content.substring(0, content.length > 200 ? 200 : content.length)}...');
           break;
+        } else {
+          debugPrint('Failed to read profile file: $profileFile');
         }
       } catch (e) {
         // Continue to next file.
@@ -162,6 +237,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       }
 
       final Map<String, dynamic> jsonData = jsonDecode(fileContent);
+      debugPrint('🔍 Parsed JSON data keys: ${jsonData.keys.toList()}');
 
       // Check for nested data structures.
 
@@ -169,10 +245,12 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
       if (jsonData.containsKey('data')) {
         profileData = jsonData['data'] as Map<String, dynamic>;
+        debugPrint('📋 Found profile data in "data" field: ${profileData.keys.toList()}');
       } else if (jsonData.containsKey('responses')) {
         // Most recent format - profile data is in 'responses'.
 
         final responses = jsonData['responses'] as Map<String, dynamic>;
+        debugPrint('📋 Found profile data in "responses" field: ${responses.keys.toList()}');
 
         // Check if responses contains actual profile data or just imageData.
         // Filter out imageData and only keep actual profile fields.
@@ -186,10 +264,13 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
           }
         }
 
+        debugPrint('📋 Extracted profile data: ${profileData.keys.toList()}');
+
         // If we've filtered everything out (only photo data was found),
         // check for profile fields in the main object.
 
         if (profileData.isEmpty) {
+          debugPrint('⚠️ No profile data found in responses, checking main object');
           for (final key in jsonData.keys) {
             if (key != 'responses' &&
                 key != 'timestamp' &&
@@ -202,8 +283,10 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
       } else if (jsonData.containsKey('timestamp') &&
           jsonData.containsKey('data')) {
         profileData = jsonData['data'] as Map<String, dynamic>;
+        debugPrint('📋 Found profile data in timestamp+data structure: ${profileData.keys.toList()}');
       } else {
         // Check for direct profile fields at the top level.
+        debugPrint('📋 Checking for direct profile fields at top level');
 
         final profileKeys = [
           'name',
@@ -223,21 +306,26 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
           }
         }
 
+        debugPrint('📋 Extracted direct profile fields: ${profileData.keys.toList()}');
+
         if (profileData.isEmpty) {
           // No profile data found at any level, return the whole object excluding photo data.
 
           profileData = Map<String, dynamic>.from(jsonData);
           profileData.remove('imageData');
           profileData.remove('format');
+          debugPrint('📋 Using entire JSON object as profile data: ${profileData.keys.toList()}');
         }
       }
 
       // Ensure we have actual profile data.
 
       if (profileData.isEmpty) {
+        debugPrint('❌ No profile data found in any structure, returning default');
         return defaultProfileData['data'] as Map<String, dynamic>;
       }
 
+      debugPrint('✅ Final profile data: ${profileData.keys.toList()}');
       return profileData;
     } catch (e) {
       debugPrint('❌ Error parsing JSON content: $e');

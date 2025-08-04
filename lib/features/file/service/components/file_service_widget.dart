@@ -70,7 +70,7 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
           featureDir = 'diary';
           break;
         case 'Blood Pressure':
-          featureDir = 'blood_pressure';
+          featureDir = 'bp';
           break;
         case 'Medications':
           featureDir = 'medication';
@@ -129,7 +129,7 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
     switch (dirName) {
       case 'diary':
         return 'Appointments Data';
-      case 'blood_pressure':
+      case 'bp':
         return 'Blood Pressure Data';
       case 'medication':
         return 'Medication Data';

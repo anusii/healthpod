@@ -70,9 +70,8 @@ class MedicationEditorService {
       for (final fileName in resources.files) {
         if (!fileName.endsWith('.enc.ttl')) continue;
 
-        // Construct the full path.
-
-        final filePath = getFeaturePath(feature, fileName);
+        // Use relative path for file operations to match writePod behavior
+        final filePath = '$feature/$fileName';
         if (!context.mounted) break;
 
         // Read the file content.

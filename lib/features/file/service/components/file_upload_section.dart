@@ -621,7 +621,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
   Widget build(BuildContext context) {
     final state = ref.watch(fileServiceProvider);
     final isInBpDirectory =
-        state.currentPath?.contains('blood_pressure') ?? false;
+        state.currentPath?.contains('bp') ?? false;
     final isInVaccinationDirectory =
         state.currentPath?.contains('vaccination') ?? false;
     final isInDiaryDirectory = state.currentPath?.contains('diary') ?? false;
