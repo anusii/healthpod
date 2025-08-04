@@ -25,13 +25,12 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
-import 'package:file_picker/file_picker.dart';
-
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/web_download_web.dart';
 
 /// Saves survey responses to a local file.
 ///
@@ -67,29 +66,21 @@ Future<void> saveResponseLocally({
     final timestamp = formatTimestampForFilename(DateTime.now());
     final defaultFileName = '${filePrefix}_$timestamp.json';
 
-    // Show file picker for save location.
-
-    String? outputFile = await FilePicker.platform.saveFile(
-      dialogTitle: dialogTitle,
-      fileName: defaultFileName,
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
-
-    if (outputFile == null) {
-      throw Exception('Save cancelled by user');
+    if (kIsWeb) {
+      // On web, use the web download function
+      downloadJsonFile(jsonString, defaultFileName);
+    } else {
+      // On non-web platforms, show a message that local save is not supported
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Local file save is not supported on this platform. Please use "Save to POD" instead.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     }
-
-    // Ensure .json extension.
-
-    if (!outputFile.toLowerCase().endsWith('.json')) {
-      outputFile = '$outputFile.json';
-    }
-
-    // Save the raw JSON file.
-
-    final file = File(outputFile);
-    await file.writeAsString(jsonString);
   } catch (e) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

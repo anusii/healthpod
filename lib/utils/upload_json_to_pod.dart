@@ -27,7 +27,7 @@ library;
 
 import 'dart:convert';
 
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
@@ -63,6 +63,12 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
     // Construct the full file path.
     final filePath = cleanTargetPath.isEmpty ? fileName : '$cleanTargetPath/$fileName';
 
+    debugPrint('🌐 uploadJsonToPod: Starting upload');
+    debugPrint('🌐 uploadJsonToPod: fileName = $fileName');
+    debugPrint('🌐 uploadJsonToPod: filePath = $filePath');
+    debugPrint('🌐 uploadJsonToPod: kIsWeb = $kIsWeb');
+    debugPrint('🌐 uploadJsonToPod: jsonString length = ${jsonString.length}');
+
     // Guard against using context across async gaps.
     if (!context.mounted) {
       debugPrint('Widget is no longer mounted, skipping upload.');
@@ -70,6 +76,7 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
     }
 
     // Use writePod directly with encryption - this works on all platforms.
+    debugPrint('🌐 uploadJsonToPod: Calling writePod...');
     final result = await writePod(
       filePath,
       jsonString,
@@ -78,12 +85,16 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
       encrypted: true,
     );
 
+    debugPrint('🌐 uploadJsonToPod: writePod result = $result');
+
     if (result == SolidFunctionCallStatus.success) {
       onSuccess?.call();
     }
 
     return result;
   } catch (e) {
+    debugPrint('💥 uploadJsonToPod: ERROR during upload: $e');
+    debugPrint('💥 uploadJsonToPod: Error type: ${e.runtimeType}');
     debugPrint('Error uploading JSON to POD: $e');
     return SolidFunctionCallStatus.fail;
   } finally {
