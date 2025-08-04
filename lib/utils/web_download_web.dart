@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:js_interop';
 
 import 'package:flutter/foundation.dart';
+
 import 'package:web/web.dart' as web;
 
 /// Downloads a JSON file on web platforms using browser APIs.

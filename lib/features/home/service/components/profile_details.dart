@@ -34,7 +34,6 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/appointment.dart';
 import 'package:healthpod/theme/card_style.dart';
-
 import 'package:healthpod/utils/fetch_profile_data.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/is_logged_in.dart';

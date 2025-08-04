@@ -53,6 +53,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  import_order_lint: ^0.2.0
   process_run: ^1.2.2+1
   test: ^1.25.15
   ubuntu_lints: ^0.4.0

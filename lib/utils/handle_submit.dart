@@ -132,12 +132,10 @@ Future<void> handleSurveySubmit({
 
     if (!context.mounted) return;
 
-    bool podSaveSuccess = true;
     if (saveChoice == 'pod' || saveChoice == 'both') {
       try {
         await saveToPod(context, responses);
       } catch (e) {
-        podSaveSuccess = false;
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -154,10 +152,6 @@ Future<void> handleSurveySubmit({
     if (!context.mounted) return;
 
     String message = 'Survey submitted and saved successfully!';
-    if (saveChoice == 'both' && !podSaveSuccess) {
-      message = 'Survey saved locally but failed to save to POD.';
-    }
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
