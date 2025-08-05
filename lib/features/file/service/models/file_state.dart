@@ -139,9 +139,9 @@ class FileState {
 
   bool get isInBpDirectory {
     return currentPath != null &&
-        (currentPath!.endsWith('/bp') ||
-            currentPath!.contains('/bp/') ||
-            currentPath == '$basePath/bp');
+        (currentPath!.endsWith('/blood_pressure') ||
+            currentPath!.contains('/blood_pressure/') ||
+            currentPath == '$basePath/blood_pressure');
   }
 
   /// Checks if the current path is in the vaccination directory.

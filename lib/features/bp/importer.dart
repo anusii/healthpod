@@ -38,7 +38,7 @@ import 'package:healthpod/utils/health_data_importer_base.dart';
 
 class BPImporter extends HealthDataImporterBase {
   @override
-  String get dataType => 'bp';
+  String get dataType => 'blood_pressure';
 
   @override
   String get timestampField => HealthSurveyConstants.fieldTimestamp;

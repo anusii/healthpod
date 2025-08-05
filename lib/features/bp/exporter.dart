@@ -45,7 +45,7 @@ import 'package:healthpod/utils/normalise_timestamp.dart';
 
 class BPExporter extends HealthDataExporterBase {
   @override
-  String get dataType => 'bp';
+  String get dataType => 'blood_pressure';
 
   @override
   String get timestampField => HealthSurveyConstants.fieldTimestamp;

@@ -41,7 +41,7 @@ import 'package:healthpod/constants/paths.dart';
 class SurveyData {
   // Fetch from directory where blood pressure-related survey data resides.
 
-  static const String bpDir = '$basePath/bp';
+  static const String bpDir = '$basePath/blood_pressure';
 
   /// Fetches survey data from POD, ensuring it is sorted by timestamp.
   ///
@@ -110,7 +110,7 @@ class SurveyData {
       for (var fileName in resources.files) {
         if (!fileName.endsWith('.enc.ttl')) continue;
 
-        // Construct the full path including healthpod/data/bp.
+        // Construct the full path including healthpod/data/blood_pressure.
 
         final filePath = '$bpDir/$fileName';
 

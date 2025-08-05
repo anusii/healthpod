@@ -55,7 +55,7 @@ Future<void> initialiseFeatureFolders({
     // List of required feature folders.
     final requiredFolders = [
       'profile',
-      'bp',
+      'blood_pressure',
       'pathology',
       'vaccination',
       'medication',

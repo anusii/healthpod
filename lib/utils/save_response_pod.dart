@@ -41,7 +41,7 @@ import 'package:healthpod/utils/upload_json_to_pod.dart';
 /// Parameters:
 /// - context: BuildContext for showing error messages
 /// - responses: Map of survey responses
-/// - podPath: Target directory path in POD (e.g., '/bp', '/vaccine')
+/// - podPath: Target directory path in POD (e.g., '/blood_pressure', '/vaccination')
 /// - filePrefix: Prefix for the filename (e.g., 'blood_pressure', 'vaccine')
 /// - additionalData: Optional additional data to include in the response
 

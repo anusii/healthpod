@@ -48,7 +48,7 @@ import 'package:healthpod/utils/get_feature_path.dart';
 class BPEditorService {
   /// The type of data being handled.
 
-  static const String feature = 'bp';
+  static const String feature = 'blood_pressure';
 
   /// Load all BP observations from `healthpod/data/blood_pressure` directory.
 
