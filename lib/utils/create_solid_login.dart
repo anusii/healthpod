@@ -94,7 +94,7 @@ class SolidLoginTestHelper {
 ///   A Widget configured for the appropriate authentication mode
 
 Widget createSolidLogin(BuildContext context) {
-  debugPrint('❌ Using external browser for login');
+  // debugPrint('❌ Using external browser for login');
 
   return Consumer(
     builder: (context, ref, child) {
@@ -102,23 +102,15 @@ Widget createSolidLogin(BuildContext context) {
       final email = ref.watch(emailProvider);
       final password = ref.watch(passwordProvider);
 
-      debugPrint('🔍 Checking saved credentials...');
-      debugPrint('📡 Server URL: $serverUrl');
-      debugPrint('👤 Email present: ${email.isNotEmpty}');
-      debugPrint('🔑 Password present: ${password.isNotEmpty}');
+      // Checking saved credentials.
 
       if (email.isEmpty || password.isEmpty) {
-        debugPrint('ℹ️ No saved credentials found, showing login screen');
+        // No saved credentials found.
+
         return _buildNormalLogin(serverUrl);
       }
 
-      debugPrint('ℹ️ Checking ChromeDriver availability for auto-login...');
-      debugPrint(
-          'ℹ️ Auto-login may not work if ChromeDriver is not running or');
-      debugPrint('configured correctly. Ensure ChromeDriver is executing by');
-      debugPrint(
-          'running `chromedriver` in your terminal (it should listen on');
-      debugPrint('port 9515 by default).');
+      // Checking ChromeDriver availability for auto-login.
 
       return FutureBuilder<AutoLoginStatus>(
         future: _attemptAutoLogin(serverUrl, email, password),
@@ -142,13 +134,13 @@ Widget createSolidLogin(BuildContext context) {
 
           switch (status) {
             case AutoLoginStatus.success:
-              debugPrint('✅ Auto-login successful');
+              // Auto-login successful.
+
               return const HealthPodHome();
 
             case AutoLoginStatus.chromeDriverNotAvailable:
-              debugPrint(
-                  'ℹ️ ChromeDriver not available or failed to initialize.');
-              debugPrint('Auto-login via ChromeDriver will be skipped.');
+              // ChromeDriver not available.
+
               return _buildNormalLogin(serverUrl);
 
             case AutoLoginStatus.generalFailure:
@@ -169,12 +161,11 @@ Future<AutoLoginStatus> _attemptAutoLogin(
   String password,
 ) async {
   final loginService = ChromeLoginService.instance;
-  debugPrint('ℹ️ Checking ChromeDriver availability for auto-login...');
+  // Checking ChromeDriver availability.
 
   final bool chromeDriverReady = await loginService.initialize();
 
-  debugPrint(
-      '✨ Attempting auto-login with saved credentials (ChromeDriver ready: $chromeDriverReady)');
+  // Attempting auto-login with saved credentials.
 
   if (!chromeDriverReady) {
     debugPrint(
@@ -232,7 +223,8 @@ Future<bool> _attemptLogin(
     if (webId != null) {
       // Note: solidAuthenticate requires a BuildContext, but we don't have one here
       // This is a limitation of the current auto-login implementation
-      debugPrint('✅ WebID obtained: $webId');
+      // WebID obtained successfully.
+
       return true;
     }
     return false;

@@ -191,13 +191,13 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         // Use the existing filename to update the file.
 
         filename = existingFile;
-        debugPrint('🔄 Updating existing profile file: $filename');
+        // Updating existing profile file.
       } else {
         // Create new filename only if no existing file found.
 
         final timestamp = formatTimestampForFilename(DateTime.now());
         filename = 'profile_$timestamp.json.enc.ttl';
-        debugPrint('🆕 Creating new profile file: $filename');
+        // Creating new profile file.
       }
 
       // Create JSON data structure matching other successful implementations.
@@ -206,7 +206,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         'responses': updatedData,
       };
 
-      debugPrint('💾 Saving profile data: ${json.encode(profileData)}');
+      // Saving profile data.
 
       // Check if context is still valid before using it.
 

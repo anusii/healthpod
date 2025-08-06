@@ -59,11 +59,11 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
     // Get the directory URL for the health_plan folder.
 
     final podDirPath = constructPodPath('health_plan', '');
-    debugPrint('Looking for health plan data in: $podDirPath');
+    // Looking for health plan data.
 
     final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
-    debugPrint('Health plan dir contents: ${resources.files}');
+    // Retrieved health plan directory contents.
 
     // Look for health plan files with .enc.ttl extension (encrypted files).
 
@@ -73,7 +73,8 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
         .toList();
 
     if (healthPlanFiles.isEmpty) {
-      debugPrint('No health plan files found. Returning empty data.');
+      // No health plan files found.
+
       return {'title': 'My Health Management Plan', 'planItems': <String>[]};
     }
 
@@ -81,7 +82,7 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
 
     healthPlanFiles.sort((a, b) => b.compareTo(a));
     final latestHealthPlanFile = healthPlanFiles.first;
-    debugPrint('Found latest health plan file: $latestHealthPlanFile');
+    // Found latest health plan file.
 
     // Read the file contents.
 
@@ -92,7 +93,7 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
     // Use readPod with the full constructed path to the file.
 
     final filePath = constructPodPath('health_plan', latestHealthPlanFile);
-    debugPrint('Reading health plan data from path: $filePath');
+    // Reading health plan data.
 
     // Prompt for security key if needed.
 
@@ -149,7 +150,8 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
       // Check for nested data structures.
 
       if (jsonData.containsKey('data')) {
-        debugPrint('Found data key in health plan, returning data object');
+        // Found data key in health plan.
+
         return jsonData['data'] as Map<String, dynamic>;
       } else if (jsonData.containsKey('timestamp') &&
           jsonData.containsKey('responses')) {

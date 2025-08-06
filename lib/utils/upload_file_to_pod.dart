@@ -80,7 +80,8 @@ Future<SolidFunctionCallStatus> uploadFileToPod({
     // Guard against using context across async gaps.
 
     if (!context.mounted) {
-      debugPrint('Widget is no longer mounted, skipping upload.');
+      // Widget no longer mounted, skipping upload.
+
       return SolidFunctionCallStatus.fail;
     }
 

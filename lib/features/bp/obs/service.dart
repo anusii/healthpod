@@ -88,6 +88,13 @@ class BPEditorService {
       }
 
       try {
+        // Check if returns RDF instead of JSON.
+
+        if (content.toString().startsWith('@prefix') ||
+            content.toString().contains('<http')) {
+          continue;
+        }
+
         final data = json.decode(content.toString());
         loadedObservations.add(BPObservation.fromJson(data));
       } catch (e) {

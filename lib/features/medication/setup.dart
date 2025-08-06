@@ -50,8 +50,6 @@ Future<SolidFunctionCallStatus> setupMedicationFeature(
     context: context,
     createInitFile: true,
     onProgressChange: (_) {},
-    onSuccess: () {
-      debugPrint('Medication feature folder initialized successfully');
-    },
+    onSuccess: () {},
   );
 }

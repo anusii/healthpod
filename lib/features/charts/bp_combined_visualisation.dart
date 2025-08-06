@@ -467,7 +467,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                             'BLOOD PRESSURE: $systolicValue/$diastolicValue mmHg',
                             '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
                             '🕒 Time: $timeStr',
-                            '❤️ Heart Rate: $heartRate bpm',
+                            '❤️ Heart Rate: ${parseNumericInput(_parseNumericValue(heartRate))} bpm',
                           ];
 
                           // Add notes if they exist.

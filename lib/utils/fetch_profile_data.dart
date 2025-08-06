@@ -87,7 +87,8 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     profileFiles.sort((a, b) => b.compareTo(a));
 
     if (!context.mounted) {
-      debugPrint('⚠️ Context no longer mounted after sorting files');
+      // Context no longer mounted.
+
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
 
@@ -99,7 +100,8 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     );
 
     if (!context.mounted) {
-      debugPrint('⚠️ Context no longer mounted after security key prompt');
+      // Context no longer mounted.
+
       return defaultProfileData['data'] as Map<String, dynamic>;
     }
 
@@ -135,8 +137,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
             context,
             const Text('Reading profile data'),
           );
-          debugPrint(
-              '✅ Successfully read profile using relative path: $relativePath');
+          // Successfully read profile using relative path.
         } catch (e) {
           // If relative path fails, try full path (backward compatibility).
 
@@ -186,7 +187,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
                 const Text('Reading profile data (retry)'),
               );
 
-              debugPrint('🔄 Retry read result length: ${content.length}');
+              // Retry read successful.
 
               // Check if retry was successful.
 

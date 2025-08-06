@@ -213,7 +213,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             subtitle: Text(
-              'BP: ${obs.systolic}/${obs.diastolic} mmHg',
+              'BP: ${obs.systolic.round()}/${obs.diastolic.round()} mmHg',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             children: [
@@ -222,7 +222,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInfoRow('Heart Rate', '${obs.heartRate} BPM'),
+                    _buildInfoRow('Heart Rate', '${obs.heartRate.round()} BPM'),
                     if (obs.notes.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       _buildInfoRow('Notes', obs.notes),

@@ -56,14 +56,14 @@ DataRow buildDisplayRow({
   final cells = <DataCell>[
     DataCell(
         Text(DateFormat('yyyy-MM-dd HH:mm').format(observation.timestamp))),
-    DataCell(Text('${observation.systolic}')),
-    DataCell(Text('${observation.diastolic}')),
+    DataCell(Text('${observation.systolic.round()}')),
+    DataCell(Text('${observation.diastolic.round()}')),
   ];
 
   // Add heart rate if screen is wide enough.
 
   if (width > 600) {
-    cells.add(DataCell(Text('${observation.heartRate}')));
+    cells.add(DataCell(Text('${observation.heartRate.round()}')));
   }
 
   // Add notes if screen is wide enough.

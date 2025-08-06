@@ -129,8 +129,14 @@ class BPExporter extends HealthDataExporterBase {
             continue;
           }
 
-          // Parse JSON content.
+          // Check if returns RDF instead of JSON.
 
+          if (content.toString().startsWith('@prefix') ||
+              content.toString().contains('<http')) {
+            continue;
+          }
+
+          // Parse JSON content.
           final jsonData = json.decode(content);
 
           // Ensure we use ISO format for timestamp with T and Z.
