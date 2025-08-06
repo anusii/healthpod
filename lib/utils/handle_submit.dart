@@ -133,16 +133,30 @@ Future<void> handleSurveySubmit({
     if (!context.mounted) return;
 
     if (saveChoice == 'pod' || saveChoice == 'both') {
-      await saveToPod(context, responses);
+      try {
+        await saveToPod(context, responses);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save to POD: $e'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+        return;
+      }
     }
 
     if (!context.mounted) return;
 
+    String message = 'Survey submitted and saved successfully!';
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Survey submitted and saved successfully!'),
+      SnackBar(
+        content: Text(message),
         backgroundColor: Colors.green,
-        duration: Duration(seconds: 3),
+        duration: const Duration(seconds: 3),
       ),
     );
 

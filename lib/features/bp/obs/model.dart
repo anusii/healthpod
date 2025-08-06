@@ -75,10 +75,14 @@ class BPObservation {
   factory BPObservation.fromJson(Map<String, dynamic> json) {
     return BPObservation(
       timestamp: DateTime.parse(json['timestamp']),
-      systolic: json['responses'][HealthSurveyConstants
-          .fieldSystolic], // Use BP survey field variable instead of full question.
-      diastolic: json['responses'][HealthSurveyConstants.fieldDiastolic],
-      heartRate: json['responses'][HealthSurveyConstants.fieldHeartRate],
+      systolic: (json['responses'][HealthSurveyConstants.fieldSystolic] as num)
+          .toDouble(), // Convert int/double to double
+      diastolic:
+          (json['responses'][HealthSurveyConstants.fieldDiastolic] as num)
+              .toDouble(),
+      heartRate:
+          (json['responses'][HealthSurveyConstants.fieldHeartRate] as num)
+              .toDouble(),
       notes: json['responses'][HealthSurveyConstants.fieldNotes] ?? '',
     );
   }

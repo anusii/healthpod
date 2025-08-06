@@ -10,8 +10,6 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  plugins:
-    - custom_lint
   errors:
     undefined_lint: ignore
   exclude:
@@ -23,10 +21,3 @@ linter:
      avoid_print: true
      prefer_single_quotes: true
      implementation_imports: false
-
-custom_lint:
-  rules:
-    - import_order_lint
-  options:
-    import_order_lint:
-      project_name: healthpod

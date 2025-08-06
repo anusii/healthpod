@@ -47,6 +47,7 @@ import 'package:healthpod/utils/get_feature_path.dart';
 
 class BPEditorService {
   /// The type of data being handled.
+
   static const String feature = 'blood_pressure';
 
   /// Load all BP observations from `healthpod/data/blood_pressure` directory.
@@ -63,7 +64,9 @@ class BPEditorService {
 
       if (!context.mounted) continue;
 
-      final filePath = getFeaturePath(feature, file);
+      // Use relative path for file operations to match writePod behaviour.
+
+      final filePath = '$feature/$file';
 
       // Prompt for security key if needed.
 
@@ -85,6 +88,13 @@ class BPEditorService {
       }
 
       try {
+        // Check if returns RDF instead of JSON.
+
+        if (content.toString().startsWith('@prefix') ||
+            content.toString().contains('<http')) {
+          continue;
+        }
+
         final data = json.decode(content.toString());
         loadedObservations.add(BPObservation.fromJson(data));
       } catch (e) {

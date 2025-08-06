@@ -110,7 +110,7 @@ class SurveyData {
       for (var fileName in resources.files) {
         if (!fileName.endsWith('.enc.ttl')) continue;
 
-        // Construct the full path including healthpod/data/bp.
+        // Construct the full path including healthpod/data/blood_pressure.
 
         final filePath = '$bpDir/$fileName';
 
@@ -129,8 +129,14 @@ class SurveyData {
         if (result != SolidFunctionCallStatus.fail.toString() &&
             result != SolidFunctionCallStatus.notLoggedIn.toString()) {
           try {
-            // The result is the JSON string directly.
+            // Check if returns RDF instead of JSON.
 
+            if (result.toString().startsWith('@prefix') ||
+                result.toString().contains('<http')) {
+              continue;
+            }
+
+            // The result is the JSON string directly.
             final data = json.decode(result.toString());
             podData.add(data);
           } catch (e) {

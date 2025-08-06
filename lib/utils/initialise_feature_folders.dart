@@ -83,12 +83,11 @@ Future<void> initialiseFeatureFolders({
             onProgress.call(inProgress);
           },
           onSuccess: () {
-            debugPrint('Successfully created $folder folder');
+            // Folder created successfully.
           },
         );
 
         if (result != SolidFunctionCallStatus.success) {
-          debugPrint('Failed to create $folder folder');
           // Continue with other folders even if one fails.
         }
       }
@@ -101,7 +100,7 @@ Future<void> initialiseFeatureFolders({
       context: context,
       onProgress: onProgress,
       onComplete: () {
-        debugPrint('Successfully initialised profile data');
+        // Profile data initialized.
       },
     );
 
@@ -112,7 +111,7 @@ Future<void> initialiseFeatureFolders({
       context: context,
       onProgress: onProgress,
       onComplete: () {
-        debugPrint('Successfully initialised health plan data');
+        // Health plan data initialized.
       },
     );
 

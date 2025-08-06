@@ -64,7 +64,7 @@ class AppointmentSurvey extends StatelessWidget {
     await saveResponseToPod(
       context: context,
       responses: responses,
-      podPath: '/diary',
+      podPath: 'diary',
       filePrefix: 'appointment',
     );
   }

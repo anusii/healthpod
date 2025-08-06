@@ -25,14 +25,15 @@
 
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:solidpod/solidpod.dart';
 
-import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/fetch_profile_data.dart';
-import 'package:healthpod/utils/upload_json_to_pod.dart';
+import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
 /// A widget that displays and allows editing of personal identification information.
 
@@ -141,13 +142,9 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         'gender': _genderController.text.trim(),
       };
 
-      // Clean up existing profile files before saving a new one.
+      // Try to update existing profile file first, create new one only if none exists.
 
-      await _deleteExistingProfileFiles();
-
-      // Try to use the uploadJsonToPod method which is known to work with other components.
-
-      final result = await _saveProfileDataUsingUploadUtil(updatedData);
+      final result = await _updateOrCreateProfileFile(updatedData);
 
       if (result != SolidFunctionCallStatus.success) {
         throw Exception('Failed to save profile data: $result');
@@ -160,7 +157,10 @@ class _PersonalDetailsState extends State<PersonalDetails> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')),
+          const SnackBar(
+            content: Text('Profile updated successfully'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
@@ -177,48 +177,90 @@ class _PersonalDetailsState extends State<PersonalDetails> {
     }
   }
 
-  /// Saves the profile data using the uploadJsonToPod utility which handles file creation
-  /// and proper encryption consistently.
+  /// Updates existing profile file or creates a new one if none exists.
 
-  Future<SolidFunctionCallStatus> _saveProfileDataUsingUploadUtil(
+  Future<SolidFunctionCallStatus> _updateOrCreateProfileFile(
       Map<String, dynamic> updatedData) async {
-    debugPrint('Saving profile using uploadJsonToPod utility...');
-
     try {
-      // Create a structure for uploadJsonToPod that matches what saveResponseToPod expects
-      // The profile data should be passed as the 'responses' parameter, not wrapped in 'data'
+      // First, try to find an existing profile file.
 
-      // Use uploadJsonToPod which is used by other components successfully.
-      final result = await uploadJsonToPod(
-        data: {
-          'timestamp': DateTime.now().toIso8601String(),
-          'responses': updatedData,
-        },
-        targetPath: 'profile',
-        fileNamePrefix: 'profile',
-        context: context,
-        onSuccess: () {
-          debugPrint('Successfully uploaded profile data');
-        },
-      );
+      final existingFile = await _findExistingProfileFile();
 
-      // Double-check by logging the directory contents after saving.
+      String filename;
+      if (existingFile != null) {
+        // Use the existing filename to update the file.
 
-      if (result == SolidFunctionCallStatus.success) {
-        try {
-          final dirUrl = await getDirUrl(constructPodPath('profile', ''));
-          final resources = await getResourcesInContainer(dirUrl);
-          debugPrint(
-              'After save - Files in profile directory: ${resources.files}');
-        } catch (e) {
-          debugPrint('Error checking directory after save: $e');
-        }
+        filename = existingFile;
+        // Updating existing profile file.
+      } else {
+        // Create new filename only if no existing file found.
+
+        final timestamp = formatTimestampForFilename(DateTime.now());
+        filename = 'profile_$timestamp.json.enc.ttl';
+        // Creating new profile file.
       }
+
+      // Create JSON data structure matching other successful implementations.
+      final profileData = {
+        'timestamp': DateTime.now().toIso8601String(),
+        'responses': updatedData,
+      };
+
+      // Saving profile data.
+
+      // Check if context is still valid before using it.
+
+      if (!mounted) {
+        debugPrint('❌ Context no longer mounted during save');
+        return SolidFunctionCallStatus.fail;
+      }
+
+      // Use direct writePod call with relative path.
+
+      final result = await writePod(
+        'profile/$filename',
+        json.encode(profileData),
+        context,
+        const Text('Saving profile data'),
+        encrypted: true,
+      );
 
       return result;
     } catch (e) {
       debugPrint('Error saving profile: $e');
       return SolidFunctionCallStatus.fail;
+    }
+  }
+
+  /// Finds an existing profile file to update, or returns null if none exists.
+
+  Future<String?> _findExistingProfileFile() async {
+    try {
+      // Get all files in the profile directory.
+
+      final dirUrl = await getDirUrl('healthpod/data/profile');
+      final resources = await getResourcesInContainer(dirUrl);
+
+      // Find all profile files.
+
+      final profileFiles = resources.files
+          .where((file) =>
+              file.startsWith('profile_') &&
+              !file.startsWith('profile_photo_') &&
+              file.endsWith('.json.enc.ttl'))
+          .toList();
+
+      if (profileFiles.isEmpty) {
+        return null;
+      }
+
+      // Return the most recent profile file (sorted by filename).
+
+      profileFiles.sort((a, b) => b.compareTo(a));
+      return profileFiles.first;
+    } catch (e) {
+      debugPrint('Error finding existing profile file: $e');
+      return null;
     }
   }
 
@@ -234,58 +276,6 @@ class _PersonalDetailsState extends State<PersonalDetails> {
         _dateOfBirthController.text.trim() !=
             (_profileData['dateOfBirth'] ?? '') ||
         _genderController.text.trim() != (_profileData['gender'] ?? '');
-  }
-
-  /// Deletes existing profile files before saving a new one to prevent duplication.
-  /// Keeps track of the most recent file (if any) for persistence purposes.
-
-  Future<void> _deleteExistingProfileFiles() async {
-    try {
-      // Get all files in the profile directory.
-      // Note: constructPodPath already includes basePath.
-
-      final dirUrl = await getDirUrl(constructPodPath('profile', ''));
-      debugPrint(
-          'Looking for profile files to delete in: ${constructPodPath('profile', '')}');
-
-      final resources = await getResourcesInContainer(dirUrl);
-      debugPrint('Files in profile directory: ${resources.files}');
-
-      // Find all profile files.
-
-      final profileFiles = resources.files
-          .where((file) =>
-              file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
-          .toList();
-
-      if (profileFiles.isEmpty) {
-        debugPrint('No existing profile files to clean up');
-        return;
-      }
-
-      // Sort to find the most recent one (we'll keep the metadata from this).
-
-      profileFiles.sort((a, b) => b.compareTo(a));
-
-      // Delete all profile files - we'll create a new one with the current data.
-
-      int deletedCount = 0;
-      for (final file in profileFiles) {
-        try {
-          final filePath = constructPodPath('profile', file);
-          debugPrint('Deleting profile file: $filePath');
-          await deleteFile(filePath);
-          deletedCount++;
-        } catch (e) {
-          debugPrint('Error deleting profile file $file: $e');
-        }
-      }
-
-      debugPrint('Successfully deleted $deletedCount profile files');
-    } catch (e) {
-      debugPrint('Error cleaning up profile files: $e');
-      // Don't rethrow - we want to continue with saving even if cleanup fails.
-    }
   }
 
   @override

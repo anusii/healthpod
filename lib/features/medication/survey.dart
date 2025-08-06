@@ -65,7 +65,7 @@ class MedicationSurvey extends StatelessWidget {
     await saveResponseToPod(
       context: context,
       responses: responses,
-      podPath: '/medication',
+      podPath: 'medication', // Use relative path to match reading operations
       filePrefix: 'medication',
     );
   }

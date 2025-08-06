@@ -54,7 +54,7 @@ Future<void> initialiseHealthPlanData({
       context: context,
       onProgressChange: (_) {},
       onSuccess: () {
-        debugPrint('✅ health_plan folder created or already exists');
+        // Health plan folder created or already exists.
       },
     );
 
@@ -63,7 +63,8 @@ Future<void> initialiseHealthPlanData({
       return;
     }
 
-    debugPrint('✅ Successfully initialized health_plan folder');
+    // Health plan folder initialized successfully.
+
     onComplete.call();
   } catch (e) {
     debugPrint('❌ Error initializing health plan folder: $e');

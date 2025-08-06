@@ -178,7 +178,7 @@ class FileBrowserState extends State<FileBrowser> {
     setState(() => isLoading = true);
 
     try {
-      // Get current directory contents.
+      // Get current directory contents with retry logic.
 
       final dirUrl = await getDirUrl(currentPath);
       final resources = await getResourcesInContainer(dirUrl);
@@ -194,21 +194,33 @@ class FileBrowserState extends State<FileBrowser> {
       currentDirFileCount =
           resources.files.where((f) => f.endsWith('.enc.ttl')).length;
 
-      // Get file counts for all subdirectories.
+      // Get file counts for all subdirectories with error handling.
 
-      final counts = await FileOperations.getDirectoryCounts(
-        currentPath,
-        directories,
-      );
+      Map<String, int> counts = {};
+      try {
+        counts = await FileOperations.getDirectoryCounts(
+          currentPath,
+          directories,
+        );
+      } catch (e) {
+        debugPrint('Error getting directory counts: $e');
+        // Continue with empty counts rather than failing completely
+      }
 
       if (!mounted) return;
 
-      // Process and validate files.
+      // Process and validate files with robust error handling.
 
-      final processedFiles = await FileOperations.getFiles(
-        currentPath,
-        context,
-      );
+      List<FileItem> processedFiles = [];
+      try {
+        processedFiles = await FileOperations.getFiles(
+          currentPath,
+          context,
+        );
+      } catch (e) {
+        debugPrint('Error processing files: $e');
+        // Continue with empty file list rather than failing completely
+      }
 
       if (!mounted) return;
 
@@ -222,7 +234,14 @@ class FileBrowserState extends State<FileBrowser> {
     } catch (e) {
       debugPrint('Error loading files: $e');
       if (mounted) {
-        setState(() => isLoading = false);
+        setState(() {
+          // Set empty state on critical failure but don't crash.
+
+          files = [];
+          directories = [];
+          directoryCounts = {};
+          isLoading = false;
+        });
       }
     }
   }

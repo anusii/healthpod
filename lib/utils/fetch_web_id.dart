@@ -45,14 +45,15 @@ Future<String?> fetchWebId() async {
     if (!userLoggedIn) {
       // User is not logged in, so return null to indicate CONTINUE flow.
 
-      debugPrint('⚠️ User not actively logged in, treating as CONTINUE flow');
+      // User not actively logged in.
+
       return null;
     }
 
     // User is logged in, fetch the WebID.
 
     final webId = await getWebId();
-    debugPrint('WebID webId: $webId');
+    // WebID retrieved.
 
     // Only return the WebID if it exists and the user is logged in.
 

@@ -56,7 +56,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
 
     bool existsAsDir = resources.subDirs.contains(featureName);
     if (existsAsDir) {
-      debugPrint('Feature folder $featureName already exists as directory');
+      // debugPrint('Feature folder $featureName already exists as directory');
       onSuccess.call();
       return SolidFunctionCallStatus.success;
     }

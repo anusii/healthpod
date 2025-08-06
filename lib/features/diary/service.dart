@@ -75,7 +75,9 @@ class DiaryService {
 
       for (final file in resources.files) {
         if (file.endsWith('.enc.ttl')) {
-          final filePath = getFeaturePath(feature, file);
+          // Use relative path for file operations to match writePod behaviour.
+
+          final filePath = '$feature/$file';
           if (!context.mounted) return appointments;
           final content = await readPod(
             filePath,
