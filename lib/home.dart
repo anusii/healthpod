@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Thursday 2025-08-07 08:32:24 +1000 Graham Williams>
+// Time-stamp: <Friday 2025-08-08 08:29:55 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -25,6 +25,7 @@
 
 library;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
@@ -298,8 +299,9 @@ class HealthPodHomeState extends State<HealthPodHome> {
               ''',
               child: VersionWidget(
                 version: _appVersion,
-                changelogUrl:
-                    'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
+                changelogUrl: kIsWeb
+                    ? 'https://raw.githubusercontent.com/anusii/healthpod/refs/heads/dev/CHANGELOG.md'
+                    : 'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
                 showDate: true,
               ),
             ),
