@@ -26,6 +26,7 @@ au](https://solidcommunity.au/docs/healthpod)
 
 ## 0.2 First stable release
 
++ Various bug fixes and code cleanup [0.1.16 20250808 gjw]
 + CARD: Flutter breaking change fixed [0.1.15 20250626 gjw]
 + MEDICATION: import/export [0.1.14 20250508 atangster]
 + DIARY: Collapse into tabs rather then separate tab [0.1.13 20250508 kev]
