@@ -1,6 +1,6 @@
 /// Create Solid Login Widget.
 //
-// Time-stamp: <Friday 2025-06-27 08:33:44 +1000 Graham Williams>
+// Time-stamp: <Friday 2025-08-08 08:20:53 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -32,6 +32,7 @@ library;
 // and WebID retrieval. Once the solidpod package exposes this functionality in its
 // public API, we should update to use the published package version instead.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -251,7 +252,9 @@ Widget _buildNormalLogin(String serverUrl) {
             : 'https://pods.dev.solidcommunity.au',
         image: const AssetImage('assets/images/app_image.png'),
         logo: const AssetImage('assets/images/app_icon.png'),
-        link: 'https://github.com/anusii/healthpod/blob/main/README.md',
+        link: kIsWeb
+            ? 'https://raw.githubusercontent.com/anusii/healthpod/refs/heads/dev/CHANGELOG.md'
+            : 'https://github.com/anusii/healthpod/blob/main/README.md',
         child: const HealthPodHome(),
       );
     },
