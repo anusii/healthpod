@@ -1,6 +1,6 @@
 /// File service provider for the file service feature.
 ///
-// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
+// Time-stamp: <Friday 2025-08-08 19:28:10 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -468,7 +468,14 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               // Refresh the file browser after successful import
               _refreshCallback?.call();
             }
-          } else if (isBloodPressure) {
+          } else //if (isBloodPressure)
+          //
+          // 20250808 gjw Remove the isBloodPressure test for now as it is
+          // always false as best I can tell. Need to understand the logi of the
+          // code here to fix it. This cause blood pressure CSV import to be
+          // failing.
+          //
+          {
             success = await BPImporter.importCsv(
               file.path!,
               state.currentPath ?? basePath,
