@@ -126,7 +126,8 @@ class SurveyData {
             const Text('Reading survey data'),
           );
         } catch (e) {
-          // File might not exist anymore (deleted, moved, or corrupted)
+          // File might not exist anymore (deleted, moved, or corrupted).
+          
           debugPrint('Error reading survey file $fileName: $e');
           continue;
         }
