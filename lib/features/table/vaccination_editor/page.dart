@@ -337,12 +337,37 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () async {
-                                await editorState.deleteObservation(
-                                  context,
-                                  editorService,
-                                  obs,
-                                );
-                                _loadData();
+                                try {
+                                  await editorState.deleteObservation(
+                                    context,
+                                    editorService,
+                                    obs,
+                                  );
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Vaccination record deleted successfully.'),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Error deleting vaccination: ${e.toString()}'),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                } finally {
+                                  // Always reload data to reflect current state.
+
+                                  _loadData();
+                                }
                               },
                             ),
                           ],

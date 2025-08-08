@@ -64,11 +64,19 @@ class MedicationData {
           final filePath = '$medicationDir/$item';
           if (!context.mounted) continue;
 
-          final content = await readPod(
-            filePath,
-            context,
-            const Text('Reading medication data'),
-          );
+          String content;
+          try {
+            content = await readPod(
+              filePath,
+              context,
+              const Text('Reading medication data'),
+            );
+          } catch (e) {
+            // File might not exist anymore (deleted, moved, or corrupted).
+
+            debugPrint('Error reading medication file $item: $e');
+            continue;
+          }
 
           if (content != SolidFunctionCallStatus.fail.toString() &&
               content != SolidFunctionCallStatus.notLoggedIn.toString()) {

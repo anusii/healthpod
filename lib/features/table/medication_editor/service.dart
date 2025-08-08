@@ -77,11 +77,19 @@ class MedicationEditorService {
 
         // Read the file content.
 
-        final result = await readPod(
-          filePath,
-          context,
-          const Text('Reading medication data'),
-        );
+        String result;
+        try {
+          result = await readPod(
+            filePath,
+            context,
+            const Text('Reading medication data'),
+          );
+        } catch (e) {
+          // File might not exist anymore (deleted, moved, or corrupted).
+
+          debugPrint('Error reading medication file $fileName: $e');
+          continue;
+        }
 
         // Parse data if read was successful.
 
@@ -226,11 +234,19 @@ class MedicationEditorService {
 
       // Read each file.
 
-      final result = await readPod(
-        filePath,
-        context,
-        const Text('Checking medication data'),
-      );
+      String result;
+      try {
+        result = await readPod(
+          filePath,
+          context,
+          const Text('Checking medication data'),
+        );
+      } catch (e) {
+        // File might not exist anymore (deleted, moved, or corrupted).
+
+        debugPrint('Error reading medication file for deletion $fileName: $e');
+        continue;
+      }
 
       if (result != SolidFunctionCallStatus.fail.toString() &&
           result != SolidFunctionCallStatus.notLoggedIn.toString()) {

@@ -171,12 +171,37 @@ class _BPEditorPageState extends State<BPEditorPage> {
                   editorState.enterEditMode(index);
                 }),
                 onDelete: () async {
-                  await editorState.deleteObservation(
-                    context,
-                    editorService,
-                    obs,
-                  );
-                  _loadData();
+                  try {
+                    await editorState.deleteObservation(
+                      context,
+                      editorService,
+                      obs,
+                    );
+
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Blood pressure reading deleted successfully.'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content:
+                              Text('Error deleting reading: ${e.toString()}'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  } finally {
+                    // Always reload data to reflect current state.
+
+                    _loadData();
+                  }
                 },
               );
             },
@@ -240,12 +265,37 @@ class _BPEditorPageState extends State<BPEditorPage> {
                         IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () async {
-                            await editorState.deleteObservation(
-                              context,
-                              editorService,
-                              obs,
-                            );
-                            _loadData();
+                            try {
+                              await editorState.deleteObservation(
+                                context,
+                                editorService,
+                                obs,
+                              );
+
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Blood pressure reading deleted successfully.'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'Error deleting reading: ${e.toString()}'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            } finally {
+                              // Always reload data to reflect current state.
+
+                              _loadData();
+                            }
                           },
                         ),
                       ],

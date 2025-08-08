@@ -79,11 +79,20 @@ class DiaryService {
 
           final filePath = '$feature/$file';
           if (!context.mounted) return appointments;
-          final content = await readPod(
-            filePath,
-            context,
-            const Text('Loading appointment'),
-          );
+
+          String content;
+          try {
+            content = await readPod(
+              filePath,
+              context,
+              const Text('Loading appointment'),
+            );
+          } catch (e) {
+            // File might not exist anymore (deleted, moved, or corrupted).
+
+            debugPrint('Error reading appointment file $file: $e');
+            continue;
+          }
 
           // Check if the file was successfully read.
 
@@ -185,11 +194,20 @@ class DiaryService {
         if (file.endsWith('.enc.ttl')) {
           final filePath = getFeaturePath(feature, file);
           if (!context.mounted) return false;
-          final content = await readPod(
-            filePath,
-            context,
-            const Text('Loading appointment for deletion'),
-          );
+
+          String content;
+          try {
+            content = await readPod(
+              filePath,
+              context,
+              const Text('Loading appointment for deletion'),
+            );
+          } catch (e) {
+            // File might not exist anymore (deleted, moved, or corrupted).
+
+            debugPrint('Error reading appointment file for deletion $file: $e');
+            continue;
+          }
 
           if (content != SolidFunctionCallStatus.fail.toString() &&
               content != SolidFunctionCallStatus.notLoggedIn.toString()) {

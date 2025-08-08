@@ -59,11 +59,20 @@ class VaccinationEditorService {
       // Use relative path for file operations to match writePod behaviour.
 
       final filePath = '$feature/$file';
-      final content = await readPod(
-        filePath,
-        context,
-        const Text('Loading file'),
-      );
+
+      String content;
+      try {
+        content = await readPod(
+          filePath,
+          context,
+          const Text('Loading file'),
+        );
+      } catch (e) {
+        // File might not exist anymore (deleted, moved, or corrupted).
+
+        debugPrint('Error reading vaccination file $file: $e');
+        continue;
+      }
 
       if (content == SolidFunctionCallStatus.fail.toString() ||
           content == SolidFunctionCallStatus.notLoggedIn.toString()) {

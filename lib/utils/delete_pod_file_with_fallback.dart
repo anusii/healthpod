@@ -67,9 +67,25 @@ Future<bool> deletePodFileWithFallback({
 
   if (resources.files.contains(filename)) {
     final filePath = constructPodPath(dataType, filename);
-    await deleteFile(filePath);
-    // debugPrint('Deleted file: $filename');
-    return true;
+    try {
+      await deleteFile(filePath);
+      // debugPrint('Deleted file: $filename');
+      return true;
+    } catch (e) {
+      // On Web/Chrome, deletion might succeed but still throw an exception.
+      // Check if it's a 404 or similar "not found" error, which means deletion worked.
+
+      if (e.toString().contains('404') ||
+          e.toString().contains('NotFoundHttpError') ||
+          e.toString().contains('not found')) {
+        debugPrint(
+            'File deletion succeeded (404 indicates file was deleted): $filename');
+        return true;
+      }
+      // For other errors, try fallback methods below.
+
+      debugPrint('Error deleting exact file $filename: $e');
+    }
   }
 
   // Try with the underscore format.
@@ -79,9 +95,22 @@ Future<bool> deletePodFileWithFallback({
   if (resources.files.contains(filenameWithUnderscore)) {
     final filePathWithUnderscore =
         constructPodPath(dataType, filenameWithUnderscore);
-    await deleteFile(filePathWithUnderscore);
-    // debugPrint('Deleted file with underscore: $filenameWithUnderscore');
-    return true;
+    try {
+      await deleteFile(filePathWithUnderscore);
+      // debugPrint('Deleted file with underscore: $filenameWithUnderscore');
+      return true;
+    } catch (e) {
+      // On Web/Chrome, deletion might succeed but still throw an exception.
+
+      if (e.toString().contains('404') ||
+          e.toString().contains('NotFoundHttpError') ||
+          e.toString().contains('not found')) {
+        debugPrint(
+            'File deletion succeeded (404 indicates file was deleted): $filenameWithUnderscore');
+        return true;
+      }
+      debugPrint('Error deleting underscore file $filenameWithUnderscore: $e');
+    }
   }
 
   // If neither exact match is found, try to find a file with a similar date part.
@@ -102,9 +131,22 @@ Future<bool> deletePodFileWithFallback({
     // Delete the first matching file.
 
     final matchingFilePath = constructPodPath(dataType, matchingFiles.first);
-    await deleteFile(matchingFilePath);
-    // debugPrint('Deleted alternative file: ${matchingFiles.first}');
-    return true;
+    try {
+      await deleteFile(matchingFilePath);
+      // debugPrint('Deleted alternative file: ${matchingFiles.first}');
+      return true;
+    } catch (e) {
+      // On Web/Chrome, deletion might succeed but still throw an exception.
+
+      if (e.toString().contains('404') ||
+          e.toString().contains('NotFoundHttpError') ||
+          e.toString().contains('not found')) {
+        debugPrint(
+            'File deletion succeeded (404 indicates file was deleted): ${matchingFiles.first}');
+        return true;
+      }
+      debugPrint('Error deleting matching file ${matchingFiles.first}: $e');
+    }
   }
 
   // No matching files found, try a more flexible approach.
@@ -116,10 +158,24 @@ Future<bool> deletePodFileWithFallback({
   if (moreFlexibleMatches.isNotEmpty) {
     final flexibleMatchPath =
         constructPodPath(dataType, moreFlexibleMatches.first);
-    await deleteFile(flexibleMatchPath);
-    // debugPrint(
-    //     'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
-    return true;
+    try {
+      await deleteFile(flexibleMatchPath);
+      // debugPrint(
+      //     'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
+      return true;
+    } catch (e) {
+      // On Web/Chrome, deletion might succeed but still throw an exception.
+
+      if (e.toString().contains('404') ||
+          e.toString().contains('NotFoundHttpError') ||
+          e.toString().contains('not found')) {
+        debugPrint(
+            'File deletion succeeded (404 indicates file was deleted): ${moreFlexibleMatches.first}');
+        return true;
+      }
+      debugPrint(
+          'Error deleting flexible match ${moreFlexibleMatches.first}: $e');
+    }
   }
 
   // No matching files found.
