@@ -266,15 +266,31 @@ abstract class HealthDataImporterBase {
 
         for (final file in existingFiles) {
           // Extract date part from filename (everything between dataType_ and T).
+          // Use string operations instead of RegExp to avoid web compatibility issues.
 
-          final dateMatch =
-              RegExp('${dataType}_(\\d{4}-\\d{2}-\\d{2})T').firstMatch(file);
-          if (dateMatch != null && dateMatch.groupCount >= 1) {
-            final dateStr = dateMatch.group(1)!;
-            if (!existingFileDateIndex.containsKey(dateStr)) {
-              existingFileDateIndex[dateStr] = [];
+          final prefix = '${dataType}_';
+          if (file.startsWith(prefix) && file.contains('T')) {
+            final afterPrefix = file.substring(prefix.length);
+            final tIndex = afterPrefix.indexOf('T');
+
+            // Ensure we have at least YYYY-MM-DD format.
+
+            if (tIndex >= 10) {
+              final dateStr = afterPrefix.substring(0, tIndex);
+
+              // Validate the date format (YYYY-MM-DD).
+
+              if (dateStr.length >= 10 &&
+                  dateStr[4] == '-' &&
+                  dateStr[7] == '-') {
+                final datePart =
+                    dateStr.substring(0, 10); // Take only YYYY-MM-DD
+                if (!existingFileDateIndex.containsKey(datePart)) {
+                  existingFileDateIndex[datePart] = [];
+                }
+                existingFileDateIndex[datePart]!.add(file);
+              }
             }
-            existingFileDateIndex[dateStr]!.add(file);
           }
         }
 
@@ -378,15 +394,36 @@ abstract class HealthDataImporterBase {
   Future<bool> importFromCsv(
     String filePath,
     String dirPath,
-    BuildContext context,
-  ) async {
+    BuildContext context, {
+    // Optional: provide content directly for web.
+
+    String? fileContent,
+
+    // Progress callback.
+
+    void Function(String message, double progress)? onProgress,
+  }) async {
+    // Remove verbose debug logs for cleaner console output.
+
     try {
       // Start processing the CSV file by reading its contents.
+      onProgress?.call('Reading CSV file...', 0.1);
 
-      final file = File(filePath);
-      final String content = await file.readAsString();
+      final String content;
+      if (fileContent != null) {
+        // Content provided directly (typically from web file bytes).
+
+        content = fileContent;
+      } else {
+        // Native platform - read from file path.
+
+        final file = File(filePath);
+        content = await file.readAsString();
+      }
 
       // Convert CSV content to a list of fields using specific parsing settings.
+
+      onProgress?.call('Parsing CSV content...', 0.2);
 
       final fields = const CsvToListConverter(
         shouldParseNumbers: false,
@@ -404,6 +441,8 @@ abstract class HealthDataImporterBase {
       }
 
       // Extract and normalize the header row from the CSV.
+
+      onProgress?.call('Validating CSV format...', 0.3);
 
       final headers = List<String>.from(
           fields[0].map((h) => h.toString().trim().toLowerCase()));
@@ -518,7 +557,17 @@ abstract class HealthDataImporterBase {
 
       // Process each row in the CSV file starting from the second row.
 
+      // Exclude header row.
+
+      final totalRows = fields.length - 1;
+      onProgress?.call('Processing $totalRows records...', 0.4);
+
       for (var i = 1; i < fields.length; i++) {
+        // Update progress for each row.
+
+        final currentProgress = 0.4 + (0.5 * (i - 1) / totalRows);
+        onProgress?.call(
+            'Processing record $i of $totalRows...', currentProgress);
         try {
           // Convert row data to a list of strings, handling null values.
 
@@ -588,17 +637,33 @@ abstract class HealthDataImporterBase {
 
           // Generate a safe filename using the timestamp.
 
-          final safeTimestamp = timestamp.replaceAll(RegExp(r'[:.]+'), '-');
+          final safeTimestamp =
+              timestamp.replaceAll(':', '-').replaceAll('.', '-');
           final outputFileName = '${dataType}_$safeTimestamp.json.enc.ttl';
 
           // Determine the correct save path based on the directory structure.
+          // Use simpler path handling that matches successful upload functions.
 
           String savePath;
           if (dirPath.endsWith('/$dataType')) {
             savePath = '$dataType/$outputFileName';
           } else {
-            final cleanDirPath =
-                dirPath.replaceFirst(RegExp(r'^healthpod/data/?'), '');
+            // Clean the directory path by removing leading healthpod/data/ prefix.
+
+            String cleanDirPath = dirPath;
+
+            if (cleanDirPath.startsWith('healthpod/data/')) {
+              cleanDirPath = cleanDirPath.substring('healthpod/data/'.length);
+            } else if (cleanDirPath.startsWith('healthpod/data')) {
+              cleanDirPath = cleanDirPath.substring('healthpod/data'.length);
+            }
+
+            // Remove leading slash if present.
+
+            if (cleanDirPath.startsWith('/')) {
+              cleanDirPath = cleanDirPath.substring(1);
+            }
+
             savePath = cleanDirPath.isEmpty
                 ? outputFileName
                 : '$cleanDirPath/$outputFileName';
@@ -609,14 +674,21 @@ abstract class HealthDataImporterBase {
           if (!context.mounted) return false;
 
           // Write the encrypted data to the pod.
-
-          final result = await writePod(
-            savePath,
-            json.encode(jsonData),
-            context,
-            Text('Converting row $i'),
-            encrypted: true,
-          );
+          final SolidFunctionCallStatus result;
+          try {
+            result = await writePod(
+              savePath,
+              json.encode(jsonData),
+              context,
+              Text('Converting row $i'),
+              encrypted: true,
+            );
+          } catch (writeError, writeStackTrace) {
+            debugPrint('❌ [CSV Import] WritePod failed: $writeError');
+            debugPrint('❌ [CSV Import] Error type: ${writeError.runtimeType}');
+            debugPrint('❌ [CSV Import] Stack trace: $writeStackTrace');
+            rethrow;
+          }
 
           // Track the success status of each save operation.
 
@@ -644,9 +716,14 @@ abstract class HealthDataImporterBase {
 
       // Return overall success status.
 
+      onProgress?.call('Import completed successfully!', 1.0);
       return allSuccess && successfulSaves > 0;
-    } catch (e) {
+    } catch (e, stackTrace) {
       // Handle any errors during the import process.
+
+      debugPrint('❌ [CSV Import] Import failed with error: $e');
+      debugPrint('❌ [CSV Import] Error type: ${e.runtimeType}');
+      debugPrint('❌ [CSV Import] Stack trace: $stackTrace');
 
       if (context.mounted) {
         showAlert(context, 'Error importing CSV: ${e.toString()}');

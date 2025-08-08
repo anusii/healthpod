@@ -397,7 +397,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
   Future<void> handleCsvImport(BuildContext context,
       {bool isVaccination = false,
       bool isMedication = false,
-      bool isDiary = false}) async {
+      bool isDiary = false,
+      bool isBloodPressure = false}) async {
     try {
       state = state.copyWith(importInProgress: true);
 
@@ -469,11 +470,71 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               _refreshCallback?.call();
             }
           } else if (isBloodPressure) {
-            success = await BPImporter.importCsv(
-              file.path!,
-              state.currentPath ?? basePath,
-              context,
+            // Handle web vs native file reading.
+
+            String? fileContent;
+            String filePath = file.path ?? 'web_file_${file.name}';
+
+            if (file.bytes != null &&
+                (file.path == null || file.path!.startsWith('blob:'))) {
+              // Web platform - use bytes (file.path might be blob URL or null).
+
+              fileContent = String.fromCharCodes(file.bytes!);
+            }
+
+            // Show progress dialog.
+
+            String progressMessage = 'Preparing import...';
+            double progressValue = 0.0;
+
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext dialogContext) => StatefulBuilder(
+                builder: (context, setState) => AlertDialog(
+                  title: const Text('Importing Blood Pressure Data'),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      LinearProgressIndicator(value: progressValue),
+                      const SizedBox(height: 16),
+                      Text(progressMessage),
+                    ],
+                  ),
+                ),
+              ),
             );
+
+            try {
+              success = await BPImporter.importCsv(
+                filePath,
+                state.currentPath ?? basePath,
+                context,
+                fileContent: fileContent,
+                onProgress: (message, progress) {
+                  progressMessage = message;
+                  progressValue = progress;
+                  if (context.mounted) {
+                    // Update the dialog if still showing.
+
+                    (context as Element).markNeedsBuild();
+                  }
+                },
+              );
+
+              // Close progress dialog.
+
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
+            } catch (e) {
+              // Close progress dialog on error.
+
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
+              rethrow;
+            }
 
             if (context.mounted && success) {
               ScaffoldMessenger.of(context).showSnackBar(
