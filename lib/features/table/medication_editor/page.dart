@@ -194,12 +194,22 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
                         IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () async {
-                            await editorState.deleteObservation(
-                              context,
-                              editorService,
-                              obs,
-                            );
-                            _loadData();
+                            try {
+                              await editorState.deleteObservation(
+                                context,
+                                editorService,
+                                obs,
+                              );
+                            } catch (e) {
+                              // Error handling is done in the service/state layers.
+                              // Just log here for debugging.
+
+                              debugPrint('Error in medication deletion UI: $e');
+                            } finally {
+                              // Always reload data to reflect current state.
+
+                              _loadData();
+                            }
                           },
                         ),
                       ],
@@ -483,12 +493,21 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
           IconButton(
             icon: const Icon(Icons.delete),
             onPressed: () async {
-              await editorState.deleteObservation(
-                context,
-                editorService,
-                observation,
-              );
-              _loadData();
+              try {
+                await editorState.deleteObservation(
+                  context,
+                  editorService,
+                  observation,
+                );
+              } catch (e) {
+                // Error handling is done in the service/state layers
+                // Just log here for debugging
+                debugPrint('Error in medication deletion UI: $e');
+              } finally {
+                // Always reload data to reflect current state.
+
+                _loadData();
+              }
             },
             tooltip: 'Delete',
             color: Colors.red.shade300,

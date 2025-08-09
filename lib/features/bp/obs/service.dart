@@ -77,11 +77,20 @@ class BPEditorService {
 
       if (!context.mounted) continue;
 
-      final content = await readPod(
-        filePath,
-        context,
-        const Text('Loading file'),
-      );
+      String content;
+      try {
+        content = await readPod(
+          filePath,
+          context,
+          const Text('Loading file'),
+        );
+      } catch (e) {
+        // File might not exist anymore (deleted, moved, or corrupted).
+
+        debugPrint('Error reading file $file: $e');
+        continue;
+      }
+
       if (content == SolidFunctionCallStatus.fail.toString() ||
           content == SolidFunctionCallStatus.notLoggedIn.toString()) {
         continue;
