@@ -126,8 +126,29 @@ class BPImporter extends HealthDataImporterBase {
   static Future<bool> importCsv(
     String filePath,
     String dirPath,
-    BuildContext context,
-  ) async {
-    return BPImporter().importFromCsv(filePath, dirPath, context);
+    BuildContext context, {
+    // Optional: provide content directly for web.
+
+    String? fileContent,
+    // Progress callback.
+
+    void Function(String message, double progress)? onProgress,
+  }) async {
+    // Remove verbose debug logs for cleaner console output.
+
+    try {
+      final result = await BPImporter().importFromCsv(
+        filePath,
+        dirPath,
+        context,
+        fileContent: fileContent,
+        onProgress: onProgress,
+      );
+      return result;
+    } catch (e, stackTrace) {
+      debugPrint('❌ [BP Import] Import failed: $e');
+      debugPrint('❌ [BP Import] Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 }

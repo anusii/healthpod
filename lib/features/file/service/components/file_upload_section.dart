@@ -624,7 +624,9 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         state.currentPath?.contains('blood_pressure') ?? false;
     final isInVaccinationDirectory =
         state.currentPath?.contains('vaccination') ?? false;
-    final isInDiaryDirectory = state.currentPath?.contains('diary') ?? false;
+    final isInDiaryDirectory =
+        (state.currentPath?.contains('diary') ?? false) &&
+            !(state.currentPath?.contains('blood_pressure') ?? false);
     final isInProfileDirectory =
         state.currentPath?.contains('profile') ?? false;
     final isInMedicationDirectory =
@@ -821,6 +823,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                               isVaccination: isInVaccinationDirectory,
                               isMedication: isInMedicationDirectory,
                               isDiary: isInDiaryDirectory,
+                              isBloodPressure: isInBpDirectory,
                             ),
                     icon: const Icon(Icons.table_chart),
                     label: const Text('Import CSV'),
