@@ -1,7 +1,7 @@
 name: healthpod
 description: "Private and Secure Storage of Health data in your Solid Pod."
 publish_to: "none"
-version: 0.1.17+7
+version: 0.1.18+7
 
 environment:
   sdk: ">=3.2.3 <4.0.0"
