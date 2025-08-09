@@ -26,6 +26,7 @@ au](https://solidcommunity.au/docs/healthpod)
 
 ## 0.2 First stable release
 
++ Fix support csv import for blood pressure [0.1.19 20250809 atangster]
 + Bug fix exception when delting on chrome/web [0.1.18 20250809 atangster]
 + Bug fix CSV import of blood pressure [0.1.17 20250808 gjw]
 + Various bug fixes and code cleanup [0.1.16 20250808 gjw]
