@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Monday 2025-08-11 05:43:16 +1000 Graham Williams>
+// Time-stamp: <Monday 2025-08-11 05:44:52 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -128,13 +128,13 @@ final List<Map<String, dynamic>> homeTabs = [
     ''',
   },
   {
-    'title': 'Help',
+    'title': 'Support',
     'icon': Icons.library_books,
     'color': null,
     'content': const ResourcesTab(),
     'tooltip': '''
 
-    **Help:** Tap here to access a comprehensive collection of health
+    **Support:** Tap here to access a comprehensive collection of health
     resources including:
 
     - Health information and guides
