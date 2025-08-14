@@ -85,22 +85,10 @@ class BPEditorService {
           const Text('Loading file'),
         );
       } catch (e) {
+        // File might not exist anymore (deleted, moved, or corrupted).
+
         debugPrint('Error reading file $file: $e');
-
-        // Retry once for potential CSS v7.1.7 intermittent issues.
-
-        try {
-          await Future.delayed(const Duration(milliseconds: 500));
-          if (!context.mounted) continue;
-          content = await readPod(
-            filePath,
-            context,
-            const Text('Retrying file load'),
-          );
-        } catch (retryError) {
-          debugPrint('Retry failed, file still encrypted');
-          continue;
-        }
+        continue;
       }
 
       if (content == SolidFunctionCallStatus.fail.toString() ||
