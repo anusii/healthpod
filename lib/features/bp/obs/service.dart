@@ -85,11 +85,11 @@ class BPEditorService {
           const Text('Loading file'),
         );
       } catch (e) {
-        debugPrint('Error reading file $file (first attempt): $e');
+        debugPrint('Error reading file $file: $e');
 
-        // Retry once for potential CSS v7.1.7 intermittent issues
+        // Retry once for potential CSS v7.1.7 intermittent issues.
+
         try {
-          debugPrint('Retrying file read for $file...');
           await Future.delayed(const Duration(milliseconds: 500));
           if (!context.mounted) continue;
           content = await readPod(
@@ -97,10 +97,8 @@ class BPEditorService {
             context,
             const Text('Retrying file load'),
           );
-          debugPrint('Retry successful for file $file');
         } catch (retryError) {
-          debugPrint('Retry failed for file $file: $retryError');
-          debugPrint('❌ Retry failed, file still encrypted');
+          debugPrint('Retry failed, file still encrypted');
           continue;
         }
       }

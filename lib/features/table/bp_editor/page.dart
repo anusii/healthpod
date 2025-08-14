@@ -77,7 +77,8 @@ class _BPEditorPageState extends State<BPEditorPage> {
 
       final observations = await editorService.loadData(context);
 
-      // Check if widget is still mounted before updating state
+      // Check if widget is still mounted before updating state.
+
       if (!mounted) return;
 
       setState(() {
@@ -88,7 +89,8 @@ class _BPEditorPageState extends State<BPEditorPage> {
         editorState.error = null;
       });
     } catch (e) {
-      // Check if widget is still mounted before updating state
+      // Check if widget is still mounted before updating state.
+
       if (!mounted) return;
 
       setState(() {
