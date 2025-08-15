@@ -26,6 +26,7 @@ au](https://solidcommunity.au/docs/healthpod)
 
 ## 0.2 First stable release
 
++ Update solidpod dependency for CSS v7.1.7 [0.1.20 20250815 gjw]
 + Fix support csv import for blood pressure [0.1.19 20250809 atangster]
 + Bug fix exception when delting on chrome/web [0.1.18 20250809 atangster]
 + Bug fix CSV import of blood pressure [0.1.17 20250808 gjw]
