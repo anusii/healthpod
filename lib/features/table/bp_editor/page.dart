@@ -70,11 +70,17 @@ class _BPEditorPageState extends State<BPEditorPage> {
 
   Future<void> _loadData() async {
     try {
+      if (!mounted) return;
       setState(() => editorState.isLoading = true);
 
       // Load observations from POD using the service.
 
       final observations = await editorService.loadData(context);
+
+      // Check if widget is still mounted before updating state.
+
+      if (!mounted) return;
+
       setState(() {
         editorState.observations = observations;
         editorState.observations
@@ -83,6 +89,10 @@ class _BPEditorPageState extends State<BPEditorPage> {
         editorState.error = null;
       });
     } catch (e) {
+      // Check if widget is still mounted before updating state.
+
+      if (!mounted) return;
+
       setState(() {
         editorState.error = e.toString();
         editorState.isLoading = false;
