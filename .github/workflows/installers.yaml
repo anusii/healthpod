@@ -13,7 +13,7 @@ on:
 
 env:
   APP: healthpod
-  FLUTTER_VERSION: '3.32.5'
+  FLUTTER_VERSION: '3.35.1'
 
 jobs:
 
