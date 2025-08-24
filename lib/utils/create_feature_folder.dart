@@ -66,7 +66,8 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
     bool existsAsFile = resources.files.contains(featureName);
     if (existsAsFile) {
       debugPrint(
-          'Removing existing file $featureName before creating directory');
+        'Removing existing file $featureName before creating directory',
+      );
       if (!context.mounted) return SolidFunctionCallStatus.fail;
 
       // Full path for deletion needs to include healthpod/data.

@@ -59,18 +59,22 @@ Future<void> initialiseProfileData({
     // Look for any profile data file (profile_*.json.enc.ttl).
 
     final profileFiles = resources.files
-        .where((file) =>
-            file.startsWith('profile_') &&
-            !file.startsWith('profile_photo_') &&
-            file.endsWith('.json.enc.ttl'))
+        .where(
+          (file) =>
+              file.startsWith('profile_') &&
+              !file.startsWith('profile_photo_') &&
+              file.endsWith('.json.enc.ttl'),
+        )
         .toList();
 
     // Also look for photo files to check for potential confusion.
 
     final photoFiles = resources.files
-        .where((file) =>
-            file.startsWith('profile_photo_') &&
-            (file.endsWith('.photo.enc.ttl') || file.endsWith('.enc.ttl')))
+        .where(
+          (file) =>
+              file.startsWith('profile_photo_') &&
+              (file.endsWith('.photo.enc.ttl') || file.endsWith('.enc.ttl')),
+        )
         .toList();
 
     if (photoFiles.isNotEmpty) {

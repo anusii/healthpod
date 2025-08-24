@@ -73,7 +73,8 @@ class BPImporter extends HealthDataImporterBase {
         final systolic = double.tryParse(value);
         if (systolic == null) {
           debugPrint(
-              'Row $rowIndex: Invalid or missing systolic value: $value');
+            'Row $rowIndex: Invalid or missing systolic value: $value',
+          );
           return false;
         } else {
           responses[HealthSurveyConstants.fieldSystolic] = systolic;
@@ -87,7 +88,8 @@ class BPImporter extends HealthDataImporterBase {
         final diastolic = double.tryParse(value);
         if (diastolic == null) {
           debugPrint(
-              'Row $rowIndex: Invalid or missing diastolic value: $value');
+            'Row $rowIndex: Invalid or missing diastolic value: $value',
+          );
           return false;
         } else {
           responses[HealthSurveyConstants.fieldDiastolic] = diastolic;
@@ -101,7 +103,8 @@ class BPImporter extends HealthDataImporterBase {
         final heartRate = double.tryParse(value);
         if (heartRate == null) {
           debugPrint(
-              'Row $rowIndex: Invalid or missing heart rate value: $value');
+            'Row $rowIndex: Invalid or missing heart rate value: $value',
+          );
           return false;
         } else {
           responses[HealthSurveyConstants.fieldHeartRate] = heartRate;

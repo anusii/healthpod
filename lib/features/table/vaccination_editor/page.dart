@@ -128,7 +128,9 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                       padding: isNarrowScreen
                           ? const EdgeInsets.all(12)
                           : const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 16),
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
                       backgroundColor:
                           Theme.of(context).colorScheme.primaryContainer,
                       foregroundColor:
@@ -317,9 +319,11 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
 
                   return DataRow(
                     cells: [
-                      DataCell(Text(
-                        '${obs.timestamp.year}-${obs.timestamp.month.toString().padLeft(2, '0')}-${obs.timestamp.day.toString().padLeft(2, '0')}',
-                      )),
+                      DataCell(
+                        Text(
+                          '${obs.timestamp.year}-${obs.timestamp.month.toString().padLeft(2, '0')}-${obs.timestamp.day.toString().padLeft(2, '0')}',
+                        ),
+                      ),
                       DataCell(Text(obs.vaccineName)),
                       DataCell(Text(obs.provider)),
                       DataCell(Text(obs.professional)),
@@ -348,7 +352,8 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
-                                            'Vaccination record deleted successfully.'),
+                                          'Vaccination record deleted successfully.',
+                                        ),
                                         backgroundColor: Colors.green,
                                       ),
                                     );
@@ -358,7 +363,8 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
-                                            'Error deleting vaccination: ${e.toString()}'),
+                                          'Error deleting vaccination: ${e.toString()}',
+                                        ),
                                         backgroundColor: Colors.red,
                                       ),
                                     );

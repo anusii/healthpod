@@ -245,7 +245,8 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                                     return AlertDialog(
                                       title: const Text('Confirm Delete'),
                                       content: Text(
-                                          'Are you sure you want to delete "$fileName"?'),
+                                        'Are you sure you want to delete "$fileName"?',
+                                      ),
                                       actions: [
                                         TextButton(
                                           onPressed: () =>
@@ -290,7 +291,10 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                         flex: 1,
                         child: Card(
                           margin: const EdgeInsets.only(
-                              left: 8, right: 16, top: 16),
+                            left: 8,
+                            right: 16,
+                            top: 16,
+                          ),
                           child: const Padding(
                             padding: EdgeInsets.all(16),
                             child: FileUploadSection(),
@@ -333,7 +337,8 @@ class _FileServiceWidgetState extends ConsumerState<FileServiceWidget> {
                                   return AlertDialog(
                                     title: const Text('Confirm Delete'),
                                     content: Text(
-                                        'Are you sure you want to delete "$fileName"?'),
+                                      'Are you sure you want to delete "$fileName"?',
+                                    ),
                                     actions: [
                                       TextButton(
                                         onPressed: () =>

@@ -131,8 +131,11 @@ class MedicationEditorService {
   /// @returns A Future that completes when the save operation is done.
 
   Future<void> saveObservationToPod(
-      BuildContext context, MedicationObservation observation,
-      {bool isEdit = false, MedicationObservation? oldObservation}) async {
+    BuildContext context,
+    MedicationObservation observation, {
+    bool isEdit = false,
+    MedicationObservation? oldObservation,
+  }) async {
     try {
       // Check valid logged in status.
 

@@ -150,33 +150,34 @@ abstract class HealthDataImporterBase {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: duplicateFiles
-                          .map((filename) => Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 6),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      '•',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.red,
+                          .map(
+                            (filename) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    '•',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      filename,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: 'monospace',
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        filename,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'monospace',
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ))
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
@@ -255,9 +256,11 @@ abstract class HealthDataImporterBase {
         // Extract date parts from existing files for comparison.
 
         final existingFiles = resources.files
-            .where((file) =>
-                file.startsWith('${dataType}_') &&
-                file.endsWith('.json.enc.ttl'))
+            .where(
+              (file) =>
+                  file.startsWith('${dataType}_') &&
+                  file.endsWith('.json.enc.ttl'),
+            )
             .toList();
 
         // Create date-based lookup index for faster comparison.
@@ -319,7 +322,8 @@ abstract class HealthDataImporterBase {
         return duplicateFiles.toSet().toList();
       } catch (resourceError) {
         throw Exception(
-            'Failed to access resources in $dataPath: $resourceError');
+          'Failed to access resources in $dataPath: $resourceError',
+        );
       }
     } catch (e) {
       throw Exception('Error checking for existing files: $e');
@@ -445,7 +449,8 @@ abstract class HealthDataImporterBase {
       onProgress?.call('Validating CSV format...', 0.3);
 
       final headers = List<String>.from(
-          fields[0].map((h) => h.toString().trim().toLowerCase()));
+        fields[0].map((h) => h.toString().trim().toLowerCase()),
+      );
 
       // Check for any missing required columns and show an alert if any are missing.
 
@@ -567,7 +572,9 @@ abstract class HealthDataImporterBase {
 
         final currentProgress = 0.4 + (0.5 * (i - 1) / totalRows);
         onProgress?.call(
-            'Processing record $i of $totalRows...', currentProgress);
+          'Processing record $i of $totalRows...',
+          currentProgress,
+        );
         try {
           // Convert row data to a list of strings, handling null values.
 
@@ -606,7 +613,8 @@ abstract class HealthDataImporterBase {
               timestamp = normaliseTimestamp(roundTimestampToSecond(value));
               if (!isValidTimestamp(timestamp)) {
                 throw FormatException(
-                    'Row $i: Invalid timestamp format: $value');
+                  'Row $i: Invalid timestamp format: $value',
+                );
               }
 
               if (!seenTimestamps.add(timestamp)) {

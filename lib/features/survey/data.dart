@@ -50,7 +50,8 @@ class SurveyData {
   /// Acts as main entry point.
 
   static Future<List<Map<String, dynamic>>> fetchAllSurveyData(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     List<Map<String, dynamic>> allData = [];
 
     // Fetch POD data.
@@ -62,8 +63,10 @@ class SurveyData {
 
     // Sort all data by timestamp.
 
-    allData.sort((a, b) => DateTime.parse(a['timestamp'])
-        .compareTo(DateTime.parse(b['timestamp'])));
+    allData.sort(
+      (a, b) => DateTime.parse(a['timestamp'])
+          .compareTo(DateTime.parse(b['timestamp'])),
+    );
 
     // Remove duplicate date entries - keeping only the latest entry for each day.
 
@@ -85,8 +88,10 @@ class SurveyData {
     // Convert back to list and re-sort.
 
     allData = uniqueDayEntries.values.toList();
-    allData.sort((a, b) => DateTime.parse(a['timestamp'])
-        .compareTo(DateTime.parse(b['timestamp'])));
+    allData.sort(
+      (a, b) => DateTime.parse(a['timestamp'])
+          .compareTo(DateTime.parse(b['timestamp'])),
+    );
 
     return allData;
   }
@@ -94,7 +99,8 @@ class SurveyData {
   /// Fetches survey data from POD storage.
 
   static Future<List<Map<String, dynamic>>> fetchPodSurveyData(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     List<Map<String, dynamic>> podData = [];
     try {
       // Get the directory URL for the bp folder.

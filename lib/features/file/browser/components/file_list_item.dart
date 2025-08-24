@@ -177,9 +177,10 @@ class FileListItem extends StatelessWidget {
                           // Retrieve the PDF file content as a base64-encoded string.
 
                           final String fileContent = await readPod(
-                              '$currentPath/${file.name}',
-                              context,
-                              Container());
+                            '$currentPath/${file.name}',
+                            context,
+                            Container(),
+                          );
 
                           // Decode the base64 string into raw PDF bytes.
 

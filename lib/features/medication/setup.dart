@@ -40,7 +40,8 @@ import 'package:healthpod/utils/create_feature_folder.dart';
 /// Returns a [Future<SolidFunctionCallStatus>] indicating setup success or failure.
 
 Future<SolidFunctionCallStatus> setupMedicationFeature(
-    BuildContext context) async {
+  BuildContext context,
+) async {
   // Return early if widget is no longer mounted.
 
   if (!context.mounted) return SolidFunctionCallStatus.fail;

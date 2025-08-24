@@ -215,7 +215,9 @@ class _AppointmentCardState extends State<AppointmentCard> {
                                 onPressed: () async {
                                   final success =
                                       await DiaryService.deleteAppointment(
-                                          context, appointment);
+                                    context,
+                                    appointment,
+                                  );
                                   if (success) {
                                     setState(() {
                                       appointments.removeAt(index);
@@ -319,7 +321,9 @@ class _AppointmentCardState extends State<AppointmentCard> {
   /// date, and time selection.
 
   void _showAddAppointmentDialog(
-      BuildContext context, void Function(void Function()) parentSetState) {
+    BuildContext context,
+    void Function(void Function()) parentSetState,
+  ) {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
     DateTime selectedDate = DateTime.now();

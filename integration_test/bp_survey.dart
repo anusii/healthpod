@@ -93,7 +93,7 @@ void bpSurvey() {
             // Authentication Phase.
 
             debugPrint(
-                '\n⚠️ Please complete browser authentication manually...');
+                '\n⚠️ Please complete browser authentication manually...',);
 
             // Allow time for manual browser authentication.
 

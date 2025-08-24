@@ -169,7 +169,8 @@ Future<AutoLoginStatus> _attemptAutoLogin(
 
   if (!chromeDriverReady) {
     debugPrint(
-        'ℹ️ ChromeDriver not available or failed to initialize. Auto-login via ChromeDriver will be skipped.');
+      'ℹ️ ChromeDriver not available or failed to initialize. Auto-login via ChromeDriver will be skipped.',
+    );
     await loginService.dispose();
     return AutoLoginStatus.chromeDriverNotAvailable;
   }
@@ -199,7 +200,8 @@ Future<AutoLoginStatus> _attemptAutoLogin(
         : AutoLoginStatus.generalFailure;
   } catch (e) {
     debugPrint(
-        '❌ Error during auto-login sequence (after ChromeDriver check): $e');
+      '❌ Error during auto-login sequence (after ChromeDriver check): $e',
+    );
     // Ensure disposal if an error occurred before _attemptLogin could dispose it,
     // or if Future.wait itself threw. loginService.dispose() is idempotent.
 

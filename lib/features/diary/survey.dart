@@ -48,7 +48,9 @@ class AppointmentSurvey extends StatelessWidget {
   /// Saves the survey responses to a local file.
 
   Future<void> _saveResponsesLocally(
-      BuildContext context, Map<String, dynamic> responses) async {
+    BuildContext context,
+    Map<String, dynamic> responses,
+  ) async {
     await saveResponseLocally(
       context: context,
       responses: responses,
@@ -60,7 +62,9 @@ class AppointmentSurvey extends StatelessWidget {
   /// Saves the survey responses directly to POD.
 
   Future<void> _saveResponsesToPod(
-      BuildContext context, Map<String, dynamic> responses) async {
+    BuildContext context,
+    Map<String, dynamic> responses,
+  ) async {
     await saveResponseToPod(
       context: context,
       responses: responses,
@@ -72,7 +76,9 @@ class AppointmentSurvey extends StatelessWidget {
   /// Handles the submission of the survey.
 
   Future<void> _handleSubmit(
-      BuildContext context, Map<String, dynamic> responses) async {
+    BuildContext context,
+    Map<String, dynamic> responses,
+  ) async {
     await handleSurveySubmit(
       context: context,
       responses: responses,

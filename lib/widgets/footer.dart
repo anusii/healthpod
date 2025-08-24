@@ -84,7 +84,9 @@ class Footer extends StatelessWidget {
   }
 
   Widget buildLoginStatusInteractiveText(
-      String loginStatus, BuildContext context) {
+    String loginStatus,
+    BuildContext context,
+  ) {
     final theme = Theme.of(context);
     final tooltipMessage = webId == null
         ? '''
@@ -120,7 +122,8 @@ class Footer extends StatelessWidget {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                  builder: (context) => createSolidLogin(context)),
+                builder: (context) => createSolidLogin(context),
+              ),
             );
           }
         },
@@ -138,7 +141,9 @@ class Footer extends StatelessWidget {
   }
 
   Widget buildSecurityKeyStatusInteractiveText(
-      String securityKeyStatus, BuildContext context) {
+    String securityKeyStatus,
+    BuildContext context,
+  ) {
     final theme = Theme.of(context);
     return MarkdownTooltip(
       message: '''
@@ -177,8 +182,13 @@ class Footer extends StatelessWidget {
     );
   }
 
-  Widget _buildNarrowLayout(String serverUri, String loginStatus,
-      Color loginStatusColor, String securityKeyStatus, BuildContext context) {
+  Widget _buildNarrowLayout(
+    String serverUri,
+    String loginStatus,
+    Color loginStatusColor,
+    String securityKeyStatus,
+    BuildContext context,
+  ) {
     final theme = Theme.of(context);
     return Container(
       color: theme.colorScheme.surface,
@@ -200,8 +210,13 @@ class Footer extends StatelessWidget {
     );
   }
 
-  Widget _buildMediumLayout(String serverUri, String loginStatus,
-      Color loginStatusColor, String securityKeyStatus, BuildContext context) {
+  Widget _buildMediumLayout(
+    String serverUri,
+    String loginStatus,
+    Color loginStatusColor,
+    String securityKeyStatus,
+    BuildContext context,
+  ) {
     final theme = Theme.of(context);
     return Container(
       color: theme.colorScheme.surface,
@@ -221,7 +236,9 @@ class Footer extends StatelessWidget {
                   buildLoginStatusInteractiveText(loginStatus, context),
                   const SizedBox(width: 16),
                   buildSecurityKeyStatusInteractiveText(
-                      securityKeyStatus, context),
+                    securityKeyStatus,
+                    context,
+                  ),
                 ],
               ),
             ),
@@ -231,8 +248,13 @@ class Footer extends StatelessWidget {
     );
   }
 
-  Widget _buildWideLayout(String serverUri, String loginStatus,
-      Color loginStatusColor, String securityKeyStatus, BuildContext context) {
+  Widget _buildWideLayout(
+    String serverUri,
+    String loginStatus,
+    Color loginStatusColor,
+    String securityKeyStatus,
+    BuildContext context,
+  ) {
     final theme = Theme.of(context);
     return Container(
       color: theme.colorScheme.surface,

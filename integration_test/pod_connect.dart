@@ -76,16 +76,16 @@ void main() {
             '--no-sandbox', // Required for running in containers.
             '--headless', // Run browser in headless mode.
             '--disable-gpu', // Recommended for headless mode.
-            '--disable-dev-shm-usage' // Prevent crashes in containers.
-          ]
-        }
+            '--disable-dev-shm-usage', // Prevent crashes in containers.
+          ],
+        },
       };
 
       // Create WebDriver instance with configured capabilities.
 
       driver = await createDriver(
           uri: Uri.parse('http://localhost:${TestConfig.chromeDriverPort}'),
-          desired: capabilities);
+          desired: capabilities,);
       Logger.info('✅ WebDriver initialized successfully');
     } catch (e, stackTrace) {
       // Log any setup failures and ensure cleanup.
@@ -152,7 +152,7 @@ void main() {
               await driver!.findElement(const By.id('consent-btn'));
           await consentButton.click();
           return true;
-        }, timeout: const Duration(seconds: 5));
+        }, timeout: const Duration(seconds: 5),);
         Logger.info('🛑 Handled consent page');
       } catch (e) {
         Logger.warn('✔️ No consent page found or already consented');
@@ -164,11 +164,11 @@ void main() {
         final currentUrl = await driver!.currentUrl;
         Logger.info('🌍 Current URL: $currentUrl');
         return currentUrl.contains('/.account/account');
-      }, timeout: TestConfig.timeout);
+      }, timeout: TestConfig.timeout,);
       Logger.info('🎉 Reached account page');
 
       Logger.info(
-          '✅ Successfully authenticated and navigated to the account page!');
+          '✅ Successfully authenticated and navigated to the account page!',);
     } catch (e, stackTrace) {
       // Log any test failures with stack trace.
 

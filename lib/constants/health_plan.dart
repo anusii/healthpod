@@ -37,5 +37,5 @@ final Map<String, dynamic> defaultHealthPlanData = {
       '> Remember to drink 2L of water daily!',
       'Monitor glucose levels at these times:\n1. Before breakfast\n2. 2 hours after lunch\n3. Before bed',
     ],
-  }
+  },
 };

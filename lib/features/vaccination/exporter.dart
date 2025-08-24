@@ -61,8 +61,9 @@ class VaccinationExporter extends HealthDataExporterBase {
   @override
   Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
     var timestamp = normaliseTimestamp(
-        jsonData[VaccinationSurveyConstants.fieldDate],
-        toIso: true);
+      jsonData[VaccinationSurveyConstants.fieldDate],
+      toIso: true,
+    );
 
     final responses = jsonData['responses'];
 
@@ -197,8 +198,10 @@ class VaccinationExporter extends HealthDataExporterBase {
 
       // Sort all records by timestamp in ascending order.
 
-      allRecords.sort((a, b) => a[VaccinationSurveyConstants.fieldDate]
-          .compareTo(b[VaccinationSurveyConstants.fieldDate]));
+      allRecords.sort(
+        (a, b) => a[VaccinationSurveyConstants.fieldDate]
+            .compareTo(b[VaccinationSurveyConstants.fieldDate]),
+      );
 
       // Define the CSV column headers.
 

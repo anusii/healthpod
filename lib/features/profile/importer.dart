@@ -83,7 +83,9 @@ class ProfileImporter {
 
         if (context.mounted) {
           await _showValidationErrorDialog(
-              context, 'Invalid profile data: ${validationResult['message']}');
+            context,
+            'Invalid profile data: ${validationResult['message']}',
+          );
         }
         return false;
       }
@@ -160,7 +162,8 @@ class ProfileImporter {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                    'Warning: Could not check for existing profiles: ${e.toString()}'),
+                  'Warning: Could not check for existing profiles: ${e.toString()}',
+                ),
                 backgroundColor: Colors.orange,
               ),
             );
@@ -191,7 +194,8 @@ class ProfileImporter {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                      'Warning: Could not delete existing profiles. The import will continue but you may have duplicate data. Error: ${e.toString()}'),
+                    'Warning: Could not delete existing profiles. The import will continue but you may have duplicate data. Error: ${e.toString()}',
+                  ),
                   backgroundColor: Colors.orange,
                   duration: const Duration(seconds: 5),
                 ),
@@ -258,7 +262,8 @@ class ProfileImporter {
   /// Returns a map with validation result, data, and error message if any.
 
   static Map<String, dynamic> _validateProfileData(
-      Map<String, dynamic> jsonData) {
+    Map<String, dynamic> jsonData,
+  ) {
     // Define required profile fields.
 
     final requiredFields = [
@@ -281,7 +286,7 @@ class ProfileImporter {
           'data': jsonData,
           'timestamp': DateTime.now().toIso8601String(),
         },
-        'message': 'Valid profile data'
+        'message': 'Valid profile data',
       };
     }
 
@@ -296,7 +301,7 @@ class ProfileImporter {
         return {
           'isValid': true,
           'data': jsonData,
-          'message': 'Valid profile data structure'
+          'message': 'Valid profile data structure',
         };
       }
     }
@@ -315,7 +320,7 @@ class ProfileImporter {
             'data': nestedData,
             'timestamp': DateTime.now().toIso8601String(),
           },
-          'message': 'Valid profile data under responses'
+          'message': 'Valid profile data under responses',
         };
       }
     }
@@ -329,7 +334,9 @@ class ProfileImporter {
     if (jsonData.containsKey('data') &&
         jsonData['data'] is Map<String, dynamic>) {
       final dataMissingFields = _checkRequiredFields(
-          jsonData['data'] as Map<String, dynamic>, requiredFields);
+        jsonData['data'] as Map<String, dynamic>,
+        requiredFields,
+      );
       if (dataMissingFields.length < missingFieldsList.length) {
         missingFieldsList = dataMissingFields;
       }
@@ -338,7 +345,9 @@ class ProfileImporter {
     if (jsonData.containsKey('responses') &&
         jsonData['responses'] is Map<String, dynamic>) {
       final responsesMissingFields = _checkRequiredFields(
-          jsonData['responses'] as Map<String, dynamic>, requiredFields);
+        jsonData['responses'] as Map<String, dynamic>,
+        requiredFields,
+      );
       if (responsesMissingFields.length < missingFieldsList.length) {
         missingFieldsList = responsesMissingFields;
       }
@@ -352,7 +361,7 @@ class ProfileImporter {
     return {
       'isValid': false,
       'message':
-          'Invalid profile data structure - missing required fields: $formattedMissingFields'
+          'Invalid profile data structure - missing required fields: $formattedMissingFields',
     };
   }
 
@@ -361,7 +370,9 @@ class ProfileImporter {
   /// Returns a list of missing field names. Empty list means all required fields are present.
 
   static List<String> _checkRequiredFields(
-      Map<String, dynamic> data, List<String> requiredFields) {
+    Map<String, dynamic> data,
+    List<String> requiredFields,
+  ) {
     final missingFields = <String>[];
 
     for (final field in requiredFields) {
@@ -521,7 +532,9 @@ class ProfileImporter {
   /// Returns a list of existing profile file names.
 
   static Future<List<String>> _checkForExistingProfiles(
-      BuildContext context, String timestampString) async {
+    BuildContext context,
+    String timestampString,
+  ) async {
     try {
       // Parse the incoming timestamp.
 
@@ -551,8 +564,10 @@ class ProfileImporter {
         final resources = await getResourcesInContainer(dirUrl);
 
         profileFiles = resources.files
-            .where((file) =>
-                file.startsWith('profile_') && file.endsWith('.json.enc.ttl'))
+            .where(
+              (file) =>
+                  file.startsWith('profile_') && file.endsWith('.json.enc.ttl'),
+            )
             .toList();
       } catch (e) {
         // Rethrow with more specific information for better troubleshooting.
@@ -644,33 +659,34 @@ class ProfileImporter {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: existingProfiles
-                          .map((filename) => Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 6),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      '•',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.red,
+                          .map(
+                            (filename) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    '•',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      filename,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: 'monospace',
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        filename,
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: 'monospace',
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ))
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                   ),
@@ -731,7 +747,9 @@ class ProfileImporter {
   /// Returns a Future that completes when all files are deleted.
 
   static Future<void> _deleteExistingProfiles(
-      BuildContext context, List<String> existingProfiles) async {
+    BuildContext context,
+    List<String> existingProfiles,
+  ) async {
     try {
       // Use the same path where the files are actually stored.
 
@@ -755,7 +773,7 @@ class ProfileImporter {
               final alternativePaths = [
                 'profile/$filename',
                 filename,
-                'profile/profile_$filename'
+                'profile/profile_$filename',
               ];
 
               bool deleted = false;
@@ -769,7 +787,8 @@ class ProfileImporter {
                 // If both paths fail, throw exception with both error details.
 
                 throw Exception(
-                    'Failed to delete profile using both paths. Primary error: $deleteError');
+                  'Failed to delete profile using both paths. Primary error: $deleteError',
+                );
               }
             } else {
               // For other errors, throw an exception.
@@ -781,7 +800,8 @@ class ProfileImporter {
           // Throw to let calling code know about the failure.
 
           throw Exception(
-              'Error processing profile file $filename: $fileError');
+            'Error processing profile file $filename: $fileError',
+          );
         }
       }
     } catch (e) {

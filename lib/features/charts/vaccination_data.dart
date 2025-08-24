@@ -50,7 +50,8 @@ class VaccinationData {
   /// Acts as main entry point.
 
   static Future<List<Map<String, dynamic>>> fetchAllVaccinationData(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     List<Map<String, dynamic>> allData = [];
 
     // Fetch POD data.
@@ -81,7 +82,8 @@ class VaccinationData {
   /// Fetches vaccination data from POD storage.
 
   static Future<List<Map<String, dynamic>>> fetchPodVaccinationData(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     List<Map<String, dynamic>> podData = [];
     try {
       /// Get the directory URL for the vaccination folder.

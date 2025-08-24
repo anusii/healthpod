@@ -180,7 +180,8 @@ class _PersonalDetailsState extends State<PersonalDetails> {
   /// Updates existing profile file or creates a new one if none exists.
 
   Future<SolidFunctionCallStatus> _updateOrCreateProfileFile(
-      Map<String, dynamic> updatedData) async {
+    Map<String, dynamic> updatedData,
+  ) async {
     try {
       // First, try to find an existing profile file.
 
@@ -244,10 +245,12 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       // Find all profile files.
 
       final profileFiles = resources.files
-          .where((file) =>
-              file.startsWith('profile_') &&
-              !file.startsWith('profile_photo_') &&
-              file.endsWith('.json.enc.ttl'))
+          .where(
+            (file) =>
+                file.startsWith('profile_') &&
+                !file.startsWith('profile_photo_') &&
+                file.endsWith('.json.enc.ttl'),
+          )
           .toList();
 
       if (profileFiles.isEmpty) {
@@ -441,7 +444,7 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                   const SizedBox(height: 12),
                   const Text('Gender'),
                   DropdownButtonFormField<String>(
-                    value: tempGenderController.text.isEmpty
+                    initialValue: tempGenderController.text.isEmpty
                         ? null
                         : tempGenderController.text,
                     decoration: const InputDecoration(
@@ -453,10 +456,13 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       DropdownMenuItem(value: 'Male', child: Text('Male')),
                       DropdownMenuItem(value: 'Female', child: Text('Female')),
                       DropdownMenuItem(
-                          value: 'Non-binary', child: Text('Non-binary')),
+                        value: 'Non-binary',
+                        child: Text('Non-binary'),
+                      ),
                       DropdownMenuItem(
-                          value: 'Prefer not to say',
-                          child: Text('Prefer not to say')),
+                        value: 'Prefer not to say',
+                        child: Text('Prefer not to say'),
+                      ),
                     ],
                     onChanged: (value) {
                       if (value != null) {
@@ -521,7 +527,10 @@ class _PersonalDetailsState extends State<PersonalDetails> {
       final parts = dateStr.split('-');
       if (parts.length == 3) {
         return DateTime(
-            int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        );
       }
     } catch (e) {
       debugPrint('Error parsing date: $e');
@@ -639,13 +648,17 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                       const SizedBox(height: 8),
                       _buildDataRow('Phone:', _bestContactPhoneController.text),
                       const SizedBox(height: 8),
-                      _buildDataRow('Alternative Phone:',
-                          _alternativeContactNumberController.text),
+                      _buildDataRow(
+                        'Alternative Phone:',
+                        _alternativeContactNumberController.text,
+                      ),
                       const SizedBox(height: 8),
                       _buildDataRow('Email:', _emailController.text),
                       const SizedBox(height: 8),
                       _buildDataRow(
-                          'Date of Birth:', _dateOfBirthController.text),
+                        'Date of Birth:',
+                        _dateOfBirthController.text,
+                      ),
                       const SizedBox(height: 8),
                       _buildDataRow('Gender:', _genderController.text),
                     ],
@@ -664,9 +677,11 @@ class _PersonalDetailsState extends State<PersonalDetails> {
                     children: [
                       const CircularProgressIndicator(),
                       const SizedBox(height: 8),
-                      Text(_isLoading
-                          ? 'Loading profile data...'
-                          : 'Saving profile data...'),
+                      Text(
+                        _isLoading
+                            ? 'Loading profile data...'
+                            : 'Saving profile data...',
+                      ),
                     ],
                   ),
                 ),

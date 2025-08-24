@@ -37,7 +37,9 @@ import 'package:healthpod/utils/is_text_file.dart';
 /// Attempts to save as JSON if possible, falls back to binary or text based on file type.
 
 Future<void> saveDecryptedContent(
-    String decryptedContent, String saveFilePath) async {
+  String decryptedContent,
+  String saveFilePath,
+) async {
   final file = File(saveFilePath);
 
   // Ensure the parent directory exists.

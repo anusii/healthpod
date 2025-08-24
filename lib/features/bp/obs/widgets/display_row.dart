@@ -55,7 +55,8 @@ DataRow buildDisplayRow({
 }) {
   final cells = <DataCell>[
     DataCell(
-        Text(DateFormat('yyyy-MM-dd HH:mm').format(observation.timestamp))),
+      Text(DateFormat('yyyy-MM-dd HH:mm').format(observation.timestamp)),
+    ),
     DataCell(Text('${observation.systolic.round()}')),
     DataCell(Text('${observation.diastolic.round()}')),
   ];

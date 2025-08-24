@@ -85,49 +85,50 @@ class DirectoryList extends StatelessWidget {
 
         // List of directory items.
 
-        ...directories.map((dir) => ListTile(
-              leading: Icon(
-                Icons.folder,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              title: Row(
-                children: [
-                  // Directory name with overflow protection.
+        ...directories.map(
+          (dir) => ListTile(
+            leading: Icon(
+              Icons.folder,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            title: Row(
+              children: [
+                // Directory name with overflow protection.
 
-                  Expanded(
-                    child: Text(
-                      dir,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                      overflow: TextOverflow.ellipsis,
+                Expanded(
+                  child: Text(
+                    dir,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+
+                // File count badge.
+
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withAlpha(10),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${directoryCounts[dir] ?? 0} files',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-
-                  // File count badge.
-
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.primary.withAlpha(10),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${directoryCounts[dir] ?? 0} files',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              dense: true,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              onTap: () => onDirectorySelected(dir),
-            )),
+                ),
+              ],
+            ),
+            dense: true,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            onTap: () => onDirectorySelected(dir),
+          ),
+        ),
       ],
     );
   }

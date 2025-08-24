@@ -192,7 +192,8 @@ class _BPEditorPageState extends State<BPEditorPage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
-                              'Blood pressure reading deleted successfully.'),
+                            'Blood pressure reading deleted successfully.',
+                          ),
                           backgroundColor: Colors.green,
                         ),
                       );
@@ -286,7 +287,8 @@ class _BPEditorPageState extends State<BPEditorPage> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
-                                        'Blood pressure reading deleted successfully.'),
+                                      'Blood pressure reading deleted successfully.',
+                                    ),
                                     backgroundColor: Colors.green,
                                   ),
                                 );
@@ -296,7 +298,8 @@ class _BPEditorPageState extends State<BPEditorPage> {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                        'Error deleting reading: ${e.toString()}'),
+                                      'Error deleting reading: ${e.toString()}',
+                                    ),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
@@ -395,7 +398,8 @@ class _BPEditorPageState extends State<BPEditorPage> {
               child: _buildInfoRow(
                 'Date/Time',
                 DateFormat('yyyy-MM-dd HH:mm').format(
-                    editorState.currentEdit?.timestamp ?? obs.timestamp),
+                  editorState.currentEdit?.timestamp ?? obs.timestamp,
+                ),
                 isEditable: true,
               ),
             ),
@@ -545,7 +549,9 @@ class _BPEditorPageState extends State<BPEditorPage> {
                       padding: isNarrowScreen
                           ? const EdgeInsets.all(12)
                           : const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 16),
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
                       backgroundColor:
                           Theme.of(context).colorScheme.primaryContainer,
                       foregroundColor:
@@ -562,10 +568,12 @@ class _BPEditorPageState extends State<BPEditorPage> {
                         : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.add_circle,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimaryContainer),
+                              Icon(
+                                Icons.add_circle,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                              ),
                               SizedBox(width: 8),
                               Text('Add New Reading'),
                             ],

@@ -56,8 +56,9 @@ class MedicationExporter extends HealthDataExporterBase {
   @override
   Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
     var timestamp = normaliseTimestamp(
-        jsonData[MedicationCSVFields.fieldTimestamp],
-        toIso: true);
+      jsonData[MedicationCSVFields.fieldTimestamp],
+      toIso: true,
+    );
 
     final responses = jsonData['responses'];
 
@@ -141,8 +142,9 @@ class MedicationExporter extends HealthDataExporterBase {
           // Ensure we use ISO format for timestamp with T and Z.
 
           var timestamp = normaliseTimestamp(
-              jsonData[MedicationCSVFields.fieldTimestamp],
-              toIso: true);
+            jsonData[MedicationCSVFields.fieldTimestamp],
+            toIso: true,
+          );
 
           final responses = jsonData['responses'];
 
@@ -173,8 +175,10 @@ class MedicationExporter extends HealthDataExporterBase {
 
       // Sort readings by timestamp.
 
-      allReadings.sort((a, b) => a[MedicationCSVFields.fieldTimestamp]
-          .compareTo(b[MedicationCSVFields.fieldTimestamp]));
+      allReadings.sort(
+        (a, b) => a[MedicationCSVFields.fieldTimestamp]
+            .compareTo(b[MedicationCSVFields.fieldTimestamp]),
+      );
 
       // Prepare CSV data.
 

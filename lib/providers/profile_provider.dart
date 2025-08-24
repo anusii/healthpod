@@ -50,7 +50,8 @@ class ProfileState {
   factory ProfileState.initial() {
     return ProfileState(
       profileData: Map<String, dynamic>.from(
-          defaultProfileData['data'] as Map<String, dynamic>),
+        defaultProfileData['data'] as Map<String, dynamic>,
+      ),
       isLoading: false,
       error: null,
     );
@@ -105,8 +106,9 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     } catch (e) {
       debugPrint('Error refreshing profile data: $e');
       state = state.copyWith(
-          isLoading: false,
-          error: 'Failed to load profile data: ${e.toString()}');
+        isLoading: false,
+        error: 'Failed to load profile data: ${e.toString()}',
+      );
     }
   }
 

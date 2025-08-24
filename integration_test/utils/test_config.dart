@@ -111,7 +111,7 @@ class TestConfig {
       throw FileSystemException(
           'ChromeDriver not found at path: $driverPath\n'
           'Please ensure ChromeDriver is installed in the tools/chromedriver directory',
-          driverPath);
+          driverPath,);
     }
 
     // On Unix-like systems, verify executable permissions.

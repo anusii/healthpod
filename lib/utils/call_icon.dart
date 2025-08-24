@@ -117,8 +117,10 @@ class _CallIconState extends State<CallIcon> {
     } catch (e) {
       if (!mounted) return;
 
-      showAlert(localContext,
-          'Fail to call ${widget.contactNumber}! Please check app permission or platform support!');
+      showAlert(
+        localContext,
+        'Fail to call ${widget.contactNumber}! Please check app permission or platform support!',
+      );
     }
 
     if (!mounted) return;

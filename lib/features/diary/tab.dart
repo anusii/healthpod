@@ -141,7 +141,9 @@ class _DiaryTabState extends State<DiaryTab> {
             TextButton(
               onPressed: () async {
                 final success = await DiaryService.deleteAppointment(
-                    dialogContext, appointment);
+                  dialogContext,
+                  appointment,
+                );
                 if (success && mounted) {
                   setState(() {
                     _appointments.remove(appointment);
@@ -217,14 +219,17 @@ class _DiaryTabState extends State<DiaryTab> {
                           fontSize: 16,
                         ),
                         items: List.generate(12, (index) => index + 1)
-                            .map((month) => DropdownMenuItem<int>(
-                                  value: month,
-                                  child: Text(
-                                    DateFormat('MMMM').format(
-                                        DateTime(_focusedDay.year, month)),
-                                    style: const TextStyle(fontSize: 16),
+                            .map(
+                              (month) => DropdownMenuItem<int>(
+                                value: month,
+                                child: Text(
+                                  DateFormat('MMMM').format(
+                                    DateTime(_focusedDay.year, month),
                                   ),
-                                ))
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            )
                             .toList(),
                         onChanged: (int? newMonth) {
                           if (newMonth != null) {
@@ -269,13 +274,15 @@ class _DiaryTabState extends State<DiaryTab> {
                           fontSize: 16,
                         ),
                         items: List.generate(11, (index) => 2020 + index)
-                            .map((year) => DropdownMenuItem<int>(
-                                  value: year,
-                                  child: Text(
-                                    year.toString(),
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ))
+                            .map(
+                              (year) => DropdownMenuItem<int>(
+                                value: year,
+                                child: Text(
+                                  year.toString(),
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            )
                             .toList(),
                         onChanged: (int? newYear) {
                           if (newYear != null) {

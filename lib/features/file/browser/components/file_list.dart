@@ -104,14 +104,16 @@ class FileList extends StatelessWidget {
 
         // List of file items.
 
-        ...files.map((file) => FileListItem(
-              file: file,
-              currentPath: currentPath,
-              isSelected: selectedFile == file.name,
-              onFileSelected: onFileSelected,
-              onFileDownload: onFileDownload,
-              onFileDelete: onFileDelete,
-            )),
+        ...files.map(
+          (file) => FileListItem(
+            file: file,
+            currentPath: currentPath,
+            isSelected: selectedFile == file.name,
+            onFileSelected: onFileSelected,
+            onFileDownload: onFileDownload,
+            onFileDelete: onFileDelete,
+          ),
+        ),
       ],
     );
   }

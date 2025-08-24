@@ -154,7 +154,8 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
           ),
           title: const Text('Notice'),
           content: const Text(
-              'No security key found. Please set a security key first.'),
+            'No security key found. Please set a security key first.',
+          ),
           actions: [
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -194,7 +195,7 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
 
       if (![
         SolidFunctionCallStatus.notLoggedIn.toString(),
-        SolidFunctionCallStatus.fail.toString()
+        SolidFunctionCallStatus.fail.toString(),
       ].contains(fileContent)) {
         await Navigator.push(
           context,
@@ -462,7 +463,8 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                               foregroundColor:
                                   Theme.of(context).colorScheme.primary,
                               side: BorderSide(
-                                  color: Theme.of(context).colorScheme.primary),
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -471,7 +473,8 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                               await _showKeyInputDialog(context);
                             },
                             child: Text(
-                                _hasExistingKey ? 'Change Key' : 'Set Key'),
+                              _hasExistingKey ? 'Change Key' : 'Set Key',
+                            ),
                           ),
                         ),
                         if (_hasExistingKey) ...[
@@ -485,7 +488,8 @@ class SecurityKeyManagerState extends State<SecurityKeyManager>
                                 foregroundColor:
                                     Theme.of(context).colorScheme.error,
                                 side: BorderSide(
-                                    color: Theme.of(context).colorScheme.error),
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),

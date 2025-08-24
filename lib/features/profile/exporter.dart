@@ -111,7 +111,8 @@ class ProfileExporter {
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
         throw Exception(
-            'Download failed - please check your connection and permissions');
+          'Download failed - please check your connection and permissions',
+        );
       }
 
       // Save the decrypted content to the specified output path.

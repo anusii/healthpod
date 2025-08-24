@@ -225,7 +225,8 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                                   final pickedTime = await showTimePicker(
                                     context: ctx,
                                     initialTime: TimeOfDay.fromDateTime(
-                                        _editingDate ?? appointment.date),
+                                      _editingDate ?? appointment.date,
+                                    ),
                                   );
                                   if (pickedTime != null && ctx.mounted) {
                                     setState(() {
@@ -271,10 +272,12 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                             ),
                           ),
                           DataCell(
-                            Text((_editingDate ?? appointment.date)
-                                    .isBefore(DateTime.now())
-                                ? 'Past'
-                                : 'Upcoming'),
+                            Text(
+                              (_editingDate ?? appointment.date)
+                                      .isBefore(DateTime.now())
+                                  ? 'Past'
+                                  : 'Upcoming',
+                            ),
                           ),
                           DataCell(
                             Row(
@@ -305,14 +308,21 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
 
                     return DataRow(
                       cells: [
-                        DataCell(Text(DateFormat('dd MMM, yyyy')
-                            .format(appointment.date))),
-                        DataCell(Text(
-                            DateFormat('hh:mm a').format(appointment.date))),
+                        DataCell(
+                          Text(
+                            DateFormat('dd MMM, yyyy').format(appointment.date),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            DateFormat('hh:mm a').format(appointment.date),
+                          ),
+                        ),
                         DataCell(Text(appointment.title)),
                         DataCell(Text(appointment.description)),
                         DataCell(
-                            Text(appointment.isPast ? 'Past' : 'Upcoming')),
+                          Text(appointment.isPast ? 'Past' : 'Upcoming'),
+                        ),
                         DataCell(
                           Row(
                             mainAxisSize: MainAxisSize.min,

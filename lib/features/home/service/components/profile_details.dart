@@ -309,7 +309,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   /// Updates existing profile file or creates a new one if none exists.
 
   Future<SolidFunctionCallStatus> _updateOrCreateProfileFile(
-      Map<String, dynamic> updatedData) async {
+    Map<String, dynamic> updatedData,
+  ) async {
     try {
       // First, try to find an existing profile file.
 
@@ -372,10 +373,12 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       // Find all profile files with the expected extension.
 
       final profileFiles = resources.files
-          .where((file) =>
-              file.startsWith('profile_') &&
-              !file.startsWith('profile_photo_') &&
-              file.endsWith('.json.enc.ttl'))
+          .where(
+            (file) =>
+                file.startsWith('profile_') &&
+                !file.startsWith('profile_photo_') &&
+                file.endsWith('.json.enc.ttl'),
+          )
           .toList();
 
       if (profileFiles.isEmpty) {
@@ -630,7 +633,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                             final DateTime? picked = await showDatePicker(
                               context: context,
                               initialDate: _parseDateOrDefault(
-                                  tempDateOfBirthController.text),
+                                tempDateOfBirthController.text,
+                              ),
                               firstDate: DateTime(1900),
                               lastDate: DateTime.now(),
                             );
@@ -645,7 +649,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                                 contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 suffixIcon: Icon(Icons.calendar_today),
                               ),
                               keyboardType: TextInputType.datetime,
@@ -668,26 +674,37 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String?>(
-                          value: tempGenderController.text.isEmpty
+                          initialValue: tempGenderController.text.isEmpty
                               ? null
                               : tempGenderController.text,
                           decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                             contentPadding: EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                           ),
                           items: const [
                             DropdownMenuItem(
-                                value: null, child: Text('Select gender')),
+                              value: null,
+                              child: Text('Select gender'),
+                            ),
                             DropdownMenuItem(
-                                value: 'Male', child: Text('Male')),
+                              value: 'Male',
+                              child: Text('Male'),
+                            ),
                             DropdownMenuItem(
-                                value: 'Female', child: Text('Female')),
+                              value: 'Female',
+                              child: Text('Female'),
+                            ),
                             DropdownMenuItem(
-                                value: 'Non-binary', child: Text('Non-binary')),
+                              value: 'Non-binary',
+                              child: Text('Non-binary'),
+                            ),
                             DropdownMenuItem(
-                                value: 'Prefer not to say',
-                                child: Text('Prefer not to say')),
+                              value: 'Prefer not to say',
+                              child: Text('Prefer not to say'),
+                            ),
                           ],
                           onChanged: (value) {
                             tempGenderController.text = value ?? '';
@@ -766,7 +783,10 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       final parts = dateStr.split('-');
       if (parts.length == 3) {
         return DateTime(
-            int.parse(parts[0]), int.parse(parts[1]), int.parse(parts[2]));
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        );
       }
     } catch (e) {
       //debugPrint('Error parsing date: $e');
@@ -1153,18 +1173,26 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       _buildDataRow('Phone:', _bestContactPhoneController.text),
                       const SizedBox(height: 6),
                       _buildDataRow(
-                          'Emergency Name:', _emergencyNameController.text),
+                        'Emergency Name:',
+                        _emergencyNameController.text,
+                      ),
                       const SizedBox(height: 6),
                       _buildDataRow(
-                          'Emergency Phone:', _emergencyPhoneController.text),
+                        'Emergency Phone:',
+                        _emergencyPhoneController.text,
+                      ),
                       const SizedBox(height: 6),
-                      _buildDataRow('Alternative:',
-                          _alternativeContactNumberController.text),
+                      _buildDataRow(
+                        'Alternative:',
+                        _alternativeContactNumberController.text,
+                      ),
                       const SizedBox(height: 6),
                       _buildDataRow('Email:', _emailController.text),
                       const SizedBox(height: 6),
                       _buildDataRow(
-                          'Date of Birth:', _dateOfBirthController.text),
+                        'Date of Birth:',
+                        _dateOfBirthController.text,
+                      ),
                       const SizedBox(height: 6),
                       _buildDataRow('Gender:', _genderController.text),
                     ],
@@ -1184,9 +1212,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     children: [
                       const CircularProgressIndicator(),
                       const SizedBox(height: 8),
-                      Text(_isLoading
-                          ? 'Loading profile data...'
-                          : 'Saving profile data...'),
+                      Text(
+                        _isLoading
+                            ? 'Loading profile data...'
+                            : 'Saving profile data...',
+                      ),
                     ],
                   ),
                 ),

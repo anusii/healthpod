@@ -62,12 +62,13 @@ class _ViewKeysState extends State<ViewKeys> {
     // The main screen layout with an app bar and a data table.
 
     return Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text(widget.title),
-          backgroundColor: Theme.of(context).colorScheme.surface,
-        ),
-        body: loadedScreen(widget.keyInfo));
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: Text(widget.title),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+      ),
+      body: loadedScreen(widget.keyInfo),
+    );
   }
 
   @override
@@ -83,23 +84,30 @@ class _ViewKeysState extends State<ViewKeys> {
     // Map the data into rows for the DataTable.
 
     final dataRows = encFileData.entries.map((entry) {
-      return DataRow(cells: [
-        DataCell(Text(
-          entry.key as String,
-          style: const TextStyle(
-            fontSize: 12,
-          ),
-        )),
-        DataCell(SizedBox(
-            width: 600,
-            child: Text(
-              entry.value[1] as String,
-              overflow: TextOverflow.ellipsis,
+      return DataRow(
+        cells: [
+          DataCell(
+            Text(
+              entry.key as String,
               style: const TextStyle(
                 fontSize: 12,
               ),
-            ))),
-      ]);
+            ),
+          ),
+          DataCell(
+            SizedBox(
+              width: 600,
+              child: Text(
+                entry.value[1] as String,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
     }).toList();
 
     // Display the table of encryption key data.
@@ -111,28 +119,29 @@ class _ViewKeysState extends State<ViewKeys> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             DataTable(
-                columnSpacing: 30.0,
-                columns: const [
-                  DataColumn(
-                    label: Text(
-                      'Parameter',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
+              columnSpacing: 30.0,
+              columns: const [
+                DataColumn(
+                  label: Text(
+                    'Parameter',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  DataColumn(
-                    label: Text(
-                      'Value',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
+                ),
+                DataColumn(
+                  label: Text(
+                    'Value',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ],
-                rows: dataRows),
+                ),
+              ],
+              rows: dataRows,
+            ),
           ],
         ),
       ),

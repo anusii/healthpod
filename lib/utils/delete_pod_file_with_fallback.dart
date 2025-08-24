@@ -79,7 +79,8 @@ Future<bool> deletePodFileWithFallback({
           e.toString().contains('NotFoundHttpError') ||
           e.toString().contains('not found')) {
         debugPrint(
-            'File deletion succeeded (404 indicates file was deleted): $filename');
+          'File deletion succeeded (404 indicates file was deleted): $filename',
+        );
         return true;
       }
       // For other errors, try fallback methods below.
@@ -106,7 +107,8 @@ Future<bool> deletePodFileWithFallback({
           e.toString().contains('NotFoundHttpError') ||
           e.toString().contains('not found')) {
         debugPrint(
-            'File deletion succeeded (404 indicates file was deleted): $filenameWithUnderscore');
+          'File deletion succeeded (404 indicates file was deleted): $filenameWithUnderscore',
+        );
         return true;
       }
       debugPrint('Error deleting underscore file $filenameWithUnderscore: $e');
@@ -142,7 +144,8 @@ Future<bool> deletePodFileWithFallback({
           e.toString().contains('NotFoundHttpError') ||
           e.toString().contains('not found')) {
         debugPrint(
-            'File deletion succeeded (404 indicates file was deleted): ${matchingFiles.first}');
+          'File deletion succeeded (404 indicates file was deleted): ${matchingFiles.first}',
+        );
         return true;
       }
       debugPrint('Error deleting matching file ${matchingFiles.first}: $e');
@@ -170,11 +173,13 @@ Future<bool> deletePodFileWithFallback({
           e.toString().contains('NotFoundHttpError') ||
           e.toString().contains('not found')) {
         debugPrint(
-            'File deletion succeeded (404 indicates file was deleted): ${moreFlexibleMatches.first}');
+          'File deletion succeeded (404 indicates file was deleted): ${moreFlexibleMatches.first}',
+        );
         return true;
       }
       debugPrint(
-          'Error deleting flexible match ${moreFlexibleMatches.first}: $e');
+        'Error deleting flexible match ${moreFlexibleMatches.first}: $e',
+      );
     }
   }
 

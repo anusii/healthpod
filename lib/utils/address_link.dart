@@ -37,8 +37,11 @@ import 'package:healthpod/dialogs/alert.dart';
 /// The address is formatted into a Google Maps URL and opened in an external
 /// application. If the URL fails to launch, a dialog will inform the user.
 
-TextSpan addressLink(String clinicAddress, BuildContext context,
-    {double fontSize = 16}) {
+TextSpan addressLink(
+  String clinicAddress,
+  BuildContext context, {
+  double fontSize = 16,
+}) {
   // Make clinicAddress understandable to Google Map.
 
   String matchAddress = '';

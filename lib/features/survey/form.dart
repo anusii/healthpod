@@ -210,11 +210,15 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: rowQuestions
-          .map((q) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: _buildQuestionWidget(
-                    q, startIndex + rowQuestions.indexOf(q)),
-              ))
+          .map(
+            (q) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: _buildQuestionWidget(
+                q,
+                startIndex + rowQuestions.indexOf(q),
+              ),
+            ),
+          )
           .toList(),
     );
   }

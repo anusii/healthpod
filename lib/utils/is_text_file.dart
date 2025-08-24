@@ -38,7 +38,7 @@ final textFileExtensions = [
   '.js',
   '.dart',
   '.yaml',
-  '.yml'
+  '.yml',
 ];
 
 /// Checks if a file is a text file based on its extension.

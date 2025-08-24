@@ -377,7 +377,9 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                                   child: IconButton(
                                     icon: const Icon(Icons.edit, size: 18),
                                     onPressed: () => _showAppointmentDialog(
-                                        appointment, index),
+                                      appointment,
+                                      index,
+                                    ),
                                     constraints: const BoxConstraints(),
                                     padding: EdgeInsets.zero,
                                   ),
@@ -398,7 +400,9 @@ class _ManageAppointmentsState extends State<ManageAppointments> {
                         const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              vertical: 4, horizontal: 8),
+                            vertical: 4,
+                            horizontal: 8,
+                          ),
                           decoration: BoxDecoration(
                             color:
                                 Theme.of(context).colorScheme.primaryContainer,

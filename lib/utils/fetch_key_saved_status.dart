@@ -36,8 +36,10 @@ import 'package:solidpod/solidpod.dart' show KeyManager;
 ///
 /// If a key exists, it triggers a callback to update the UI.
 
-Future<bool> fetchKeySavedStatus(BuildContext context,
-    [Function(bool)? onKeyStatusChanged]) async {
+Future<bool> fetchKeySavedStatus(
+  BuildContext context, [
+  Function(bool)? onKeyStatusChanged,
+]) async {
   try {
     // Simply check if the security key exists in memory.
 

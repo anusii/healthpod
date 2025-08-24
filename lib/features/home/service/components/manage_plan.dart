@@ -307,78 +307,83 @@ class _ManagePlanState extends State<ManagePlan> {
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                        'No health plan items added yet. Click edit to add items.'),
+                      'No health plan items added yet. Click edit to add items.',
+                    ),
                   )
                 else
-                  ...planItems.map((item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• '),
-                            Expanded(
-                              child: MarkdownBody(
-                                data: item,
-                                selectable: true,
-                                onTapLink: (text, href, title) {
-                                  if (href != null) {
-                                    ResourceService.openExternalLink(
-                                        context, href);
-                                  }
-                                },
-                                styleSheet: MarkdownStyleSheet(
-                                  p: const TextStyle(fontSize: 14),
-                                  strong: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  em: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 14,
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                  ),
-                                  blockquote: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Theme.of(context).colorScheme.tertiary
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .secondary,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                  blockquoteDecoration: BoxDecoration(
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .surfaceContainerHighest
-                                            .withValues(alpha: 0.6)
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .secondaryContainer
-                                            .withValues(alpha: 0.5),
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border(
-                                      left: BorderSide(
-                                        width: 4,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
+                  ...planItems.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('• '),
+                          Expanded(
+                            child: MarkdownBody(
+                              data: item,
+                              selectable: true,
+                              onTapLink: (text, href, title) {
+                                if (href != null) {
+                                  ResourceService.openExternalLink(
+                                    context,
+                                    href,
+                                  );
+                                }
+                              },
+                              styleSheet: MarkdownStyleSheet(
+                                p: const TextStyle(fontSize: 14),
+                                strong: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                em: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 14,
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                ),
+                                blockquote: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Theme.of(context).colorScheme.tertiary
+                                      : Theme.of(context).colorScheme.secondary,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                blockquoteDecoration: BoxDecoration(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest
+                                          .withValues(alpha: 0.6)
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .secondaryContainer
+                                          .withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border(
+                                    left: BorderSide(
+                                      width: 4,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     ),
                                   ),
-                                  blockquotePadding: const EdgeInsets.only(
-                                      left: 12, top: 4, bottom: 4, right: 4),
+                                ),
+                                blockquotePadding: const EdgeInsets.only(
+                                  left: 12,
+                                  top: 4,
+                                  bottom: 4,
+                                  right: 4,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                      )),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
     );

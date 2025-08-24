@@ -176,8 +176,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
           _refreshCallback?.call();
         }
       } else if (context.mounted) {
-        showAlert(context,
-            'Upload failed - please check your connection and permissions.');
+        showAlert(
+          context,
+          'Upload failed - please check your connection and permissions.',
+        );
       }
     } catch (e) {
       if (context.mounted) {
@@ -239,7 +241,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
         throw Exception(
-            'Download failed - please check your connection and permissions');
+          'Download failed - please check your connection and permissions',
+        );
       }
 
       await saveDecryptedContent(fileContent, outputFile);
@@ -394,11 +397,13 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
   /// Handles the import of BP, Vaccination, Medication or Diary data from CSV format.
 
-  Future<void> handleCsvImport(BuildContext context,
-      {bool isVaccination = false,
-      bool isMedication = false,
-      bool isDiary = false,
-      bool isBloodPressure = false}) async {
+  Future<void> handleCsvImport(
+    BuildContext context, {
+    bool isVaccination = false,
+    bool isMedication = false,
+    bool isDiary = false,
+    bool isBloodPressure = false,
+  }) async {
     try {
       state = state.copyWith(importInProgress: true);
 
@@ -426,7 +431,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                      '${Feature.vaccination.displayName} data imported and converted successfully'),
+                    '${Feature.vaccination.displayName} data imported and converted successfully',
+                  ),
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
@@ -444,7 +450,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                      '${Feature.diary.displayName} data imported and converted successfully'),
+                    '${Feature.diary.displayName} data imported and converted successfully',
+                  ),
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
@@ -462,7 +469,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                      '${Feature.medication.displayName} data imported and converted successfully'),
+                    '${Feature.medication.displayName} data imported and converted successfully',
+                  ),
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
@@ -540,7 +548,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                      '${Feature.bloodPressure.displayName} data imported and converted successfully'),
+                    '${Feature.bloodPressure.displayName} data imported and converted successfully',
+                  ),
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
@@ -559,8 +568,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                 : isDiary
                     ? Feature.diary
                     : Feature.bloodPressure;
-        showAlert(context,
-            'Failed to import ${feature.displayName} data: ${e.toString()}');
+        showAlert(
+          context,
+          'Failed to import ${feature.displayName} data: ${e.toString()}',
+        );
       }
     } finally {
       if (context.mounted) {
@@ -571,10 +582,12 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
   /// Handles the export of BP, Vaccination, Diary or Medication data to CSV format.
 
-  Future<void> handleCsvExport(BuildContext context,
-      {bool isVaccination = false,
-      bool isDiary = false,
-      bool isMedication = false}) async {
+  Future<void> handleCsvExport(
+    BuildContext context, {
+    bool isVaccination = false,
+    bool isDiary = false,
+    bool isMedication = false,
+  }) async {
     try {
       state = state.copyWith(exportInProgress: true);
 
@@ -652,8 +665,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
                 : isDiary
                     ? Feature.diary
                     : Feature.bloodPressure;
-        showAlert(context,
-            'Failed to export ${feature.displayName} data: ${e.toString()}');
+        showAlert(
+          context,
+          'Failed to export ${feature.displayName} data: ${e.toString()}',
+        );
       }
     } finally {
       if (context.mounted) {
@@ -664,8 +679,10 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 
   /// Handles the import of profile data from JSON format.
 
-  Future<void> handleProfileImport(BuildContext context,
-      {required WidgetRef ref}) async {
+  Future<void> handleProfileImport(
+    BuildContext context, {
+    required WidgetRef ref,
+  }) async {
     try {
       state = state.copyWith(importInProgress: true);
 

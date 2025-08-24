@@ -48,8 +48,11 @@ class AudioWithTooltip extends StatelessWidget {
 
   /// Constructs a `AudioWithTooltip` widget.
 
-  const AudioWithTooltip(
-      {super.key, required this.isPlaying, required this.toggleAudio});
+  const AudioWithTooltip({
+    super.key,
+    required this.isPlaying,
+    required this.toggleAudio,
+  });
 
   @override
   Widget build(BuildContext context) {

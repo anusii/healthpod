@@ -74,7 +74,8 @@ class ChromeLoginService {
       return true;
     } catch (e) {
       debugPrint(
-          'ℹ️ Auto-login may not work if ChromeDriver is not running or configured correctly. Ensure ChromeDriver is executing by running `chromedriver` in your terminal (it should listen on port 9515 by default).');
+        'ℹ️ Auto-login may not work if ChromeDriver is not running or configured correctly. Ensure ChromeDriver is executing by running `chromedriver` in your terminal (it should listen on port 9515 by default).',
+      );
       return false;
     }
   }
@@ -82,7 +83,10 @@ class ChromeLoginService {
   /// Perform automated login.
 
   Future<String?> login(
-      String serverUrl, String username, String password) async {
+    String serverUrl,
+    String username,
+    String password,
+  ) async {
     if (_driver == null) {
       throw Exception('ChromeDriver not initialized');
     }
@@ -197,7 +201,8 @@ class ChromeLoginService {
 
       if (timeout == 0) {
         debugPrint(
-            '❌ Login timeout - page did not change after form submission');
+          '❌ Login timeout - page did not change after form submission',
+        );
         return null;
       }
 

@@ -40,7 +40,7 @@ String getMonthAbbrev(int month) {
     'Sep',
     'Oct',
     'Nov',
-    'Dec'
+    'Dec',
   ];
   return monthAbbrevs[month - 1];
 }

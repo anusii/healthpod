@@ -340,10 +340,14 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                                         if (emoji.isNotEmpty)
                                           Padding(
                                             padding: const EdgeInsets.only(
-                                                right: 8.0),
-                                            child: Text(emoji,
-                                                style: const TextStyle(
-                                                    fontSize: 16)),
+                                              right: 8.0,
+                                            ),
+                                            child: Text(
+                                              emoji,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                              ),
+                                            ),
                                           ),
                                         Text(
                                           record.name,

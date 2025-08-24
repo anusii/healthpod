@@ -172,13 +172,15 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
           if (validData.isNotEmpty) {
             _surveyData = validData;
             debugPrint(
-                'Loaded ${validData.length} medication records from pod');
+              'Loaded ${validData.length} medication records from pod',
+            );
           } else {
             // Otherwise use sample data.
 
             _surveyData = _getSampleData();
             debugPrint(
-                'No valid medication data found in pod, using sample data');
+              'No valid medication data found in pod, using sample data',
+            );
           }
           _isLoading = false;
         });
@@ -474,7 +476,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
                     Text(
                       [
                         if (dosage.isNotEmpty) dosage,
-                        if (frequency.isNotEmpty) frequency
+                        if (frequency.isNotEmpty) frequency,
                       ].join(', '),
                       style: theme.textTheme.bodyMedium,
                     ),

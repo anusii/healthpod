@@ -81,7 +81,9 @@ class ProfileImportService {
       if (!validationResult.isValid) {
         if (!context.mounted) return false;
         await _showValidationErrorDialog(
-            context, validationResult.error ?? 'Invalid profile data');
+          context,
+          validationResult.error ?? 'Invalid profile data',
+        );
         return false;
       }
 
@@ -89,7 +91,9 @@ class ProfileImportService {
 
       if (!context.mounted) return false;
       final shouldProceed = await showPreviewDialog(
-          context, validationResult.data!['data'] as Map<String, dynamic>);
+        context,
+        validationResult.data!['data'] as Map<String, dynamic>,
+      );
       if (!shouldProceed) return false;
 
       // Save the profile data.
@@ -161,7 +165,9 @@ class ProfileImportService {
   /// Shows a validation error dialog with the given message.
 
   static Future<void> _showValidationErrorDialog(
-      BuildContext context, String message) async {
+    BuildContext context,
+    String message,
+  ) async {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -208,7 +214,9 @@ class ProfileImportService {
   /// Shows a preview dialog with the profile data.
 
   static Future<bool> showPreviewDialog(
-      BuildContext context, Map<String, dynamic> profileData) async {
+    BuildContext context,
+    Map<String, dynamic> profileData,
+  ) async {
     // List of important fields to show in the preview.
 
     final previewFields = [

@@ -50,7 +50,8 @@ class MedicationData {
   /// Acts as main entry point.
 
   static Future<List<Map<String, dynamic>>> fetchAllMedicationData(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     List<Map<String, dynamic>> allData = [];
 
     // Fetch POD data.

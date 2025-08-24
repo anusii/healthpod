@@ -34,7 +34,9 @@ class HealthSurveyValidator {
   /// - Otherwise, returns `null`.
 
   static String? validateTextInput(
-      String? value, HealthSurveyQuestion question) {
+    String? value,
+    HealthSurveyQuestion question,
+  ) {
     if (question.isRequired && (value == null || value.isEmpty)) {
       return 'Please enter a value';
     }
@@ -49,7 +51,9 @@ class HealthSurveyValidator {
   /// - Returns an error message if validation fails, otherwise returns `null`.
 
   static String? validateNumberInput(
-      String? value, HealthSurveyQuestion question) {
+    String? value,
+    HealthSurveyQuestion question,
+  ) {
     if (value == null || value.isEmpty) {
       return question.isRequired ? 'Please enter a value' : null;
     }
@@ -76,7 +80,9 @@ class HealthSurveyValidator {
   /// - Returns an error message if validation fails, otherwise returns `null`.
 
   static String? validateCategoricalInput(
-      String? value, HealthSurveyQuestion question) {
+    String? value,
+    HealthSurveyQuestion question,
+  ) {
     if (question.isRequired && (value == null || value.isEmpty)) {
       return 'Please select an option';
     }

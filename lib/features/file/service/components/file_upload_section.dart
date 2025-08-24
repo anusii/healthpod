@@ -160,8 +160,12 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
   /// Builds a CSV format information card for each supported directory.
 
-  Widget _buildFormatCard(bool isInBpDirectory, bool isInVaccinationDirectory,
-      bool isInProfileDirectory, bool isInMedicationDirectory) {
+  Widget _buildFormatCard(
+    bool isInBpDirectory,
+    bool isInVaccinationDirectory,
+    bool isInProfileDirectory,
+    bool isInMedicationDirectory,
+  ) {
     if (!isInBpDirectory &&
         !isInVaccinationDirectory &&
         !isInProfileDirectory &&
@@ -189,7 +193,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         'name',
         'dosage',
         'frequency',
-        'start_date'
+        'start_date',
       ];
       optionalFields = ['notes'];
     } else if (isInProfileDirectory) {
@@ -201,7 +205,7 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
         'alternativeContactNumber',
         'email',
         'dateOfBirth',
-        'gender'
+        'gender',
       ];
       isJson = true;
     }
@@ -571,7 +575,8 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
       // Create a file with a name based on the original PDF.
 
       final jsonFile = File(
-          '${tempDir.path}/${path.basenameWithoutExtension(file.path)}_final.json');
+        '${tempDir.path}/${path.basenameWithoutExtension(file.path)}_final.json',
+      );
       await jsonFile
           .writeAsString(const JsonEncoder.withIndent('  ').convert(finalJson));
 
@@ -730,8 +735,10 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
                             }
                           }
                         },
-                  icon: Icon(Icons.file_upload,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer),
+                  icon: Icon(
+                    Icons.file_upload,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
                   label: const Text('Upload'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -890,8 +897,12 @@ class _FileUploadSectionState extends ConsumerState<FileUploadSection> {
 
         // Display CSV format information card.
 
-        _buildFormatCard(isInBpDirectory, isInVaccinationDirectory,
-            isInProfileDirectory, isInMedicationDirectory),
+        _buildFormatCard(
+          isInBpDirectory,
+          isInVaccinationDirectory,
+          isInProfileDirectory,
+          isInMedicationDirectory,
+        ),
 
         const SizedBox(height: 12),
         MarkdownTooltip(

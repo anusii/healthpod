@@ -175,8 +175,10 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildInfoRow('Start Date',
-                        DateFormat('yyyy-MM-dd').format(obs.startDate)),
+                    _buildInfoRow(
+                      'Start Date',
+                      DateFormat('yyyy-MM-dd').format(obs.startDate),
+                    ),
                     if (obs.notes.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       _buildInfoRow('Notes', obs.notes),
@@ -470,51 +472,57 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
     }
 
     if (width > 900) {
-      cells.add(DataCell(Text(
-        observation.notes.isEmpty ? '-' : observation.notes,
-        overflow: TextOverflow.ellipsis,
-      )));
+      cells.add(
+        DataCell(
+          Text(
+            observation.notes.isEmpty ? '-' : observation.notes,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      );
     }
 
     // Actions cell (always visible).
 
-    cells.add(DataCell(
-      Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () => setState(() {
-              editorState.enterEditMode(index);
-            }),
-            tooltip: 'Edit',
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              try {
-                await editorState.deleteObservation(
-                  context,
-                  editorService,
-                  observation,
-                );
-              } catch (e) {
-                // Error handling is done in the service/state layers
-                // Just log here for debugging
-                debugPrint('Error in medication deletion UI: $e');
-              } finally {
-                // Always reload data to reflect current state.
+    cells.add(
+      DataCell(
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => setState(() {
+                editorState.enterEditMode(index);
+              }),
+              tooltip: 'Edit',
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () async {
+                try {
+                  await editorState.deleteObservation(
+                    context,
+                    editorService,
+                    observation,
+                  );
+                } catch (e) {
+                  // Error handling is done in the service/state layers
+                  // Just log here for debugging
+                  debugPrint('Error in medication deletion UI: $e');
+                } finally {
+                  // Always reload data to reflect current state.
 
-                _loadData();
-              }
-            },
-            tooltip: 'Delete',
-            color: Colors.red.shade300,
-          ),
-        ],
+                  _loadData();
+                }
+              },
+              tooltip: 'Delete',
+              color: Colors.red.shade300,
+            ),
+          ],
+        ),
       ),
-    ));
+    );
 
     return DataRow(cells: cells);
   }
@@ -675,7 +683,9 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
                       padding: isNarrowScreen
                           ? const EdgeInsets.all(12)
                           : const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 16),
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
                       backgroundColor:
                           Theme.of(context).colorScheme.primaryContainer,
                       foregroundColor:
@@ -692,10 +702,12 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
                         : Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.add_circle,
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimaryContainer),
+                              Icon(
+                                Icons.add_circle,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                              ),
                               const SizedBox(width: 8),
                               const Text('Add New Medication'),
                             ],

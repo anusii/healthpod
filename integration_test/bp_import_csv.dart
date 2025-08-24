@@ -96,7 +96,7 @@ void bpImportCSV() {
             // Authentication Phase.
 
             debugPrint(
-                '\n⚠️ Please complete browser authentication manually...');
+                '\n⚠️ Please complete browser authentication manually...',);
             await Future.delayed(const Duration(seconds: 15));
             await tester.pumpAndSettle();
 
@@ -115,7 +115,7 @@ void bpImportCSV() {
             debugPrint('\n🔍 Locating blood_pressure folder...');
             final bpFolder = find.text('blood_pressure');
             expect(bpFolder, findsOneWidget,
-                reason: 'blood_pressure folder not found in Files');
+                reason: 'blood_pressure folder not found in Files',);
             await tester.tap(bpFolder);
             await tester.pumpAndSettle(const Duration(seconds: 3));
 
@@ -124,14 +124,14 @@ void bpImportCSV() {
             debugPrint('\n🖱️ Tapping Import CSV button...');
             final importCsvButton = find.text('Import CSV');
             expect(importCsvButton, findsOneWidget,
-                reason: 'Import CSV button not found');
+                reason: 'Import CSV button not found',);
             await tester.tap(importCsvButton);
             await tester.pumpAndSettle();
 
             // Manual file selection phase.
 
             debugPrint(
-                '\n⚠️ Please select a valid BP CSV file in the dialog...');
+                '\n⚠️ Please select a valid BP CSV file in the dialog...',);
             await Future.delayed(const Duration(seconds: 10));
             await tester.pumpAndSettle();
 
@@ -153,9 +153,9 @@ void bpImportCSV() {
             // Verify the success message appears in the SnackBar.
 
             final messageFinder = find.text(
-                'Blood pressure data imported and converted successfully');
+                'Blood pressure data imported and converted successfully',);
             expect(messageFinder, findsOneWidget,
-                reason: 'Success message not found');
+                reason: 'Success message not found',);
 
             // Give UI time to settle before continuing.
 
@@ -171,16 +171,16 @@ void bpImportCSV() {
                   widget is Text && filePattern.hasMatch(widget.data ?? ''),
             );
             expect(files, findsWidgets,
-                reason: 'No imported blood pressure files found in folder');
+                reason: 'No imported blood pressure files found in folder',);
             debugPrint('\n🔍 Verifying imported files appear in the folder...');
             expect(files, findsWidgets,
-                reason: 'No imported blood pressure files found in folder');
+                reason: 'No imported blood pressure files found in folder',);
 
             // Verify new files appeared.
 
             debugPrint('\n🔍 Verifying imported files appear in the folder...');
             expect(files, findsWidgets,
-                reason: 'No imported blood pressure files found in folder');
+                reason: 'No imported blood pressure files found in folder',);
           } catch (e) {
             debugPrint('\n❌ CSV Import test failed with error: $e');
             rethrow;

@@ -305,7 +305,8 @@ class _ManageMedicationsState extends State<ManageMedications> {
                                     ),
                                   ),
                                   Text(
-                                      '${medication.dosage} - ${medication.frequency}'),
+                                    '${medication.dosage} - ${medication.frequency}',
+                                  ),
                                   if (medication.notes.isNotEmpty)
                                     Text(
                                       medication.notes,
@@ -324,7 +325,9 @@ class _ManageMedicationsState extends State<ManageMedications> {
                                   child: IconButton(
                                     icon: const Icon(Icons.edit, size: 18),
                                     onPressed: () => _showMedicationDialog(
-                                        medication, index),
+                                      medication,
+                                      index,
+                                    ),
                                     constraints: const BoxConstraints(),
                                     padding: EdgeInsets.zero,
                                   ),

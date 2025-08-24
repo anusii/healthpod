@@ -61,7 +61,8 @@ class DiaryService {
   /// Returns an empty list if there are any errors during loading.
 
   static Future<List<Appointment>> loadAppointments(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     try {
       // Get the path to the diary directory in the POD.
 
@@ -116,12 +117,14 @@ class DiaryService {
                 continue;
               }
 
-              appointments.add(Appointment(
-                date: DateTime.parse(dateStr),
-                title: appointmentData['title'],
-                description: appointmentData['description'],
-                isPast: DateTime.parse(dateStr).isBefore(DateTime.now()),
-              ));
+              appointments.add(
+                Appointment(
+                  date: DateTime.parse(dateStr),
+                  title: appointmentData['title'],
+                  description: appointmentData['description'],
+                  isPast: DateTime.parse(dateStr).isBefore(DateTime.now()),
+                ),
+              );
             } catch (e) {
               debugPrint('Error parsing appointment file $file: $e');
             }
@@ -144,7 +147,9 @@ class DiaryService {
   /// 3. Returns true if successful, false otherwise
 
   static Future<bool> saveAppointment(
-      BuildContext context, Appointment appointment) async {
+    BuildContext context,
+    Appointment appointment,
+  ) async {
     try {
       // Prepare the appointment data for saving.
 
@@ -180,7 +185,9 @@ class DiaryService {
   /// 4. Returns true if successful, false otherwise
 
   static Future<bool> deleteAppointment(
-      BuildContext context, Appointment appointment) async {
+    BuildContext context,
+    Appointment appointment,
+  ) async {
     try {
       // Get the diary directory path.
 

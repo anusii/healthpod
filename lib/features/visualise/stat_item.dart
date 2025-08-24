@@ -56,7 +56,9 @@ class StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
-          horizontal: 8.0, vertical: 4.0), // Add padding
+        horizontal: 8.0,
+        vertical: 4.0,
+      ), // Add padding
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

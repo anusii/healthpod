@@ -142,8 +142,9 @@ class BPExporter extends HealthDataExporterBase {
           // Ensure we use ISO format for timestamp with T and Z.
 
           var timestamp = normaliseTimestamp(
-              jsonData[BPCSVFields.fieldTimestamp],
-              toIso: true);
+            jsonData[BPCSVFields.fieldTimestamp],
+            toIso: true,
+          );
 
           final responses = jsonData['responses'];
 
@@ -168,8 +169,10 @@ class BPExporter extends HealthDataExporterBase {
 
       // Sort readings by timestamp.
 
-      allReadings.sort((a, b) => a[BPCSVFields.fieldTimestamp]
-          .compareTo(b[BPCSVFields.fieldTimestamp]));
+      allReadings.sort(
+        (a, b) => a[BPCSVFields.fieldTimestamp]
+            .compareTo(b[BPCSVFields.fieldTimestamp]),
+      );
 
       // Prepare CSV data.
 

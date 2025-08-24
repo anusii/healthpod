@@ -148,7 +148,9 @@ class _AvatarNameState extends State<AvatarName> {
                               decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                                 contentPadding: EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                               ),
                             ),
                           )

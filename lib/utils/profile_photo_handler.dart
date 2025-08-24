@@ -121,7 +121,7 @@ class ProfilePhotoHandler {
         'format': imageFile.path.split('.').last.toLowerCase(),
         // Add a type marker to clearly identify this as a photo file.
 
-        'type': 'profile_photo'
+        'type': 'profile_photo',
       };
 
       // Convert to JSON string.

@@ -236,18 +236,20 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                     * **Diastolic**: Lower number - Pressure when heart relaxes
 
                   ''',
-                  child: Row(children: [
-                    Text(
-                      'Blood Pressure Trends',
-                      style: TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.info_outline,
-                      color: theme.colorScheme.onSurfaceVariant,
-                      size: 20,
-                    ),
-                  ]),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Blood Pressure Trends',
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.info_outline,
+                        color: theme.colorScheme.onSurfaceVariant,
+                        size: 20,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -455,11 +457,15 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                           // Get both systolic and diastolic values from the data.
 
                           final systolicValue = parseNumericInput(
-                              _parseNumericValue(
-                                  data[HealthSurveyConstants.fieldSystolic]));
+                            _parseNumericValue(
+                              data[HealthSurveyConstants.fieldSystolic],
+                            ),
+                          );
                           final diastolicValue = parseNumericInput(
-                              _parseNumericValue(
-                                  data[HealthSurveyConstants.fieldDiastolic]));
+                            _parseNumericValue(
+                              data[HealthSurveyConstants.fieldDiastolic],
+                            ),
+                          );
 
                           // Create a consistent tooltip regardless of which point was touched.
 
@@ -491,23 +497,27 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                             // Only the first tooltip will actually be visible with content.
 
                             if (i == 0) {
-                              items.add(LineTooltipItem(
-                                tooltipContent,
-                                TextStyle(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 13,
-                                  height: 1.8,
+                              items.add(
+                                LineTooltipItem(
+                                  tooltipContent,
+                                  TextStyle(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 13,
+                                    height: 1.8,
+                                  ),
+                                  textAlign: TextAlign.left,
                                 ),
-                                textAlign: TextAlign.left,
-                              ));
+                              );
                             } else {
                               // Add empty tooltip items for other spots, they won't be visible.
 
-                              items.add(LineTooltipItem(
-                                '',
-                                const TextStyle(fontSize: 0),
-                              ));
+                              items.add(
+                                LineTooltipItem(
+                                  '',
+                                  const TextStyle(fontSize: 0),
+                                ),
+                              );
                             }
                           }
 
@@ -559,15 +569,16 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                                 index < _surveyData.length &&
                                 value == index.toDouble()) {
                               final date = DateTime.parse(
-                                  _surveyData[index]['timestamp']);
+                                _surveyData[index]['timestamp'],
+                              );
 
                               // Show year if this is first data point or if year changed from previous point.
 
                               bool showYear = index == 0 ||
                                   (index > 0 &&
-                                      DateTime.parse(_surveyData[index - 1]
-                                                  ['timestamp'])
-                                              .year !=
+                                      DateTime.parse(
+                                            _surveyData[index - 1]['timestamp'],
+                                          ).year !=
                                           date.year);
 
                               /// Date label with hover tooltip showing time.
@@ -820,7 +831,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                                         size: 16,
                                       ),
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
@@ -843,7 +854,7 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );

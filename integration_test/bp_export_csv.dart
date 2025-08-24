@@ -98,7 +98,7 @@ void bpExportCSV() {
             // The test will wait for a reasonable time for this to complete.
 
             debugPrint(
-                '\n⚠️ Please complete browser authentication manually...');
+                '\n⚠️ Please complete browser authentication manually...',);
             await Future.delayed(const Duration(seconds: 15));
             await tester.pumpAndSettle();
 
@@ -125,7 +125,7 @@ void bpExportCSV() {
             debugPrint('\n🔍 Locating blood_pressure folder...');
             final bpFolder = find.text('blood_pressure');
             expect(bpFolder, findsOneWidget,
-                reason: 'blood_pressure folder not found in Files');
+                reason: 'blood_pressure folder not found in Files',);
             await tester.tap(bpFolder);
             await tester.pumpAndSettle(const Duration(seconds: 3));
 
@@ -135,7 +135,7 @@ void bpExportCSV() {
             debugPrint('\n🖱️ Tapping Export CSV button...');
             final exportCsvButton = find.text('Export CSV');
             expect(exportCsvButton, findsOneWidget,
-                reason: 'Export CSV button not found');
+                reason: 'Export CSV button not found',);
             await tester.tap(exportCsvButton);
             await tester.pumpAndSettle();
 
@@ -144,7 +144,7 @@ void bpExportCSV() {
             // This cannot be automated and requires manual intervention.
 
             debugPrint(
-                '\n⚠️ Please handle the native file save dialog manually...');
+                '\n⚠️ Please handle the native file save dialog manually...',);
             await Future.delayed(const Duration(seconds: 10));
             await tester.pumpAndSettle();
 
@@ -155,7 +155,7 @@ void bpExportCSV() {
             final successMessage =
                 find.text('Blood pressure data exported successfully');
             expect(successMessage, findsOneWidget,
-                reason: 'CSV export success message not displayed');
+                reason: 'CSV export success message not displayed',);
           } catch (e) {
             debugPrint('\n❌ CSV Export test failed with error: $e');
             rethrow;

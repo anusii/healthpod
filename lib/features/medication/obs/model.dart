@@ -72,7 +72,8 @@ class MedicationObservation {
       dosage: json['responses'][MedicationSurveyConstants.fieldDosage],
       frequency: json['responses'][MedicationSurveyConstants.fieldFrequency],
       startDate: DateTime.parse(
-          json['responses'][MedicationSurveyConstants.fieldStartDate]),
+        json['responses'][MedicationSurveyConstants.fieldStartDate],
+      ),
       notes: json['responses'][MedicationSurveyConstants.fieldNotes] ?? '',
     );
   }

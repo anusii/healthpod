@@ -53,7 +53,8 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
     await CentralKeyManager.instance.ensureSecurityKey(
       context,
       const Text(
-          'Security verification is required to access your health plan'),
+        'Security verification is required to access your health plan',
+      ),
     );
 
     // Get the directory URL for the health_plan folder.
@@ -68,8 +69,10 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
     // Look for health plan files with .enc.ttl extension (encrypted files).
 
     final healthPlanFiles = resources.files
-        .where((file) =>
-            file.startsWith('health_plan_') && file.endsWith('.enc.ttl'))
+        .where(
+          (file) =>
+              file.startsWith('health_plan_') && file.endsWith('.enc.ttl'),
+        )
         .toList();
 
     if (healthPlanFiles.isEmpty) {
@@ -100,7 +103,8 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
     await getKeyFromUserIfRequired(
       context,
       const Text(
-          'Please enter your security key to access your health plan data'),
+        'Please enter your security key to access your health plan data',
+      ),
     );
 
     if (!context.mounted) {
@@ -125,7 +129,8 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
     // Log content details for debugging.
 
     debugPrint(
-        'Successfully read encrypted health plan data (length: ${fileContent.length})');
+      'Successfully read encrypted health plan data (length: ${fileContent.length})',
+    );
 
     // Try to parse the JSON directly - this should work if decryption is successful.
 
@@ -134,9 +139,11 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
 
       if (fileContent.trim().startsWith('@prefix')) {
         debugPrint(
-            'File appears to be in TTL format. This indicates the file is still encrypted.');
+          'File appears to be in TTL format. This indicates the file is still encrypted.',
+        );
         debugPrint(
-            'The file may be double-encrypted or the security key is incorrect.');
+          'The file may be double-encrypted or the security key is incorrect.',
+        );
 
         // Return empty data since we can't decrypt the TTL format directly.
 
@@ -145,7 +152,8 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
 
       final Map<String, dynamic> jsonData = jsonDecode(fileContent);
       debugPrint(
-          'Successfully parsed health plan JSON with keys: ${jsonData.keys.join(', ')}');
+        'Successfully parsed health plan JSON with keys: ${jsonData.keys.join(', ')}',
+      );
 
       // Check for nested data structures.
 
@@ -156,7 +164,8 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
       } else if (jsonData.containsKey('timestamp') &&
           jsonData.containsKey('responses')) {
         debugPrint(
-            'Found timestamp and responses keys, returning responses object');
+          'Found timestamp and responses keys, returning responses object',
+        );
         return jsonData['responses'] as Map<String, dynamic>;
       }
 
@@ -166,13 +175,15 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
     } catch (e) {
       debugPrint('Error parsing health plan JSON: $e');
       debugPrint(
-          'Content preview: ${fileContent.substring(0, min(100, fileContent.length))}...');
+        'Content preview: ${fileContent.substring(0, min(100, fileContent.length))}...',
+      );
 
       // If content starts with @prefix, it's likely TTL format and the security key is incorrect.
 
       if (fileContent.trim().startsWith('@prefix')) {
         debugPrint(
-            'File appears to be in TTL format. This indicates double encryption or incorrect security key.');
+          'File appears to be in TTL format. This indicates double encryption or incorrect security key.',
+        );
       }
 
       // Return empty data.

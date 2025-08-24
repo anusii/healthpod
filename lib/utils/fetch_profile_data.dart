@@ -56,13 +56,15 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
     // If we don't find any recent files, try refreshing the directory listing.
 
-    final hasRecentFiles = resources.files.any((file) =>
-        file.startsWith('profile_') &&
-            !file.startsWith('profile_photo_') &&
-            (file.endsWith('.enc.ttl') || file.endsWith('.json.enc.ttl')) &&
-            file.contains('2025-07-') ||
-        file.contains('2025-08-') ||
-        file.contains('2025-09-'));
+    final hasRecentFiles = resources.files.any(
+      (file) =>
+          file.startsWith('profile_') &&
+              !file.startsWith('profile_photo_') &&
+              (file.endsWith('.enc.ttl') || file.endsWith('.json.enc.ttl')) &&
+              file.contains('2025-07-') ||
+          file.contains('2025-08-') ||
+          file.contains('2025-09-'),
+    );
 
     if (!hasRecentFiles) {
       // Small delay then retry directory listing.
@@ -72,10 +74,12 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     }
 
     final profileFiles = resources.files
-        .where((file) =>
-            file.startsWith('profile_') &&
-            !file.startsWith('profile_photo_') &&
-            (file.endsWith('.enc.ttl') || file.endsWith('.json.enc.ttl')))
+        .where(
+          (file) =>
+              file.startsWith('profile_') &&
+              !file.startsWith('profile_photo_') &&
+              (file.endsWith('.enc.ttl') || file.endsWith('.json.enc.ttl')),
+        )
         .toList();
 
     if (profileFiles.isEmpty) {
@@ -172,7 +176,8 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
               await CentralKeyManager.instance.ensureSecurityKey(
                 context,
                 const Text(
-                    'Please enter your security key to access your profile data'),
+                  'Please enter your security key to access your profile data',
+                ),
               );
 
               if (!context.mounted) {
@@ -283,7 +288,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
           'alternativeContactNumber',
           'email',
           'dateOfBirth',
-          'gender'
+          'gender',
         ];
 
         // Copy only profile-related fields.

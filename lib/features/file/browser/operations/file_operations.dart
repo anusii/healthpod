@@ -56,7 +56,9 @@ class FileOperations {
   /// Returns a list of processed [FileItem] objects.
 
   static Future<List<FileItem>> getFiles(
-      String currentPath, BuildContext context) async {
+    String currentPath,
+    BuildContext context,
+  ) async {
     // Get directory URL and contents.
 
     final dirUrl = await getDirUrl(currentPath);
@@ -89,11 +91,13 @@ class FileOperations {
 
         if (metadata != SolidFunctionCallStatus.fail.toString() &&
             metadata != SolidFunctionCallStatus.notLoggedIn.toString()) {
-          processedFiles.add(FileItem(
-            name: fileName,
-            path: relativePath,
-            dateModified: DateTime.now(),
-          ));
+          processedFiles.add(
+            FileItem(
+              name: fileName,
+              path: relativePath,
+              dateModified: DateTime.now(),
+            ),
+          );
         } else {
           // File exists in directory listing but can't be read - skip silently.
 
