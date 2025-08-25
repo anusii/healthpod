@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Friday 2025-08-15 20:40:53 +1000 Graham Williams>
+// Time-stamp: <Monday 2025-08-25 10:52:34 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -71,20 +71,6 @@ final List<Map<String, dynamic>> homeTabs = [
     ''',
   },
   {
-    'title': 'Add',
-    'icon': Icons.assignment,
-    'color': null,
-    'content': const SurveyTab(),
-    'tooltip': '''
-
-    **Add:** Tap here to directly enter new data. This could be new observations
-    of your **Blood Pressure** (systolic, diastolic, heart rate) or a new
-    **Vaccination**. To upload new data from a *CSV* file vist the **Files**
-    tab.
-
-    ''',
-  },
-  {
     'title': 'View',
     'icon': Icons.show_chart,
     'color': null,
@@ -94,6 +80,20 @@ final List<Map<String, dynamic>> homeTabs = [
     **View:** Tap here to visualise your health data that is stored in your
       pod. Your **blood pressure** observations will show trends over time and
       other health metrics. Your **vaccinations** will be shown as a timeline.
+
+    ''',
+  },
+  {
+    'title': 'Entry',
+    'icon': Icons.assignment,
+    'color': null,
+    'content': const SurveyTab(),
+    'tooltip': '''
+
+    **Add:** Tap here to directly enter new data. This could be new observations
+    of your **Blood Pressure** (systolic, diastolic, heart rate) or a new
+    **Vaccination**. To upload new data from a *CSV* file vist the **Files**
+    tab.
 
     ''',
   },
