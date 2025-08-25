@@ -109,9 +109,10 @@ class TestConfig {
     final driverFile = File(driverPath);
     if (!await driverFile.exists()) {
       throw FileSystemException(
-          'ChromeDriver not found at path: $driverPath\n'
-          'Please ensure ChromeDriver is installed in the tools/chromedriver directory',
-          driverPath,);
+        'ChromeDriver not found at path: $driverPath\n'
+        'Please ensure ChromeDriver is installed in the tools/chromedriver directory',
+        driverPath,
+      );
     }
 
     // On Unix-like systems, verify executable permissions.

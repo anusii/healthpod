@@ -194,7 +194,8 @@ class ChromeDriverProcess {
 
       if (!await _isPortAvailable(TestConfig.chromeDriverPort)) {
         throw StateError(
-            '⚠️ Port ${TestConfig.chromeDriverPort} is already in use. Please close other instances.',);
+          '⚠️ Port ${TestConfig.chromeDriverPort} is already in use. Please close other instances.',
+        );
       }
 
       // Configure and start process.
@@ -253,7 +254,8 @@ class ChromeDriverProcess {
           const Duration(seconds: 5),
           onTimeout: () {
             Logger.warn(
-                '⚠️ ChromeDriver graceful shutdown timed out, forcing termination',);
+              '⚠️ ChromeDriver graceful shutdown timed out, forcing termination',
+            );
             _process!.kill(ProcessSignal.sigkill);
             return -1;
           },

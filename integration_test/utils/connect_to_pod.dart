@@ -151,7 +151,9 @@ void connectToPod() {
         // Verify home screen title.
 
         expect(
-            find.text('Your Health Data, Under Your Control'), findsOneWidget,);
+          find.text('Your Health Data, Under Your Control'),
+          findsOneWidget,
+        );
 
         // Verify WebID is fetched.
 
@@ -168,9 +170,11 @@ void connectToPod() {
         // Handle logout confirmation.
 
         final okButton = find.text('OK');
-        expect(okButton, findsOneWidget,
-            reason:
-                'OK button should be present in logout confirmation dialog',);
+        expect(
+          okButton,
+          findsOneWidget,
+          reason: 'OK button should be present in logout confirmation dialog',
+        );
         await tester.tap(okButton);
         await tester.pumpAndSettle();
 
@@ -184,8 +188,11 @@ void connectToPod() {
         // Verify successful logout.
 
         final webIdAfterLogout = await fetchWebId();
-        expect(webIdAfterLogout, isNull,
-            reason: 'WebID should be null after logout',);
+        expect(
+          webIdAfterLogout,
+          isNull,
+          reason: 'WebID should be null after logout',
+        );
       });
     });
   });
@@ -238,7 +245,8 @@ void connectToPodWebView() {
         debugPrint('✅ WebID retrieved from page: $webId');
       } else {
         debugPrint(
-            '❌ WebID could not be retrieved after $maxRetries attempts!',);
+          '❌ WebID could not be retrieved after $maxRetries attempts!',
+        );
         fail('Unable to fetch WebID from HTML.');
       }
     });
