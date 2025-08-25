@@ -1,5 +1,7 @@
 # HealthPod Installers
 
+<!-- markdownlint-disable MD013 -->
+
 Flutter supports multiple platform targets. Flutter based apps can run
 native on Android, iOS, Linux, MacOS, and Windows, as well as directly
 in a browser from the web. Flutter functionality is essentially
@@ -103,7 +105,8 @@ app should then run without the warning next time.
 ## Web -- No Installation Required
 
 No installer is required for a browser based experience of
-Healthpod. Simply visit https://healthpod.solidcommunity.au.
+Healthpod. Simply visit
+[https://healthpod.solidcommunity.au](https://healthpod.solidcommunity.au).
 
 Also, your Web browser will provide an option in its menus to install
 the app locally, which can add an icon to your home screen to start

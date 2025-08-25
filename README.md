@@ -2,7 +2,7 @@
 
 **An ANU Software Innovation Institute demonstrator for your Data Vault**.
 
-*Time-stamp: <Tuesday 2025-07-22 21:12:46 +1000 Graham Williams>*
+*Time-stamp: <Monday 2025-08-25 11:18:41 +1000 Graham Williams>*
 
 *Authors: Ashley Tang, Graham Williams, Zheyuan Xu, Kevin Wang*
 
@@ -44,7 +44,9 @@ can interact with it to review your health. You can also decide if you
 want to share that data with anyone else, like you general
 practitioner for them to provide their professional advice.
 
-Visit https://healthpod.solidcommunity.au/ to run the app online.
+Visit
+[https://healthpod.solidcommunity.au/](https://healthpod.solidcommunity.au/)
+to run the app online.
 
 See [installers](installers/README.md) for instructions to install on
 your device.
@@ -78,22 +80,22 @@ A grid of icons provides access to the functionality.
 
 The grid items include:
 
-+ Obs (A feature to record daily or regular observations like
+- Obs (A feature to record daily or regular observations like
   blood pressure, physical activity, etc)
 
-+ Activity (A record of activities recording date, start, end, what)
+- Activity (A record of activities recording date, start, end, what)
 
-+ Diary (A record of visits to doctors, dentists, pharmacy,
+- Diary (A record of visits to doctors, dentists, pharmacy,
   vaccinations, etc. Each diary entry records: date, what, details,
   provider, professional, total, covered, cost)
 
-+ Docs (A file browser type of thing where the user can arrange their
+- Docs (A file browser type of thing where the user can arrange their
   PDFs into appropriate folders as they like.)
 
 ## Use Cases
 
-+ I am visiting the doctor and I need to check when I last had a
+- I am visiting the doctor and I need to check when I last had a
   vaccination
 
-+ A LLM model runs over the whole contents of the Pod to then allow me
+- A LLM model runs over the whole contents of the Pod to then allow me
   to interact with the data collection.

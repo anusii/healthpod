@@ -47,7 +47,7 @@ au](https://solidcommunity.au/docs/healthpod)
 + Resync [0.1.2 20250423 gjw]
 + HOME: Concept dashboard and vaccinations [0.1.1 20250402 misc]
 
-## 0.1 Initial beta release.
+## 0.1 Initial beta release
 
 + Ready for beta release [0.1.0 20250326 gjw]
 + Deploy navigator [0.0.9 20250218 kev]
