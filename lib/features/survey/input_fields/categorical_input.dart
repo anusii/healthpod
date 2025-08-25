@@ -232,7 +232,9 @@ class _HealthSurveyCategoricalInputState
                 children: [
                   Radio<String>(
                     value: option,
+                    // ignore: deprecated_member_use
                     groupValue: field.value,
+                    // ignore: deprecated_member_use
                     onChanged: (value) =>
                         _selectOption(field, value!, optionIndex),
                     focusNode: FocusNode(skipTraversal: true),
