@@ -31,6 +31,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solidpod/solidpod.dart' show getAppNameVersion;
 import 'package:solidui/solidui.dart';
 
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/charts/tab.dart';
 import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
@@ -115,7 +116,7 @@ List<SolidMenuItem> _buildHealthPodMenu() => [
 
     ''',
         child: const SolidFile(
-          basePath: 'health/',
+          basePath: basePath,
         ),
       ),
       SolidMenuItem(
