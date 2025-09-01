@@ -25,30 +25,22 @@
 
 library;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import 'package:markdown_tooltip/markdown_tooltip.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solidpod/solidpod.dart' show getAppNameVersion;
-import 'package:version_widget/version_widget.dart';
+import 'package:solidui/solidui.dart';
 
-import 'package:healthpod/dialogs/alert.dart';
-import 'package:healthpod/dialogs/show_about.dart';
 import 'package:healthpod/features/charts/tab.dart';
-import 'package:healthpod/features/file/service/page.dart';
 import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/features/update/tab.dart';
 import 'package:healthpod/settings/dialog.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
-import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/utils/is_logged_in.dart';
-import 'package:healthpod/utils/security_key/central_key_manager.dart';
-import 'package:healthpod/widgets/footer.dart';
 import 'package:healthpod/widgets/home_page.dart';
-import 'package:healthpod/widgets/theme_toggle.dart';
 
 /// The home screen for the HealthPod app.
 ///
@@ -56,39 +48,37 @@ import 'package:healthpod/widgets/theme_toggle.dart';
 /// providing users with a dashboard of features, a footer with user-specific
 /// information, and options to log out or view information about the app.
 
-// Define the [NavigationRail] tabs for the home page.
-// Color is set to null to use the default color from the theme.
+// Define the menu items for SolidScaffold navigation.
 
-final List<Map<String, dynamic>> homeTabs = [
-  {
-    'title': 'Home',
-    'icon': Icons.home,
-    'color': null,
-    'tooltip': '''
+List<SolidMenuItem> _buildHealthPodMenu() => [
+      SolidMenuItem(
+        title: 'Home',
+        icon: Icons.home,
+        tooltip: '''
 
     **Home:** Tap here to view your HealthPod overview and dashboard.
 
     ''',
-  },
-  {
-    'title': 'View',
-    'icon': Icons.show_chart,
-    'color': null,
-    'content': const ChartTab(),
-    'tooltip': '''
+        child: HomePage(
+          onNavigateToProfile: () {},
+        ),
+      ),
+      SolidMenuItem(
+        title: 'View',
+        icon: Icons.show_chart,
+        tooltip: '''
 
     **View:** Tap here to visualise your health data that is stored in your
       pod. Your **blood pressure** observations will show trends over time and
       other health metrics. Your **vaccinations** will be shown as a timeline.
 
     ''',
-  },
-  {
-    'title': 'Entry',
-    'icon': Icons.assignment,
-    'color': null,
-    'content': const SurveyTab(),
-    'tooltip': '''
+        child: const ChartTab(),
+      ),
+      SolidMenuItem(
+        title: 'Entry',
+        icon: Icons.assignment,
+        tooltip: '''
 
     **Add:** Tap here to directly enter new data. This could be new observations
     of your **Blood Pressure** (systolic, diastolic, heart rate) or a new
@@ -96,26 +86,24 @@ final List<Map<String, dynamic>> homeTabs = [
     tab.
 
     ''',
-  },
-  {
-    'title': 'Data',
-    'icon': Icons.table_chart,
-    'color': null,
-    'content': const TableTab(),
-    'tooltip': '''
+        child: const SurveyTab(),
+      ),
+      SolidMenuItem(
+        title: 'Data',
+        icon: Icons.table_chart,
+        tooltip: '''
 
     **Data:** Tap here to view, modify, add, or remove your saved health data
       through a tabular form. All of your health data from your pod is
       accessible here.
 
     ''',
-  },
-  {
-    'title': 'Files',
-    'icon': Icons.folder,
-    'color': null,
-    'content': const FileService(),
-    'tooltip': '''
+        child: const TableTab(),
+      ),
+      SolidMenuItem(
+        title: 'Files',
+        icon: Icons.folder,
+        tooltip: '''
 
     **Files:** Tap here to access file management features.  Here you can load
     your health data from any local *CSV* files you may have created into your
@@ -126,13 +114,14 @@ final List<Map<String, dynamic>> homeTabs = [
     to **delete** files from your pod storage.
 
     ''',
-  },
-  {
-    'title': 'Support',
-    'icon': Icons.library_books,
-    'color': null,
-    'content': const ResourcesTab(),
-    'tooltip': '''
+        child: const SolidFile(
+          basePath: 'health/',
+        ),
+      ),
+      SolidMenuItem(
+        title: 'Support',
+        icon: Icons.library_books,
+        tooltip: '''
 
     **Support:** Tap here to access a comprehensive collection of health
     resources including:
@@ -144,25 +133,21 @@ final List<Map<String, dynamic>> homeTabs = [
     - Useful health calculators and tools
 
     ''',
-  },
-];
+        child: const ResourcesTab(),
+      ),
+    ];
 
-class HealthPodHome extends StatefulWidget {
+class HealthPodHome extends ConsumerStatefulWidget {
   const HealthPodHome({super.key});
 
   @override
   HealthPodHomeState createState() => HealthPodHomeState();
 }
 
-class HealthPodHomeState extends State<HealthPodHome> {
+class HealthPodHomeState extends ConsumerState<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
-  int _selectedIndex = 0;
   String _appVersion = '';
-  bool _isVersionLoaded = false;
-  // Key to force rebuilds when profile is updated.
-
-  final GlobalKey<State> _homePageKey = GlobalKey<State>();
 
   @override
   void initState() {
@@ -179,7 +164,6 @@ class HealthPodHomeState extends State<HealthPodHome> {
     if (mounted) {
       setState(() {
         _appVersion = appInfo.version;
-        _isVersionLoaded = true;
       });
     }
   }
@@ -201,7 +185,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
       // Check security key once for the entire session.
 
       if (context.mounted) {
-        await CentralKeyManager.instance.ensureSecurityKey(
+        await SolidSecurityKeyCentralManager.instance.ensureSecurityKey(
           context,
           const Text('Security verification is required to access your data'),
         );
@@ -238,7 +222,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
       // Let the central key manager check for security key status.
       // This prevents multiple prompts across the app.
 
-      isKeySaved = await CentralKeyManager.instance.ensureSecurityKey(
+      isKeySaved =
+          await SolidSecurityKeyCentralManager.instance.ensureSecurityKey(
         context,
         const Text('Security verification is required for Health Pod'),
       );
@@ -261,185 +246,118 @@ class HealthPodHomeState extends State<HealthPodHome> {
     });
   }
 
-  void _handleTabChange(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  /// Extracts the server URL from a WebID.
 
-    final tab = homeTabs[index];
-
-    if (tab.containsKey('message')) {
-      alert(context, tab['message'], tab['dialogTitle']);
-    } else if (tab.containsKey('action')) {
-      tab['action'](context);
+  String _extractServerFromWebId(String webId) {
+    try {
+      final uri = Uri.parse(webId);
+      return '${uri.scheme}://${uri.host}'
+          '${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
+    } catch (e) {
+      final parts = webId.split('/');
+      if (parts.length >= 3) {
+        return '${parts[0]}//${parts[2]}';
+      }
+      return webId;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(homeTabs[_selectedIndex]['title']),
-        backgroundColor: theme.colorScheme.surface,
-        automaticallyImplyLeading: false,
+    return SolidScaffold(
+      menu: _buildHealthPodMenu(),
+      appBar: SolidAppBarConfig(
+        title: 'HealthPod',
         actions: [
-          // Add version widget.
-
-          if (_isVersionLoaded)
-            MarkdownTooltip(
-              message: '''
-
-              **Version:** This is the current version of the HealthPod app. If
-              the version is out of date then the text will be red. You can tap on
-              the version to view the app's Change Log to determine if it is worth
-              updating your version.
-
-              ''',
-              child: VersionWidget(
-                version: _appVersion,
-                changelogUrl: kIsWeb
-                    ? 'https://raw.githubusercontent.com/anusii/healthpod/refs/heads/dev/CHANGELOG.md'
-                    : 'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
-                showDate: true,
-              ),
-            ),
-
-          const SizedBox(width: 50),
-
-          const ThemeToggle(),
-
-          MarkdownTooltip(
-            message: '''
+          SolidAppBarAction(
+            icon: Icons.settings,
+            tooltip: '''
 
             **Settings:** Tap here to view and manage your HealthPod account
               settings.
 
             ''',
-            child: IconButton(
-              icon: Icon(
-                Icons.settings,
-                color: theme.colorScheme.primary,
-              ),
-              onPressed: () => showDialog(
-                context: context,
-                builder: (context) => const SettingsDialog(),
-              ),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => const SettingsDialog(),
             ),
           ),
-          MarkdownTooltip(
-            message: '''
+          SolidAppBarAction(
+            icon: Icons.logout,
+            tooltip: '''
 
             **Logout:** Tap here to securely log out of your HealthPod account.
             This will clear your current session and return you to the login
             screen.
 
             ''',
-            child: IconButton(
-              icon: Icon(
-                Icons.logout,
-                color: theme.colorScheme.primary,
-              ),
-              onPressed: () => handleLogout(context),
-            ),
-          ),
-          MarkdownTooltip(
-            message: '''
-
-            **About:** Tap here to view information about the HealthPod app.
-            This includes a list of contributers and the extensive list of
-            open-source packages that the HealthPod app is built on and their
-            licenses.
-
-            ''',
-            child: IconButton(
-              onPressed: () {
-                showAbout(context);
-              },
-              icon: Icon(
-                Icons.info,
-                color: theme.colorScheme.primary,
-              ),
-            ),
+            onPressed: () => handleLogout(context),
           ),
         ],
+        overflowItems: [],
       ),
-      backgroundColor: theme.colorScheme.surface,
-      body: Column(
-        children: [
-          Divider(height: 1, color: theme.dividerColor),
-          Expanded(
-            child: Row(
-              children: [
-                ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context)
-                      .copyWith(scrollbars: false),
-                  child: SingleChildScrollView(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: Container(
-                        color: theme.colorScheme.surface,
-                        child: NavigationRail(
-                          backgroundColor: theme.colorScheme.surface,
-                          selectedIndex: _selectedIndex,
-                          onDestinationSelected: _handleTabChange,
-                          labelType: NavigationRailLabelType.all,
-                          destinations: homeTabs.map((tab) {
-                            final tooltipMessage =
-                                tab['tooltip'] ?? tab['message'];
+      themeToggle: SolidThemeToggleConfig(),
+      statusBar: SolidStatusBarConfig(
+        serverInfo: _webId != null
+            ? SolidServerInfo(
+                serverUri: _extractServerFromWebId(_webId!),
+                tooltip: '''
 
-                            return NavigationRailDestination(
-                              icon: MarkdownTooltip(
-                                message: tooltipMessage,
-                                child: Icon(
-                                  tab['icon'],
-                                  color:
-                                      tab['color'] ?? theme.colorScheme.primary,
-                                ),
-                              ),
-                              label: Text(
-                                tab['title'],
-                                style: theme.textTheme.bodyLarge,
-                              ),
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 0.0),
-                            );
-                          }).toList(),
-                          selectedLabelTextStyle:
-                              theme.textTheme.labelLarge?.copyWith(
-                            color: theme.colorScheme.primary,
-                          ),
-                          unselectedLabelTextStyle: theme.textTheme.bodyMedium,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                VerticalDivider(color: theme.dividerColor),
-                Expanded(
-                  child: homeTabs[_selectedIndex]['content'] ??
-                      HomePage(
-                        key: _homePageKey,
-                        onNavigateToProfile: () {},
-                      ),
-                ),
-              ],
-            ),
-          ),
-          Divider(height: 1, color: theme.dividerColor),
-        ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        height: getFooterHeight(context),
-        color: theme.colorScheme.surface,
-        child: SizedBox(
-          child: Footer(
-            webId: _webId,
-            isKeySaved: _isKeySaved,
-            onKeyStatusChanged: _updateKeyStatus,
-          ),
+**Server:** This is your Solid Pod server where your health data is stored
+securely.
+
+Tap to visit your server in the browser.
+
+''',
+              )
+            : null,
+        loginStatus: SolidLoginStatus(
+          webId: _webId,
+          onTap: () => handleLogout(context),
         ),
+        securityKeyStatus: SolidSecurityKeyStatus(
+          isKeySaved: _isKeySaved,
+          onKeyStatusChanged: _updateKeyStatus,
+        ),
+      ),
+      aboutConfig: SolidAboutConfig(
+        applicationName: 'HealthPod',
+        applicationVersion: _appVersion,
+        applicationIcon: Image.asset(
+          'assets/images/app_logo.png',
+          width: 100,
+          height: 100,
+        ),
+        applicationLegalese: '© 2025 Software Innovation Institute ANU',
+        text: '''
+
+**A Health and Medical Record Manager.**
+
+HealthPod is an app for managing your health data and medical records, keeping
+all data stored in your personal online dataset (Pod). Medical documents as well
+as a health diary can be maintained.
+
+The app is written in Flutter and the open source code is available from
+[github](https://github.com/gjwgit/healthpod). You can try it out online at the
+[AU Solid Community](https://healthpod.solidcommunity.au).
+
+The images for the app were generated by ChatGPT.
+
+*Authors: Graham Williams, Ashley Tang, Kevin Wang, Zheyuan Xu.*
+
+*Contributors: .*
+
+**Web ID:** ${_webId ?? 'Web ID is not available and need to login first.'}
+
+''',
+        tooltip: '''
+
+        **About:** Tap here to view information about the HealthPod app.
+        This includes a list of contributers and the extensive list of
+        open-source packages that the HealthPod app is built on and their
+        licenses.
+
+        ''',
       ),
     );
   }

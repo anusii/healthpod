@@ -34,9 +34,9 @@ import 'package:solidpod/solidpod.dart'
         getDirUrl,
         readPod,
         getKeyFromUserIfRequired;
+import 'package:solidui/solidui.dart';
 
 import 'package:healthpod/utils/construct_pod_path.dart';
-import 'package:healthpod/utils/security_key/central_key_manager.dart';
 
 /// Fetches the most recent health plan data from the pod.
 ///
@@ -50,7 +50,7 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
   try {
     // Replace the direct call with our central key manager.
 
-    await CentralKeyManager.instance.ensureSecurityKey(
+    await SolidSecurityKeyCentralManager.instance.ensureSecurityKey(
       context,
       const Text(
         'Security verification is required to access your health plan',

@@ -28,9 +28,9 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:solidui/solidui.dart';
 
 import 'package:healthpod/providers/settings.dart';
-import 'package:healthpod/providers/theme_provider.dart';
 import 'package:healthpod/theme/app_theme.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
 
@@ -63,17 +63,14 @@ class _HealthPodState extends ConsumerState<HealthPod> {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(themeProvider);
-
     // Initialise settings.
 
     ref.watch(settingsInitializerProvider);
 
-    return MaterialApp(
+    return SolidThemeApp(
       title: 'Solid Health Pod',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
       home: SelectionArea(
         child: _loginWidget ?? createSolidLogin(context),
       ),
