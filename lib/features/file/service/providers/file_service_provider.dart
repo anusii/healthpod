@@ -1,12 +1,10 @@
 /// File service provider for the file service feature.
 ///
-// Time-stamp: <Friday 2025-08-08 19:28:10 +1000 Graham Williams>
+/// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
-/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
+/// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// Licensed under the GNU General Public License, Version 3 (the "License").
-///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -34,6 +32,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
+import 'package:solidui/solidui.dart' hide isTextFile;
 
 import 'package:healthpod/constants/feature.dart';
 import 'package:healthpod/constants/paths.dart';
@@ -41,7 +40,6 @@ import 'package:healthpod/features/bp/exporter.dart';
 import 'package:healthpod/features/bp/importer.dart';
 import 'package:healthpod/features/diary/exporter.dart';
 import 'package:healthpod/features/diary/importer.dart';
-import 'package:healthpod/features/file/service/models/file_state.dart';
 import 'package:healthpod/features/medication/exporter.dart';
 import 'package:healthpod/features/medication/importer.dart';
 import 'package:healthpod/features/profile/exporter.dart';
@@ -54,9 +52,6 @@ import 'package:healthpod/utils/save_decrypted_content.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
 /// A provider that manages the business logic for file operations.
-///
-/// This provider handles all file-related operations including upload, download,
-/// and deletion, while maintaining the state of these operations.
 
 class FileServiceNotifier extends StateNotifier<FileState> {
   final bool isVaccination;
@@ -71,7 +66,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     required this.isBloodPressure,
   }) : super(FileState());
 
-  // Add callback for browser refresh .
+  // Add callback for browser refresh.
 
   Function? _refreshCallback;
 
@@ -703,7 +698,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
             onSuccess: () {
               if (!context.mounted) return;
 
-              // Show success message first
+              // Show success message first.
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Profile data imported successfully'),

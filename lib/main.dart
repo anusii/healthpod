@@ -28,12 +28,11 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:solidui/solidui.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'package:healthpod/healthpod.dart';
 import 'package:healthpod/utils/is_desktop.dart';
-import 'package:healthpod/utils/security_key/central_key_manager.dart';
-
-import 'healthpod.dart';
 
 /// Main entry point for the [HealthPod] application.
 
@@ -52,9 +51,10 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize CentralKeyManager to handle all user security key requests.
+  // Initialize SolidUI security key manager to handle all user security key
+  // requests.
 
-  CentralKeyManager.instance;
+  SolidSecurityKeyCentralManager.instance;
 
   if (isDesktop(PlatformWrapper())) {
     // Support [windowManager] options for the desktop. We do this here before

@@ -28,17 +28,17 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart' show logoutPopup, getWebId;
+import 'package:solidui/solidui.dart';
 
 import 'package:healthpod/home.dart';
 import 'package:healthpod/utils/create_solid_login.dart';
-import 'package:healthpod/utils/security_key/central_key_manager.dart';
 
 /// Handles logout and navigates to the login screen.
 
 Future<void> handleLogout(BuildContext context) async {
   // Reset the key verification status to ensure fresh prompts on next login.
 
-  CentralKeyManager.instance.reset();
+  SolidSecurityKeyCentralManager.instance.reset();
 
   await logoutPopup(context, const HealthPodHome());
 

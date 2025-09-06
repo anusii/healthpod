@@ -32,6 +32,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
 /// Handles the uploading, retrieval, and management of profile photos.
@@ -43,7 +44,7 @@ class ProfilePhotoHandler {
 
   // Full path to the profile directory in the pod (for directory operations).
 
-  static const String _profileDirectoryFull = 'healthpod/data/profile';
+  static const String _profileDirectoryFull = '$basePath/profile';
 
   /// Build the correct pod path for profile data.
   ///

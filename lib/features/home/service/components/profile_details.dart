@@ -33,6 +33,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/appointment.dart';
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/theme/card_style.dart';
 import 'package:healthpod/utils/fetch_profile_data.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
@@ -367,7 +368,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     try {
       // Get all files in the profile directory.
 
-      final dirUrl = await getDirUrl('healthpod/data/profile');
+      final dirUrl = await getDirUrl('$basePath/profile');
       final resources = await getResourcesInContainer(dirUrl);
 
       // Find all profile files with the expected extension.
