@@ -31,6 +31,7 @@ import 'package:solidpod/solidpod.dart'
     show SolidFunctionCallStatus, getResourcesInContainer, getDirUrl, readPod;
 import 'package:solidui/solidui.dart';
 
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/constants/profile.dart';
 
 /// Fetches the most recent profile data from the pod.
@@ -47,7 +48,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     // Note: SolidPod path normalization doesn't work correctly for getDirUrl on web,
     // so we need to use the full path for directory operations.
 
-    final fullDirPath = 'healthpod/data/profile';
+    final fullDirPath = '$basePath/profile';
     final dirUrl = await getDirUrl(fullDirPath);
 
     // Try to get fresh directory listing - sometimes cache issues occur.
@@ -126,7 +127,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
         // Also try full path for backward compatibility with existing files.
 
         final relativePath = 'profile/$profileFile';
-        final fullPath = 'healthpod/data/profile/$profileFile';
+        final fullPath = '$basePath/profile/$profileFile';
 
         if (!context.mounted) {
           return defaultProfileData['data'] as Map<String, dynamic>;
