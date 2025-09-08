@@ -409,7 +409,7 @@ class _FileManagementContentState
   SolidFileUploadCallbacks _createUploadCallbacks(String currentPath) {
     // Determine which type of directory we're in.
 
-    final isInBpDirectory = currentPath.contains('/bp');
+    final isInBpDirectory = currentPath.contains('/blood_pressure');
     final isInVaccinationDirectory = currentPath.contains('/vaccination');
     final isInMedicationDirectory = currentPath.contains('/medication');
     final isInDiaryDirectory = currentPath.contains('/diary');

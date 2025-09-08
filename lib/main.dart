@@ -51,7 +51,7 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize SolidUI security key manager to handle all user security key
+  // Initialise SolidUI security key manager to handle all user security key
   // requests.
 
   SolidSecurityKeyCentralManager.instance;
