@@ -38,6 +38,7 @@ import 'package:healthpod/features/file/service/providers/file_service_provider.
 import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/features/update/tab.dart';
+import 'package:healthpod/providers/tab_state.dart';
 import 'package:healthpod/settings/dialog.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
 import 'package:healthpod/utils/handle_logout.dart';
@@ -378,6 +379,17 @@ class _FileManagementContentState
     extends ConsumerState<_FileManagementContent> {
   final GlobalKey<SolidFileBrowserState> _browserKey = GlobalKey();
 
+  /// Flag to track whether the user has manually navigated to a different
+  /// folder. If true, we won't override the user's choice with tab
+  /// coordination.
+
+  bool _userHasManuallyNavigated = false;
+
+  /// Track the last tab index we coordinated with to avoid redundant
+  /// navigation.
+
+  int? _lastCoordinatedTabIndex;
+
   @override
   void initState() {
     super.initState();
@@ -387,21 +399,67 @@ class _FileManagementContentState
       ref.read(fileServiceProvider.notifier).setRefreshCallback(() {
         _browserKey.currentState?.refreshFiles();
       });
-      _navigateToFeatureFolder();
+
+      // Initialise to home folder by default.
+
+      Future(() {
+        ref.read(fileServiceProvider.notifier).updateCurrentPath(basePath);
+      });
     });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _navigateToFeatureFolder();
   }
 
-  /// Navigates to the feature-specific folder.
+  /// Navigates to the feature-specific folder based on the current tab
+  /// selection.
 
   void _navigateToFeatureFolder() {
+    // If the user has manually navigated, don't override their choice.
+
+    if (_userHasManuallyNavigated) {
+      return;
+    }
+
+    // Read the selected tab index from the provider to coordinate with other
+    // tabs.
+
+    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
+
+    // Map the tab index to the corresponding directory name.
+    // Index 0: Appointments → diary
+    // Index 1: Blood Pressure → blood_pressure
+    // Index 2: Medications → medication
+    // Index 3: Vaccinations → vaccination
+
+    String featureDir;
+    switch (selectedIndex) {
+      case 0:
+        featureDir = 'diary'; // Appointments
+        break;
+      case 1:
+        featureDir = 'blood_pressure'; // Blood Pressure
+        break;
+      case 2:
+        featureDir = 'medication'; // Medications
+        break;
+      case 3:
+        featureDir = 'vaccination'; // Vaccinations
+        break;
+      default:
+        featureDir = ''; // Default to home
+        break;
+    }
+
+    final targetPath =
+        featureDir.isNotEmpty ? '$basePath/$featureDir' : basePath;
     final currentPath = ref.read(fileServiceProvider).currentPath ?? basePath;
-    _browserKey.currentState?.navigateToPath(currentPath);
+    if (currentPath != targetPath) {
+      ref.read(fileServiceProvider.notifier).updateCurrentPath(targetPath);
+      _browserKey.currentState?.navigateToPath(targetPath);
+    }
   }
 
   /// Creates upload callbacks based on current path.
@@ -529,16 +587,59 @@ class _FileManagementContentState
     final state = ref.watch(fileServiceProvider);
     final currentPath = state.currentPath ?? basePath;
 
+    // Watch the tab state and trigger navigation when it changes.
+
+    final currentTabState = ref.watch(tabStateProvider);
+
+    // Check if tab has changed and we need to coordinate navigation.
+
+    if (!_userHasManuallyNavigated &&
+        _lastCoordinatedTabIndex != currentTabState.selectedIndex) {
+      // Update the last coordinated index.
+
+      _lastCoordinatedTabIndex = currentTabState.selectedIndex;
+
+      // Use a post-frame callback to trigger navigation after build completes.
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_userHasManuallyNavigated) {
+          _navigateToFeatureFolder();
+        }
+      });
+    }
+
     return SolidFile(
       basePath: basePath,
       currentPath: currentPath,
       browserKey: _browserKey,
+      autoConfig: true,
+      showBackButton: true,
+      backButtonText: 'Back to Home Folder',
       onBackPressed: () {
         const rootPath = basePath;
-        if (state.currentPath != rootPath) {
-          ref.read(fileServiceProvider.notifier).updateCurrentPath(rootPath);
-          _browserKey.currentState?.navigateToPath(rootPath);
-        }
+        // Set manual navigation flag to prevent automatic coordination after
+        // back press.
+
+        _userHasManuallyNavigated = true;
+
+        // Reset coordinated index to allow future tab coordination if needed.
+
+        _lastCoordinatedTabIndex = null;
+        ref.read(fileServiceProvider.notifier).updateCurrentPath(rootPath);
+        _browserKey.currentState?.navigateToPath(rootPath);
+
+        // Re-enable coordination after a short delay to allow tab coordination
+        // again.
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            _userHasManuallyNavigated = false;
+          }
+        });
+
+        // Force refresh the widget to ensure immediate update.
+
+        setState(() {});
       },
       onFileSelected: (fileName, filePath) {
         ref.read(fileServiceProvider.notifier)
@@ -590,6 +691,8 @@ class _FileManagementContentState
         debugPrint('Import CSV: $fileName at $filePath');
       },
       onDirectoryChanged: (path) {
+        _userHasManuallyNavigated = true;
+        _lastCoordinatedTabIndex = null;
         ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
       },
       uploadCallbacks: _createUploadCallbacks(currentPath),
