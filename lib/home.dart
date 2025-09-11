@@ -462,45 +462,66 @@ class _FileManagementContentState
     }
   }
 
-  /// Creates upload callbacks based on current path.
+  /// Gets the expected path for the current tab selection.
+
+  String _getExpectedPathForCurrentTab() {
+    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
+
+    String featureDir;
+    switch (selectedIndex) {
+      case 0:
+        featureDir = 'diary'; // Appointments
+        break;
+      case 1:
+        featureDir = 'blood_pressure'; // Blood Pressure
+        break;
+      case 2:
+        featureDir = 'medication'; // Medications
+        break;
+      case 3:
+        featureDir = 'vaccination'; // Vaccinations
+        break;
+      default:
+        featureDir = ''; // Default to home
+        break;
+    }
+
+    return featureDir.isNotEmpty ? '$basePath/$featureDir' : basePath;
+  }
+
+  /// Creates upload callbacks.
 
   SolidFileUploadCallbacks _createUploadCallbacks(String currentPath) {
-    // Determine which type of directory we're in.
+    Map<String, bool> computeDirectoryFlags() {
+      final livePath = ref.read(fileServiceProvider).currentPath ?? basePath;
+      final isInBpDirectory = livePath.contains('/blood_pressure');
+      final isInVaccinationDirectory = livePath.contains('/vaccination');
+      final isInMedicationDirectory = livePath.contains('/medication');
+      final isInDiaryDirectory = livePath.contains('/diary');
 
-    final isInBpDirectory = currentPath.contains('/blood_pressure');
-    final isInVaccinationDirectory = currentPath.contains('/vaccination');
-    final isInMedicationDirectory = currentPath.contains('/medication');
-    final isInDiaryDirectory = currentPath.contains('/diary');
-    final isInProfileDirectory = currentPath.contains('/profile');
+      return {
+        'isVaccination': isInVaccinationDirectory,
+        'isMedication': isInMedicationDirectory,
+        'isDiary': isInDiaryDirectory,
+        'isBloodPressure': isInBpDirectory,
+      };
+    }
 
-    // Determine if we should show buttons.
-
-    final showCsvButtons = isInBpDirectory ||
-        isInVaccinationDirectory ||
-        isInMedicationDirectory ||
-        isInDiaryDirectory;
-    final showProfileButtons = isInProfileDirectory;
+    bool inProfileDirectory() {
+      final livePath = ref.read(fileServiceProvider).currentPath ?? basePath;
+      return livePath.contains('/profile');
+    }
 
     return SolidFileUploadCallbacks(
       onUpload: () => _handleFileUpload(),
-      onImportCsv: showCsvButtons
-          ? () => _handleCsvImport({
-                'isVaccination': isInVaccinationDirectory,
-                'isMedication': isInMedicationDirectory,
-                'isDiary': isInDiaryDirectory,
-                'isBloodPressure': isInBpDirectory,
-              })
-          : null,
-      onExportCsv: showCsvButtons
-          ? () => _handleCsvExport({
-                'isVaccination': isInVaccinationDirectory,
-                'isMedication': isInMedicationDirectory,
-                'isDiary': isInDiaryDirectory,
-                'isBloodPressure': isInBpDirectory,
-              })
-          : null,
-      onImportProfile: showProfileButtons ? () => _handleProfileImport() : null,
-      onExportProfile: showProfileButtons ? () => _handleProfileExport() : null,
+      onImportCsv: () => _handleCsvImport(computeDirectoryFlags()),
+      onExportCsv: () => _handleCsvExport(computeDirectoryFlags()),
+      onImportProfile: () {
+        if (inProfileDirectory()) _handleProfileImport();
+      },
+      onExportProfile: () {
+        if (inProfileDirectory()) _handleProfileExport();
+      },
       onVisualiseJson: () => _handleVisualiseJson(),
       onPreviewFile: () => _handlePreview(),
       onConvertToJson: () => _handleConvertToJson(),
@@ -691,8 +712,14 @@ class _FileManagementContentState
         debugPrint('Import CSV: $fileName at $filePath');
       },
       onDirectoryChanged: (path) {
-        _userHasManuallyNavigated = true;
-        _lastCoordinatedTabIndex = null;
+        final expectedPath = _getExpectedPathForCurrentTab();
+        final isTabCoordinatedNavigation = (path == expectedPath);
+
+        if (!isTabCoordinatedNavigation) {
+          _userHasManuallyNavigated = true;
+          _lastCoordinatedTabIndex = null;
+        }
+
         ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
       },
       uploadCallbacks: _createUploadCallbacks(currentPath),

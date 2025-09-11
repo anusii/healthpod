@@ -34,7 +34,7 @@ dependencies:
   solidui:
     git:
       url: https://github.com/anusii/solidui.git
-      ref: tony/448a_migrate
+      ref: tony/448b_migrate
   table_calendar: ^3.0.9
   timeline_tile: ^2.0.0
   universal_io: ^2.2.2
