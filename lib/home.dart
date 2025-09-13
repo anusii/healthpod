@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:solidpod/solidpod.dart' show getAppNameVersion;
+import 'package:solidpod/solidpod.dart';
 import 'package:solidui/solidui.dart';
 
 import 'package:healthpod/constants/paths.dart';
@@ -273,7 +273,7 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
         SnackBar(
           content: Text(
             '${importType.replaceAll('_', ' ').toUpperCase()} data imported '
-                'successfully',
+            'successfully',
           ),
           backgroundColor: Theme.of(context).colorScheme.tertiary,
           duration: const Duration(seconds: 2),
@@ -773,11 +773,53 @@ class _FileManagementContentState
           },
         );
 
-        if (confirm == true) {
-          // Delete functionality would be implemented here.
+        if (!context.mounted) return;
 
-          debugPrint('Delete file: $filePath');
-          _browserKey.currentState?.refreshFiles();
+        if (confirm == true) {
+          String actualPath = '$filePath/$fileName';
+
+          try {
+            // Delete the main file first.
+
+            await deleteFile(actualPath);
+
+            // Try to delete the ACL file.
+
+            try {
+              await deleteFile('$actualPath.acl');
+            } catch (e) {
+              // ACL files are optional and may not exist.
+            }
+
+            // Show success message.
+
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('File deleted successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+
+              // Refresh the file browser.
+
+              _browserKey.currentState?.refreshFiles();
+            }
+          } catch (e) {
+            if (context.mounted) {
+              final message = e.toString().contains('404') ||
+                      e.toString().contains('NotFoundHttpError')
+                  ? 'File not found or already deleted'
+                  : 'Delete failed: ${e.toString()}';
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
         }
       },
       onImportCsv: (fileName, filePath) {
