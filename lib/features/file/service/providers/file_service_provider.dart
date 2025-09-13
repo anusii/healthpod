@@ -398,6 +398,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     bool isMedication = false,
     bool isDiary = false,
     bool isBloodPressure = false,
+    Function(String importType)? onImportSuccess,
   }) async {
     try {
       state = state.copyWith(importInProgress: true);
@@ -433,6 +434,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               );
               // Refresh the file browser after successful import
               _refreshCallback?.call();
+              // Call success callback for navigation
+              onImportSuccess?.call('vaccination');
             }
           } else if (isDiary) {
             success = await DiaryImporter.importCsv(
@@ -452,6 +455,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               );
               // Refresh the file browser after successful import
               _refreshCallback?.call();
+              // Call success callback for navigation
+              onImportSuccess?.call('diary');
             }
           } else if (isMedication) {
             success = await MedicationImporter.importCsv(
@@ -471,6 +476,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               );
               // Refresh the file browser after successful import
               _refreshCallback?.call();
+              // Call success callback for navigation
+              onImportSuccess?.call('medication');
             }
           } else if (isBloodPressure) {
             // Handle web vs native file reading.
@@ -550,6 +557,8 @@ class FileServiceNotifier extends StateNotifier<FileState> {
               );
               // Refresh the file browser after successful import
               _refreshCallback?.call();
+              // Call success callback for navigation
+              onImportSuccess?.call('blood_pressure');
             }
           }
         }
