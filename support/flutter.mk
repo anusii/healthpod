@@ -129,7 +129,7 @@ linux_config:
 	flutter config --enable-linux-desktop
 
 .PHONY: prep
-prep: analyze fix import_order_fix format dcm ignore license locmax todo markdown depend bakfind test
+prep: analyze fix import_order_fix format dcm ignore license todo locmax markdown depend bakfind test
 	@echo "ADVISORY: make tests docs"
 	@echo $(SEPARATOR)
 
@@ -215,14 +215,15 @@ locmax:
 			printf "%4d %s\n" $$lines "$$1"; \
 		fi \
 	' _ {} \; | sort -nr); \
+	locm=$$(echo $$output | wc -w | awk '{print $$1/2}'); \
 	if [ -n "$$output" ]; then \
 		echo "$$output"; \
 		echo "\nTotal $$loc lines of code across $$numf files."; \
-		echo "\n$(CROSS) Error: Files with more than $(LINES) lines found"; \
+		echo "\n$(CROSS) Error: Found $$locm files with more than $(LINES) lines of code."; \
 		exit 1; \
 	else \
 		echo "Total $$loc lines of code across $$numf files."; \
-		echo "\n$(TICK) All files are under $(LINES) lines"; \
+		echo "\n$(TICK) All files are under $(LINES) lines."; \
 	fi
 	@echo $(SEPARATOR)
 
@@ -243,10 +244,11 @@ locmax-enforce:
 			printf "%4d %s\n" $$lines "$$1"; \
 		fi \
 	' _ {} \; | sort -nr); \
+	locm=$$(echo $$output | wc -w | awk '{print $$1/2}'); \
 	if [ -n "$$output" ]; then \
 		echo "$$output"; \
 		echo "Total $$loc lines of code across $$numf files."; \
-		echo "$(CROSS) Error: Files with more than $(LINES) lines found"; \
+		echo "$(CROSS) Error: Found $$locm files with more than $(LINES) lines of code."; \
 		exit 1; \
 	else \
 		echo "Total $$loc lines of code across $$numf files."; \
