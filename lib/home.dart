@@ -263,22 +263,19 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
     setSelectedMenuIndex(index);
   }
 
-  /// Handles successful CSV import by navigating to the View tab.
+  /// Handles successful CSV import.
 
   void _onImportSuccess(String importType) {
     if (mounted) {
-      // Set the main tab to View (index 1).
-
-      setSelectedMenuIndex(1);
-
-      // Show a message about the navigation.
+      // Show a success message.
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Navigating to View tab to display imported $importType data',
+            '${importType.replaceAll('_', ' ').toUpperCase()} data imported '
+                'successfully',
           ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
           duration: const Duration(seconds: 2),
         ),
       );
@@ -622,37 +619,12 @@ class _FileManagementContentState
         );
   }
 
-  /// Handles successful CSV import by navigating to the appropriate view.
+  /// Handles successful CSV import.
 
   void _handleImportSuccess(String importType) {
     // Call the parent callback if provided.
 
     widget.onImportSuccess?.call(importType);
-
-    // Set the appropriate sub-tab based on import type.
-
-    int subTabIndex;
-    switch (importType) {
-      case 'diary':
-        subTabIndex = 0; // Appointments
-        break;
-      case 'blood_pressure':
-        subTabIndex = 1; // Blood Pressure
-        break;
-      case 'medication':
-        subTabIndex = 2; // Medications
-        break;
-      case 'vaccination':
-        subTabIndex = 3; // Vaccinations
-        break;
-      default:
-        subTabIndex = 0;
-        break;
-    }
-
-    // Update the tab state for feature coordination.
-
-    ref.read(tabStateProvider.notifier).setSelectedIndex(subTabIndex);
   }
 
   /// Handles CSV export.
