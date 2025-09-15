@@ -13,6 +13,7 @@ on:
 
 env:
   APP: healthpod
+  LINUX_PKGS: libsecret-1-dev
   FLUTTER_VERSION: '3.35.3'
 
 jobs:
@@ -52,6 +53,12 @@ jobs:
           sudo apt-get install -y libgtk-3-dev
           printf '#%.0s' {1..72}; printf '\nclang cmake\n'
           sudo apt-get install -y clang cmake
+
+      - name: Install extra Linux packages
+        if: env.LINUX_PKGS != ''
+        run: |
+          printf '#%.0s' {1..72}; printf '\n${{env.LINUX_PKGS}}\n'
+          sudo apt-get install -y ${{env.LINUX_PKGS}}
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -156,7 +163,6 @@ jobs:
           directory: build/macos/Build/Products/Release
           path: ${{ env.APP }}.app
           filename: ${{ env.APP }}-${{github.ref_name}}-macos.zip
-
       - name: Review ZIP exists
         run: ls -lh build/macos/Build/Products/Release
 
