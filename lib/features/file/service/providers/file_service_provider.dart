@@ -578,9 +578,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
         );
       }
     } finally {
-      if (context.mounted) {
-        state = state.copyWith(importInProgress: false);
-      }
+      state = state.copyWith(importInProgress: false);
     }
   }
 
