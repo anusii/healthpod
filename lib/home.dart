@@ -724,20 +724,8 @@ class _FileManagementContentState
 
         setState(() {});
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('JSON content loaded for ${state.cleanFileName}'),
-          backgroundColor: Colors.green,
-        ),
-      );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load JSON: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      debugPrint('Failed to load JSON: ${e.toString()}');
     }
   }
 
@@ -792,20 +780,8 @@ class _FileManagementContentState
       if (!currentState.showPreview) {
         ref.read(fileServiceProvider.notifier).togglePreview();
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('File content loaded for ${state.cleanFileName}'),
-          backgroundColor: Colors.green,
-        ),
-      );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load file: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      debugPrint('Failed to load file: ${e.toString()}');
     }
   }
 
@@ -975,6 +951,12 @@ class _FileManagementContentState
         }
 
         ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
+      },
+      onClosePreview: () {
+        final currentState = ref.read(fileServiceProvider);
+        if (currentState.showPreview) {
+          ref.read(fileServiceProvider.notifier).togglePreview();
+        }
       },
       uploadCallbacks: _createUploadCallbacks(currentPath),
       uploadState: SolidFileUploadState(
