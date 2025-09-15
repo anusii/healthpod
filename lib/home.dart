@@ -657,7 +657,7 @@ class _FileManagementContentState
 
   void _handleVisualiseJson() async {
     final state = ref.read(fileServiceProvider);
-    
+
     if (state.remoteFileName == null || state.currentPath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -712,11 +712,11 @@ class _FileManagementContentState
       // Update the file preview state.
 
       ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
-      
+
       // Always ensure preview is shown when content is loaded.
 
       final currentState = ref.read(fileServiceProvider);
-      
+
       if (!currentState.showPreview) {
         ref.read(fileServiceProvider.notifier).togglePreview();
       } else {
@@ -733,7 +733,7 @@ class _FileManagementContentState
 
   Future<void> _handlePreview() async {
     final state = ref.read(fileServiceProvider);
-    
+
     if (state.remoteFileName == null || state.currentPath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -766,14 +766,14 @@ class _FileManagementContentState
 
       // Display content (truncate if too long).
 
-      String displayContent = fileContent.length > 1000 
+      String displayContent = fileContent.length > 1000
           ? '${fileContent.substring(0, 1000)}...\n\n[Content truncated]'
           : fileContent;
 
       // Update the file preview state.
 
       ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
-      
+
       // Always ensure preview is shown when content is loaded.
 
       final currentState = ref.read(fileServiceProvider);
