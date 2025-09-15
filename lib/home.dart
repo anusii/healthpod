@@ -672,12 +672,14 @@ class _FileManagementContentState
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to select JSON file: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to select JSON file: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -687,7 +689,7 @@ class _FileManagementContentState
     try {
       final file = File(filePath);
       final content = await file.readAsString();
-      
+
       String displayContent;
       try {
         final jsonData = jsonDecode(content);
@@ -701,7 +703,7 @@ class _FileManagementContentState
       // Update the file preview state.
 
       ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
-      
+
       // Always ensure preview is shown when content is loaded.
 
       final currentState = ref.read(fileServiceProvider);
@@ -711,19 +713,23 @@ class _FileManagementContentState
         setState(() {}); // Force a widget rebuild
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Local JSON file loaded: ${path.basename(filePath)}'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Local JSON file loaded: ${path.basename(filePath)}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to load local file: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load local file: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -909,9 +915,9 @@ class _FileManagementContentState
       final List<String> lines = text.split('\n');
 
       // Close loading dialog.
-
-      if (!context.mounted) return;
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
 
       // Extract final structured data.
 
@@ -990,77 +996,92 @@ class _FileManagementContentState
         // Extract test results.
 
         if (line.contains('Sodium')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['sodium'] = double.tryParse(parts[1]) ?? 0.0;
           }
         } else if (line.contains('Potassium')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['potassium'] = double.tryParse(parts[1]) ?? 0.0;
           }
         } else if (line.contains('Chloride')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['chloride'] = double.tryParse(parts[1]) ?? 0.0;
           }
         } else if (line.contains('Bicarbonate')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['bicarbonate'] = double.tryParse(parts[1]) ?? 0.0;
           }
         } else if (line.contains('Anion Gap')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['anion_gap'] = double.tryParse(parts[1]) ?? 0.0;
           }
         } else if (line.contains('Urea')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['urea'] = double.tryParse(parts[1]) ?? 0.0;
           }
         } else if (line.contains('Creatinine')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['creatinine'] = double.tryParse(parts[1]) ?? 0.0;
           }
         } else if (line.contains('eGFR')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['egfr'] = double.tryParse(parts[1]) ?? 0.0;
           }
         } else if (line.contains('Total Protein')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 3) {
             finalJson['total_protien'] = double.tryParse(parts[2]) ?? 0.0;
           }
         } else if (line.contains('Globulin')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['globulin'] = double.tryParse(parts[1]) ?? 0.0;
           }
         } else if (line.contains('Albumin')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['albumin'] = double.tryParse(parts[1]) ?? 0.0;
           }
         } else if (line.contains('Bilirubin Total')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 3) {
             finalJson['bilirubin_total'] = double.tryParse(parts[2]) ?? 0.0;
           }
         } else if (line.contains('Alk Phosphatase')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 3) {
             finalJson['alk_phosphatase'] = double.tryParse(parts[2]) ?? 0.0;
           }
         } else if (line.contains('Gamma GT')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 3) {
             finalJson['gamma_gt'] = double.tryParse(parts[2]) ?? 0.0;
           }
         } else if (line.contains('ALT')) {
-          final parts = line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
           if (parts.length >= 2) {
             finalJson['alt'] = double.tryParse(parts[1]) ?? 0.0;
           }
@@ -1080,22 +1101,25 @@ class _FileManagementContentState
       final jsonFile = File(
         '${tempDir.path}/${path.basenameWithoutExtension(file.path)}_final.json',
       );
-      await jsonFile.writeAsString(const JsonEncoder.withIndent('  ').convert(finalJson));
+      await jsonFile
+          .writeAsString(const JsonEncoder.withIndent('  ').convert(finalJson));
 
       // Upload both files to POD.
 
       if (!context.mounted) return;
 
       // First upload the PDF.
-
       ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
-      await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      if (context.mounted) {
+        await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      }
       if (!context.mounted) return;
 
       // Then upload the JSON.
-
       ref.read(fileServiceProvider.notifier).setUploadFile(jsonFile.path);
-      await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      if (context.mounted) {
+        await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      }
       if (!context.mounted) return;
 
       // Clean up temporary file.
@@ -1104,23 +1128,24 @@ class _FileManagementContentState
       await tempDir.delete();
 
       // Show success message.
-
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('PDF and JSON files uploaded successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF and JSON files uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
-      if (!context.mounted) return;
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error processing PDF: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error processing PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
