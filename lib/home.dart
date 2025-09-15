@@ -25,10 +25,13 @@
 
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as path;
 import 'package:solidpod/solidpod.dart';
 import 'package:solidui/solidui.dart';
 
@@ -653,22 +656,157 @@ class _FileManagementContentState
   /// Handles JSON visualisation.
 
   void _handleVisualiseJson() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
-    if (result != null && result.files.isNotEmpty) {
-      final file = result.files.first;
-      if (file.path != null) {
-        await _handlePreview();
+    final state = ref.read(fileServiceProvider);
+    
+    if (state.remoteFileName == null || state.currentPath == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a file first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Construct the full file path by combining directory and filename.
+
+    String filePath;
+    if (state.downloadFile != null && state.downloadFile!.isNotEmpty) {
+      filePath = '${state.downloadFile}/${state.remoteFileName}';
+    } else {
+      // Fallback to manual construction using currentPath.
+
+      filePath = state.currentPath == basePath
+          ? '$basePath/${state.remoteFileName}'
+          : '${state.currentPath}/${state.remoteFileName}';
+    }
+
+    try {
+      // Read the file content from POD.
+
+      final fileContent = await readPod(
+        filePath,
+        context,
+        const Text('Reading JSON file'),
+      );
+
+      if (fileContent == SolidFunctionCallStatus.fail.toString() ||
+          fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
+        throw Exception('Failed to read file from POD');
       }
+
+      // Try to parse and format the JSON content.
+
+      String displayContent;
+      try {
+        final jsonData = jsonDecode(fileContent);
+        // Pretty format the JSON with indentation.
+
+        displayContent = const JsonEncoder.withIndent('  ').convert(jsonData);
+      } catch (e) {
+        // If it's not valid JSON, just show the raw content.
+
+        displayContent = fileContent;
+      }
+
+      // Update the file preview state.
+
+      ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
+      
+      // Always ensure preview is shown when content is loaded.
+
+      final currentState = ref.read(fileServiceProvider);
+      
+      if (!currentState.showPreview) {
+        ref.read(fileServiceProvider.notifier).togglePreview();
+      } else {
+        // Force a widget rebuild by calling setState on a parent widget.
+
+        setState(() {});
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('JSON content loaded for ${state.cleanFileName}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load JSON: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
   /// Handles file preview.
 
   Future<void> _handlePreview() async {
-    debugPrint('Preview file functionality');
+    final state = ref.read(fileServiceProvider);
+    
+    if (state.remoteFileName == null || state.currentPath == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a file first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Construct the full file path.
+
+    final filePath = state.currentPath == basePath
+        ? '$basePath/${state.remoteFileName}'
+        : '${state.currentPath}/${state.remoteFileName}';
+
+    try {
+      // Read the file content from POD.
+
+      final fileContent = await readPod(
+        filePath,
+        context,
+        const Text('Reading file'),
+      );
+
+      if (fileContent == SolidFunctionCallStatus.fail.toString() ||
+          fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
+        throw Exception('Failed to read file from POD');
+      }
+
+      // Display content (truncate if too long).
+
+      String displayContent = fileContent.length > 1000 
+          ? '${fileContent.substring(0, 1000)}...\n\n[Content truncated]'
+          : fileContent;
+
+      // Update the file preview state.
+
+      ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
+      
+      // Always ensure preview is shown when content is loaded.
+
+      final currentState = ref.read(fileServiceProvider);
+      if (!currentState.showPreview) {
+        ref.read(fileServiceProvider.notifier).togglePreview();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('File content loaded for ${state.cleanFileName}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load file: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   /// Handles PDF to JSON conversion.
@@ -740,12 +878,12 @@ class _FileManagementContentState
         ref.read(fileServiceProvider.notifier)
           ..setDownloadFile(filePath)
           ..setFilePreview(fileName)
-          ..setRemoteFileName(fileName);
+          ..setRemoteFileName(path.basename(fileName));
       },
       onFileDownload: (fileName, filePath) async {
         ref.read(fileServiceProvider.notifier)
           ..setDownloadFile(filePath)
-          ..setRemoteFileName(fileName)
+          ..setRemoteFileName(path.basename(fileName))
           ..handleDownload(context);
       },
       onFileDelete: (fileName, filePath) async {
@@ -845,6 +983,8 @@ class _FileManagementContentState
         exportInProgress: state.exportInProgress,
         uploadedFilePath: state.uploadFile,
         uploadDone: state.uploadDone,
+        filePreview: state.filePreview,
+        showPreview: state.showPreview,
       ),
     );
   }
