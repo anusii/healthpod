@@ -64,7 +64,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
     required this.isDiary,
     required this.isMedication,
     required this.isBloodPressure,
-  }) : super(FileState());
+  }) : super(FileState(currentPath: '$basePath/diary'));
 
   // Add callback for browser refresh.
 

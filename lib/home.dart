@@ -593,6 +593,7 @@ class _FileManagementContentState
         if (inProfileDirectory()) _handleProfileExport();
       },
       onVisualiseJson: () => _handleVisualiseJson(),
+      onSelectLocalJson: () => _handleSelectLocalJson(),
       onPreviewFile: () => _handlePreview(),
       onConvertToJson: () => _handleConvertToJson(),
     );
@@ -655,7 +656,78 @@ class _FileManagementContentState
     debugPrint('Export Profile functionality');
   }
 
-  /// Handles JSON visualisation.
+  /// Handles selecting and previewing local JSON files.
+
+  void _handleSelectLocalJson() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+      
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        if (file.path != null) {
+          await _handlePreviewLocalFile(file.path!);
+        }
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to select JSON file: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  /// Handles previewing a local file by path.
+
+  Future<void> _handlePreviewLocalFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      final content = await file.readAsString();
+      
+      String displayContent;
+      try {
+        final jsonData = jsonDecode(content);
+        displayContent = const JsonEncoder.withIndent('  ').convert(jsonData);
+      } catch (e) {
+        // If it's not valid JSON, just show the raw content.
+
+        displayContent = content;
+      }
+
+      // Update the file preview state.
+
+      ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
+      
+      // Always ensure preview is shown when content is loaded.
+
+      final currentState = ref.read(fileServiceProvider);
+      if (!currentState.showPreview) {
+        ref.read(fileServiceProvider.notifier).togglePreview();
+      } else {
+        setState(() {}); // Force a widget rebuild
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Local JSON file loaded: ${path.basename(filePath)}'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load local file: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  /// Handles JSON visualisation from POD.
 
   void _handleVisualiseJson() async {
     final state = ref.read(fileServiceProvider);
