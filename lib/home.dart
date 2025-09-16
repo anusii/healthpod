@@ -333,6 +333,15 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
       onMenuSelected: _onMenuSelected,
       appBar: SolidAppBarConfig(
         title: 'HealthPod',
+        versionConfig: const SolidVersionConfig(
+          showDate: true,
+          changelogUrl: 'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
+          tooltip: '''
+Version information for HealthPod
+
+Tap to view the complete changelog on GitHub with release notes, bug fixes, and new features.
+''',
+        ),
         actions: [
           SolidAppBarAction(
             icon: Icons.settings,
@@ -1327,6 +1336,7 @@ class _FileManagementContentState
         }
 
         ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
+        setState(() {});
       },
       onClosePreview: () {
         final currentState = ref.read(fileServiceProvider);
