@@ -335,7 +335,8 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
         title: 'HealthPod',
         versionConfig: const SolidVersionConfig(
           showDate: true,
-          changelogUrl: 'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
+          changelogUrl:
+              'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
           tooltip: '''
 Version information for HealthPod
 
@@ -565,14 +566,6 @@ class _FileManagementContentState
     }
 
     return featureDir.isNotEmpty ? '$basePath/$featureDir' : basePath;
-  }
-
-  /// Creates upload configuration based on current path.
-
-  SolidFileUploadConfig _createUploadConfig(String currentPath) {
-    final livePath = ref.read(fileServiceProvider).currentPath ?? basePath;
-    final fileTypeConfig = FileTypeConfig.fromPath(livePath, basePath);
-    return fileTypeConfig.createUploadConfig();
   }
 
   /// Creates upload callbacks.
@@ -1345,7 +1338,6 @@ class _FileManagementContentState
         }
       },
       uploadCallbacks: _createUploadCallbacks(currentPath),
-      uploadConfig: _createUploadConfig(currentPath),
       uploadState: SolidFileUploadState(
         uploadInProgress: state.uploadInProgress,
         importInProgress: state.importInProgress,
