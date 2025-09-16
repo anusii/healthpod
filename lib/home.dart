@@ -558,6 +558,14 @@ class _FileManagementContentState
     return featureDir.isNotEmpty ? '$basePath/$featureDir' : basePath;
   }
 
+  /// Creates upload configuration based on current path.
+
+  SolidFileUploadConfig _createUploadConfig(String currentPath) {
+    final livePath = ref.read(fileServiceProvider).currentPath ?? basePath;
+    final fileTypeConfig = FileTypeConfig.fromPath(livePath, basePath);
+    return fileTypeConfig.createUploadConfig();
+  }
+
   /// Creates upload callbacks.
 
   SolidFileUploadCallbacks _createUploadCallbacks(String currentPath) {
@@ -1327,6 +1335,7 @@ class _FileManagementContentState
         }
       },
       uploadCallbacks: _createUploadCallbacks(currentPath),
+      uploadConfig: _createUploadConfig(currentPath),
       uploadState: SolidFileUploadState(
         uploadInProgress: state.uploadInProgress,
         importInProgress: state.importInProgress,
