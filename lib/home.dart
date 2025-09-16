@@ -664,7 +664,7 @@ class _FileManagementContentState
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
-      
+
       if (result != null && result.files.isNotEmpty) {
         final file = result.files.first;
         if (file.path != null) {
@@ -1109,17 +1109,27 @@ class _FileManagementContentState
       if (!context.mounted) return;
 
       // First upload the PDF.
+
       ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
-      if (context.mounted) {
-        await ref.read(fileServiceProvider.notifier).handleUpload(context);
-      }
+      if (!context.mounted) return;
+
+      // Store context reference for safe async usage.
+
+      final currentContext = context;
+      await ref.read(fileServiceProvider.notifier).handleUpload(currentContext);
       if (!context.mounted) return;
 
       // Then upload the JSON.
+
       ref.read(fileServiceProvider.notifier).setUploadFile(jsonFile.path);
-      if (context.mounted) {
-        await ref.read(fileServiceProvider.notifier).handleUpload(context);
-      }
+      if (!context.mounted) return;
+
+      // Store context reference for safe async usage.
+
+      final currentContext2 = context;
+      await ref
+          .read(fileServiceProvider.notifier)
+          .handleUpload(currentContext2);
       if (!context.mounted) return;
 
       // Clean up temporary file.
