@@ -3,8 +3,8 @@
 Recorded here are the high level changes for the HealthPod app.
 
 Guide: Each version update is recorded here with a short user-oriented
-description of the update. Updates in the 0.1.n series are heading
-toward a 0.2 release. The `[version timestamp user]` string is
+description of the update. Updates in the 0.2.n series are heading
+toward a 0.3 release. The `[version timestamp user]` string is
 utilised by the flutter version_widget package.
 
 Run the app online: [**web**](https://healthpod.solidcommunity.au).
@@ -24,10 +24,14 @@ Windows
 Coding documentation is available from [solid community
 au](https://solidcommunity.au/docs/healthpod)
 
-## 0.2 First stable release
+## 0.3 Test and Make Robust
 
-+ LINT: Remove unused code and split long files [0.2.23 20250918 tonypioneer]
-+ Get installer builds working [0.2.22 20250917 gjw]
++ Begin new series to test and make robust [0.2.0 20250918 gjw]
+
+## 0.2 First stable release with SolidScaffold
+
++ LINT: Remove unused code and split long files [0.1.23 20250918 tonypioneer]
++ Get installer builds working [0.1.22 20250917 gjw]
 + Migrate to solidscaffold [0.1.21 20250917 tonypioneer]
 + Update solidpod dependency for CSS v7.1.7 [0.1.20 20250815 gjw]
 + Fix support csv import for blood pressure [0.1.19 20250809 atangster]
