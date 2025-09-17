@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Monday 2025-08-25 10:52:34 +1000 Graham Williams>
+// Time-stamp: <Wednesday 2025-09-17 12:03:19 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -25,30 +25,31 @@
 
 library;
 
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
-import 'package:markdown_tooltip/markdown_tooltip.dart';
-import 'package:solidpod/solidpod.dart' show getAppNameVersion;
-import 'package:version_widget/version_widget.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as path;
+import 'package:solidpod/solidpod.dart';
+import 'package:solidui/solidui.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
-import 'package:healthpod/dialogs/alert.dart';
-import 'package:healthpod/dialogs/show_about.dart';
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/charts/tab.dart';
-import 'package:healthpod/features/file/service/page.dart';
+import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
 import 'package:healthpod/features/resources/tab.dart';
 import 'package:healthpod/features/table/tab.dart';
 import 'package:healthpod/features/update/tab.dart';
+import 'package:healthpod/providers/tab_state.dart';
 import 'package:healthpod/settings/dialog.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
-import 'package:healthpod/utils/get_footer_height.dart';
 import 'package:healthpod/utils/handle_logout.dart';
 import 'package:healthpod/utils/initialise_feature_folders.dart';
 import 'package:healthpod/utils/is_logged_in.dart';
-import 'package:healthpod/utils/security_key/central_key_manager.dart';
-import 'package:healthpod/widgets/footer.dart';
 import 'package:healthpod/widgets/home_page.dart';
-import 'package:healthpod/widgets/theme_toggle.dart';
 
 /// The home screen for the HealthPod app.
 ///
@@ -56,39 +57,37 @@ import 'package:healthpod/widgets/theme_toggle.dart';
 /// providing users with a dashboard of features, a footer with user-specific
 /// information, and options to log out or view information about the app.
 
-// Define the [NavigationRail] tabs for the home page.
-// Color is set to null to use the default color from the theme.
+// Global function to build basic menu items.
 
-final List<Map<String, dynamic>> homeTabs = [
-  {
-    'title': 'Home',
-    'icon': Icons.home,
-    'color': null,
-    'tooltip': '''
+List<SolidMenuItem> _buildBasicHealthPodMenu() => [
+      SolidMenuItem(
+        title: 'Home',
+        icon: Icons.home,
+        tooltip: '''
 
     **Home:** Tap here to view your HealthPod overview and dashboard.
 
     ''',
-  },
-  {
-    'title': 'View',
-    'icon': Icons.show_chart,
-    'color': null,
-    'content': const ChartTab(),
-    'tooltip': '''
+        child: HomePage(
+          onNavigateToProfile: () {},
+        ),
+      ),
+      SolidMenuItem(
+        title: 'View',
+        icon: Icons.show_chart,
+        tooltip: '''
 
     **View:** Tap here to visualise your health data that is stored in your
       pod. Your **blood pressure** observations will show trends over time and
       other health metrics. Your **vaccinations** will be shown as a timeline.
 
     ''',
-  },
-  {
-    'title': 'Entry',
-    'icon': Icons.assignment,
-    'color': null,
-    'content': const SurveyTab(),
-    'tooltip': '''
+        child: const ChartTab(),
+      ),
+      SolidMenuItem(
+        title: 'Entry',
+        icon: Icons.assignment,
+        tooltip: '''
 
     **Add:** Tap here to directly enter new data. This could be new observations
     of your **Blood Pressure** (systolic, diastolic, heart rate) or a new
@@ -96,26 +95,24 @@ final List<Map<String, dynamic>> homeTabs = [
     tab.
 
     ''',
-  },
-  {
-    'title': 'Data',
-    'icon': Icons.table_chart,
-    'color': null,
-    'content': const TableTab(),
-    'tooltip': '''
+        child: const SurveyTab(),
+      ),
+      SolidMenuItem(
+        title: 'Data',
+        icon: Icons.table_chart,
+        tooltip: '''
 
     **Data:** Tap here to view, modify, add, or remove your saved health data
       through a tabular form. All of your health data from your pod is
       accessible here.
 
     ''',
-  },
-  {
-    'title': 'Files',
-    'icon': Icons.folder,
-    'color': null,
-    'content': const FileService(),
-    'tooltip': '''
+        child: const TableTab(),
+      ),
+      SolidMenuItem(
+        title: 'Files',
+        icon: Icons.folder,
+        tooltip: '''
 
     **Files:** Tap here to access file management features.  Here you can load
     your health data from any local *CSV* files you may have created into your
@@ -126,13 +123,14 @@ final List<Map<String, dynamic>> homeTabs = [
     to **delete** files from your pod storage.
 
     ''',
-  },
-  {
-    'title': 'Support',
-    'icon': Icons.library_books,
-    'color': null,
-    'content': const ResourcesTab(),
-    'tooltip': '''
+        child: const _FileManagementContent(
+          hasUserSelectedFeatureTab: false,
+        ),
+      ),
+      SolidMenuItem(
+        title: 'Support',
+        icon: Icons.library_books,
+        tooltip: '''
 
     **Support:** Tap here to access a comprehensive collection of health
     resources including:
@@ -144,25 +142,23 @@ final List<Map<String, dynamic>> homeTabs = [
     - Useful health calculators and tools
 
     ''',
-  },
-];
+        child: const ResourcesTab(),
+      ),
+    ];
 
-class HealthPodHome extends StatefulWidget {
+class HealthPodHome extends ConsumerStatefulWidget {
   const HealthPodHome({super.key});
 
   @override
   HealthPodHomeState createState() => HealthPodHomeState();
 }
 
-class HealthPodHomeState extends State<HealthPodHome> {
+class HealthPodHomeState extends ConsumerState<HealthPodHome> {
   String? _webId;
   bool _isKeySaved = false;
-  int _selectedIndex = 0;
   String _appVersion = '';
-  bool _isVersionLoaded = false;
-  // Key to force rebuilds when profile is updated.
-
-  final GlobalKey<State> _homePageKey = GlobalKey<State>();
+  int _selectedMenuIndex = 0;
+  bool _hasUserSelectedFeatureTab = false;
 
   @override
   void initState() {
@@ -179,7 +175,6 @@ class HealthPodHomeState extends State<HealthPodHome> {
     if (mounted) {
       setState(() {
         _appVersion = appInfo.version;
-        _isVersionLoaded = true;
       });
     }
   }
@@ -201,7 +196,7 @@ class HealthPodHomeState extends State<HealthPodHome> {
       // Check security key once for the entire session.
 
       if (context.mounted) {
-        await CentralKeyManager.instance.ensureSecurityKey(
+        await SolidSecurityKeyCentralManager.instance.ensureSecurityKey(
           context,
           const Text('Security verification is required to access your data'),
         );
@@ -238,7 +233,8 @@ class HealthPodHomeState extends State<HealthPodHome> {
       // Let the central key manager check for security key status.
       // This prevents multiple prompts across the app.
 
-      isKeySaved = await CentralKeyManager.instance.ensureSecurityKey(
+      isKeySaved =
+          await SolidSecurityKeyCentralManager.instance.ensureSecurityKey(
         context,
         const Text('Security verification is required for Health Pod'),
       );
@@ -261,185 +257,1151 @@ class HealthPodHomeState extends State<HealthPodHome> {
     });
   }
 
-  void _handleTabChange(int index) {
+  /// Sets the selected menu index and triggers a rebuild.
+
+  void setSelectedMenuIndex(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedMenuIndex = index;
     });
+  }
 
-    final tab = homeTabs[index];
+  /// Handles menu selection in the SolidScaffold.
 
-    if (tab.containsKey('message')) {
-      alert(context, tab['message'], tab['dialogTitle']);
-    } else if (tab.containsKey('action')) {
-      tab['action'](context);
+  void _onMenuSelected(int index) {
+    setSelectedMenuIndex(index);
+    // Mark that the user has actively selected a feature tab.
+
+    _hasUserSelectedFeatureTab = true;
+
+    // Only set tabStateProvider selectedIndex to 0 when user clicks View,
+    // Entry, or Data.
+
+    if (index == 1 || index == 2 || index == 3) {
+      // View, Entry, Data
+      ref.read(tabStateProvider.notifier).setSelectedIndex(0);
+    }
+  }
+
+  /// Handles successful CSV import.
+
+  void _onImportSuccess(String importType) {
+    if (mounted) {
+      // Show a success message.
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '${importType.replaceAll('_', ' ').toUpperCase()} data imported '
+            'successfully',
+          ),
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  /// Builds the menu items for SolidScaffold navigation with callbacks.
+
+  List<SolidMenuItem> _buildHealthPodMenu() {
+    final basicMenu = _buildBasicHealthPodMenu();
+
+    // Find the Files menu item and replace it with one that has the callback.
+
+    return basicMenu.map((item) {
+      if (item.title == 'Files') {
+        return SolidMenuItem(
+          title: item.title,
+          icon: item.icon,
+          tooltip: item.tooltip,
+          child: _FileManagementContent(
+            onImportSuccess: _onImportSuccess,
+            hasUserSelectedFeatureTab: _hasUserSelectedFeatureTab,
+          ),
+        );
+      }
+      return item;
+    }).toList();
+  }
+
+  /// Extracts the server URL from a WebID.
+
+  String _extractServerFromWebId(String webId) {
+    try {
+      final uri = Uri.parse(webId);
+      return '${uri.scheme}://${uri.host}'
+          '${uri.port != 80 && uri.port != 443 ? ':${uri.port}' : ''}';
+    } catch (e) {
+      final parts = webId.split('/');
+      if (parts.length >= 3) {
+        return '${parts[0]}//${parts[2]}';
+      }
+      return webId;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    return SolidScaffold(
+      menu: _buildHealthPodMenu(),
+      selectedIndex: _selectedMenuIndex,
+      onMenuSelected: _onMenuSelected,
+      appBar: SolidAppBarConfig(
+        title: 'HealthPod',
+        versionConfig: const SolidVersionConfig(
+          showDate: true,
+          changelogUrl:
+              'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
+          tooltip: '''
+Version information for HealthPod
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(homeTabs[_selectedIndex]['title']),
-        backgroundColor: theme.colorScheme.surface,
-        automaticallyImplyLeading: false,
+Tap to view the complete changelog on GitHub with release notes, bug fixes, and new features.
+''',
+        ),
         actions: [
-          // Add version widget.
-
-          if (_isVersionLoaded)
-            MarkdownTooltip(
-              message: '''
-
-              **Version:** This is the current version of the HealthPod app. If
-              the version is out of date then the text will be red. You can tap on
-              the version to view the app's Change Log to determine if it is worth
-              updating your version.
-
-              ''',
-              child: VersionWidget(
-                version: _appVersion,
-                changelogUrl: kIsWeb
-                    ? 'https://raw.githubusercontent.com/anusii/healthpod/refs/heads/dev/CHANGELOG.md'
-                    : 'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
-                showDate: true,
-              ),
-            ),
-
-          const SizedBox(width: 50),
-
-          const ThemeToggle(),
-
-          MarkdownTooltip(
-            message: '''
+          SolidAppBarAction(
+            icon: Icons.settings,
+            tooltip: '''
 
             **Settings:** Tap here to view and manage your HealthPod account
               settings.
 
             ''',
-            child: IconButton(
-              icon: Icon(
-                Icons.settings,
-                color: theme.colorScheme.primary,
-              ),
-              onPressed: () => showDialog(
-                context: context,
-                builder: (context) => const SettingsDialog(),
-              ),
+            onPressed: () => showDialog(
+              context: context,
+              builder: (context) => const SettingsDialog(),
             ),
           ),
-          MarkdownTooltip(
-            message: '''
+          SolidAppBarAction(
+            icon: Icons.logout,
+            tooltip: '''
 
             **Logout:** Tap here to securely log out of your HealthPod account.
             This will clear your current session and return you to the login
             screen.
 
             ''',
-            child: IconButton(
-              icon: Icon(
-                Icons.logout,
-                color: theme.colorScheme.primary,
-              ),
-              onPressed: () => handleLogout(context),
-            ),
-          ),
-          MarkdownTooltip(
-            message: '''
-
-            **About:** Tap here to view information about the HealthPod app.
-            This includes a list of contributers and the extensive list of
-            open-source packages that the HealthPod app is built on and their
-            licenses.
-
-            ''',
-            child: IconButton(
-              onPressed: () {
-                showAbout(context);
-              },
-              icon: Icon(
-                Icons.info,
-                color: theme.colorScheme.primary,
-              ),
-            ),
+            onPressed: () => handleLogout(context),
           ),
         ],
+        overflowItems: [],
       ),
-      backgroundColor: theme.colorScheme.surface,
-      body: Column(
-        children: [
-          Divider(height: 1, color: theme.dividerColor),
-          Expanded(
-            child: Row(
-              children: [
-                ScrollConfiguration(
-                  behavior: ScrollConfiguration.of(context)
-                      .copyWith(scrollbars: false),
-                  child: SingleChildScrollView(
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: Container(
-                        color: theme.colorScheme.surface,
-                        child: NavigationRail(
-                          backgroundColor: theme.colorScheme.surface,
-                          selectedIndex: _selectedIndex,
-                          onDestinationSelected: _handleTabChange,
-                          labelType: NavigationRailLabelType.all,
-                          destinations: homeTabs.map((tab) {
-                            final tooltipMessage =
-                                tab['tooltip'] ?? tab['message'];
+      themeToggle: SolidThemeToggleConfig(),
+      statusBar: SolidStatusBarConfig(
+        serverInfo: _webId != null
+            ? SolidServerInfo(
+                serverUri: _extractServerFromWebId(_webId!),
+                tooltip: '''
 
-                            return NavigationRailDestination(
-                              icon: MarkdownTooltip(
-                                message: tooltipMessage,
-                                child: Icon(
-                                  tab['icon'],
-                                  color:
-                                      tab['color'] ?? theme.colorScheme.primary,
-                                ),
-                              ),
-                              label: Text(
-                                tab['title'],
-                                style: theme.textTheme.bodyLarge,
-                              ),
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 0.0),
-                            );
-                          }).toList(),
-                          selectedLabelTextStyle:
-                              theme.textTheme.labelLarge?.copyWith(
-                            color: theme.colorScheme.primary,
-                          ),
-                          unselectedLabelTextStyle: theme.textTheme.bodyMedium,
-                        ),
-                      ),
-                    ),
-                  ),
+**Server:** This is your Solid Pod server where your health data is stored
+securely.
+
+Tap to visit your server in the browser.
+
+''',
+              )
+            : null,
+        loginStatus: SolidLoginStatus(
+          webId: _webId,
+          onTap: () => handleLogout(context),
+        ),
+        securityKeyStatus: SolidSecurityKeyStatus(
+          isKeySaved: _isKeySaved,
+          onKeyStatusChanged: _updateKeyStatus,
+        ),
+      ),
+      aboutConfig: SolidAboutConfig(
+        applicationName: 'HealthPod',
+        applicationVersion: _appVersion,
+        applicationIcon: Image.asset(
+          'assets/images/app_logo.png',
+          width: 100,
+          height: 100,
+        ),
+        applicationLegalese: '© 2025 Software Innovation Institute ANU',
+        text: '''
+
+**A Health and Medical Record Manager.**
+
+HealthPod is an app for managing your health data and medical records, keeping
+all data stored in your personal online dataset (Pod). Medical documents as well
+as a health diary can be maintained.
+
+The app is written in Flutter and the open source code is available from
+[github](https://github.com/gjwgit/healthpod). You can try it out online at the
+[AU Solid Community](https://healthpod.solidcommunity.au).
+
+The images for the app were generated by ChatGPT.
+
+*Authors: Graham Williams, Ashley Tang, Kevin Wang, Zheyuan Xu.*
+
+*Contributors: .*
+
+**Web ID:** ${_webId ?? 'Web ID is not available and need to login first.'}
+
+''',
+        tooltip: '''
+
+        **About:** Tap here to view information about the HealthPod app.
+        This includes a list of contributers and the extensive list of
+        open-source packages that the HealthPod app is built on and their
+        licenses.
+
+        ''',
+      ),
+    );
+  }
+}
+
+/// File management content widget using SolidFile.
+
+class _FileManagementContent extends ConsumerStatefulWidget {
+  /// Callback function to handle import success navigation.
+
+  final Function(String importType)? onImportSuccess;
+
+  /// Flag to track whether the user has ever actively selected a feature tab.
+
+  final bool hasUserSelectedFeatureTab;
+
+  const _FileManagementContent({
+    this.onImportSuccess,
+    required this.hasUserSelectedFeatureTab,
+  });
+
+  @override
+  ConsumerState<_FileManagementContent> createState() =>
+      _FileManagementContentState();
+}
+
+class _FileManagementContentState
+    extends ConsumerState<_FileManagementContent> {
+  final GlobalKey<SolidFileBrowserState> _browserKey = GlobalKey();
+
+  /// Flag to track whether the user has manually navigated to a different
+  /// folder. If true, we won't override the user's choice with tab
+  /// coordination.
+
+  bool _userHasManuallyNavigated = false;
+
+  /// Track the last tab index we coordinated with to avoid redundant
+  /// navigation.
+
+  int? _lastCoordinatedTabIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    // Set up the refresh callback after the widget is built.
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(fileServiceProvider.notifier).setRefreshCallback(() {
+        _browserKey.currentState?.refreshFiles();
+      });
+
+      // Check if we should navigate to a specific folder based on current tab
+      // selection, but only if user has actively selected a feature tab.
+
+      final currentTabIndex = ref.read(tabStateProvider).selectedIndex;
+      String initialPath = basePath;
+
+      // Map tab index to directory only if we're coordinating with other tabs
+      // and the user has actually selected a feature tab.
+
+      if (!_userHasManuallyNavigated && widget.hasUserSelectedFeatureTab) {
+        switch (currentTabIndex) {
+          case 0:
+            initialPath = '$basePath/diary'; // Appointments
+            break;
+          case 1:
+            initialPath = '$basePath/blood_pressure'; // Blood Pressure
+            break;
+          case 2:
+            initialPath = '$basePath/medication'; // Medications
+            break;
+          case 3:
+            initialPath = '$basePath/vaccination'; // Vaccinations
+            break;
+          default:
+            initialPath = basePath; // Default to home
+            break;
+        }
+      }
+
+      // Initialise to the appropriate folder.
+
+      Future(() {
+        ref.read(fileServiceProvider.notifier).updateCurrentPath(initialPath);
+        if (initialPath != basePath) {
+          _browserKey.currentState?.navigateToPath(initialPath);
+        }
+
+        // Update the coordinated tab index to avoid conflicts.
+
+        _lastCoordinatedTabIndex = currentTabIndex;
+      });
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  /// Navigates to the feature-specific folder based on the current tab
+  /// selection.
+
+  void _navigateToFeatureFolder() {
+    // If the user has manually navigated, don't override their choice.
+
+    if (_userHasManuallyNavigated) {
+      return;
+    }
+
+    // Read the selected tab index from the provider to coordinate with other
+    // tabs.
+
+    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
+
+    // Map the tab index to the corresponding directory name.
+    // Index 0: Appointments → diary
+    // Index 1: Blood Pressure → blood_pressure
+    // Index 2: Medications → medication
+    // Index 3: Vaccinations → vaccination
+
+    String featureDir;
+    switch (selectedIndex) {
+      case 0:
+        featureDir = 'diary'; // Appointments
+        break;
+      case 1:
+        featureDir = 'blood_pressure'; // Blood Pressure
+        break;
+      case 2:
+        featureDir = 'medication'; // Medications
+        break;
+      case 3:
+        featureDir = 'vaccination'; // Vaccinations
+        break;
+      default:
+        featureDir = ''; // Default to home
+        break;
+    }
+
+    final targetPath =
+        featureDir.isNotEmpty ? '$basePath/$featureDir' : basePath;
+    final currentPath = ref.read(fileServiceProvider).currentPath ?? basePath;
+    if (currentPath != targetPath) {
+      ref.read(fileServiceProvider.notifier).updateCurrentPath(targetPath);
+      _browserKey.currentState?.navigateToPath(targetPath);
+    }
+  }
+
+  /// Gets the expected path for the current tab selection.
+
+  String _getExpectedPathForCurrentTab() {
+    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
+
+    String featureDir;
+    switch (selectedIndex) {
+      case 0:
+        featureDir = 'diary'; // Appointments
+        break;
+      case 1:
+        featureDir = 'blood_pressure'; // Blood Pressure
+        break;
+      case 2:
+        featureDir = 'medication'; // Medications
+        break;
+      case 3:
+        featureDir = 'vaccination'; // Vaccinations
+        break;
+      default:
+        featureDir = ''; // Default to home
+        break;
+    }
+
+    return featureDir.isNotEmpty ? '$basePath/$featureDir' : basePath;
+  }
+
+  /// Creates upload callbacks.
+
+  SolidFileUploadCallbacks _createUploadCallbacks(String currentPath) {
+    Map<String, bool> computeDirectoryFlags() {
+      final livePath = ref.read(fileServiceProvider).currentPath ?? basePath;
+      final isInBpDirectory = livePath.contains('/blood_pressure');
+      final isInVaccinationDirectory = livePath.contains('/vaccination');
+      final isInMedicationDirectory = livePath.contains('/medication');
+      final isInDiaryDirectory = livePath.contains('/diary');
+
+      return {
+        'isVaccination': isInVaccinationDirectory,
+        'isMedication': isInMedicationDirectory,
+        'isDiary': isInDiaryDirectory,
+        'isBloodPressure': isInBpDirectory,
+      };
+    }
+
+    bool inProfileDirectory() {
+      final livePath = ref.read(fileServiceProvider).currentPath ?? basePath;
+      return livePath.contains('/profile');
+    }
+
+    return SolidFileUploadCallbacks(
+      onUpload: () => _handleFileUpload(),
+      onImportCsv: () => _handleCsvImport(computeDirectoryFlags()),
+      onExportCsv: () => _handleCsvExport(computeDirectoryFlags()),
+      onImportSuccess: _handleImportSuccess,
+      onImportProfile: () {
+        if (inProfileDirectory()) _handleProfileImport();
+      },
+      onExportProfile: () {
+        if (inProfileDirectory()) _handleProfileExport();
+      },
+      onVisualiseJson: () => _handleVisualiseJson(),
+      onSelectLocalJson: () => _handleSelectLocalJson(),
+      onPreviewFile: () => _handlePreview(),
+      onConvertToJson: () => _handleConvertToJson(),
+    );
+  }
+
+  /// Handles file upload.
+
+  void _handleFileUpload() async {
+    final result = await FilePicker.platform.pickFiles();
+    if (result != null && result.files.isNotEmpty) {
+      final file = result.files.first;
+      if (file.path != null && mounted) {
+        ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
+        await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      }
+    }
+  }
+
+  /// Handles CSV import.
+
+  void _handleCsvImport(Map<String, bool> directoryFlags) {
+    ref.read(fileServiceProvider.notifier).handleCsvImport(
+          context,
+          isVaccination: directoryFlags['isVaccination'] ?? false,
+          isMedication: directoryFlags['isMedication'] ?? false,
+          isDiary: directoryFlags['isDiary'] ?? false,
+          isBloodPressure: directoryFlags['isBloodPressure'] ?? false,
+          onImportSuccess: _handleImportSuccess,
+        );
+  }
+
+  /// Handles successful CSV import.
+
+  void _handleImportSuccess(String importType) {
+    // Call the parent callback if provided.
+
+    widget.onImportSuccess?.call(importType);
+  }
+
+  /// Handles CSV export.
+
+  void _handleCsvExport(Map<String, bool> directoryFlags) {
+    ref.read(fileServiceProvider.notifier).handleCsvExport(
+          context,
+          isVaccination: directoryFlags['isVaccination'] ?? false,
+          isDiary: directoryFlags['isDiary'] ?? false,
+          isMedication: directoryFlags['isMedication'] ?? false,
+        );
+  }
+
+  /// Handles Profile import.
+
+  void _handleProfileImport() {
+    debugPrint('Import Profile functionality');
+  }
+
+  /// Handles Profile export.
+
+  void _handleProfileExport() {
+    debugPrint('Export Profile functionality');
+  }
+
+  /// Handles selecting and previewing local JSON files.
+
+  void _handleSelectLocalJson() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        if (file.path != null) {
+          await _handlePreviewLocalFile(file.path!);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to select JSON file: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Handles previewing a local file by path.
+
+  Future<void> _handlePreviewLocalFile(String filePath) async {
+    try {
+      final file = File(filePath);
+      final content = await file.readAsString();
+
+      String displayContent;
+      try {
+        final jsonData = jsonDecode(content);
+        displayContent = const JsonEncoder.withIndent('  ').convert(jsonData);
+      } catch (e) {
+        // If it's not valid JSON, just show the raw content.
+
+        displayContent = content;
+      }
+
+      // Update the file preview state.
+
+      ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
+
+      // Always ensure preview is shown when content is loaded.
+
+      final currentState = ref.read(fileServiceProvider);
+      if (!currentState.showPreview) {
+        ref.read(fileServiceProvider.notifier).togglePreview();
+      } else {
+        setState(() {}); // Force a widget rebuild
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Local JSON file loaded: ${path.basename(filePath)}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load local file: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  /// Handles JSON visualisation from POD.
+
+  void _handleVisualiseJson() async {
+    final state = ref.read(fileServiceProvider);
+
+    if (state.remoteFileName == null || state.currentPath == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a file first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Construct the full file path by combining directory and filename.
+
+    String filePath;
+    if (state.downloadFile != null && state.downloadFile!.isNotEmpty) {
+      filePath = '${state.downloadFile}/${state.remoteFileName}';
+    } else {
+      // Fallback to manual construction using currentPath.
+
+      filePath = state.currentPath == basePath
+          ? '$basePath/${state.remoteFileName}'
+          : '${state.currentPath}/${state.remoteFileName}';
+    }
+
+    try {
+      // Read the file content from POD.
+
+      final fileContent = await readPod(
+        filePath,
+        context,
+        const Text('Reading JSON file'),
+      );
+
+      if (fileContent == SolidFunctionCallStatus.fail.toString() ||
+          fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
+        throw Exception('Failed to read file from POD');
+      }
+
+      // Try to parse and format the JSON content.
+
+      String displayContent;
+      try {
+        final jsonData = jsonDecode(fileContent);
+        // Pretty format the JSON with indentation.
+
+        displayContent = const JsonEncoder.withIndent('  ').convert(jsonData);
+      } catch (e) {
+        // If it's not valid JSON, just show the raw content.
+
+        displayContent = fileContent;
+      }
+
+      // Update the file preview state.
+
+      ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
+
+      // Always ensure preview is shown when content is loaded.
+
+      final currentState = ref.read(fileServiceProvider);
+
+      if (!currentState.showPreview) {
+        ref.read(fileServiceProvider.notifier).togglePreview();
+      } else {
+        // Force a widget rebuild by calling setState on a parent widget.
+
+        setState(() {});
+      }
+    } catch (e) {
+      debugPrint('Failed to load JSON: ${e.toString()}');
+    }
+  }
+
+  /// Handles file preview.
+
+  Future<void> _handlePreview() async {
+    final state = ref.read(fileServiceProvider);
+
+    if (state.remoteFileName == null || state.currentPath == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a file first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Construct the full file path.
+
+    final filePath = state.currentPath == basePath
+        ? '$basePath/${state.remoteFileName}'
+        : '${state.currentPath}/${state.remoteFileName}';
+
+    try {
+      // Read the file content from POD.
+
+      final fileContent = await readPod(
+        filePath,
+        context,
+        const Text('Reading file'),
+      );
+
+      if (fileContent == SolidFunctionCallStatus.fail.toString() ||
+          fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
+        throw Exception('Failed to read file from POD');
+      }
+
+      // Display content (truncate if too long).
+
+      String displayContent = fileContent.length > 1000
+          ? '${fileContent.substring(0, 1000)}...\n\n[Content truncated]'
+          : fileContent;
+
+      // Update the file preview state.
+
+      ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
+
+      // Always ensure preview is shown when content is loaded.
+
+      final currentState = ref.read(fileServiceProvider);
+      if (!currentState.showPreview) {
+        ref.read(fileServiceProvider.notifier).togglePreview();
+      }
+    } catch (e) {
+      debugPrint('Failed to load file: ${e.toString()}');
+    }
+  }
+
+  /// Handles PDF to JSON conversion.
+
+  void _handleConvertToJson() async {
+    final state = ref.read(fileServiceProvider);
+    if (state.uploadFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No file uploaded for conversion'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    await _convertPDFToJsonUpload(File(state.uploadFile!));
+  }
+
+  /// Converts PDF to JSON and uploads both files.
+
+  Future<void> _convertPDFToJsonUpload(File file) async {
+    try {
+      // Show loading dialog while processing.
+
+      if (!context.mounted) return;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      // Read PDF file.
+
+      final bytes = await file.readAsBytes();
+      if (!context.mounted) return;
+      final PdfDocument pdf = PdfDocument(inputBytes: bytes);
+
+      // Extract text from all pages.
+
+      String text = '';
+      for (var i = 0; i < pdf.pages.count; i++) {
+        text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
+      }
+
+      // Structure the data to match kt_pathology.json format.
+
+      final List<String> lines = text.split('\n');
+
+      // Close loading dialog.
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      // Extract final structured data.
+
+      final Map<String, dynamic> finalJson = {
+        'timestamp': '',
+        'clinical_note': '',
+        'referrer': '',
+        'clinic': '',
+        'laboratory': '4Cyte Pathology',
+        'pathologist': '',
+        'sodium': 0.0,
+        'potassium': 0.0,
+        'chloride': 0.0,
+        'bicarbonate': 0.0,
+        'anion_gap': 0.0,
+        'urea': 0.0,
+        'creatinine': 0.0,
+        'egfr': 0.0,
+        'total_protien': 0.0,
+        'globulin': 0.0,
+        'albumin': 0.0,
+        'bilirubin_total': 0.0,
+        'alk_phosphatase': 0.0,
+        'gamma_gt': 0.0,
+        'alt': 0.0,
+        'ast': 0.0,
+      };
+
+      // Parse the extracted text.
+
+      for (var line in lines) {
+        line = line.trim();
+        if (line.isEmpty) continue;
+
+        // Extract timestamp.
+
+        if (line.contains('Collected:')) {
+          final dateTime = line.split('Collected:')[1].trim();
+          final parts = dateTime.split(' ');
+          if (parts.length == 2) {
+            final date = parts[0].split('/');
+            if (date.length == 3) {
+              final year = date[2];
+              final month = date[1].padLeft(2, '0');
+              final day = date[0].padLeft(2, '0');
+              final time = parts[1];
+              finalJson['timestamp'] = '$year-$month-$day $time';
+            }
+          }
+        }
+
+        // Extract clinical note.
+
+        if (line.contains('Clinical Notes:')) {
+          finalJson['clinical_note'] = line.split('Clinical Notes:')[1].trim();
+        }
+
+        // Extract referrer.
+
+        if (line.startsWith('Dr ')) {
+          finalJson['referrer'] = line;
+        }
+
+        // Extract clinic address.
+
+        if (line.contains('Medical Centre')) {
+          finalJson['clinic'] = line;
+        }
+
+        // Extract pathologist.
+
+        if (line.contains('Pathologist:')) {
+          finalJson['pathologist'] = line.split('Pathologist:')[1].trim();
+        }
+
+        // Extract test results.
+
+        if (line.contains('Sodium')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['sodium'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Potassium')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['potassium'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Chloride')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['chloride'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Bicarbonate')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['bicarbonate'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Anion Gap')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['anion_gap'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Urea')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['urea'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Creatinine')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['creatinine'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('eGFR')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['egfr'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Total Protein')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 3) {
+            finalJson['total_protien'] = double.tryParse(parts[2]) ?? 0.0;
+          }
+        } else if (line.contains('Globulin')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['globulin'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Albumin')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['albumin'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('Bilirubin Total')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 3) {
+            finalJson['bilirubin_total'] = double.tryParse(parts[2]) ?? 0.0;
+          }
+        } else if (line.contains('Alk Phosphatase')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 3) {
+            finalJson['alk_phosphatase'] = double.tryParse(parts[2]) ?? 0.0;
+          }
+        } else if (line.contains('Gamma GT')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 3) {
+            finalJson['gamma_gt'] = double.tryParse(parts[2]) ?? 0.0;
+          }
+        } else if (line.contains('ALT')) {
+          final parts =
+              line.split(RegExp(r'\s+')).where((s) => s.isNotEmpty).toList();
+          if (parts.length >= 2) {
+            finalJson['alt'] = double.tryParse(parts[1]) ?? 0.0;
+          }
+        } else if (line.contains('AST')) {
+          final nextLine = lines[lines.indexOf(line) + 1].trim();
+          finalJson['ast'] = double.tryParse(nextLine) ?? 0.0;
+        }
+      }
+
+      // Create a temporary file for the final JSON.
+
+      final tempDir = await Directory.systemTemp.createTemp();
+      if (!context.mounted) return;
+
+      // Create a file with a name based on the original PDF.
+
+      final jsonFile = File(
+        '${tempDir.path}/${path.basenameWithoutExtension(file.path)}_final.json',
+      );
+      await jsonFile
+          .writeAsString(const JsonEncoder.withIndent('  ').convert(finalJson));
+
+      // Upload both files to POD.
+
+      if (!mounted) return;
+
+      // First upload the PDF.
+
+      ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
+      if (!context.mounted) return;
+
+      // Store context reference for safe async usage.
+
+      final currentContext = context;
+      await ref.read(fileServiceProvider.notifier).handleUpload(currentContext);
+      if (!context.mounted) return;
+
+      // Then upload the JSON.
+
+      ref.read(fileServiceProvider.notifier).setUploadFile(jsonFile.path);
+      if (!context.mounted) return;
+
+      // Store context reference for safe async usage.
+
+      final currentContext2 = context;
+      await ref
+          .read(fileServiceProvider.notifier)
+          .handleUpload(currentContext2);
+      if (!context.mounted) return;
+
+      // Clean up temporary file.
+
+      await jsonFile.delete();
+      await tempDir.delete();
+
+      // Show success message.
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF and JSON files uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error processing PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(fileServiceProvider);
+    final currentPath = state.currentPath ?? basePath;
+
+    // Watch the tab state and trigger navigation when it changes.
+
+    final currentTabState = ref.watch(tabStateProvider);
+
+    // Check if tab has changed and we need to coordinate navigation.
+
+    if (!_userHasManuallyNavigated &&
+        _lastCoordinatedTabIndex != currentTabState.selectedIndex) {
+      // Update the last coordinated index.
+
+      _lastCoordinatedTabIndex = currentTabState.selectedIndex;
+
+      // Use a post-frame callback to trigger navigation after build completes.
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_userHasManuallyNavigated) {
+          _navigateToFeatureFolder();
+        }
+      });
+    }
+
+    return SolidFile(
+      basePath: basePath,
+      currentPath: currentPath,
+      browserKey: _browserKey,
+      autoConfig: true,
+      showBackButton: true,
+      backButtonText: 'Back to Home Folder',
+      onBackPressed: () {
+        const rootPath = basePath;
+        // Set manual navigation flag to prevent automatic coordination after
+        // back press.
+
+        _userHasManuallyNavigated = true;
+
+        // Reset coordinated index to allow future tab coordination if needed.
+
+        _lastCoordinatedTabIndex = null;
+        ref.read(fileServiceProvider.notifier).updateCurrentPath(rootPath);
+        _browserKey.currentState?.navigateToPath(rootPath);
+
+        // Re-enable coordination after a short delay to allow tab coordination
+        // again.
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) {
+            _userHasManuallyNavigated = false;
+          }
+        });
+
+        // Force refresh the widget to ensure immediate update.
+
+        setState(() {});
+      },
+      onFileSelected: (fileName, filePath) {
+        ref.read(fileServiceProvider.notifier)
+          ..setDownloadFile(filePath)
+          ..setFilePreview(fileName)
+          ..setRemoteFileName(path.basename(fileName));
+      },
+      onFileDownload: (fileName, filePath) async {
+        ref.read(fileServiceProvider.notifier)
+          ..setDownloadFile(filePath)
+          ..setRemoteFileName(path.basename(fileName))
+          ..handleDownload(context);
+      },
+      onFileDelete: (fileName, filePath) async {
+        // Show confirmation dialogue before deleting.
+
+        final bool? confirm = await showDialog<bool>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Confirm Delete'),
+              content: Text(
+                'Are you sure you want to delete "$fileName"?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
                 ),
-                VerticalDivider(color: theme.dividerColor),
-                Expanded(
-                  child: homeTabs[_selectedIndex]['content'] ??
-                      HomePage(
-                        key: _homePageKey,
-                        onNavigateToProfile: () {},
-                      ),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Delete'),
                 ),
               ],
-            ),
-          ),
-          Divider(height: 1, color: theme.dividerColor),
-        ],
-      ),
-      bottomNavigationBar: BottomAppBar(
-        height: getFooterHeight(context),
-        color: theme.colorScheme.surface,
-        child: SizedBox(
-          child: Footer(
-            webId: _webId,
-            isKeySaved: _isKeySaved,
-            onKeyStatusChanged: _updateKeyStatus,
-          ),
-        ),
+            );
+          },
+        );
+
+        if (!context.mounted) return;
+
+        if (confirm == true) {
+          String actualPath = '$filePath/$fileName';
+
+          try {
+            // Delete the main file first.
+
+            await deleteFile(actualPath);
+
+            // Try to delete the ACL file.
+
+            try {
+              await deleteFile('$actualPath.acl');
+            } catch (e) {
+              // ACL files are optional and may not exist.
+            }
+
+            // Show success message.
+
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('File deleted successfully'),
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                ),
+              );
+
+              // Refresh the file browser.
+
+              _browserKey.currentState?.refreshFiles();
+            }
+          } catch (e) {
+            if (context.mounted) {
+              final message = e.toString().contains('404') ||
+                      e.toString().contains('NotFoundHttpError')
+                  ? 'File not found or already deleted'
+                  : 'Delete failed: ${e.toString()}';
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        }
+      },
+      onImportCsv: (fileName, filePath) {
+        // Import CSV functionality would be implemented here.
+
+        debugPrint('Import CSV: $fileName at $filePath');
+      },
+      onDirectoryChanged: (path) {
+        final expectedPath = _getExpectedPathForCurrentTab();
+        final isTabCoordinatedNavigation = (path == expectedPath);
+
+        if (!isTabCoordinatedNavigation) {
+          _userHasManuallyNavigated = true;
+          _lastCoordinatedTabIndex = null;
+        }
+
+        ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
+        setState(() {});
+      },
+      onClosePreview: () {
+        final currentState = ref.read(fileServiceProvider);
+        if (currentState.showPreview) {
+          ref.read(fileServiceProvider.notifier).togglePreview();
+        }
+      },
+      uploadCallbacks: _createUploadCallbacks(currentPath),
+      uploadState: SolidFileUploadState(
+        uploadInProgress: state.uploadInProgress,
+        importInProgress: state.importInProgress,
+        exportInProgress: state.exportInProgress,
+        uploadedFilePath: state.uploadFile,
+        uploadDone: state.uploadDone,
+        filePreview: state.filePreview,
+        showPreview: state.showPreview,
       ),
     );
   }

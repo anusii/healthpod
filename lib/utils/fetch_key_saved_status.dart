@@ -31,8 +31,9 @@ import 'package:solidpod/solidpod.dart' show KeyManager;
 
 /// This function checks if an encryption key is available for the user.
 ///
-/// Instead of directly triggering a key prompt, it now uses the CentralKeyManager
-/// to ensure the prompt only shows once across the application.
+/// Instead of directly triggering a key prompt, it now uses the SolidUI
+/// security key manager to ensure the prompt only shows once across the
+/// application.
 ///
 /// If a key exists, it triggers a callback to update the UI.
 

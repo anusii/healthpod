@@ -33,6 +33,7 @@ import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/format_timestamp_for_display.dart';
 import 'package:healthpod/utils/is_valid_timestamp.dart';
 import 'package:healthpod/utils/normalise_timestamp.dart';
@@ -247,7 +248,7 @@ abstract class HealthDataImporterBase {
     try {
       // Only check the known working path where health data files are stored.
 
-      final String dataPath = 'healthpod/data/$dataType';
+      final String dataPath = '$basePath/$dataType';
 
       try {
         final dirUrl = await getDirUrl(dataPath);
@@ -361,8 +362,8 @@ abstract class HealthDataImporterBase {
           final alternativePaths = [
             dataType,
             '$dataType/$fileName',
-            'healthpod/data/$dataType',
-            'healthpod/data/$dataType/$fileName',
+            '$basePath/$dataType',
+            '$basePath/$dataType/$fileName',
           ];
 
           for (final altPath in alternativePaths) {
@@ -660,10 +661,10 @@ abstract class HealthDataImporterBase {
 
             String cleanDirPath = dirPath;
 
-            if (cleanDirPath.startsWith('healthpod/data/')) {
-              cleanDirPath = cleanDirPath.substring('healthpod/data/'.length);
-            } else if (cleanDirPath.startsWith('healthpod/data')) {
-              cleanDirPath = cleanDirPath.substring('healthpod/data'.length);
+            if (cleanDirPath.startsWith(basePath)) {
+              cleanDirPath = cleanDirPath.substring(basePath.length);
+            } else if (cleanDirPath.startsWith(basePath)) {
+              cleanDirPath = cleanDirPath.substring(basePath.length);
             }
 
             // Remove leading slash if present.
@@ -847,7 +848,7 @@ abstract class HealthDataImporterBase {
     List<String> filesToDelete,
   ) async {
     try {
-      final String dataPath = 'healthpod/data/$dataType';
+      final String dataPath = '$basePath/$dataType';
 
       // Attempt to delete each file.
 

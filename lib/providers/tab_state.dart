@@ -40,7 +40,7 @@ class TabState {
   /// Creates a new [TabState] with the given index.
 
   const TabState({
-    this.selectedIndex = 0,
+    this.selectedIndex = -1,
   });
 
   /// Creates a copy of this [TabState] with the given fields replaced with new values.
@@ -58,7 +58,7 @@ class TabState {
   /// Normalizes the index to ensure it's within valid range.
 
   static int _normalizeIndex(int index) {
-    if (index < 0) return 0;
+    if (index < -1) return -1;
     if (index >= maxTabs) return maxTabs - 1;
     return index;
   }

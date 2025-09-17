@@ -481,13 +481,7 @@ import_order_fix:
 # dart pub global activate dart_code_metrics
 
 .PHONY: dcm
-dcm: nullable unused_code unused_files metrics
-
-.PHONY: nullable
-nullable:
-	@echo "Dart Code Metrics: NULLABLE"
-	-metrics check-unnecessary-nullable --disable-sunset-warning lib
-	@echo $(SEPARATOR)
+dcm: unused_code unused_files
 
 .PHONY: unused_code
 unused_code:
@@ -499,12 +493,6 @@ unused_code:
 unused_files:
 	@echo "Dart Code Metrics: UNUSED FILES"
 	-metrics check-unused-files --disable-sunset-warning lib
-	@echo $(SEPARATOR)
-
-.PHONY: metrics
-metrics:
-	@echo "Dart Code Metrics: METRICS"
-	-metrics analyze --disable-sunset-warning lib --reporter=console
 	@echo $(SEPARATOR)
 
 ### TODO THESE SHOULD BE CHECKED AND CLEANED UP

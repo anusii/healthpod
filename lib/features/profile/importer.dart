@@ -30,6 +30,7 @@ import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
 /// Class that handles the import of profile data from JSON file.
@@ -557,7 +558,7 @@ class ProfileImporter {
 
       // Only check the known path where profile files are stored.
 
-      final profilePath = 'healthpod/data/profile';
+      final profilePath = '$basePath/profile';
 
       try {
         final dirUrl = await getDirUrl(profilePath);
@@ -753,7 +754,7 @@ class ProfileImporter {
     try {
       // Use the same path where the files are actually stored.
 
-      final normalizedPath = 'healthpod/data/profile';
+      final normalizedPath = '$basePath/profile';
 
       for (final filename in existingProfiles) {
         try {
