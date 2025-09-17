@@ -272,11 +272,12 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
     // Mark that the user has actively selected a feature tab.
 
     _hasUserSelectedFeatureTab = true;
-    
+
     // Only set tabStateProvider selectedIndex to 0 when user clicks View,
     // Entry, or Data.
 
-    if (index == 1 || index == 2 || index == 3) { // View, Entry, Data
+    if (index == 1 || index == 2 || index == 3) {
+      // View, Entry, Data
       ref.read(tabStateProvider.notifier).setSelectedIndex(0);
     }
   }
@@ -458,9 +459,9 @@ class _FileManagementContent extends ConsumerStatefulWidget {
   /// Callback function to handle import success navigation.
 
   final Function(String importType)? onImportSuccess;
-  
+
   /// Flag to track whether the user has ever actively selected a feature tab.
-  
+
   final bool hasUserSelectedFeatureTab;
 
   const _FileManagementContent({
