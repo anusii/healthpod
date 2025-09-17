@@ -479,10 +479,45 @@ class _FileManagementContentState
         _browserKey.currentState?.refreshFiles();
       });
 
-      // Initialise to home folder by default.
+      // Check if we should navigate to a specific folder based on current tab
+      // selection.
+
+      final currentTabIndex = ref.read(tabStateProvider).selectedIndex;
+      String initialPath = basePath;
+      
+      // Map tab index to directory if we're coordinating with other tabs.
+
+      if (!_userHasManuallyNavigated) {
+        switch (currentTabIndex) {
+          case 0:
+            initialPath = '$basePath/diary'; // Appointments
+            break;
+          case 1:
+            initialPath = '$basePath/blood_pressure'; // Blood Pressure
+            break;
+          case 2:
+            initialPath = '$basePath/medication'; // Medications
+            break;
+          case 3:
+            initialPath = '$basePath/vaccination'; // Vaccinations
+            break;
+          default:
+            initialPath = basePath; // Default to home
+            break;
+        }
+      }
+
+      // Initialise to the appropriate folder.
 
       Future(() {
-        ref.read(fileServiceProvider.notifier).updateCurrentPath(basePath);
+        ref.read(fileServiceProvider.notifier).updateCurrentPath(initialPath);
+        if (initialPath != basePath) {
+          _browserKey.currentState?.navigateToPath(initialPath);
+        }
+
+        // Update the coordinated tab index to avoid conflicts.
+
+        _lastCoordinatedTabIndex = currentTabIndex;
       });
     });
   }
