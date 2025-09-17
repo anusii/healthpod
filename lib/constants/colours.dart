@@ -29,8 +29,4 @@ import 'package:flutter/material.dart';
 
 const anuGold = Color(0xFFBE830E);
 
-const iconColor = Colors.white;
-
 const iconGreen = Colors.green;
-
-const titleBackgroundColor = Color(0xFFF0E4D7);

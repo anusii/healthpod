@@ -65,22 +65,6 @@ enum AutoLoginStatus {
 ///    - Uses the SolidLogin widget for authentication
 ///    - Supports optional Pod connectivity
 ///    - Maintains session persistence
-///
-/// The file also includes a helper class for storing WebIDs during testing sessions.
-
-/// Global navigator key for managing navigation state.
-
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
-/// Helper class for storing WebID during integration tests
-///
-/// Provides a static storage mechanism for the WebID extracted during
-/// automated WebView authentication flows. This is specifically used
-/// in integration testing scenarios.
-
-class SolidLoginTestHelper {
-  static String? extractedWebId;
-}
 
 /// Creates the appropriate Solid login widget based on environment.
 ///
