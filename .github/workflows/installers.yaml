@@ -163,6 +163,7 @@ jobs:
           directory: build/macos/Build/Products/Release
           path: ${{ env.APP }}.app
           filename: ${{ env.APP }}-${{github.ref_name}}-macos.zip
+
       - name: Review ZIP exists
         run: ls -lh build/macos/Build/Products/Release
 
