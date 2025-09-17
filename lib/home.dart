@@ -469,6 +469,11 @@ class _FileManagementContentState
 
   int? _lastCoordinatedTabIndex;
 
+  /// Flag to track whether the user has ever actively selected a feature tab.
+  /// This helps distinguish between default tab state and user selection.
+
+  bool _hasUserSelectedFeatureTab = false;
+
   @override
   void initState() {
     super.initState();
@@ -480,14 +485,15 @@ class _FileManagementContentState
       });
 
       // Check if we should navigate to a specific folder based on current tab
-      // selection.
+      // selection, but only if user has actively selected a feature tab.
 
       final currentTabIndex = ref.read(tabStateProvider).selectedIndex;
       String initialPath = basePath;
       
-      // Map tab index to directory if we're coordinating with other tabs.
+      // Map tab index to directory only if we're coordinating with other tabs
+      // and the user has actually selected a feature tab.
 
-      if (!_userHasManuallyNavigated) {
+      if (!_userHasManuallyNavigated && _hasUserSelectedFeatureTab) {
         switch (currentTabIndex) {
           case 0:
             initialPath = '$basePath/diary'; // Appointments
@@ -1217,6 +1223,10 @@ class _FileManagementContentState
 
     if (!_userHasManuallyNavigated &&
         _lastCoordinatedTabIndex != currentTabState.selectedIndex) {
+      // Mark that user has selected a feature tab.
+
+      _hasUserSelectedFeatureTab = true;
+
       // Update the last coordinated index.
 
       _lastCoordinatedTabIndex = currentTabState.selectedIndex;
