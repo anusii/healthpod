@@ -24,12 +24,10 @@ dependencies:
   file_picker: ^10.1.2
   fl_chart: ^1.0.0
   flutter_markdown: ^0.7.3
-  flutter_riverpod: ^2.4.9
+  flutter_riverpod: ^2.6.1
   intl: any
   markdown_tooltip: ^0.0.7
   path: ^1.9.0
-#  pdf: ^3.11.3
-#  printing: ^5.11.0
   rdflib: ^0.2.9
   shared_preferences: ^2.5.2
   solidpod: ^0.7.9
@@ -42,24 +40,21 @@ dependencies:
   timeline_tile: ^2.0.0
   universal_io: ^2.2.2
   url_launcher: ^6.3.1
-#  version_widget: ^1.0.2
   webdriver: ^3.0.3
   window_manager: ^0.5.1
 
 dev_dependencies:
   build_runner: ^2.4.0
-  encrypt: ^5.0.3
+  #encrypt: ^5.0.3
   flutter_inappwebview: ^6.1.5
-  flutter_launcher_icons: ^0.14.2
+  #flutter_launcher_icons: ^0.14.2
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  import_order_lint: ^0.2.0
-  process_run: ^1.2.2+1
+  #process_run: ^1.2.2+1
   test: ^1.25.15
-  ubuntu_lints: ^0.4.0
 
 flutter:
   assets:
