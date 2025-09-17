@@ -27,13 +27,6 @@ library;
 
 /// Dummy data for the avatar and appointment section in home screen.
 
-final String appointmentDate = '';
-final String appointmentTime = '';
-final String appointmentLocation = '';
-final String patientID = '';
-final String phoneNumber = '';
 final String userName = '';
-
-final bool clinicBusAvailable = true;
 
 final int notificationCount = 3;

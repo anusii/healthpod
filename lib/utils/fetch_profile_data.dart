@@ -334,7 +334,3 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
     return defaultProfileData['data'] as Map<String, dynamic>;
   }
 }
-
-/// Returns the minimum of two integers (helper function).
-
-int min(int a, int b) => a < b ? a : b;
