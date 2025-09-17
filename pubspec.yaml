@@ -27,6 +27,7 @@ dependencies:
   flutter_riverpod: ^2.6.1
   intl: any
   markdown_tooltip: ^0.0.7
+  package_info_plus: ^8.3.1
   path: ^1.9.0
   shared_preferences: ^2.5.2
   solidpod: ^0.7.9
