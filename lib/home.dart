@@ -1,6 +1,6 @@
 /// Home screen for the health data app.
 ///
-// Time-stamp: <Monday 2025-08-25 10:52:34 +1000 Graham Williams>
+// Time-stamp: <Wednesday 2025-09-17 12:03:19 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -489,7 +489,7 @@ class _FileManagementContentState
 
       final currentTabIndex = ref.read(tabStateProvider).selectedIndex;
       String initialPath = basePath;
-      
+
       // Map tab index to directory only if we're coordinating with other tabs
       // and the user has actually selected a feature tab.
 
@@ -1157,7 +1157,7 @@ class _FileManagementContentState
 
       // Upload both files to POD.
 
-      if (!context.mounted) return;
+      if (!mounted) return;
 
       // First upload the PDF.
 
