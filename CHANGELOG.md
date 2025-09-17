@@ -26,6 +26,7 @@ au](https://solidcommunity.au/docs/healthpod)
 
 ## 0.2 First stable release
 
++ Get installer builds working [0.2.22 20250917 gjw]
 + Migrate to solidscaffold [0.1.21 20250917 tonypioneer]
 + Update solidpod dependency for CSS v7.1.7 [0.1.20 20250815 gjw]
 + Fix support csv import for blood pressure [0.1.19 20250809 atangster]
