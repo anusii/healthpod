@@ -122,17 +122,23 @@ class _BPEditorPageState extends State<BPEditorPage> {
   /// Handles saving an observation.
 
   Future<void> _handleSave(int index) async {
+    if (!mounted) return;
+
     await editorState.saveObservation(
       context,
       editorService,
       index,
     );
-    _loadData();
+    if (mounted) {
+      _loadData();
+    }
   }
 
   /// Handles deleting an observation.
 
   Future<void> _handleDelete(BPObservation obs, int index) async {
+    if (!mounted) return;
+
     try {
       await editorState.deleteObservation(
         context,
@@ -140,7 +146,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
         obs,
       );
 
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -151,7 +157,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
         );
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error deleting reading: ${e.toString()}'),

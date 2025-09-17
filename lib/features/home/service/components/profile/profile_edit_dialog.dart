@@ -123,9 +123,9 @@ class ProfileEditDialog {
 
     if (result == true) {
       final updatedData = <String, String>{};
-      tempControllers.forEach((key, controller) {
-        updatedData[key] = controller.text;
-      });
+      for (final entry in tempControllers.entries) {
+        updatedData[entry.key] = entry.value.text;
+      }
 
       // Clean up temporary controllers.
 

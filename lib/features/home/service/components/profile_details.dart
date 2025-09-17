@@ -410,7 +410,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     };
 
     final rows = <Widget>[];
-    _controllers.forEach((controller, fieldName) {
+    for (final entry in _controllers.entries) {
+      final controller = entry.key;
+      final fieldName = entry.value;
       final label = fieldLabels[fieldName];
       if (label != null) {
         rows.add(
@@ -418,7 +420,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         );
         rows.add(const SizedBox(height: 6));
       }
-    });
+    }
 
     // Remove the last SizedBox.
     if (rows.isNotEmpty) {

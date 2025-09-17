@@ -146,12 +146,16 @@ class ProfilePhotoManager {
 
           // Cleanup old photos.
 
-          await ProfilePhotoHandler.cleanupOldProfilePhotos(context);
+          if (context.mounted) {
+            await ProfilePhotoHandler.cleanupOldProfilePhotos(context);
+          }
 
           // Reload the photo.
 
-          final newPhoto = await ProfilePhotoHandler.getProfilePhoto(context);
-          onPhotoChanged(newPhoto);
+          if (context.mounted) {
+            final newPhoto = await ProfilePhotoHandler.getProfilePhoto(context);
+            onPhotoChanged(newPhoto);
+          }
 
           // Notify parent of data change.
 
