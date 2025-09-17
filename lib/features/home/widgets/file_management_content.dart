@@ -23,20 +23,17 @@
 
 library;
 
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as path;
-import 'package:solidpod/solidpod.dart';
 import 'package:solidui/solidui.dart';
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
-import 'package:healthpod/features/home/widgets/pdf_processor.dart';
+import 'package:healthpod/features/home/widgets/handlers/file_content_handler.dart';
+import 'package:healthpod/features/home/widgets/handlers/file_operation_handler.dart';
+import 'package:healthpod/features/home/widgets/handlers/upload_callback_handler.dart';
+import 'package:healthpod/features/home/widgets/navigation/tab_coordinator.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
 /// File management content widget using SolidFile.
@@ -85,34 +82,15 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
         _browserKey.currentState?.refreshFiles();
       });
 
-      // Check if we should navigate to a specific folder based on current tab
-      // selection, but only if user has actively selected a feature tab.
+      // Get initial path using TabCoordinator.
+
+      final initialPath = TabCoordinator.getInitialPath(
+        ref,
+        _userHasManuallyNavigated,
+        widget.hasUserSelectedFeatureTab,
+      );
 
       final currentTabIndex = ref.read(tabStateProvider).selectedIndex;
-      String initialPath = basePath;
-
-      // Map tab index to directory only if we're coordinating with other tabs
-      // and the user has actually selected a feature tab.
-
-      if (!_userHasManuallyNavigated && widget.hasUserSelectedFeatureTab) {
-        switch (currentTabIndex) {
-          case 0:
-            initialPath = '$basePath/diary'; // Appointments
-            break;
-          case 1:
-            initialPath = '$basePath/blood_pressure'; // Blood Pressure
-            break;
-          case 2:
-            initialPath = '$basePath/medication'; // Medications
-            break;
-          case 3:
-            initialPath = '$basePath/vaccination'; // Vaccinations
-            break;
-          default:
-            initialPath = basePath; // Default to home
-            break;
-        }
-      }
 
       // Initialise to the appropriate folder.
 
@@ -134,414 +112,35 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
     super.didChangeDependencies();
   }
 
-  /// Navigates to the feature-specific folder based on the current tab
-  /// selection.
-
-  void _navigateToFeatureFolder() {
-    // If the user has manually navigated, don't override their choice.
-
-    if (_userHasManuallyNavigated) {
-      return;
-    }
-
-    // Read the selected tab index from the provider to coordinate with other
-    // tabs.
-
-    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
-
-    // Map the tab index to the corresponding directory name.
-    // Index 0: Appointments → diary
-    // Index 1: Blood Pressure → blood_pressure
-    // Index 2: Medications → medication
-    // Index 3: Vaccinations → vaccination
-
-    String featureDir;
-    switch (selectedIndex) {
-      case 0:
-        featureDir = 'diary'; // Appointments
-        break;
-      case 1:
-        featureDir = 'blood_pressure'; // Blood Pressure
-        break;
-      case 2:
-        featureDir = 'medication'; // Medications
-        break;
-      case 3:
-        featureDir = 'vaccination'; // Vaccinations
-        break;
-      default:
-        featureDir = ''; // Default to home
-        break;
-    }
-
-    final targetPath =
-        featureDir.isNotEmpty ? '$basePath/$featureDir' : basePath;
-    final currentPath = ref.read(fileServiceProvider).currentPath ?? basePath;
-    if (currentPath != targetPath) {
-      ref.read(fileServiceProvider.notifier).updateCurrentPath(targetPath);
-      _browserKey.currentState?.navigateToPath(targetPath);
-    }
-  }
-
-  /// Gets the expected path for the current tab selection.
-
-  String _getExpectedPathForCurrentTab() {
-    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
-
-    String featureDir;
-    switch (selectedIndex) {
-      case 0:
-        featureDir = 'diary'; // Appointments
-        break;
-      case 1:
-        featureDir = 'blood_pressure'; // Blood Pressure
-        break;
-      case 2:
-        featureDir = 'medication'; // Medications
-        break;
-      case 3:
-        featureDir = 'vaccination'; // Vaccinations
-        break;
-      default:
-        featureDir = ''; // Default to home
-        break;
-    }
-
-    return featureDir.isNotEmpty ? '$basePath/$featureDir' : basePath;
-  }
-
-  /// Creates upload callbacks.
-
-  SolidFileUploadCallbacks _createUploadCallbacks(String currentPath) {
-    Map<String, bool> computeDirectoryFlags() {
-      final livePath = ref.read(fileServiceProvider).currentPath ?? basePath;
-      final isInBpDirectory = livePath.contains('/blood_pressure');
-      final isInVaccinationDirectory = livePath.contains('/vaccination');
-      final isInMedicationDirectory = livePath.contains('/medication');
-      final isInDiaryDirectory = livePath.contains('/diary');
-
-      return {
-        'isVaccination': isInVaccinationDirectory,
-        'isMedication': isInMedicationDirectory,
-        'isDiary': isInDiaryDirectory,
-        'isBloodPressure': isInBpDirectory,
-      };
-    }
-
-    bool inProfileDirectory() {
-      final livePath = ref.read(fileServiceProvider).currentPath ?? basePath;
-      return livePath.contains('/profile');
-    }
-
-    return SolidFileUploadCallbacks(
-      onUpload: () => _handleFileUpload(),
-      onImportCsv: () => _handleCsvImport(computeDirectoryFlags()),
-      onExportCsv: () => _handleCsvExport(computeDirectoryFlags()),
-      onImportSuccess: _handleImportSuccess,
-      onImportProfile: () {
-        if (inProfileDirectory()) _handleProfileImport();
-      },
-      onExportProfile: () {
-        if (inProfileDirectory()) _handleProfileExport();
-      },
-      onVisualiseJson: () => _handleVisualiseJson(),
-      onSelectLocalJson: () => _handleSelectLocalJson(),
-      onPreviewFile: () => _handlePreview(),
-      onConvertToJson: () => _handleConvertToJson(),
-    );
-  }
-
-  /// Handles file upload.
-
-  void _handleFileUpload() async {
-    final result = await FilePicker.platform.pickFiles();
-    if (result != null && result.files.isNotEmpty) {
-      final file = result.files.first;
-      if (file.path != null && mounted) {
-        ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
-        await ref.read(fileServiceProvider.notifier).handleUpload(context);
-      }
-    }
-  }
-
-  /// Handles CSV import.
-
-  void _handleCsvImport(Map<String, bool> directoryFlags) {
-    ref.read(fileServiceProvider.notifier).handleCsvImport(
-          context,
-          isVaccination: directoryFlags['isVaccination'] ?? false,
-          isMedication: directoryFlags['isMedication'] ?? false,
-          isDiary: directoryFlags['isDiary'] ?? false,
-          isBloodPressure: directoryFlags['isBloodPressure'] ?? false,
-          onImportSuccess: _handleImportSuccess,
-        );
-  }
-
-  /// Handles successful CSV import.
-
-  void _handleImportSuccess(String importType) {
-    // Call the parent callback if provided.
-
-    widget.onImportSuccess?.call(importType);
-  }
-
-  /// Handles CSV export.
-
-  void _handleCsvExport(Map<String, bool> directoryFlags) {
-    ref.read(fileServiceProvider.notifier).handleCsvExport(
-          context,
-          isVaccination: directoryFlags['isVaccination'] ?? false,
-          isDiary: directoryFlags['isDiary'] ?? false,
-          isMedication: directoryFlags['isMedication'] ?? false,
-        );
-  }
-
-  /// Handles Profile import.
-
-  void _handleProfileImport() {
-    debugPrint('Import Profile functionality');
-  }
-
-  /// Handles Profile export.
-
-  void _handleProfileExport() {
-    debugPrint('Export Profile functionality');
-  }
-
-  /// Handles selecting and previewing local JSON files.
-
-  void _handleSelectLocalJson() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['json'],
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        if (file.path != null) {
-          await _handlePreviewLocalFile(file.path!);
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to select JSON file: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  /// Handles previewing a local file by path.
-
-  Future<void> _handlePreviewLocalFile(String filePath) async {
-    try {
-      final file = File(filePath);
-      final content = await file.readAsString();
-
-      String displayContent;
-      try {
-        final jsonData = jsonDecode(content);
-        displayContent = const JsonEncoder.withIndent('  ').convert(jsonData);
-      } catch (e) {
-        // If it's not valid JSON, just show the raw content.
-
-        displayContent = content;
-      }
-
-      // Update the file preview state.
-
-      ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
-
-      // Always ensure preview is shown when content is loaded.
-
-      final currentState = ref.read(fileServiceProvider);
-      if (!currentState.showPreview) {
-        ref.read(fileServiceProvider.notifier).togglePreview();
-      } else {
-        setState(() {}); // Force a widget rebuild
-      }
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Local JSON file loaded: ${path.basename(filePath)}'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load local file: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  /// Handles JSON visualisation from POD.
-
-  void _handleVisualiseJson() async {
-    final state = ref.read(fileServiceProvider);
-
-    if (state.remoteFileName == null || state.currentPath == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a file first'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    // Construct the full file path by combining directory and filename.
-
-    String filePath;
-    if (state.downloadFile != null && state.downloadFile!.isNotEmpty) {
-      filePath = '${state.downloadFile}/${state.remoteFileName}';
-    } else {
-      // Fallback to manual construction using currentPath.
-
-      filePath = state.currentPath == basePath
-          ? '$basePath/${state.remoteFileName}'
-          : '${state.currentPath}/${state.remoteFileName}';
-    }
-
-    try {
-      // Read the file content from POD.
-
-      final fileContent = await readPod(
-        filePath,
-        context,
-        const Text('Reading JSON file'),
-      );
-
-      if (fileContent == SolidFunctionCallStatus.fail.toString() ||
-          fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
-        throw Exception('Failed to read file from POD');
-      }
-
-      // Try to parse and format the JSON content.
-
-      String displayContent;
-      try {
-        final jsonData = jsonDecode(fileContent);
-        // Pretty format the JSON with indentation.
-
-        displayContent = const JsonEncoder.withIndent('  ').convert(jsonData);
-      } catch (e) {
-        // If it's not valid JSON, just show the raw content.
-
-        displayContent = fileContent;
-      }
-
-      // Update the file preview state.
-
-      ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
-
-      // Always ensure preview is shown when content is loaded.
-
-      final currentState = ref.read(fileServiceProvider);
-
-      if (!currentState.showPreview) {
-        ref.read(fileServiceProvider.notifier).togglePreview();
-      } else {
-        // Force a widget rebuild by calling setState on a parent widget.
-
-        setState(() {});
-      }
-    } catch (e) {
-      debugPrint('Failed to load JSON: ${e.toString()}');
-    }
-  }
-
-  /// Handles file preview.
-
-  Future<void> _handlePreview() async {
-    final state = ref.read(fileServiceProvider);
-
-    if (state.remoteFileName == null || state.currentPath == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a file first'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    // Construct the full file path.
-
-    final filePath = state.currentPath == basePath
-        ? '$basePath/${state.remoteFileName}'
-        : '${state.currentPath}/${state.remoteFileName}';
-
-    try {
-      // Read the file content from POD.
-
-      final fileContent = await readPod(
-        filePath,
-        context,
-        const Text('Reading file'),
-      );
-
-      if (fileContent == SolidFunctionCallStatus.fail.toString() ||
-          fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
-        throw Exception('Failed to read file from POD');
-      }
-
-      // Display content (truncate if too long).
-
-      String displayContent = fileContent.length > 1000
-          ? '${fileContent.substring(0, 1000)}...\n\n[Content truncated]'
-          : fileContent;
-
-      // Update the file preview state.
-
-      ref.read(fileServiceProvider.notifier).setFilePreview(displayContent);
-
-      // Always ensure preview is shown when content is loaded.
-
-      final currentState = ref.read(fileServiceProvider);
-      if (!currentState.showPreview) {
-        ref.read(fileServiceProvider.notifier).togglePreview();
-      }
-    } catch (e) {
-      debugPrint('Failed to load file: ${e.toString()}');
-    }
-  }
-
-  /// Handles PDF to JSON conversion.
-
-  void _handleConvertToJson() async {
-    final state = ref.read(fileServiceProvider);
-    if (state.uploadFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No file uploaded for conversion'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    await PdfProcessor.convertPDFToJsonUpload(
-      File(state.uploadFile!),
-      context,
-      ref,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(fileServiceProvider);
     final currentPath = state.currentPath ?? basePath;
+
+    // Create handler instances.
+
+    final fileContentHandler = FileContentHandler(
+      ref: ref,
+      context: context,
+      onStateUpdate: () => setState(() {}),
+    );
+
+    final uploadHandler = UploadCallbackHandler(
+      ref: ref,
+      context: context,
+      onImportSuccess: (importType) => widget.onImportSuccess?.call(importType),
+      onVisualiseJson: fileContentHandler.handleVisualiseJson,
+      onSelectLocalJson: fileContentHandler.handleSelectLocalJson,
+      onPreviewFile: fileContentHandler.handlePreview,
+      onConvertToJson: fileContentHandler.handleConvertToJson,
+    );
+
+    final fileOperationHandler = FileOperationHandler(
+      ref: ref,
+      context: context,
+      browserKey: _browserKey,
+      onStateUpdate: () => setState(() {}),
+    );
 
     // Watch the tab state and trigger navigation when it changes.
 
@@ -559,7 +158,12 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!_userHasManuallyNavigated) {
-          _navigateToFeatureFolder();
+          TabCoordinator.navigateToFeatureFolder(
+            ref,
+            _userHasManuallyNavigated,
+            (targetPath) =>
+                _browserKey.currentState?.navigateToPath(targetPath),
+          );
         }
       });
     }
@@ -597,116 +201,20 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
 
         setState(() {});
       },
-      onFileSelected: (fileName, filePath) {
-        ref.read(fileServiceProvider.notifier)
-          ..setDownloadFile(filePath)
-          ..setFilePreview(fileName)
-          ..setRemoteFileName(path.basename(fileName));
-      },
-      onFileDownload: (fileName, filePath) async {
-        ref.read(fileServiceProvider.notifier)
-          ..setDownloadFile(filePath)
-          ..setRemoteFileName(path.basename(fileName))
-          ..handleDownload(context);
-      },
-      onFileDelete: (fileName, filePath) async {
-        // Show confirmation dialogue before deleting.
-
-        final bool? confirm = await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Confirm Delete'),
-              content: Text(
-                'Are you sure you want to delete "$fileName"?',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Delete'),
-                ),
-              ],
-            );
-          },
-        );
-
-        if (!context.mounted) return;
-
-        if (confirm == true) {
-          String actualPath = '$filePath/$fileName';
-
-          try {
-            // Delete the main file first.
-
-            await deleteFile(actualPath);
-
-            // Try to delete the ACL file.
-
-            try {
-              await deleteFile('$actualPath.acl');
-            } catch (e) {
-              // ACL files are optional and may not exist.
-            }
-
-            // Show success message.
-
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('File deleted successfully'),
-                  backgroundColor: Theme.of(context).colorScheme.tertiary,
-                ),
-              );
-
-              // Refresh the file browser.
-
-              _browserKey.currentState?.refreshFiles();
-            }
-          } catch (e) {
-            if (context.mounted) {
-              final message = e.toString().contains('404') ||
-                      e.toString().contains('NotFoundHttpError')
-                  ? 'File not found or already deleted'
-                  : 'Delete failed: ${e.toString()}';
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(message),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          }
-        }
-      },
-      onImportCsv: (fileName, filePath) {
-        // Import CSV functionality would be implemented here.
-
-        debugPrint('Import CSV: $fileName at $filePath');
-      },
+      onFileSelected: fileOperationHandler.handleFileSelected,
+      onFileDownload: fileOperationHandler.handleFileDownload,
+      onFileDelete: fileOperationHandler.handleFileDelete,
+      onImportCsv: fileOperationHandler.handleImportCsv,
       onDirectoryChanged: (path) {
-        final expectedPath = _getExpectedPathForCurrentTab();
-        final isTabCoordinatedNavigation = (path == expectedPath);
-
-        if (!isTabCoordinatedNavigation) {
-          _userHasManuallyNavigated = true;
-          _lastCoordinatedTabIndex = null;
-        }
-
-        ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
-        setState(() {});
+        fileOperationHandler.handleDirectoryChanged(
+          path,
+          () => TabCoordinator.getExpectedPathForCurrentTab(ref),
+          (value) => _userHasManuallyNavigated = value,
+          (value) => _lastCoordinatedTabIndex = value,
+        );
       },
-      onClosePreview: () {
-        final currentState = ref.read(fileServiceProvider);
-        if (currentState.showPreview) {
-          ref.read(fileServiceProvider.notifier).togglePreview();
-        }
-      },
-      uploadCallbacks: _createUploadCallbacks(currentPath),
+      onClosePreview: fileOperationHandler.handleClosePreview,
+      uploadCallbacks: uploadHandler.createUploadCallbacks(currentPath),
       uploadState: SolidFileUploadState(
         uploadInProgress: state.uploadInProgress,
         importInProgress: state.importInProgress,
