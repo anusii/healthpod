@@ -123,7 +123,9 @@ List<SolidMenuItem> _buildBasicHealthPodMenu() => [
     to **delete** files from your pod storage.
 
     ''',
-        child: const _FileManagementContent(),
+        child: const _FileManagementContent(
+          hasUserSelectedFeatureTab: false,
+        ),
       ),
       SolidMenuItem(
         title: 'Support',
@@ -156,6 +158,7 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
   bool _isKeySaved = false;
   String _appVersion = '';
   int _selectedMenuIndex = 0;
+  bool _hasUserSelectedFeatureTab = false;
 
   @override
   void initState() {
@@ -266,6 +269,16 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
 
   void _onMenuSelected(int index) {
     setSelectedMenuIndex(index);
+    // Mark that the user has actively selected a feature tab.
+
+    _hasUserSelectedFeatureTab = true;
+    
+    // Only set tabStateProvider selectedIndex to 0 when user clicks View,
+    // Entry, or Data.
+
+    if (index == 1 || index == 2 || index == 3) { // View, Entry, Data
+      ref.read(tabStateProvider.notifier).setSelectedIndex(0);
+    }
   }
 
   /// Handles successful CSV import.
@@ -302,6 +315,7 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
           tooltip: item.tooltip,
           child: _FileManagementContent(
             onImportSuccess: _onImportSuccess,
+            hasUserSelectedFeatureTab: _hasUserSelectedFeatureTab,
           ),
         );
       }
@@ -444,9 +458,14 @@ class _FileManagementContent extends ConsumerStatefulWidget {
   /// Callback function to handle import success navigation.
 
   final Function(String importType)? onImportSuccess;
+  
+  /// Flag to track whether the user has ever actively selected a feature tab.
+  
+  final bool hasUserSelectedFeatureTab;
 
   const _FileManagementContent({
     this.onImportSuccess,
+    required this.hasUserSelectedFeatureTab,
   });
 
   @override
@@ -469,11 +488,6 @@ class _FileManagementContentState
 
   int? _lastCoordinatedTabIndex;
 
-  /// Flag to track whether the user has ever actively selected a feature tab.
-  /// This helps distinguish between default tab state and user selection.
-
-  bool _hasUserSelectedFeatureTab = false;
-
   @override
   void initState() {
     super.initState();
@@ -493,7 +507,7 @@ class _FileManagementContentState
       // Map tab index to directory only if we're coordinating with other tabs
       // and the user has actually selected a feature tab.
 
-      if (!_userHasManuallyNavigated && _hasUserSelectedFeatureTab) {
+      if (!_userHasManuallyNavigated && widget.hasUserSelectedFeatureTab) {
         switch (currentTabIndex) {
           case 0:
             initialPath = '$basePath/diary'; // Appointments
@@ -1223,10 +1237,6 @@ class _FileManagementContentState
 
     if (!_userHasManuallyNavigated &&
         _lastCoordinatedTabIndex != currentTabState.selectedIndex) {
-      // Mark that user has selected a feature tab.
-
-      _hasUserSelectedFeatureTab = true;
-
       // Update the last coordinated index.
 
       _lastCoordinatedTabIndex = currentTabState.selectedIndex;
