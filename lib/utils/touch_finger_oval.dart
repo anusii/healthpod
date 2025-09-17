@@ -1,6 +1,6 @@
-/// Appointment constants.
+/// Touch finger oval widget showing message.
 //
-// Time-stamp: <Wednesday 2025-04-23 21:12:11 +1000 Graham Williams>
+// Time-stamp: <Friday 2025-02-21 08:30:05 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -25,15 +25,30 @@
 
 library;
 
-/// Dummy data for the avatar and appointment section in home screen.
+import 'package:flutter/material.dart';
 
-final String appointmentDate = '';
-final String appointmentTime = '';
-final String appointmentLocation = '';
-final String patientID = '';
-final String phoneNumber = '';
-final String userName = '';
+import 'package:markdown_tooltip/markdown_tooltip.dart';
 
-final bool clinicBusAvailable = true;
+Widget touchFingerOval(String messageText) {
+  return ClipOval(
+    child: Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: null,
+        child: MarkdownTooltip(
+          message: messageText,
+          child: Icon(Icons.touch_app, color: Colors.green, size: 28),
+        ),
+      ),
+    ),
+  );
+}
 
-final int notificationCount = 3;
+/// Text style for plot tooltip.
+
+const plotTextStyleTooltip = TextStyle(
+  fontWeight: FontWeight.normal,
+  fontSize: 12,
+  color: Colors.white,
+  height: 1.1,
+);

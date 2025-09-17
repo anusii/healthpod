@@ -1,6 +1,6 @@
-/// Appointment constants.
+/// Platform-specific implementation for IO (non-web) platforms.
 //
-// Time-stamp: <Wednesday 2025-04-23 21:12:11 +1000 Graham Williams>
+// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -21,19 +21,26 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Zheyuan Xu
+/// Authors: Ashley Tang
 
 library;
 
-/// Dummy data for the avatar and appointment section in home screen.
+import 'dart:io' as io;
 
-final String appointmentDate = '';
-final String appointmentTime = '';
-final String appointmentLocation = '';
-final String patientID = '';
-final String phoneNumber = '';
-final String userName = '';
+/// Wrapper class that provides platform-specific implementations
+/// for environment variables and platform detection.
 
-final bool clinicBusAvailable = true;
+class PlatformWrapper {
+  /// Retrieves an environment variable using the native platform APIs.
 
-final int notificationCount = 3;
+  static String? getEnvironmentVariable(String name) {
+    return io.Platform.environment[name];
+  }
+
+  /// Checks if the application is running in integration test mode.
+
+  static bool isIntegrationTest() {
+    final testEnv = io.Platform.environment['INTEGRATION_TEST'] ?? 'false';
+    return testEnv.toLowerCase() == 'true';
+  }
+}

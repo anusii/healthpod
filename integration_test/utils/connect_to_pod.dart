@@ -32,7 +32,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'package:healthpod/main.dart' as app;
+import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
+import 'package:healthpod/utils/platform/helper.dart';
 
 /// Integration tests for Solid POD connection functionality in HealthPod app.
 ///
@@ -70,8 +72,7 @@ void main() {
 
   // Determine test mode based on environment.
 
-  final isIntegrationTest =
-      const String.fromEnvironment('INTEGRATION_TEST') == 'true';
+  final isIntegrationTest = PlatformHelper.isIntegrationTest();
 
   // Log the test environment configuration.
 
@@ -234,7 +235,7 @@ void connectToPodWebView() {
         await Future.delayed(const Duration(seconds: 3));
         await tester.pumpAndSettle();
 
-        webId = null;
+        webId = SolidLoginTestHelper.extractedWebId;
         remaining--;
       }
 

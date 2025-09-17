@@ -213,12 +213,7 @@ class _HealthSurveyCategoricalInputState
 
             if (event.logicalKey == LogicalKeyboardKey.space ||
                 event.logicalKey == LogicalKeyboardKey.enter) {
-              field.didChange(option);
-              widget.controller
-                  .updateResponse(widget.question.fieldName, option);
-              setState(() {
-                selectedValue = option;
-              });
+              _selectOption(field, option, optionIndex);
               return KeyEventResult.handled;
             }
           }
@@ -229,14 +224,7 @@ class _HealthSurveyCategoricalInputState
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () {
-              field.didChange(option);
-              widget.controller
-                  .updateResponse(widget.question.fieldName, option);
-              setState(() {
-                selectedValue = option;
-              });
-            },
+            onTap: () => _selectOption(field, option, optionIndex),
             borderRadius: BorderRadius.circular(8),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
@@ -244,6 +232,11 @@ class _HealthSurveyCategoricalInputState
                 children: [
                   Radio<String>(
                     value: option,
+                    // ignore: deprecated_member_use
+                    groupValue: field.value,
+                    // ignore: deprecated_member_use
+                    onChanged: (value) =>
+                        _selectOption(field, value!, optionIndex),
                     focusNode: FocusNode(skipTraversal: true),
                   ),
                   const SizedBox(width: 8),
@@ -262,5 +255,19 @@ class _HealthSurveyCategoricalInputState
         ),
       ),
     );
+  }
+
+  /// Updates the selected option in both local state and form controller.
+
+  void _selectOption(
+    FormFieldState<String> field,
+    String option,
+    int optionIndex,
+  ) {
+    setState(() {
+      selectedValue = option;
+    });
+    field.didChange(option);
+    widget.controller.updateResponse(widget.question.fieldName, option);
   }
 }

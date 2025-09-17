@@ -1,12 +1,12 @@
-/// Appointment constants.
-//
-// Time-stamp: <Wednesday 2025-04-23 21:12:11 +1000 Graham Williams>
-//
-/// Copyright (C) 2025, Software Innovation Institute, ANU
+/// Color constants used throughout the app.
 ///
-/// Licensed under the GNU General Public License, Version 3 (the "License");
+// Time-stamp: <Tuesday 2025-01-07 14:24:22 +1100 Graham Williams>
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
+///
+/// Licensed under the GNU General Public License, Version 3 (the "License").
+///
+/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -21,19 +21,16 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://www.gnu.org/licenses/>.
 ///
-/// Authors: Zheyuan Xu
+/// Authors: Graham Williams
 
 library;
 
-/// Dummy data for the avatar and appointment section in home screen.
+import 'package:flutter/material.dart';
 
-final String appointmentDate = '';
-final String appointmentTime = '';
-final String appointmentLocation = '';
-final String patientID = '';
-final String phoneNumber = '';
-final String userName = '';
+const anuGold = Color(0xFFBE830E);
 
-final bool clinicBusAvailable = true;
+const iconColor = Colors.white;
 
-final int notificationCount = 3;
+const iconGreen = Colors.green;
+
+const titleBackgroundColor = Color(0xFFF0E4D7);

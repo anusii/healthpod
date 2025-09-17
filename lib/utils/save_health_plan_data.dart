@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/utils/upload_json_to_pod.dart';
+import 'package:healthpod/utils/validate_health_plan_data.dart';
 
 /// Saves health plan data directly to POD.
 ///
@@ -80,4 +81,37 @@ Future<bool> saveHealthPlanData({
     }
     return false;
   }
+}
+
+/// Validates and saves uploaded health plan data.
+///
+/// Parameters:
+/// - context: BuildContext for showing error messages
+/// - data: Health plan data to validate and save
+
+Future<bool> validateAndSaveHealthPlanData({
+  required BuildContext context,
+  required Map<String, dynamic> data,
+}) async {
+  // Validate the uploaded data.
+
+  if (!validateHealthPlanData(data)) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Invalid health plan data format'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+    return false;
+  }
+
+  // Save the validated data.
+
+  return saveHealthPlanData(
+    context: context,
+    title: data['title'] as String,
+    planItems: (data['planItems'] as List).cast<String>(),
+  );
 }

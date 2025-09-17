@@ -28,6 +28,7 @@ dependencies:
   intl: any
   markdown_tooltip: ^0.0.7
   path: ^1.9.0
+  rdflib: ^0.2.9
   shared_preferences: ^2.5.2
   solidpod: ^0.7.9
   solidui:
@@ -41,7 +42,6 @@ dependencies:
   url_launcher: ^6.3.1
   webdriver: ^3.0.3
   window_manager: ^0.5.1
-  web: ^1.1.1
 
 dev_dependencies:
   #build_runner: ^2.4.0 # 20250917 gjw Required for macOS?

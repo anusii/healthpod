@@ -24,11 +24,10 @@
 library;
 
 import 'dart:convert';
-import 'dart:js_interop';
+// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
+import 'dart:html' as html;
 
 import 'package:flutter/foundation.dart';
-
-import 'package:web/web.dart';
 
 /// Downloads a JSON file on web platforms using browser APIs.
 ///
@@ -41,27 +40,18 @@ void downloadJsonFile(String jsonContent, String fileName) {
       // Create a blob with the JSON content
       final bytes = utf8.encode(jsonContent);
 
-      // Create blob options
-      final blobOptions = BlobPropertyBag(type: 'application/json');
-
-      // Create blob with the content
-      final blob = Blob([bytes.toJS].toJS, blobOptions);
+      final blob = html.Blob([bytes], 'application/json');
 
       // Create a download URL
-      final url = URL.createObjectURL(blob);
+      final url = html.Url.createObjectUrlFromBlob(blob);
 
       // Create an anchor element and trigger download
-      final anchor = HTMLAnchorElement();
-      anchor.href = url;
+      final anchor = html.AnchorElement(href: url);
       anchor.download = fileName;
-
-      // Add to document, click, and remove
-      document.body!.appendChild(anchor);
       anchor.click();
-      document.body!.removeChild(anchor);
 
       // Clean up the URL
-      URL.revokeObjectURL(url);
+      html.Url.revokeObjectUrl(url);
     } catch (e) {
       debugPrint('💥 downloadJsonFile: ERROR during web download: $e');
       debugPrint('🔍 downloadJsonFile: Error type: ${e.runtimeType}');
