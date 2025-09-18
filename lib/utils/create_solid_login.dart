@@ -1,6 +1,6 @@
 /// Create Solid Login Widget.
 //
-// Time-stamp: <Friday 2025-08-08 08:29:49 +1000 Graham Williams>
+// Time-stamp: <Thursday 2025-09-18 13:38:03 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
