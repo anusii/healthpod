@@ -132,11 +132,16 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
     _hasUserSelectedFeatureTab = true;
 
     // Only set tabStateProvider selectedIndex to 0 when user clicks View,
-    // Entry, or Data.
+    // Entry, or Data AND the current selected index is -1 (initial state).
+    // This preserves tab synchronisation whilst ensuring proper initialisation.
 
     if (index == 1 || index == 2 || index == 3) {
-      // View, Entry, Data
-      ref.read(tabStateProvider.notifier).setSelectedIndex(0);
+      // View, Entry, Data.
+
+      final currentTabIndex = ref.read(tabStateProvider).selectedIndex;
+      if (currentTabIndex == -1) {
+        ref.read(tabStateProvider.notifier).setSelectedIndex(0);
+      }
     }
   }
 

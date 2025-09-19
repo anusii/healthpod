@@ -74,7 +74,8 @@ class _ChartTabState extends ConsumerState<ChartTab>
   void didChangeDependencies() {
     super.didChangeDependencies();
     final tabState = ref.watch(tabStateProvider);
-    if (_tabController.index != tabState.selectedIndex) {
+    if (tabState.selectedIndex >= 0 &&
+        _tabController.index != tabState.selectedIndex) {
       _tabController.animateTo(tabState.selectedIndex);
     }
   }
