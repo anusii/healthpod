@@ -222,12 +222,12 @@ Tap to view the complete changelog on GitHub with release notes, bug fixes, and 
       themeToggle: SolidThemeToggleConfig(),
       statusBar: SolidStatusBarConfig(
         serverInfo: _webId != null
-            ? SolidServerInfo(
-                serverUri: HomeStateManager.extractServerFromWebId(_webId!),
+            ? SolidServerInfo.fromWebId(
+                _webId!,
                 tooltip: '''
 
-**Server:** This is your Solid Pod server where your health data is stored
-securely.
+**WebID:** This is your complete WebID including both server and username
+where your health data is stored securely.
 
 Tap to visit your server in the browser.
 
