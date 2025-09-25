@@ -47,7 +47,6 @@ import 'package:healthpod/features/home/managers/home_state_manager.dart';
 import 'package:healthpod/features/home/widgets/menu_builder.dart';
 import 'package:healthpod/providers/tab_state.dart';
 import 'package:healthpod/settings/dialog.dart';
-import 'package:healthpod/utils/handle_logout.dart';
 
 /// The home screen for the HealthPod app.
 ///
@@ -205,17 +204,6 @@ Tap to view the complete changelog on GitHub with release notes, bug fixes, and 
               builder: (context) => const SettingsDialog(),
             ),
           ),
-          SolidAppBarAction(
-            icon: Icons.logout,
-            tooltip: '''
-
-            **Logout:** Tap here to securely log out of your HealthPod account.
-            This will clear your current session and return you to the login
-            screen.
-
-            ''',
-            onPressed: () => handleLogout(context),
-          ),
         ],
         overflowItems: [],
       ),
@@ -236,7 +224,6 @@ Tap to visit your server in the browser.
             : null,
         loginStatus: SolidLoginStatus(
           webId: _webId,
-          onTap: () => handleLogout(context),
         ),
         securityKeyStatus: SolidSecurityKeyStatus(
           isKeySaved: _isKeySaved,
