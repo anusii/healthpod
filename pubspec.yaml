@@ -30,12 +30,11 @@ dependencies:
   package_info_plus: ^8.3.1
   path: ^1.9.0
   shared_preferences: ^2.5.2
-  solidpod: ^0.7.10
+  solidpod: ^0.7.11
   solidui:
-    # path: ../solidui
     git:
       url: https://github.com/anusii/solidui.git
-      ref: dev
+      ref: tony/460_logged_in_user
   syncfusion_flutter_pdf: ^30.1.37
   table_calendar: ^3.0.9
   timeline_tile: ^2.0.0
