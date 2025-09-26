@@ -54,7 +54,7 @@ class _HealthPodState extends ConsumerState<HealthPod> {
   @override
   void initState() {
     super.initState();
-    
+
     // Configure the integrated authentication handler.
 
     SolidAuthHandler.instance.configure(
@@ -71,7 +71,7 @@ class _HealthPodState extends ConsumerState<HealthPod> {
         },
       ),
     );
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _loginWidget = createSolidLogin(context);
