@@ -109,7 +109,7 @@ Blood pressure is measured using two numbers:
 
 ## Learn More
 * [American Heart Association - Understanding Blood Pressure](https://www.heart.org/en/health-topics/high-blood-pressure/understanding-blood-pressure-readings)
-* [Health Direct - Blood Pressure](https://www.healthdirect.gov.au/blood-pressure)
+* [Health Direct - Blood Pressure](https://www.healthdirect.gov.au/what-is-a-healthy-blood-pressure)
 
 ''';
         break;
@@ -227,8 +227,8 @@ We are working on implementing various health tracking features based on clinica
 * Medication and Appointment Reminders
 
 Learn more about health tracking:
-* [Health Direct - Health and Wellbeing](https://www.healthdirect.gov.au/health-and-wellbeing)
-* [Better Health Channel - Goal Setting](https://www.betterhealth.vic.gov.au/health/healthyliving/goal-setting)
+* [Health Direct - Health and Wellbeing](https://www.healthdirect.gov.au/mental-health-and-wellbeing)
+* [Better Health Channel - Life! Program](https://www.betterhealth.vic.gov.au/life/welcome)
 
 ''',
       'Health Tracker',
