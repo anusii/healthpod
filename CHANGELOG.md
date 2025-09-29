@@ -26,6 +26,7 @@ au](https://solidcommunity.au/docs/healthpod)
 
 ## 0.3 Test and Make Robust
 
++ Lychee checks and template updates [0.2.1 20250929 gjw]
 + Begin new series to test and make robust [0.2.0 20250918 gjw]
 
 ## 0.2 First stable release with SolidScaffold
