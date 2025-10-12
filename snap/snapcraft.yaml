@@ -27,17 +27,25 @@ apps:
       - network
       - home
 
-# The `flutter_secure_storage` package (and maybe `vault_storage`) is
-# used by `solidpod/solidui` to save secrets locally, if the app
-# provides this option to the user to do so. Thus `libsecret-1-dev`
-# and `libjsoncpp-dev` are required to build the installer and
-# `libsecret-1-0` and `libjsoncpp1` to run the application. See
+# 20251013 gjw The `flutter_secure_storage` package (and maybe
+# `vault_storage`) is used by `solidpod/solidui` to save secrets
+# locally, if the app provides this option to the user to do so. Thus
+# `libsecret-1-dev` and `libjsoncpp-dev` are required to build the
+# installer and `libsecret-1-0` and `libjsoncpp1` to run the
+# application. See
 #
 # https://github.com/juliansteenbakker/flutter_secure_storage/blob/develop/README.md
 # https://pub.dev/packages/vault_storage/versions/2.2.0#platform-setup
 
-parts:
-  healthpod:
+# 20251013 gjw If using the `audioplayers` package for flutter then
+# the gstreamer packages are required. For bulding the installer we
+# need `libgstreamer1.0-dev`, `libgstreamer-plugins-base1.0-dev`, and
+# `libgstreamer-plugins-good1.0-dev`. For running the app we require -
+# libgstreamer1.0-0 `libgstreamer-plugins-base1.0-0`,
+# `libgstreamer-plugins-good1.0-0`, `gstreamer1.0-plugins-good`, and
+# `gstreamer1.0-plugins-base`.
+
+ healthpod:
     source: .
     plugin: flutter
     flutter-target: lib/main.dart
@@ -50,6 +58,14 @@ parts:
       - liblzma-dev
       - libsecret-1-dev
       - libjsoncpp-dev
+      - libgstreamer1.0-dev
+      - libgstreamer-plugins-base1.0-dev
+      - libgstreamer-plugins-good1.0-dev
     stage-packages:
       - libsecret-1-0
       - libjsoncpp-dev
+      - libgstreamer1.0-0
+      - libgstreamer-plugins-base1.0-0
+      - libgstreamer-plugins-good1.0-0
+      - gstreamer1.0-plugins-good
+      - gstreamer1.0-plugins-base
