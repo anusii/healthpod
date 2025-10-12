@@ -82,7 +82,9 @@ class VaccinationObservation {
 
     final timestamp = json['date'] ?? json['timestamp'];
     if (timestamp == null) {
-      throw FormatException('Missing date/timestamp field in vaccination data');
+      throw const FormatException(
+        'Missing date/timestamp field in vaccination data',
+      );
     }
 
     // Get responses map, defaulting to empty map if null.
@@ -136,7 +138,7 @@ class VaccinationObservation {
 
       return VaccinationObservation.fromJson(data);
     }
-    throw FormatException('Unsupported data format');
+    throw const FormatException('Unsupported data format');
   }
 
   /// Converts observation to JSON format matching survey response structure.

@@ -50,15 +50,15 @@ class TransportInfoWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (useClinicBus)
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.directions_bus, color: Colors.green),
-              const SizedBox(width: 8),
-              const Text(
+              Icon(Icons.directions_bus, color: Colors.green),
+              SizedBox(width: 8),
+              Text(
                 'Transport:',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const Icon(Icons.check, color: Colors.green),
+              Icon(Icons.check, color: Colors.green),
             ],
           ),
         if (needsTransport) ...[

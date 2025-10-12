@@ -94,7 +94,7 @@ class BPLegendStats extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               width: 50, // Adjust based on available space.
                               child: Text(
                                 'Systolic',
@@ -155,7 +155,7 @@ class BPLegendStats extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Flexible(child: const Text('Diastolic')),
+                            const Flexible(child: Text('Diastolic')),
                             const SizedBox(width: 4),
                             // Info icon.
 

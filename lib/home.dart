@@ -219,7 +219,7 @@ Tap to view the complete changelog on GitHub with release notes, bug fixes, and 
         ],
         overflowItems: [],
       ),
-      themeToggle: SolidThemeToggleConfig(),
+      themeToggle: const SolidThemeToggleConfig(),
       statusBar: SolidStatusBarConfig(
         serverInfo: _webId != null
             ? SolidServerInfo.fromWebId(

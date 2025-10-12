@@ -54,7 +54,7 @@ class HealthPodMenuBuilder {
             onNavigateToProfile: () {},
           ),
         ),
-        SolidMenuItem(
+        const SolidMenuItem(
           title: 'View',
           icon: Icons.show_chart,
           tooltip: '''
@@ -64,9 +64,9 @@ class HealthPodMenuBuilder {
       other health metrics. Your **vaccinations** will be shown as a timeline.
 
     ''',
-          child: const ChartTab(),
+          child: ChartTab(),
         ),
-        SolidMenuItem(
+        const SolidMenuItem(
           title: 'Entry',
           icon: Icons.assignment,
           tooltip: '''
@@ -77,9 +77,9 @@ class HealthPodMenuBuilder {
     tab.
 
     ''',
-          child: const SurveyTab(),
+          child: SurveyTab(),
         ),
-        SolidMenuItem(
+        const SolidMenuItem(
           title: 'Data',
           icon: Icons.table_chart,
           tooltip: '''
@@ -89,9 +89,9 @@ class HealthPodMenuBuilder {
       accessible here.
 
     ''',
-          child: const TableTab(),
+          child: TableTab(),
         ),
-        SolidMenuItem(
+        const SolidMenuItem(
           title: 'Files',
           icon: Icons.folder,
           tooltip: '''
@@ -105,11 +105,11 @@ class HealthPodMenuBuilder {
     to **delete** files from your pod storage.
 
     ''',
-          child: const FileManagementContent(
+          child: FileManagementContent(
             hasUserSelectedFeatureTab: false,
           ),
         ),
-        SolidMenuItem(
+        const SolidMenuItem(
           title: 'Support',
           icon: Icons.library_books,
           tooltip: '''
@@ -124,7 +124,7 @@ class HealthPodMenuBuilder {
     - Useful health calculators and tools
 
     ''',
-          child: const ResourcesTab(),
+          child: ResourcesTab(),
         ),
       ];
 

@@ -92,7 +92,7 @@ class FileDeleteHandler {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('File deleted successfully'),
+              content: const Text('File deleted successfully'),
               backgroundColor: Theme.of(context).colorScheme.tertiary,
             ),
           );

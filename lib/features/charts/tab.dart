@@ -37,19 +37,19 @@ import 'package:healthpod/providers/tab_state.dart';
 final List<Map<String, dynamic>> chartPanels = [
   {
     'title': 'Appointments',
-    'widget': DiaryTab(),
+    'widget': const DiaryTab(),
   },
   {
     'title': 'Blood Pressure',
-    'widget': BPCombinedVisualisation(),
+    'widget': const BPCombinedVisualisation(),
   },
   {
     'title': 'Medications',
-    'widget': MedicationVisualisation(),
+    'widget': const MedicationVisualisation(),
   },
   {
     'title': 'Vaccinations',
-    'widget': VaccinationVisualisation(),
+    'widget': const VaccinationVisualisation(),
   },
 ];
 

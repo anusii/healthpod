@@ -263,8 +263,8 @@ class _BPEditorPageState extends State<BPEditorPage> {
                                     .colorScheme
                                     .onPrimaryContainer,
                               ),
-                              SizedBox(width: 8),
-                              Text('Add New Reading'),
+                              const SizedBox(width: 8),
+                              const Text('Add New Reading'),
                             ],
                           ),
                   );

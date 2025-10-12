@@ -139,7 +139,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
               // 80% of screen height.
 
               height: size.height * 0.8,
-              constraints: BoxConstraints(
+              constraints: const BoxConstraints(
                 // Maximum height in logical pixels.
 
                 maxHeight: 600,

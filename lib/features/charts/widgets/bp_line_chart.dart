@@ -195,10 +195,10 @@ class BPLineChart extends StatelessWidget {
 
               /// Hide unnecessary axis titles.
 
-              rightTitles: AxisTitles(
+              rightTitles: const AxisTitles(
                 sideTitles: SideTitles(showTitles: false),
               ),
-              topTitles: AxisTitles(
+              topTitles: const AxisTitles(
                 sideTitles: SideTitles(showTitles: false),
               ),
             ),
@@ -337,9 +337,9 @@ class BPLineChart extends StatelessWidget {
         );
       } else {
         items.add(
-          LineTooltipItem(
+          const LineTooltipItem(
             '',
-            const TextStyle(fontSize: 0),
+            TextStyle(fontSize: 0),
           ),
         );
       }

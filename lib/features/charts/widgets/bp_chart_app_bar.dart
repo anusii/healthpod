@@ -61,7 +61,7 @@ class BPChartAppBar extends StatelessWidget implements PreferredSizeWidget {
             ''',
             child: Row(
               children: [
-                Text(
+                const Text(
                   'Blood Pressure Trends',
                   style: TextStyle(fontWeight: FontWeight.w500),
                 ),

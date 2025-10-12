@@ -69,7 +69,7 @@ class ProfileHandler {
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Profile data imported successfully'),
+                  content: const Text('Profile data imported successfully'),
                   backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
@@ -134,7 +134,7 @@ class ProfileHandler {
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('Profile data exported successfully'),
+                content: const Text('Profile data exported successfully'),
                 backgroundColor: Theme.of(context).colorScheme.tertiary,
               ),
             );

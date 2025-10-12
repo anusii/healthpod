@@ -226,13 +226,13 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                     ),
                   ),
                   IconButton(
-                    icon: MarkdownTooltip(
+                    icon: const MarkdownTooltip(
                       message: '''
                       
                       **Refresh:** Tap here to reload your vaccination history data.
                       
                       ''',
-                      child: const Icon(Icons.refresh),
+                      child: Icon(Icons.refresh),
                     ),
                     onPressed: _loadData,
                   ),
@@ -246,7 +246,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                         child: MarkdownBody(
                           data: 'No vaccination records found',
                           styleSheet: MarkdownStyleSheet(
-                            p: TextStyle(
+                            p: const TextStyle(
                               fontSize: 16,
                             ),
                           ),

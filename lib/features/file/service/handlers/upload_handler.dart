@@ -105,7 +105,7 @@ class FileUploadHandler {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('File uploaded successfully'),
+              content: const Text('File uploaded successfully'),
               backgroundColor: Theme.of(context).colorScheme.tertiary,
             ),
           );
@@ -130,7 +130,7 @@ class FileUploadHandler {
         showAlert(context, 'Upload error: ${e.toString()}');
         debugPrint('Upload error: $e');
       }
-      return FileUploadResult(
+      return const FileUploadResult(
         success: false,
         remoteFileName: null,
         cleanFileName: null,
