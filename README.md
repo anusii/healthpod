@@ -1,5 +1,11 @@
 # Health Pod &mdash; Collect Your Health Data in your Data Vault
 
+[![GitHub License](https://img.shields.io/github/license/anusii/healthpod)](https://github.com/anusii/healthpod/blob/dev/LICENSE)
+[![Flutter Version](https://img.shields.io/badge/dynamic/yaml?url=https://raw.githubusercontent.com/anusii/healthpod/master/pubspec.yaml&query=$.version&label=version)](https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md)
+[![Last Updated](https://img.shields.io/github/last-commit/anusii/healthpod?label=last%20updated)](https://github.com/anusii/healthpod/commits/dev/)
+[![GitHub commit activity (dev)](https://img.shields.io/github/commit-activity/w/anusii/healthpod/dev)](https://github.com/anusii/healthpod/commits/dev/)
+[![GitHub Issues](https://img.shields.io/github/issues/anusii/healthpod)](https://github.com/anusii/healthpod/issues)
+
 An app to support the storage and AI analysis of your health data with
 data encrypted and stored on your pwn personal online data store (pod)
 hosted in your Data Vault on a SOlid Server. The app was developed by
@@ -27,14 +33,12 @@ or
 Contributions are welcome. Visit
 [github](https://github.com/gjwgit/healthpod) to submit an issue or,
 even better, fork the repository yourself, update the code, and submit
-a Pull Request. Thanks.
+a Pull Request.  The app is implemented in
+[Flutter](https://flutter.dev) using
+[solidpod](https://pub.dev/packages/solidpod) for Flutter to manage
+the Solid Pod interactions. Thank you.
 
-The app is implemented in [Flutter](https://flutter.dev) using our own
-[solidpod](https://pub.dev/packages/solidpod) package for Flutter to
-manage the Solid Pod interactions, and
-[markdown_tooltip](https://pub.dev/packages/markdown_tooltip) to
-enhance the user experience, guiding the user through the app, within
-app.
+## Introduction
 
 The Health Pod collects into one private and secure location all of
 your health data and medical records. Value is added to the data
@@ -83,16 +87,10 @@ The grid items include:
 + A LLM model runs over the whole contents of the Pod to then allow me
   to interact with the data collection.
 
-[![GitHub License](https://img.shields.io/github/license/anusii/healthpod)](https://github.com/anusii/healthpod/blob/dev/LICENSE)
-[![Flutter Version](https://img.shields.io/badge/dynamic/yaml?url=https://raw.githubusercontent.com/anusii/healthpod/master/pubspec.yaml&query=$.version&label=version)](https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md)
-[![Last Updated](https://img.shields.io/github/last-commit/anusii/healthpod?label=last%20updated)](https://github.com/anusii/healthpod/commits/dev/)
-[![GitHub commit activity (dev)](https://img.shields.io/github/commit-activity/w/anusii/healthpod/dev)](https://github.com/anusii/healthpod/commits/dev/)
-[![GitHub Issues](https://img.shields.io/github/issues/anusii/healthpod)](https://github.com/anusii/healthpod/issues)
-
 [![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 
-Time-stamp: <Sunday 2025-10-12 16:36:20 +1100 Graham Williams>
+Time-stamp: <Sunday 2025-10-12 20:26:37 +1100 Graham Williams>
 
 <!-- markdownlint-disable MD053 -->
 [comment]: # (Local Variables:)
