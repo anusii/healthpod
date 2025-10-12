@@ -1,4 +1,4 @@
-# Health Pod &mdash; Collect Your Health Data in your Data Vault
+# Health Pod &mdash; Your Health Data in your Data Vault
 
 [![GitHub License](https://img.shields.io/github/license/anusii/healthpod)](https://github.com/anusii/healthpod/blob/dev/LICENSE)
 [![Flutter Version](https://img.shields.io/badge/dynamic/yaml?url=https://raw.githubusercontent.com/anusii/healthpod/master/pubspec.yaml&query=$.version&label=version)](https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md)
@@ -90,7 +90,7 @@ The grid items include:
 [![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 
-Time-stamp: <Sunday 2025-10-12 20:26:37 +1100 Graham Williams>
+Time-stamp: <Sunday 2025-10-12 20:27:25 +1100 Graham Williams>
 
 <!-- markdownlint-disable MD053 -->
 [comment]: # (Local Variables:)
