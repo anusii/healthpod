@@ -54,6 +54,24 @@ class _HealthPodState extends ConsumerState<HealthPod> {
   @override
   void initState() {
     super.initState();
+
+    // Configure the integrated authentication handler.
+
+    SolidAuthHandler.instance.configure(
+      SolidAuthConfig(
+        loginPageBuilder: (context) => createSolidLogin(context),
+        defaultServerUrl: 'https://pods.dev.solidcommunity.au',
+        appTitle: 'HEALTH POD',
+        appDirectory: 'healthpod',
+        appImage: const AssetImage('assets/images/app_image.png'),
+        appLogo: const AssetImage('assets/images/app_icon.png'),
+        appLink: 'https://github.com/anusii/healthpod/blob/main/README.md',
+        onSecurityKeyReset: () {
+          SolidSecurityKeyCentralManager.instance.reset();
+        },
+      ),
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setState(() {
         _loginWidget = createSolidLogin(context);
