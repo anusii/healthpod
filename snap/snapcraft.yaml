@@ -14,6 +14,13 @@ base: core22
 grade: stable
 confinement: strict
 
+# 20251013 gjw Plugins that may be needed include the following, but are
+# not required for every app:
+#
+#      - audio-playback
+#      - pulseaudio
+#      - screen-inhibit-control
+
 apps:
   healthpod:
     command: healthpod
@@ -36,14 +43,29 @@ apps:
 #
 # https://github.com/juliansteenbakker/flutter_secure_storage/blob/develop/README.md
 # https://pub.dev/packages/vault_storage/versions/2.2.0#platform-setup
-
+#
+#    build-packages:
+#      - libsecret-1-dev
+#      - libjsoncpp-dev
+#
+#    stage-packages:
+#      - libsecret-1-0
+#      - libjsoncpp-dev
+#
 # 20251013 gjw If using the `audioplayers` package for flutter then
-# the gstreamer packages are required. For bulding the installer we
-# need `libgstreamer1.0-dev`, `libgstreamer-plugins-base1.0-dev`, and
-# `libgstreamer-plugins-good1.0-dev`. For running the app we require -
-# libgstreamer1.0-0 `libgstreamer-plugins-base1.0-0`,
-# `libgstreamer-plugins-good1.0-0`, `gstreamer1.0-plugins-good`, and
-# `gstreamer1.0-plugins-base`.
+# the gstreamer packages are required for bulding the installer 
+# running the app. 
+#
+#    build-packages:
+#      - libgstreamer1.0-dev
+#      - libgstreamer-plugins-base1.0-dev
+#      - libgstreamer-plugins-good1.0-dev
+#    stage-packages:
+#      - libgstreamer1.0-0
+#      - libgstreamer-plugins-base1.0-0
+#      - libgstreamer-plugins-good1.0-0
+#      - gstreamer1.0-plugins-good
+#      - gstreamer1.0-plugins-base
 
 parts:
   healthpod:
