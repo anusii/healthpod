@@ -270,7 +270,7 @@ locmax-enforce:
 .PHONY: markdown
 markdown:
 	@echo "Markdown: MARKDOWN FORMAT CHECK."
-	-markdownlint --disable MD036 -- *.md lib assets installers
+	-markdownlint *.md lib assets installers
 	@echo
 	@echo $(SEPARATOR)
 
@@ -333,7 +333,7 @@ desktops:
 .PHONY: test
 test:
 	@echo "Unit TEST:"
-	@-if [ -d test ]; then flutter test test; else echo "\nNo test folder found."; fi
+	@-if [ -d test ]; then flutter test; else echo "\nNo test folder found."; fi
 	@echo $(SEPARATOR)
 
 # For a specific interactive test we think of it as providing a
@@ -441,8 +441,11 @@ apk::
 	cp build/app/outputs/flutter-apk/app-release.apk installers/$(APP).apk
 	cp build/app/outputs/flutter-apk/app-release.apk installers/$(APP)-$(VER).apk
 
-appbundle:
+appbundle::
+	flutter clean
 	flutter build appbundle --release
+	cp build/app/outputs/bundle/release/app-release.aab installers/$(APP).aab
+	cp build/app/outputs/bundle/release/app-release.aab installers/$(APP)-$(VER).aab
 
 realclean::
 	flutter clean
@@ -519,8 +522,7 @@ docs::
 
 .PHONY: versions
 versions:
-	perl -pi -e 's|applicationVersion = ".*";|applicationVersion = "$(VER)";|' \
-	lib/constants/app.dart
+	if [ -d snap ]; then perl -pi -e 's|^version:.*|version: $(VER)|' snap/snapcraft.yaml; fi
 
 .PHONY: loc
 loc: lib/*.dart
