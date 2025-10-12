@@ -1,7 +1,7 @@
 name: healthpod
 description: "Private and Secure Storage of Health data in your Solid Pod."
 publish_to: "none"
-version: 0.2.0+7
+version: 0.2.3+10
 
 environment:
   sdk: ">=3.2.3 <4.0.0"
@@ -30,11 +30,8 @@ dependencies:
   package_info_plus: ^8.3.1
   path: ^1.9.0
   shared_preferences: ^2.5.2
-  solidpod: ^0.7.11
-  solidui:
-    git:
-      url: https://github.com/anusii/solidui.git
-      ref: tony/337_login_status_security_key_bugs
+  solidpod: ^0.7.13
+  solidui: ^0.0.3
   syncfusion_flutter_pdf: ^30.1.37
   table_calendar: ^3.0.9
   timeline_tile: ^2.0.0

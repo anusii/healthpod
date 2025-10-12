@@ -1,12 +1,12 @@
 /// Service class for automated login using ChromeDriver.
 ///
-// Time-stamp: <Wednesday 2025-03-26 09:54:58 +1100 Graham Williams>
+// Time-stamp: <Monday 2025-09-29 15:40:07 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -56,7 +56,7 @@ class ChromeLoginService {
     try {
       _driver = createDriver(
         spec: WebDriverSpec.W3c,
-        uri: Uri.parse('http://localhost:9515'),
+        uri: Uri.parse('http' '://localhost:9515'),
         desired: {
           'browserName': 'chrome',
           'goog:chromeOptions': {

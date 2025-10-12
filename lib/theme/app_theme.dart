@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -40,7 +40,7 @@ class AppTheme {
       useMaterial3: true,
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
-      colorScheme: ColorScheme.light(
+      colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         onPrimary: AppColors.iconDefault,
         secondary: AppColors.secondary,
@@ -53,7 +53,7 @@ class AppTheme {
         onSurfaceVariant: AppColors.textSecondary,
         outline: AppColors.cardBorder,
       ),
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         displayLarge: TextStyle(
           color: AppColors.textPrimary,
           fontSize: 32,
@@ -87,11 +87,11 @@ class AppTheme {
           letterSpacing: 0.1,
         ),
       ),
-      iconTheme: IconThemeData(
+      iconTheme: const IconThemeData(
         color: AppColors.navUnselected,
         size: 24,
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -111,13 +111,13 @@ class AppTheme {
         shadowColor: AppColors.textPrimary.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
+          side: const BorderSide(
             color: AppColors.cardBorder,
             width: 1,
           ),
         ),
       ),
-      dividerTheme: DividerThemeData(
+      dividerTheme: const DividerThemeData(
         color: AppColors.cardBorder,
         thickness: 1,
         space: 1,
@@ -132,7 +132,7 @@ class AppTheme {
       useMaterial3: true,
       primaryColor: AppColors.primaryDark,
       scaffoldBackgroundColor: AppColors.backgroundDark,
-      colorScheme: ColorScheme.dark(
+      colorScheme: const ColorScheme.dark(
         primary: AppColors.primaryDark,
         onPrimary: AppColors.iconDefaultDark,
         secondary: AppColors.secondaryDark,
@@ -145,7 +145,7 @@ class AppTheme {
         onSurfaceVariant: AppColors.textSecondaryDark,
         outline: AppColors.cardBorderDark,
       ),
-      textTheme: TextTheme(
+      textTheme: const TextTheme(
         displayLarge: TextStyle(
           color: AppColors.textPrimaryDark,
           fontSize: 32,
@@ -179,11 +179,11 @@ class AppTheme {
           letterSpacing: 0.1,
         ),
       ),
-      iconTheme: IconThemeData(
+      iconTheme: const IconThemeData(
         color: AppColors.navUnselectedDark,
         size: 24,
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.surfaceDark,
         foregroundColor: AppColors.textPrimaryDark,
         elevation: 0,
@@ -203,13 +203,13 @@ class AppTheme {
         shadowColor: AppColors.textPrimaryDark.withValues(alpha: 0.2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
+          side: const BorderSide(
             color: AppColors.cardBorderDark,
             width: 1,
           ),
         ),
       ),
-      dividerTheme: DividerThemeData(
+      dividerTheme: const DividerThemeData(
         color: AppColors.cardBorderDark,
         thickness: 1,
         space: 1,
@@ -218,28 +218,28 @@ class AppTheme {
         fillColor: AppColors.inputBackgroundDark,
         filled: true,
         border: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.inputBorderDark),
+          borderSide: const BorderSide(color: AppColors.inputBorderDark),
           borderRadius: BorderRadius.circular(8),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.inputBorderDark),
+          borderSide: const BorderSide(color: AppColors.inputBorderDark),
           borderRadius: BorderRadius.circular(8),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: AppColors.primaryDark),
+          borderSide: const BorderSide(color: AppColors.primaryDark),
           borderRadius: BorderRadius.circular(8),
         ),
-        labelStyle: TextStyle(color: AppColors.textPrimaryDark),
-        hintStyle: TextStyle(color: AppColors.textSecondaryDark),
-        prefixStyle: TextStyle(color: AppColors.textPrimaryDark),
-        suffixStyle: TextStyle(color: AppColors.textPrimaryDark),
+        labelStyle: const TextStyle(color: AppColors.textPrimaryDark),
+        hintStyle: const TextStyle(color: AppColors.textSecondaryDark),
+        prefixStyle: const TextStyle(color: AppColors.textPrimaryDark),
+        suffixStyle: const TextStyle(color: AppColors.textPrimaryDark),
       ),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(
           color: AppColors.tooltipBackgroundDark,
           borderRadius: BorderRadius.circular(8),
         ),
-        textStyle: TextStyle(
+        textStyle: const TextStyle(
           color: AppColors.tooltipTextDark,
           fontSize: 14,
         ),

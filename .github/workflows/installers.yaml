@@ -14,7 +14,7 @@ on:
 env:
   APP: healthpod
   LINUX_PKGS: libsecret-1-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad
-  FLUTTER_VERSION: '3.35.4'
+  FLUTTER_VERSION: '3.35.5'
 
 jobs:
 
@@ -94,6 +94,52 @@ jobs:
           name: ${{ env.APP }}-linux-zip
           path: build/linux/x64/release/bundle/${{ env.APP }}-${{ github.ref_name }}-linux.zip
 
+
+  package-linux-snap:
+    if: |
+      contains(github.event.head_commit.message, 'bump version') ||
+      contains(github.event.head_commit.message, 'build installers') ||
+      contains(github.event.head_commit.message, 'build linux') ||
+      contains(github.event.head_commit.message, 'build snap')
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Clone Repository
+        uses: actions/checkout@v4
+
+      - name: Build snap
+        if: hashFiles('snap/**') != ''
+        uses: snapcore/action-build@v1
+        id: build
+
+      - name: Upload snap artifact
+        if: hashFiles('snap/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP }}-linux-snap
+          path: ${{ steps.build.outputs.snap }}
+
+  # publish:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   # Only publish on tag pushes
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   steps:
+  #     - name: Download snap artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: snap-package
+
+  #     - name: Publish to Snap Store
+  #       uses: snapcore/action-publish@v1
+  #       env:
+  #         SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_TOKEN }}
+  #       with:
+  #         snap: '*.snap'
+  #         release: stable
+
   ########################################################################
   # MACOS
 
@@ -112,7 +158,8 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: ${{env.FLUTTER_VERSION}}
+          flutter-version: 3.35.5
+          # flutter-version: ${{env.FLUTTER_VERSION}}
 
       - name: Confirm Flutter Version
         run: flutter --version
@@ -181,7 +228,7 @@ jobs:
       contains(github.event.head_commit.message, 'bump version') ||
       contains(github.event.head_commit.message, 'build installers') ||
       contains(github.event.head_commit.message, 'build windows')
-    runs-on: windows-latest
+    runs-on: windows-latest # randomly not working (choco fails) with inno 1.2.7
 
     steps:
       - name: Clone Repository
@@ -232,7 +279,7 @@ jobs:
           echo "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Compile .ISS to .EXE Installer
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
         with:
           path: installers/app-windows.iss
           options: /O+

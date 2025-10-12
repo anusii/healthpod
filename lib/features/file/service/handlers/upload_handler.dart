@@ -4,7 +4,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang, Tony Chen
 
@@ -105,7 +105,7 @@ class FileUploadHandler {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('File uploaded successfully'),
+              content: const Text('File uploaded successfully'),
               backgroundColor: Theme.of(context).colorScheme.tertiary,
             ),
           );
@@ -130,7 +130,7 @@ class FileUploadHandler {
         showAlert(context, 'Upload error: ${e.toString()}');
         debugPrint('Upload error: $e');
       }
-      return FileUploadResult(
+      return const FileUploadResult(
         success: false,
         remoteFileName: null,
         cleanFileName: null,
