@@ -45,7 +45,8 @@ apps:
 # `libgstreamer-plugins-good1.0-0`, `gstreamer1.0-plugins-good`, and
 # `gstreamer1.0-plugins-base`.
 
- healthpod:
+parts:
+  healthpod:
     source: .
     plugin: flutter
     flutter-target: lib/main.dart
