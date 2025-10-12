@@ -21,6 +21,7 @@ The latest version of the app can be downloaded and installed from the
 + **Android**
 [apk](https://solidcommunity.au/installers/healthpod.apk);
 + **GNU/Linux**
+[snap](https://solidcommunity.au/installers/healthpod_amd64.snap) or
 [deb](https://solidcommunity.au/installers/healthpod_amd64.deb) or
 [zip](https://solidcommunity.au/installers/healthpod-dev-linux.zip);
 + **macOS**
@@ -90,7 +91,7 @@ The grid items include:
 [![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 
-Time-stamp: <Sunday 2025-10-12 20:27:25 +1100 Graham Williams>
+Time-stamp: <Monday 2025-10-13 08:02:56 +1100 Graham Williams>
 
 <!-- markdownlint-disable MD053 -->
 [comment]: # (Local Variables:)
