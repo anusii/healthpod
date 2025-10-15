@@ -147,7 +147,6 @@ Vaccinations are a crucial part of preventive healthcare that helps protect both
 > **Remember:** Always consult your healthcare provider about which vaccines are right for you.
 
 ## Learn More
-* [Australian Immunisation Handbook](https://immunisationhandbook.health.gov.au/)
 * [WHO - Vaccines and Immunization](https://www.who.int/health-topics/vaccines-and-immunization)
 
 ''';
