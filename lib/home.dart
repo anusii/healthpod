@@ -263,7 +263,6 @@ Tap to visit your server in the browser.
         ''',
       ),
       userInfo: SolidNavUserInfo(
-        userName: _webId != null ? 'HealthPod User' : 'Not logged in',
         webId: _webId,
         showWebId: true,
         avatarIcon: Icons.account_circle,
