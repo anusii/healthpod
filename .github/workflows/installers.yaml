@@ -158,8 +158,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: 3.35.5
-          # flutter-version: ${{env.FLUTTER_VERSION}}
+          flutter-version: ${{env.FLUTTER_VERSION}}
 
       - name: Confirm Flutter Version
         run: flutter --version
