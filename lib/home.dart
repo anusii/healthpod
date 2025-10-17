@@ -36,6 +36,7 @@ import 'package:solidui/solidui.dart'
         SolidAppBarConfig,
         SolidLoginStatus,
         SolidMenuItem,
+        SolidNavUserInfo,
         SolidScaffold,
         SolidSecurityKeyStatus,
         SolidServerInfo,
@@ -260,6 +261,21 @@ Tap to visit your server in the browser.
         **Web ID:** ${_webId ?? 'Web ID is not available and need to login first.'}
 
         ''',
+      ),
+      userInfo: SolidNavUserInfo(
+        webId: _webId,
+        showWebId: true,
+        avatarIcon: Icons.account_circle,
+        versionConfig: const SolidVersionConfig(
+          changelogUrl:
+              'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
+          showDate: true,
+          tooltip: '''
+Version information for HealthPod
+
+Tap to view the complete changelog on GitHub with release notes, bug fixes, and new features.
+''',
+        ),
       ),
     );
   }
