@@ -13,13 +13,16 @@ An app to support the storage and AI analysis of your health data with
 data encrypted and stored on your pwn personal online data store (pod)
 hosted in your Data Vault on a SOlid Server. The app was developed by
 the [ANU Software Innovation Institute](https://sii.anu.edu.au) and
-written by Ashley Tang, Graham Williams, Zheyuan Xu, and Kevin Wang.
-You can run the app online at
-[healthpod.solidcommunity.au](https://healthpod.solidcommunity.au)
-&mdash; no installation required.
+written by [Ashley Tang](https://github.com/atangster), [Graham
+Williams](https://github.com/gjwgit), [Zheyuan
+Xu](https://github.com/zheyxu), [Kevin
+Wang](https://github.com/junhaow1), and [Tony
+Chen](https://github.com/tonypioneer).
 
-The latest version of the app can be downloaded and installed from the
-[Solid Community AU](https://solidcommunity.au):
+The latest version of the app can be run online at
+[healthpod.solidcommunity.au](https://healthpod.solidcommunity.au)
+with no installation required, or download and install for your
+platform from the [Solid Community AU](https://solidcommunity.au):
 
 + **Android**
 [apk](https://solidcommunity.au/installers/healthpod.apk);
