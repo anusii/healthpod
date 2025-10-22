@@ -244,6 +244,8 @@ class _HealthSurveyCategoricalInputState
                 children: [
                   Radio<String>(
                     value: option,
+                    groupValue: field.value,
+                    onChanged: (_) {},
                     focusNode: FocusNode(skipTraversal: true),
                   ),
                   const SizedBox(width: 8),
