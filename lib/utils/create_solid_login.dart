@@ -1,6 +1,6 @@
 /// Create Solid Login Widget.
 //
-// Time-stamp: <Friday 2025-08-08 08:29:49 +1000 Graham Williams>
+// Time-stamp: <Friday 2025-10-24 09:37:37 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -35,7 +35,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:solidpod/solidpod.dart';
+import 'package:solidui/solidui.dart';
 
 import 'package:healthpod/home.dart';
 import 'package:healthpod/providers/settings.dart';
