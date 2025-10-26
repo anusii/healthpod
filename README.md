@@ -9,11 +9,12 @@
 [![GitHub commit activity (dev)](https://img.shields.io/github/commit-activity/w/anusii/healthpod/dev)](https://github.com/anusii/healthpod/commits/dev/)
 [![GitHub Issues](https://img.shields.io/github/issues/anusii/healthpod)](https://github.com/anusii/healthpod/issues)
 
-An app to support the storage and AI analysis of your health data with
-data encrypted and stored on your pwn personal online data store (pod)
-hosted in your Data Vault on a SOlid Server. The app was developed by
-the [ANU Software Innovation Institute](https://sii.anu.edu.au) and
-written by [Ashley Tang](https://github.com/atangster), [Graham
+A [solidui](https://github.com/anusii/solidui) based app to support
+the storage and AI analysis of your health data with data encrypted
+and stored on your pwn personal online data store (pod) hosted in your
+Data Vault on a SOlid Server. The app was developed by the [ANU
+Software Innovation Institute](https://sii.anu.edu.au) and written by
+[Ashley Tang](https://github.com/atangster), [Graham
 Williams](https://github.com/gjwgit), [Zheyuan
 Xu](https://github.com/zheyxu), [Kevin
 Wang](https://github.com/junhaow1), and [Tony
