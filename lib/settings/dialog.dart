@@ -1,6 +1,6 @@
 /// Settings dialog/popup for the health data app.
 ///
-// Time-stamp: <Wednesday 2025-03-26 09:54:58 +1100 Graham Williams>
+// Time-stamp: <Saturday 2025-10-25 06:03:20 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -81,7 +81,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
     // Set default values if no settings are found in shared preferences.
 
     ref.read(serverURLProvider.notifier).state =
-        prefs.getString('server_url') ?? 'https://pods.dev.solidcommunity.au';
+        prefs.getString('server_url') ?? 'https://pods.solidcommunity.au';
     ref.read(emailProvider.notifier).state =
         prefs.getString('email') ?? 'test@anu.edu.au';
     ref.read(passwordProvider.notifier).state =
@@ -177,7 +177,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                       ),
                       SettingField(
                         label: 'Server URL',
-                        hint: 'https://pods.dev.solidcommunity.au',
+                        hint: 'https://pods.solidcommunity.au',
                         provider: serverURLProvider,
                         tooltip: '''
 
@@ -188,10 +188,10 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         [https://pods.solidcommunity.au](https://pods.solidcommunity.au),
                         but any Solid server will do.  The default is
                         **currently** our development server
-                        [https://pods.dev.solidcommunity.au](https://pods.dev.solidcommunity.au)
+                        [https://pods.solidcommunity.au](https://pods.solidcommunity.au)
                         **Server URL Setting**
                         Enter the URL of your Solid Pod server.
-                        Default: https://pods.dev.solidcommunity.au
+                        Default: https://pods.solidcommunity.au
 
                         This is the server where your health data will be stored.
                         Make sure to use a trusted Solid Pod provider.
@@ -260,10 +260,10 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                         children: [
                           MarkdownTooltip(
                             message: '''
-                            
+
                             **Clear All Settings:** Tap here to remove all saved settings.
                             This will clear all fields but won't affect your Pod data.
-                            
+
                             ''',
                             child: ElevatedButton(
                               onPressed: () async {
@@ -314,10 +314,10 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                           const SizedBox(width: 16),
                           MarkdownTooltip(
                             message: '''
-                            
+
                             **Reset to Default:** Tap here to restore all settings to their default values.
                             This will reset all fields to their original configuration.
-                            
+
                             ''',
                             child: ElevatedButton(
                               onPressed: () async {
@@ -367,9 +367,9 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
               child: IconButton(
                 icon: MarkdownTooltip(
                   message: '''
-                  
+
                   **Close:** Tap here to close the settings dialog.
-                  
+
                   ''',
                   child: Icon(
                     Icons.close,

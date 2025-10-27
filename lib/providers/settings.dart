@@ -1,6 +1,6 @@
 /// Providers for the settings popup.
 ///
-// Time-stamp: <Friday 2025-02-21 16:58:42 +1100 Graham Williams>
+// Time-stamp: <Saturday 2025-10-25 06:03:53 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -41,7 +41,7 @@ Future<String> _initSetting(String key, String defaultValue) async {
 
 final settingsInitializerProvider = FutureProvider<void>((ref) async {
   final serverUrl =
-      await _initSetting('server_url', 'https://pods.dev.solidcommunity.au');
+      await _initSetting('server_url', 'https://pods.solidcommunity.au');
   final email = await _initSetting('email', 'test@anu.edu.au');
   final password = await _initSetting('password', 'SuperSecure123');
   final secretKey = await _initSetting('secret_key', 'YourSecretKey123');
@@ -55,7 +55,7 @@ final settingsInitializerProvider = FutureProvider<void>((ref) async {
 // Default server URL for the Solid Pod server.
 
 final serverURLProvider =
-    StateProvider<String>((ref) => 'https://pods.dev.solidcommunity.au');
+    StateProvider<String>((ref) => 'https://pods.solidcommunity.au');
 
 // Stores the user's Solid Pod email.
 
