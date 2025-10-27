@@ -3,7 +3,6 @@
 [![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/anusii/healthpod)
 [![GitHub License](https://img.shields.io/github/license/anusii/healthpod)](https://github.com/anusii/healthpod/blob/dev/LICENSE)
 [![Flutter Version](https://img.shields.io/badge/dynamic/yaml?url=https://raw.githubusercontent.com/anusii/healthpod/master/pubspec.yaml&query=$.version&label=version)](https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md)
 [![Last Updated](https://img.shields.io/github/last-commit/anusii/healthpod?label=last%20updated)](https://github.com/anusii/healthpod/commits/dev/)
@@ -21,9 +20,14 @@ Xu](https://github.com/zheyxu), [Kevin
 Wang](https://github.com/junhaow1), and [Tony
 Chen](https://github.com/tonypioneer).
 
+If you appreciate the app then please show some ❤️ and star the GitHub
+Repository to support the project.
+
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/anusii/healthpod)
+
 The latest version of the app can be run online at
 [healthpod.solidcommunity.au](https://healthpod.solidcommunity.au)
-with no installation required, or download and install for your
+with no installation required, or downloaded and installed for your
 platform from the [Solid Community AU](https://solidcommunity.au):
 
 + **Android**
@@ -108,7 +112,7 @@ The grid items include:
 + A LLM model runs over the whole contents of the Pod to then allow me
   to interact with the data collection.
 
-Time-stamp: <Tuesday 2025-10-28 08:57:32 +1100 Graham Williams>
+Time-stamp: <Tuesday 2025-10-28 10:37:08 +1100 Graham Williams>
 
 <!-- markdownlint-disable MD053 -->
 [comment]: # (Local Variables:)
