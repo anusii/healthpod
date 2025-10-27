@@ -3,6 +3,7 @@
 [![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/anusii/healthpod)
 [![GitHub License](https://img.shields.io/github/license/anusii/healthpod)](https://github.com/anusii/healthpod/blob/dev/LICENSE)
 [![Flutter Version](https://img.shields.io/badge/dynamic/yaml?url=https://raw.githubusercontent.com/anusii/healthpod/master/pubspec.yaml&query=$.version&label=version)](https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md)
 [![Last Updated](https://img.shields.io/github/last-commit/anusii/healthpod?label=last%20updated)](https://github.com/anusii/healthpod/commits/dev/)
@@ -56,15 +57,25 @@ can interact with it to review your health. You can also decide if you
 want to share that data with anyone else, like you general
 practitioner for them to provide their professional advice.
 
+For a **quick start**, first download the [sample blood pressure CSV
+file](https://raw.githubusercontent.com/anusii/healthpod/refs/heads/dev/integration_test/data/sample_blood_pressure.csv). Then
+within the app navigate to the FILES tab, navigate to the BLOOD
+PRESSURE folder, tap the IMPORT CSV button, navigate to and choose the
+downloaded `sample_blood_pressure.csv`. After the import has
+completed, navigate to the VIEW tab and select the BLOOD PRESSURE
+option:
+
+![Blood Pressure Visualisation](assets/screenshots/sample_blood_pressure_view.png)
+
 ## Milestones
 
 + [X] Basic Icon-Based GUI with Solid Pod login
 + [X] Profile management with personalized profile photo upload
-+ [ ] File browse my medical reports
-+ [ ] Daily entry of Blood Pressure with visualisations
-+ [ ] Your latest clinic data + appointments and medicines
-+ [ ] Important medical information, notes and numbers
-+ [ ] My vaccination history
++ [X] File browse my medical reports
++ [X] Daily entry of Blood Pressure with visualisations
++ [X] Your latest clinic data + appointments and medicines
++ [X] Important medical information, notes and numbers
++ [X] My vaccination history
 
 ## Design Goals
 
@@ -95,7 +106,7 @@ The grid items include:
 + A LLM model runs over the whole contents of the Pod to then allow me
   to interact with the data collection.
 
-Time-stamp: *<Thursday 2025-10-16 08:46:39 +1100 Graham Williams>*
+Time-stamp: <Tuesday 2025-10-28 08:38:21 +1100 Graham Williams>
 
 <!-- markdownlint-disable MD053 -->
 [comment]: # (Local Variables:)
