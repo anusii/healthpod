@@ -3,16 +3,19 @@
 [![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
 
-[![GitHub License](https://img.shields.io/github/license/anusii/healthpod)](https://github.com/anusii/healthpod/blob/dev/LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/anusii/healthpod)
+[![GitHub License](https://img.shields.io/github/license/anusii/healthpod)](https://github.com/anusii/healthpod?tab=GPL-3.0-1-ov-file)
 [![Flutter Version](https://img.shields.io/badge/dynamic/yaml?url=https://raw.githubusercontent.com/anusii/healthpod/master/pubspec.yaml&query=$.version&label=version)](https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md)
 [![Last Updated](https://img.shields.io/github/last-commit/anusii/healthpod?label=last%20updated)](https://github.com/anusii/healthpod/commits/dev/)
 [![GitHub commit activity (dev)](https://img.shields.io/github/commit-activity/w/anusii/healthpod/dev)](https://github.com/anusii/healthpod/commits/dev/)
 [![GitHub Issues](https://img.shields.io/github/issues/anusii/healthpod)](https://github.com/anusii/healthpod/issues)
 
+[![Snap](https://snapcraft.io/healthpod/badge.svg)](https://snapcraft.io/healthpod)
+
 A [solidui](https://github.com/anusii/solidui) based app to support
-the storage and AI analysis of your health data with data encrypted
-and stored on your pwn personal online data store (pod) hosted in your
-Data Vault on a SOlid Server. The app was developed by the [ANU
+the secure and private storage and AI analysis of your health data with data encrypted
+and stored on your own personal online data store (Pod) hosted in your
+Data Vault on a Solid Server. The app was developed by the [ANU
 Software Innovation Institute](https://sii.anu.edu.au) and written by
 [Ashley Tang](https://github.com/atangster), [Graham
 Williams](https://github.com/gjwgit), [Zheyuan
@@ -21,9 +24,9 @@ Wang](https://github.com/junhaow1), and [Tony
 Chen](https://github.com/tonypioneer).
 
 If you appreciate the app then please show some ❤️ and star the GitHub
-Repository to support the project.
-
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/anusii/healthpod)
+Repository to support the project.  You can install the app from
+different repositories including
+[SnapCraft](https://snapcraft.io/healthpod) for Linux.
 
 The latest version of the app can be run online at
 [healthpod.solidcommunity.au](https://healthpod.solidcommunity.au)
@@ -44,9 +47,9 @@ or
 [inno](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
 
 Contributions are welcome. Visit
-[github](https://github.com/gjwgit/healthpod) to submit an issue or,
+[github](https://github.com/anusii/healthpod) to submit an issue or,
 even better, fork the repository yourself, update the code, and submit
-a Pull Request.  The app is implemented in
+a Pull Request. The app is implemented in
 [Flutter](https://flutter.dev) using
 [solidpod](https://pub.dev/packages/solidpod) for Flutter to manage
 the Solid Pod interactions. Thank you.
@@ -112,7 +115,9 @@ The grid items include:
 + A LLM model runs over the whole contents of the Pod to then allow me
   to interact with the data collection.
 
-Time-stamp: <Tuesday 2025-10-28 10:37:08 +1100 Graham Williams>
+<!-- markdownlint-disable MD036 -->
+*Time-stamp: <Tuesday 2025-10-28 11:59:35 +1100 Graham Williams>*
+<!-- markdownlint-enable MD036 -->
 
 <!-- markdownlint-disable MD053 -->
 [comment]: # (Local Variables:)
