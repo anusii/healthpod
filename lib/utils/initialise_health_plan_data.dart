@@ -4,7 +4,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -54,7 +54,7 @@ Future<void> initialiseHealthPlanData({
       context: context,
       onProgressChange: (_) {},
       onSuccess: () {
-        debugPrint('✅ health_plan folder created or already exists');
+        // Health plan folder created or already exists.
       },
     );
 
@@ -63,7 +63,8 @@ Future<void> initialiseHealthPlanData({
       return;
     }
 
-    debugPrint('✅ Successfully initialized health_plan folder');
+    // Health plan folder initialized successfully.
+
     onComplete.call();
   } catch (e) {
     debugPrint('❌ Error initializing health plan folder: $e');

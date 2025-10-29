@@ -4,7 +4,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -132,7 +132,9 @@ class _HealthSurveyCategoricalInputState
       child: FormField<String>(
         initialValue: selectedValue,
         validator: (value) => HealthSurveyValidator.validateCategoricalInput(
-            value, widget.question),
+          value,
+          widget.question,
+        ),
         builder: (FormFieldState<String> field) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,8 +171,12 @@ class _HealthSurveyCategoricalInputState
 
   /// Builds a single radio button option with focus and selection handling.
 
-  Widget _buildOption(BuildContext context, FormFieldState<String> field,
-      String option, int optionIndex) {
+  Widget _buildOption(
+    BuildContext context,
+    FormFieldState<String> field,
+    String option,
+    int optionIndex,
+  ) {
     final theme = Theme.of(context);
     final isSelected = field.value == option;
 
@@ -207,7 +213,12 @@ class _HealthSurveyCategoricalInputState
 
             if (event.logicalKey == LogicalKeyboardKey.space ||
                 event.logicalKey == LogicalKeyboardKey.enter) {
-              _selectOption(field, option, optionIndex);
+              field.didChange(option);
+              widget.controller
+                  .updateResponse(widget.question.fieldName, option);
+              setState(() {
+                selectedValue = option;
+              });
               return KeyEventResult.handled;
             }
           }
@@ -218,7 +229,14 @@ class _HealthSurveyCategoricalInputState
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => _selectOption(field, option, optionIndex),
+            onTap: () {
+              field.didChange(option);
+              widget.controller
+                  .updateResponse(widget.question.fieldName, option);
+              setState(() {
+                selectedValue = option;
+              });
+            },
             borderRadius: BorderRadius.circular(8),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
@@ -226,9 +244,6 @@ class _HealthSurveyCategoricalInputState
                 children: [
                   Radio<String>(
                     value: option,
-                    groupValue: field.value,
-                    onChanged: (value) =>
-                        _selectOption(field, value!, optionIndex),
                     focusNode: FocusNode(skipTraversal: true),
                   ),
                   const SizedBox(width: 8),
@@ -247,16 +262,5 @@ class _HealthSurveyCategoricalInputState
         ),
       ),
     );
-  }
-
-  /// Updates the selected option in both local state and form controller.
-
-  void _selectOption(
-      FormFieldState<String> field, String option, int optionIndex) {
-    setState(() {
-      selectedValue = option;
-    });
-    field.didChange(option);
-    widget.controller.updateResponse(widget.question.fieldName, option);
   }
 }

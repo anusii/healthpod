@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Kevin Wang
 library;
@@ -225,7 +225,8 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                                   final pickedTime = await showTimePicker(
                                     context: ctx,
                                     initialTime: TimeOfDay.fromDateTime(
-                                        _editingDate ?? appointment.date),
+                                      _editingDate ?? appointment.date,
+                                    ),
                                   );
                                   if (pickedTime != null && ctx.mounted) {
                                     setState(() {
@@ -271,10 +272,12 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                             ),
                           ),
                           DataCell(
-                            Text((_editingDate ?? appointment.date)
-                                    .isBefore(DateTime.now())
-                                ? 'Past'
-                                : 'Upcoming'),
+                            Text(
+                              (_editingDate ?? appointment.date)
+                                      .isBefore(DateTime.now())
+                                  ? 'Past'
+                                  : 'Upcoming',
+                            ),
                           ),
                           DataCell(
                             Row(
@@ -305,14 +308,21 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
 
                     return DataRow(
                       cells: [
-                        DataCell(Text(DateFormat('dd MMM, yyyy')
-                            .format(appointment.date))),
-                        DataCell(Text(
-                            DateFormat('hh:mm a').format(appointment.date))),
+                        DataCell(
+                          Text(
+                            DateFormat('dd MMM, yyyy').format(appointment.date),
+                          ),
+                        ),
+                        DataCell(
+                          Text(
+                            DateFormat('hh:mm a').format(appointment.date),
+                          ),
+                        ),
                         DataCell(Text(appointment.title)),
                         DataCell(Text(appointment.description)),
                         DataCell(
-                            Text(appointment.isPast ? 'Past' : 'Upcoming')),
+                          Text(appointment.isPast ? 'Past' : 'Upcoming'),
+                        ),
                         DataCell(
                           Row(
                             mainAxisSize: MainAxisSize.min,

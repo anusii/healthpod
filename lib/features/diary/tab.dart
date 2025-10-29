@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Kevin Wang
 
@@ -32,7 +32,6 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_markdown/flutter_markdown.dart';
-
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -142,7 +141,9 @@ class _DiaryTabState extends State<DiaryTab> {
             TextButton(
               onPressed: () async {
                 final success = await DiaryService.deleteAppointment(
-                    dialogContext, appointment);
+                  dialogContext,
+                  appointment,
+                );
                 if (success && mounted) {
                   setState(() {
                     _appointments.remove(appointment);
@@ -218,14 +219,17 @@ class _DiaryTabState extends State<DiaryTab> {
                           fontSize: 16,
                         ),
                         items: List.generate(12, (index) => index + 1)
-                            .map((month) => DropdownMenuItem<int>(
-                                  value: month,
-                                  child: Text(
-                                    DateFormat('MMMM').format(
-                                        DateTime(_focusedDay.year, month)),
-                                    style: const TextStyle(fontSize: 16),
+                            .map(
+                              (month) => DropdownMenuItem<int>(
+                                value: month,
+                                child: Text(
+                                  DateFormat('MMMM').format(
+                                    DateTime(_focusedDay.year, month),
                                   ),
-                                ))
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            )
                             .toList(),
                         onChanged: (int? newMonth) {
                           if (newMonth != null) {
@@ -270,13 +274,15 @@ class _DiaryTabState extends State<DiaryTab> {
                           fontSize: 16,
                         ),
                         items: List.generate(11, (index) => 2020 + index)
-                            .map((year) => DropdownMenuItem<int>(
-                                  value: year,
-                                  child: Text(
-                                    year.toString(),
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ))
+                            .map(
+                              (year) => DropdownMenuItem<int>(
+                                value: year,
+                                child: Text(
+                                  year.toString(),
+                                  style: const TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            )
                             .toList(),
                         onChanged: (int? newYear) {
                           if (newYear != null) {

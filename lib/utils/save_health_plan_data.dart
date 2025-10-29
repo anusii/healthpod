@@ -4,7 +4,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -28,7 +28,6 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/utils/upload_json_to_pod.dart';
-import 'package:healthpod/utils/validate_health_plan_data.dart';
 
 /// Saves health plan data directly to POD.
 ///
@@ -81,37 +80,4 @@ Future<bool> saveHealthPlanData({
     }
     return false;
   }
-}
-
-/// Validates and saves uploaded health plan data.
-///
-/// Parameters:
-/// - context: BuildContext for showing error messages
-/// - data: Health plan data to validate and save
-
-Future<bool> validateAndSaveHealthPlanData({
-  required BuildContext context,
-  required Map<String, dynamic> data,
-}) async {
-  // Validate the uploaded data.
-
-  if (!validateHealthPlanData(data)) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Invalid health plan data format'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-    return false;
-  }
-
-  // Save the validated data.
-
-  return saveHealthPlanData(
-    context: context,
-    title: data['title'] as String,
-    planItems: (data['planItems'] as List).cast<String>(),
-  );
 }

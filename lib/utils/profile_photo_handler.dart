@@ -4,7 +4,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -32,6 +32,7 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
 /// Handles the uploading, retrieval, and management of profile photos.
@@ -43,7 +44,7 @@ class ProfilePhotoHandler {
 
   // Full path to the profile directory in the pod (for directory operations).
 
-  static const String _profileDirectoryFull = 'healthpod/data/profile';
+  static const String _profileDirectoryFull = '$basePath/profile';
 
   /// Build the correct pod path for profile data.
   ///
@@ -121,7 +122,7 @@ class ProfilePhotoHandler {
         'format': imageFile.path.split('.').last.toLowerCase(),
         // Add a type marker to clearly identify this as a photo file.
 
-        'type': 'profile_photo'
+        'type': 'profile_photo',
       };
 
       // Convert to JSON string.

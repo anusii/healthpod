@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang.
 
@@ -129,15 +129,22 @@ class BPExporter extends HealthDataExporterBase {
             continue;
           }
 
-          // Parse JSON content.
+          // Check if returns RDF instead of JSON.
 
+          if (content.toString().startsWith('@prefix') ||
+              content.toString().contains('<http')) {
+            continue;
+          }
+
+          // Parse JSON content.
           final jsonData = json.decode(content);
 
           // Ensure we use ISO format for timestamp with T and Z.
 
           var timestamp = normaliseTimestamp(
-              jsonData[BPCSVFields.fieldTimestamp],
-              toIso: true);
+            jsonData[BPCSVFields.fieldTimestamp],
+            toIso: true,
+          );
 
           final responses = jsonData['responses'];
 
@@ -162,8 +169,10 @@ class BPExporter extends HealthDataExporterBase {
 
       // Sort readings by timestamp.
 
-      allReadings.sort((a, b) => a[BPCSVFields.fieldTimestamp]
-          .compareTo(b[BPCSVFields.fieldTimestamp]));
+      allReadings.sort(
+        (a, b) => a[BPCSVFields.fieldTimestamp]
+            .compareTo(b[BPCSVFields.fieldTimestamp]),
+      );
 
       // Prepare CSV data.
 

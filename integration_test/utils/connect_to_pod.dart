@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -32,9 +32,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'package:healthpod/main.dart' as app;
-import 'package:healthpod/utils/create_solid_login.dart';
 import 'package:healthpod/utils/fetch_web_id.dart';
-import 'package:healthpod/utils/platform/helper.dart';
 
 /// Integration tests for Solid POD connection functionality in HealthPod app.
 ///
@@ -72,7 +70,8 @@ void main() {
 
   // Determine test mode based on environment.
 
-  final isIntegrationTest = PlatformHelper.isIntegrationTest();
+  final isIntegrationTest =
+      const String.fromEnvironment('INTEGRATION_TEST') == 'true';
 
   // Log the test environment configuration.
 
@@ -151,7 +150,9 @@ void connectToPod() {
         // Verify home screen title.
 
         expect(
-            find.text('Your Health Data, Under Your Control'), findsOneWidget);
+          find.text('Your Health Data, Under Your Control'),
+          findsOneWidget,
+        );
 
         // Verify WebID is fetched.
 
@@ -168,9 +169,11 @@ void connectToPod() {
         // Handle logout confirmation.
 
         final okButton = find.text('OK');
-        expect(okButton, findsOneWidget,
-            reason:
-                'OK button should be present in logout confirmation dialog');
+        expect(
+          okButton,
+          findsOneWidget,
+          reason: 'OK button should be present in logout confirmation dialog',
+        );
         await tester.tap(okButton);
         await tester.pumpAndSettle();
 
@@ -184,8 +187,11 @@ void connectToPod() {
         // Verify successful logout.
 
         final webIdAfterLogout = await fetchWebId();
-        expect(webIdAfterLogout, isNull,
-            reason: 'WebID should be null after logout');
+        expect(
+          webIdAfterLogout,
+          isNull,
+          reason: 'WebID should be null after logout',
+        );
       });
     });
   });
@@ -228,7 +234,7 @@ void connectToPodWebView() {
         await Future.delayed(const Duration(seconds: 3));
         await tester.pumpAndSettle();
 
-        webId = SolidLoginTestHelper.extractedWebId;
+        webId = null;
         remaining--;
       }
 
@@ -238,7 +244,8 @@ void connectToPodWebView() {
         debugPrint('✅ WebID retrieved from page: $webId');
       } else {
         debugPrint(
-            '❌ WebID could not be retrieved after $maxRetries attempts!');
+          '❌ WebID could not be retrieved after $maxRetries attempts!',
+        );
         fail('Unable to fetch WebID from HTML.');
       }
     });

@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 library;
@@ -133,16 +133,30 @@ Future<void> handleSurveySubmit({
     if (!context.mounted) return;
 
     if (saveChoice == 'pod' || saveChoice == 'both') {
-      await saveToPod(context, responses);
+      try {
+        await saveToPod(context, responses);
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to save to POD: $e'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
+        return;
+      }
     }
 
     if (!context.mounted) return;
 
+    String message = 'Survey submitted and saved successfully!';
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Survey submitted and saved successfully!'),
+      SnackBar(
+        content: Text(message),
         backgroundColor: Colors.green,
-        duration: Duration(seconds: 3),
+        duration: const Duration(seconds: 3),
       ),
     );
 

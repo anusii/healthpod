@@ -4,7 +4,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -50,7 +50,8 @@ class ProfileState {
   factory ProfileState.initial() {
     return ProfileState(
       profileData: Map<String, dynamic>.from(
-          defaultProfileData['data'] as Map<String, dynamic>),
+        defaultProfileData['data'] as Map<String, dynamic>,
+      ),
       isLoading: false,
       error: null,
     );
@@ -105,8 +106,9 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
     } catch (e) {
       debugPrint('Error refreshing profile data: $e');
       state = state.copyWith(
-          isLoading: false,
-          error: 'Failed to load profile data: ${e.toString()}');
+        isLoading: false,
+        error: 'Failed to load profile data: ${e.toString()}',
+      );
     }
   }
 

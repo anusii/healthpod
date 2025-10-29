@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang.
 
@@ -73,7 +73,8 @@ class BPImporter extends HealthDataImporterBase {
         final systolic = double.tryParse(value);
         if (systolic == null) {
           debugPrint(
-              'Row $rowIndex: Invalid or missing systolic value: $value');
+            'Row $rowIndex: Invalid or missing systolic value: $value',
+          );
           return false;
         } else {
           responses[HealthSurveyConstants.fieldSystolic] = systolic;
@@ -87,7 +88,8 @@ class BPImporter extends HealthDataImporterBase {
         final diastolic = double.tryParse(value);
         if (diastolic == null) {
           debugPrint(
-              'Row $rowIndex: Invalid or missing diastolic value: $value');
+            'Row $rowIndex: Invalid or missing diastolic value: $value',
+          );
           return false;
         } else {
           responses[HealthSurveyConstants.fieldDiastolic] = diastolic;
@@ -101,7 +103,8 @@ class BPImporter extends HealthDataImporterBase {
         final heartRate = double.tryParse(value);
         if (heartRate == null) {
           debugPrint(
-              'Row $rowIndex: Invalid or missing heart rate value: $value');
+            'Row $rowIndex: Invalid or missing heart rate value: $value',
+          );
           return false;
         } else {
           responses[HealthSurveyConstants.fieldHeartRate] = heartRate;
@@ -126,8 +129,29 @@ class BPImporter extends HealthDataImporterBase {
   static Future<bool> importCsv(
     String filePath,
     String dirPath,
-    BuildContext context,
-  ) async {
-    return BPImporter().importFromCsv(filePath, dirPath, context);
+    BuildContext context, {
+    // Optional: provide content directly for web.
+
+    String? fileContent,
+    // Progress callback.
+
+    void Function(String message, double progress)? onProgress,
+  }) async {
+    // Remove verbose debug logs for cleaner console output.
+
+    try {
+      final result = await BPImporter().importFromCsv(
+        filePath,
+        dirPath,
+        context,
+        fileContent: fileContent,
+        onProgress: onProgress,
+      );
+      return result;
+    } catch (e, stackTrace) {
+      debugPrint('❌ [BP Import] Import failed: $e');
+      debugPrint('❌ [BP Import] Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 }

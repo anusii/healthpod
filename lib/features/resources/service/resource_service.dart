@@ -4,7 +4,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -109,7 +109,7 @@ Blood pressure is measured using two numbers:
 
 ## Learn More
 * [American Heart Association - Understanding Blood Pressure](https://www.heart.org/en/health-topics/high-blood-pressure/understanding-blood-pressure-readings)
-* [Health Direct - Blood Pressure](https://www.healthdirect.gov.au/blood-pressure)
+* [Health Direct - Blood Pressure](https://www.healthdirect.gov.au/what-is-a-healthy-blood-pressure)
 
 ''';
         break;
@@ -147,7 +147,6 @@ Vaccinations are a crucial part of preventive healthcare that helps protect both
 > **Remember:** Always consult your healthcare provider about which vaccines are right for you.
 
 ## Learn More
-* [Australian Immunisation Handbook](https://immunisationhandbook.health.gov.au/)
 * [WHO - Vaccines and Immunization](https://www.who.int/health-topics/vaccines-and-immunization)
 
 ''';
@@ -227,8 +226,8 @@ We are working on implementing various health tracking features based on clinica
 * Medication and Appointment Reminders
 
 Learn more about health tracking:
-* [Health Direct - Health and Wellbeing](https://www.healthdirect.gov.au/health-and-wellbeing)
-* [Better Health Channel - Goal Setting](https://www.betterhealth.vic.gov.au/health/healthyliving/goal-setting)
+* [Health Direct - Health and Wellbeing](https://www.healthdirect.gov.au/mental-health-and-wellbeing)
+* [Better Health Channel - Life! Program](https://www.betterhealth.vic.gov.au/life/welcome)
 
 ''',
       'Health Tracker',

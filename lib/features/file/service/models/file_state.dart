@@ -1,12 +1,10 @@
-/// File state model for the file service.
+/// File state model for the file service provider.
 ///
-// Time-stamp: <Friday 2025-02-14 08:40:39 +1100 Graham Williams>
-///
-/// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
+/// Copyright (C) 2025, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,71 +17,38 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
-/// Authors: Ashley Tang
+/// Authors: Ashley Tang, Tony Chen
 
 library;
 
-import 'package:healthpod/constants/paths.dart';
-
-/// A model class to manage the state of file operations in the file service.
-///
-/// This class encapsulates all the state variables that were previously scattered
-/// throughout the FileService widget, providing a more organized and maintainable
-/// way to manage file operation states.
+/// State class for file service operations.
 
 class FileState {
-  /// The currently selected file for upload.
+  final String? currentPath;
+  final String? uploadFile;
+  final String? downloadFile;
+  final String? remoteFileName;
+  final String? cleanFileName;
+  final String? filePreview;
+  final bool uploadInProgress;
+  final bool downloadInProgress;
+  final bool deleteInProgress;
+  final bool importInProgress;
+  final bool exportInProgress;
+  final bool uploadDone;
+  final bool downloadDone;
+  final bool deleteDone;
+  final bool showPreview;
 
-  String? uploadFile;
-
-  /// The currently selected file for download.
-
-  String? downloadFile;
-
-  /// The name of the file on the remote server.
-
-  String? remoteFileName;
-
-  /// The clean name of the file (without encryption extension).
-
-  String? cleanFileName;
-
-  /// The URL of the remote file.
-
-  String? remoteFileUrl;
-
-  /// The preview content of the selected file.
-
-  String? filePreview;
-
-  /// The current directory path.
-
-  String? currentPath;
-
-  /// Operation status flags.
-
-  bool uploadInProgress = false;
-  bool downloadInProgress = false;
-  bool deleteInProgress = false;
-  bool importInProgress = false;
-  bool exportInProgress = false;
-  bool uploadDone = false;
-  bool downloadDone = false;
-  bool deleteDone = false;
-  bool showPreview = false;
-
-  /// Creates a new [FileState] with default values.
-
-  FileState({
+  const FileState({
+    this.currentPath,
     this.uploadFile,
     this.downloadFile,
-    this.remoteFileName = 'remoteFileName',
-    this.cleanFileName = 'remoteFileName',
-    this.remoteFileUrl,
+    this.remoteFileName,
+    this.cleanFileName,
     this.filePreview,
-    this.currentPath = basePath,
     this.uploadInProgress = false,
     this.downloadInProgress = false,
     this.deleteInProgress = false,
@@ -95,16 +60,16 @@ class FileState {
     this.showPreview = false,
   });
 
-  /// Creates a copy of this [FileState] with the given fields replaced with new values.
+  /// Creates a copy of this state with the given fields replaced with new
+  /// values.
 
   FileState copyWith({
+    String? currentPath,
     String? uploadFile,
     String? downloadFile,
     String? remoteFileName,
     String? cleanFileName,
-    String? remoteFileUrl,
     String? filePreview,
-    String? currentPath,
     bool? uploadInProgress,
     bool? downloadInProgress,
     bool? deleteInProgress,
@@ -116,13 +81,12 @@ class FileState {
     bool? showPreview,
   }) {
     return FileState(
+      currentPath: currentPath ?? this.currentPath,
       uploadFile: uploadFile ?? this.uploadFile,
       downloadFile: downloadFile ?? this.downloadFile,
       remoteFileName: remoteFileName ?? this.remoteFileName,
       cleanFileName: cleanFileName ?? this.cleanFileName,
-      remoteFileUrl: remoteFileUrl ?? this.remoteFileUrl,
       filePreview: filePreview ?? this.filePreview,
-      currentPath: currentPath ?? this.currentPath,
       uploadInProgress: uploadInProgress ?? this.uploadInProgress,
       downloadInProgress: downloadInProgress ?? this.downloadInProgress,
       deleteInProgress: deleteInProgress ?? this.deleteInProgress,
@@ -133,33 +97,5 @@ class FileState {
       deleteDone: deleteDone ?? this.deleteDone,
       showPreview: showPreview ?? this.showPreview,
     );
-  }
-
-  /// Checks if the current path is in the blood pressure directory.
-
-  bool get isInBpDirectory {
-    return currentPath != null &&
-        (currentPath!.endsWith('/blood_pressure') ||
-            currentPath!.contains('/blood_pressure/') ||
-            currentPath == '$basePath/blood_pressure');
-  }
-
-  /// Checks if the current path is in the vaccination directory.
-
-  bool get isInVaccinationDirectory {
-    return currentPath != null &&
-        (currentPath!.endsWith('/vaccination') ||
-            currentPath!.contains('/vaccination/') ||
-            currentPath == '$basePath/vaccination');
-  }
-
-  /// Checks if the current path is in the profile directory.
-
-  bool get isInProfileDirectory {
-    return currentPath != null &&
-        (currentPath!.endsWith('/profile') ||
-            currentPath!.contains('/profile/') ||
-            currentPath == '$basePath/profile' ||
-            currentPath == 'healthpod/profile');
   }
 }

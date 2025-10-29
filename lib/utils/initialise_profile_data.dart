@@ -4,7 +4,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -59,18 +59,22 @@ Future<void> initialiseProfileData({
     // Look for any profile data file (profile_*.json.enc.ttl).
 
     final profileFiles = resources.files
-        .where((file) =>
-            file.startsWith('profile_') &&
-            !file.startsWith('profile_photo_') &&
-            file.endsWith('.json.enc.ttl'))
+        .where(
+          (file) =>
+              file.startsWith('profile_') &&
+              !file.startsWith('profile_photo_') &&
+              file.endsWith('.json.enc.ttl'),
+        )
         .toList();
 
     // Also look for photo files to check for potential confusion.
 
     final photoFiles = resources.files
-        .where((file) =>
-            file.startsWith('profile_photo_') &&
-            (file.endsWith('.photo.enc.ttl') || file.endsWith('.enc.ttl')))
+        .where(
+          (file) =>
+              file.startsWith('profile_photo_') &&
+              (file.endsWith('.photo.enc.ttl') || file.endsWith('.enc.ttl')),
+        )
         .toList();
 
     if (photoFiles.isNotEmpty) {

@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -46,7 +46,9 @@ class BPSurvey extends StatelessWidget {
   /// Saves the survey responses to a local file.
 
   Future<void> _saveResponsesLocally(
-      BuildContext context, Map<String, dynamic> responses) async {
+    BuildContext context,
+    Map<String, dynamic> responses,
+  ) async {
     await saveResponseLocally(
       context: context,
       responses: responses,
@@ -58,11 +60,13 @@ class BPSurvey extends StatelessWidget {
   /// Saves the survey responses directly to POD.
 
   Future<void> _saveResponsesToPod(
-      BuildContext context, Map<String, dynamic> responses) async {
+    BuildContext context,
+    Map<String, dynamic> responses,
+  ) async {
     await saveResponseToPod(
       context: context,
       responses: responses,
-      podPath: '/blood_pressure',
+      podPath: 'blood_pressure',
       filePrefix: 'blood_pressure',
     );
   }
@@ -70,7 +74,9 @@ class BPSurvey extends StatelessWidget {
   /// Handles the submission of the survey.
 
   Future<void> _handleSubmit(
-      BuildContext context, Map<String, dynamic> responses) async {
+    BuildContext context,
+    Map<String, dynamic> responses,
+  ) async {
     await handleSurveySubmit(
       context: context,
       responses: responses,

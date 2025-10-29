@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang.
 
@@ -39,7 +39,6 @@ import 'package:solidpod/solidpod.dart'
         getKeyFromUserIfRequired;
 
 import 'package:healthpod/features/bp/obs/model.dart';
-
 import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
@@ -48,6 +47,7 @@ import 'package:healthpod/utils/get_feature_path.dart';
 
 class BPEditorService {
   /// The type of data being handled.
+
   static const String feature = 'blood_pressure';
 
   /// Load all BP observations from `healthpod/data/blood_pressure` directory.
@@ -64,7 +64,9 @@ class BPEditorService {
 
       if (!context.mounted) continue;
 
-      final filePath = getFeaturePath(feature, file);
+      // Use relative path for file operations to match writePod behaviour.
+
+      final filePath = '$feature/$file';
 
       // Prompt for security key if needed.
 
@@ -75,17 +77,33 @@ class BPEditorService {
 
       if (!context.mounted) continue;
 
-      final content = await readPod(
-        filePath,
-        context,
-        const Text('Loading file'),
-      );
+      String content;
+      try {
+        content = await readPod(
+          filePath,
+          context,
+          const Text('Loading file'),
+        );
+      } catch (e) {
+        // File might not exist anymore (deleted, moved, or corrupted).
+
+        debugPrint('Error reading file $file: $e');
+        continue;
+      }
+
       if (content == SolidFunctionCallStatus.fail.toString() ||
           content == SolidFunctionCallStatus.notLoggedIn.toString()) {
         continue;
       }
 
       try {
+        // Check if returns RDF instead of JSON.
+
+        if (content.toString().startsWith('@prefix') ||
+            content.toString().contains('<http')) {
+          continue;
+        }
+
         final data = json.decode(content.toString());
         loadedObservations.add(BPObservation.fromJson(data));
       } catch (e) {

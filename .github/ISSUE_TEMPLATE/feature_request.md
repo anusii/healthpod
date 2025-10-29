@@ -12,10 +12,9 @@ assignees: ''
 
 ## Why
 
-So that as a [user] I can [clear and concise description of
-what you want to happen and the benefit of it.]
+So that as a user I can [clear and concise benefit].
 
-## Closing Crieria
+## Closing Criteria
 
 Checklist for closing the issue:
 

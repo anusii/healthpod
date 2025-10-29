@@ -4,7 +4,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -34,6 +34,7 @@ import 'package:solidpod/solidpod.dart'
         getDirUrl,
         readPod,
         getKeyFromUserIfRequired;
+import 'package:solidui/solidui.dart';
 
 import 'package:healthpod/utils/construct_pod_path.dart';
 
@@ -47,24 +48,36 @@ import 'package:healthpod/utils/construct_pod_path.dart';
 
 Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
   try {
+    // Replace the direct call with our central key manager.
+
+    await SolidSecurityKeyCentralManager.instance.ensureSecurityKey(
+      context,
+      const Text(
+        'Security verification is required to access your health plan',
+      ),
+    );
+
     // Get the directory URL for the health_plan folder.
 
     final podDirPath = constructPodPath('health_plan', '');
-    debugPrint('Looking for health plan data in: $podDirPath');
+    // Looking for health plan data.
 
     final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
-    debugPrint('Health plan dir contents: ${resources.files}');
+    // Retrieved health plan directory contents.
 
     // Look for health plan files with .enc.ttl extension (encrypted files).
 
     final healthPlanFiles = resources.files
-        .where((file) =>
-            file.startsWith('health_plan_') && file.endsWith('.enc.ttl'))
+        .where(
+          (file) =>
+              file.startsWith('health_plan_') && file.endsWith('.enc.ttl'),
+        )
         .toList();
 
     if (healthPlanFiles.isEmpty) {
-      debugPrint('No health plan files found. Returning empty data.');
+      // No health plan files found.
+
       return {'title': 'My Health Management Plan', 'planItems': <String>[]};
     }
 
@@ -72,7 +85,7 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
 
     healthPlanFiles.sort((a, b) => b.compareTo(a));
     final latestHealthPlanFile = healthPlanFiles.first;
-    debugPrint('Found latest health plan file: $latestHealthPlanFile');
+    // Found latest health plan file.
 
     // Read the file contents.
 
@@ -83,14 +96,15 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
     // Use readPod with the full constructed path to the file.
 
     final filePath = constructPodPath('health_plan', latestHealthPlanFile);
-    debugPrint('Reading health plan data from path: $filePath');
+    // Reading health plan data.
 
     // Prompt for security key if needed.
 
     await getKeyFromUserIfRequired(
       context,
       const Text(
-          'Please enter your security key to access your health plan data'),
+        'Please enter your security key to access your health plan data',
+      ),
     );
 
     if (!context.mounted) {
@@ -115,7 +129,8 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
     // Log content details for debugging.
 
     debugPrint(
-        'Successfully read encrypted health plan data (length: ${fileContent.length})');
+      'Successfully read encrypted health plan data (length: ${fileContent.length})',
+    );
 
     // Try to parse the JSON directly - this should work if decryption is successful.
 
@@ -124,9 +139,11 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
 
       if (fileContent.trim().startsWith('@prefix')) {
         debugPrint(
-            'File appears to be in TTL format. This indicates the file is still encrypted.');
+          'File appears to be in TTL format. This indicates the file is still encrypted.',
+        );
         debugPrint(
-            'The file may be double-encrypted or the security key is incorrect.');
+          'The file may be double-encrypted or the security key is incorrect.',
+        );
 
         // Return empty data since we can't decrypt the TTL format directly.
 
@@ -135,17 +152,20 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
 
       final Map<String, dynamic> jsonData = jsonDecode(fileContent);
       debugPrint(
-          'Successfully parsed health plan JSON with keys: ${jsonData.keys.join(', ')}');
+        'Successfully parsed health plan JSON with keys: ${jsonData.keys.join(', ')}',
+      );
 
       // Check for nested data structures.
 
       if (jsonData.containsKey('data')) {
-        debugPrint('Found data key in health plan, returning data object');
+        // Found data key in health plan.
+
         return jsonData['data'] as Map<String, dynamic>;
       } else if (jsonData.containsKey('timestamp') &&
           jsonData.containsKey('responses')) {
         debugPrint(
-            'Found timestamp and responses keys, returning responses object');
+          'Found timestamp and responses keys, returning responses object',
+        );
         return jsonData['responses'] as Map<String, dynamic>;
       }
 
@@ -155,13 +175,15 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
     } catch (e) {
       debugPrint('Error parsing health plan JSON: $e');
       debugPrint(
-          'Content preview: ${fileContent.substring(0, min(100, fileContent.length))}...');
+        'Content preview: ${fileContent.substring(0, min(100, fileContent.length))}...',
+      );
 
       // If content starts with @prefix, it's likely TTL format and the security key is incorrect.
 
       if (fileContent.trim().startsWith('@prefix')) {
         debugPrint(
-            'File appears to be in TTL format. This indicates double encryption or incorrect security key.');
+          'File appears to be in TTL format. This indicates double encryption or incorrect security key.',
+        );
       }
 
       // Return empty data.

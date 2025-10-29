@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -70,18 +70,26 @@ class MedicationEditorService {
       for (final fileName in resources.files) {
         if (!fileName.endsWith('.enc.ttl')) continue;
 
-        // Construct the full path.
+        // Use relative path for file operations to match writePod behaviour.
 
-        final filePath = getFeaturePath(feature, fileName);
+        final filePath = '$feature/$fileName';
         if (!context.mounted) break;
 
         // Read the file content.
 
-        final result = await readPod(
-          filePath,
-          context,
-          const Text('Reading medication data'),
-        );
+        String result;
+        try {
+          result = await readPod(
+            filePath,
+            context,
+            const Text('Reading medication data'),
+          );
+        } catch (e) {
+          // File might not exist anymore (deleted, moved, or corrupted).
+
+          debugPrint('Error reading medication file $fileName: $e');
+          continue;
+        }
 
         // Parse data if read was successful.
 
@@ -123,8 +131,11 @@ class MedicationEditorService {
   /// @returns A Future that completes when the save operation is done.
 
   Future<void> saveObservationToPod(
-      BuildContext context, MedicationObservation observation,
-      {bool isEdit = false, MedicationObservation? oldObservation}) async {
+    BuildContext context,
+    MedicationObservation observation, {
+    bool isEdit = false,
+    MedicationObservation? oldObservation,
+  }) async {
     try {
       // Check valid logged in status.
 
@@ -226,11 +237,19 @@ class MedicationEditorService {
 
       // Read each file.
 
-      final result = await readPod(
-        filePath,
-        context,
-        const Text('Checking medication data'),
-      );
+      String result;
+      try {
+        result = await readPod(
+          filePath,
+          context,
+          const Text('Checking medication data'),
+        );
+      } catch (e) {
+        // File might not exist anymore (deleted, moved, or corrupted).
+
+        debugPrint('Error reading medication file for deletion $fileName: $e');
+        continue;
+      }
 
       if (result != SolidFunctionCallStatus.fail.toString() &&
           result != SolidFunctionCallStatus.notLoggedIn.toString()) {

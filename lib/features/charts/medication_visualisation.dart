@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -172,13 +172,15 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
           if (validData.isNotEmpty) {
             _surveyData = validData;
             debugPrint(
-                'Loaded ${validData.length} medication records from pod');
+              'Loaded ${validData.length} medication records from pod',
+            );
           } else {
             // Otherwise use sample data.
 
             _surveyData = _getSampleData();
             debugPrint(
-                'No valid medication data found in pod, using sample data');
+              'No valid medication data found in pod, using sample data',
+            );
           }
           _isLoading = false;
         });
@@ -474,7 +476,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
                     Text(
                       [
                         if (dosage.isNotEmpty) dosage,
-                        if (frequency.isNotEmpty) frequency
+                        if (frequency.isNotEmpty) frequency,
                       ].join(', '),
                       style: theme.textTheme.bodyMedium,
                     ),

@@ -14,7 +14,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -27,7 +27,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Kevin Wang
 
@@ -61,7 +61,8 @@ class DiaryService {
   /// Returns an empty list if there are any errors during loading.
 
   static Future<List<Appointment>> loadAppointments(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     try {
       // Get the path to the diary directory in the POD.
 
@@ -75,13 +76,24 @@ class DiaryService {
 
       for (final file in resources.files) {
         if (file.endsWith('.enc.ttl')) {
-          final filePath = getFeaturePath(feature, file);
+          // Use relative path for file operations to match writePod behaviour.
+
+          final filePath = '$feature/$file';
           if (!context.mounted) return appointments;
-          final content = await readPod(
-            filePath,
-            context,
-            const Text('Loading appointment'),
-          );
+
+          String content;
+          try {
+            content = await readPod(
+              filePath,
+              context,
+              const Text('Loading appointment'),
+            );
+          } catch (e) {
+            // File might not exist anymore (deleted, moved, or corrupted).
+
+            debugPrint('Error reading appointment file $file: $e');
+            continue;
+          }
 
           // Check if the file was successfully read.
 
@@ -105,12 +117,14 @@ class DiaryService {
                 continue;
               }
 
-              appointments.add(Appointment(
-                date: DateTime.parse(dateStr),
-                title: appointmentData['title'],
-                description: appointmentData['description'],
-                isPast: DateTime.parse(dateStr).isBefore(DateTime.now()),
-              ));
+              appointments.add(
+                Appointment(
+                  date: DateTime.parse(dateStr),
+                  title: appointmentData['title'],
+                  description: appointmentData['description'],
+                  isPast: DateTime.parse(dateStr).isBefore(DateTime.now()),
+                ),
+              );
             } catch (e) {
               debugPrint('Error parsing appointment file $file: $e');
             }
@@ -133,7 +147,9 @@ class DiaryService {
   /// 3. Returns true if successful, false otherwise
 
   static Future<bool> saveAppointment(
-      BuildContext context, Appointment appointment) async {
+    BuildContext context,
+    Appointment appointment,
+  ) async {
     try {
       // Prepare the appointment data for saving.
 
@@ -169,7 +185,9 @@ class DiaryService {
   /// 4. Returns true if successful, false otherwise
 
   static Future<bool> deleteAppointment(
-      BuildContext context, Appointment appointment) async {
+    BuildContext context,
+    Appointment appointment,
+  ) async {
     try {
       // Get the diary directory path.
 
@@ -183,11 +201,20 @@ class DiaryService {
         if (file.endsWith('.enc.ttl')) {
           final filePath = getFeaturePath(feature, file);
           if (!context.mounted) return false;
-          final content = await readPod(
-            filePath,
-            context,
-            const Text('Loading appointment for deletion'),
-          );
+
+          String content;
+          try {
+            content = await readPod(
+              filePath,
+              context,
+              const Text('Loading appointment for deletion'),
+            );
+          } catch (e) {
+            // File might not exist anymore (deleted, moved, or corrupted).
+
+            debugPrint('Error reading appointment file for deletion $file: $e');
+            continue;
+          }
 
           if (content != SolidFunctionCallStatus.fail.toString() &&
               content != SolidFunctionCallStatus.notLoggedIn.toString()) {

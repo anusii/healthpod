@@ -1,12 +1,12 @@
-/// DESCRIPTION
+/// HealthPod - Collect and analyse health data preserving privacy using PODs.
 ///
-// Time-stamp: <Friday 2025-02-14 08:06:50 +1100 Graham Williams>
+// Time-stamp: <Monday 2025-09-29 08:38:20 +1000 Graham Williams>
 ///
-/// Copyright (C) 2025, Software Innovation Institute, ANU
+/// Copyright (C) 2025, Software Innovation Institute ANU
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,8 +19,11 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: AUTHORS
+
+// Add the library directive as we have doc entries above. We publish the above
+// meta doc lines in the docs.
 
 library;

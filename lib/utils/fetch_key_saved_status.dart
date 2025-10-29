@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,52 +19,40 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
 library;
 
-import 'package:solidpod/solidpod.dart'
-    show KeyManager, SolidFunctionCallStatus, getEncKeyPath, readPod;
+import 'package:flutter/material.dart';
 
-import 'package:healthpod/utils/security_key/manager.dart';
+import 'package:solidpod/solidpod.dart' show KeyManager;
 
-/// This function verifies if an encryption key is available for the user by:
+/// This function checks if an encryption key is available for the user.
 ///
-/// 1. Checking the encrypted key file in the POD
-/// 2. Verifying if a key exists in local storage
+/// Instead of directly triggering a key prompt, it now uses the SolidUI
+/// security key manager to ensure the prompt only shows once across the
+/// application.
 ///
 /// If a key exists, it triggers a callback to update the UI.
 
-Future<bool> fetchKeySavedStatus(context,
-    [Function(bool)? onKeyStatusChanged]) async {
+Future<bool> fetchKeySavedStatus(
+  BuildContext context, [
+  Function(bool)? onKeyStatusChanged,
+]) async {
   try {
-    // Get the path to the encrypted key file.
+    // Simply check if the security key exists in memory.
 
-    final filePath = await getEncKeyPath();
+    final hasKey = await KeyManager.hasSecurityKey();
 
-    // Read the file content from the POD using the security key manager
+    // Call the callback if provided.
 
-    final fileContent = await readPod(
-      filePath,
-      context,
-      SecurityKeyManager(
-        onKeyStatusChanged:
-            onKeyStatusChanged ?? (_) {}, // Callback to update key status.
-      ),
-    );
+    if (onKeyStatusChanged != null) {
+      onKeyStatusChanged(hasKey);
+    }
 
-    // Check if the file content is valid.
-
-    bool hasLocalKey = ![
-      SolidFunctionCallStatus.notLoggedIn.toString(),
-      SolidFunctionCallStatus.fail.toString()
-    ].contains(fileContent);
-
-    // Return true if the key is saved locally or in the POD.
-
-    return await KeyManager.hasSecurityKey() || hasLocalKey;
+    return hasKey;
   } catch (e) {
     return false;
   }

@@ -2,7 +2,7 @@
 #
 # Makefile template for Flutter
 #
-# Copyright 2021 (c) Graham.Williams@togaware.com
+# Copyright 2021-2025 (c) Graham.Williams@togaware.com
 #
 # License: Creative Commons Attribution-ShareAlike 4.0 International.
 #
@@ -14,7 +14,7 @@
 #   Trivial update or bug fix
 
 ifeq ($(VER),)
-  VER = $(shell egrep '^version:' pubspec.yaml | cut -d' ' -f2)
+  VER = $(if $(wildcard pubspec.yaml),$(shell egrep '^version:' pubspec.yaml | cut -d' ' -f2),)
 endif
 
 define FLUTTER_HELP
@@ -31,19 +31,22 @@ flutter:
 
   docs	    Run `dart doc` to create documentation.
 
+  import_order      Run import order checking.
+  import_order_fix  Run import order fixing.
+
+  pubspec         Choose actual/local pubspec using meld.
+  pubspec.local   Overwrite with local pubspec.
+  pubspec.actual  Overwrite with actual pubspec.
+
   fix             Run `dart fix --apply`.
   format          Run `dart format`.
-  dcm             Run dart code metrics
-    nullable	  Check NULLs from dart_code_metrics.
-    unused_code   Check unused code from dart_code_metrics.
-    unused_files  Check unused files from dart_code_metrics.
-    metrics	  Run analyze from dart_code_metrics.
-  analyze         Run flutter analyze.
+  analyze         Run `flutter analyze`.
+  depend	  Run `dart run dependency_validator`.
   ignore          Look for usage of ignore directives.
   license	  Look for missing top license in source code.
 
-  test	    Run `flutter test` for testing.
-  itest	    Run `flutter test integration_test` for interation testing.
+  test	    Run flutter testing.
+  itest	    Run flutter interation testing.
   qtest	    Run above test with PAUSE=0.
   coverage  Run with `--coverage`.
     coview  View the generated html coverage in browser.
@@ -70,9 +73,21 @@ export FLUTTER_HELP
 help::
 	@echo "$$FLUTTER_HELP"
 
+TICK=\033[0;32m✔\033[0m
+CROSS=\033[31m❌\033[0m
+
+DART_CODE=lib \
+	$(if $(wildcard test/),test) \
+	$(if $(wildcard integration_test/),integration_test)
+
+# Cater for the case where the support folder is one directory up.
+
+LOC := $(shell if [ -f support/loc.sh ]; then echo support/loc.sh; \
+       elif [ -f ../support/loc.sh ]; then echo ../support/loc.sh; fi)
+
 .PHONY: chrome
 chrome:
-	flutter run -d chrome
+	flutter run -d chrome --release
 
 # 20220503 gjw The following fails if the target files already exist -
 # just needs to be run once.
@@ -123,7 +138,7 @@ linux_config:
 	flutter config --enable-linux-desktop
 
 .PHONY: prep
-prep: analyze fix format dcm ignore license todo
+prep: analyze fix import_order_fix format dcm ignore license todo locmax markdown lychee depend bakfind test
 	@echo "ADVISORY: make tests docs"
 	@echo $(SEPARATOR)
 
@@ -134,19 +149,38 @@ docs::
 
 SEPARATOR="------------------------------------------------------------------------"
 
+.PHONY: pubspec
+pubspec:
+	meld pubspec.yaml.actual pubspec.yaml pubspec.yaml.local
+
+.PHONY: pubspec.local
+pubspec.local:
+	cp --backup pubspec.yaml pubspec.yaml.actual
+	cp --backup pubspec.yaml.local pubspec.yaml
+
+.PHONY: pubspec.actual
+pubspec.actual:
+	cp --backup pubspec.yaml.actual pubspec.yaml
+
 .PHONY: fix
 fix:
 	@echo "Dart: FIX"
-	dart fix --apply lib
+	dart fix --apply
 	@echo $(SEPARATOR)
 
 .PHONY: format
 format:
 	@echo "Dart: FORMAT"
-	dart format lib/
+	dart format lib/ $(if $(shell test -d example && echo yes),example/)
 	@echo $(SEPARATOR)
 
 # My emacs IDE is starting to add imports of backups automagically!
+
+.PHONY: bakfind
+bakfind:
+	@echo "Find imports of backups.\n"
+	@-! find lib -type f -name '*.dart' -exec grep '\.dart\.~\([0-9]\)~' {} +
+	@echo $(SEPARATOR)
 
 .PHONY: bakfix
 bakfix:
@@ -157,56 +191,113 @@ bakfix:
 .PHONY: tests
 tests:: test qtest
 
-.PHONY: dcm
-dcm: nullable unused_code unused_files metrics
-
-.PHONY: nullable
-nullable:
-	@echo "Dart Code Metrics: NULLABLE"
-	-dart run dart_code_metrics:metrics check-unnecessary-nullable --disable-sunset-warning lib
-	@echo $(SEPARATOR)
-
-.PHONY: unused_code
-unused_code:
-	@echo "Dart Code Metrics: UNUSED CODE"
-	-dart run dart_code_metrics:metrics check-unused-code --disable-sunset-warning lib
-	@echo $(SEPARATOR)
-
-.PHONY: unused_files
-unused_files:
-	@echo "Dart Code Metrics: UNUSED FILES"
-	-dart run dart_code_metrics:metrics check-unused-files --disable-sunset-warning lib
-	@echo $(SEPARATOR)
-
-.PHONY: metrics
-metrics:
-	@echo "Dart Code Metrics: METRICS"
-	-dart run dart_code_metrics:metrics analyze --disable-sunset-warning lib --reporter=console
-	@echo $(SEPARATOR)
-
 .PHONY: analyze
 analyze:
 	@echo "Futter ANALYZE"
-	-flutter analyze lib
+	-flutter analyze
 #	dart run custom_lint
+	@echo $(SEPARATOR)
+
+# dart pub global activate dependency_validator
+
+.PHONY: depend
+depend:
+	@echo "Dart: REVIEW DEPENDENCIES."
+	-dependency_validator
+	@echo $(SEPARATOR)
+
+LINES ?= 300
+
+.PHONY: locmax
+locmax:
+	@echo "Files with EXCESS LINES OF CODE:\n"
+	@-loc=$$(cat $(shell find lib -name '*.dart') \
+		| egrep -v '^ */' \
+		| egrep -v '^ *$$' \
+		| egrep -v '^ *[)},]+, *$$' \
+		| wc -l \
+		| numfmt --grouping); \
+	numf=$$(find lib -name "*.dart" -type f | wc -l); \
+	output=$$(find lib -name "*.dart" -exec sh -c ' \
+		lines=$$(bash $(LOC) "$$1"); \
+		if [ $$lines -gt $(LINES) ]; then \
+			printf "%4d %s\n" $$lines "$$1"; \
+		fi \
+	' _ {} \; | sort -nr); \
+	locm=$$(echo $$output | wc -w | awk '{print $$1/2}'); \
+	if [ -n "$$output" ]; then \
+		echo "$$output"; \
+		echo "\nTotal $$loc lines of code across $$numf files."; \
+		echo "\n$(CROSS) Error: Found $$locm files with more than $(LINES) lines of code."; \
+		exit 1; \
+	else \
+		echo "Total $$loc lines of code across $$numf files."; \
+		echo "\n$(TICK) All files are under $(LINES) lines."; \
+	fi
+	@echo $(SEPARATOR)
+
+# Check and fail if any files exceed limit
+
+PHONY: locmax-enforce
+locmax-enforce:
+	@loc=$$(cat $(shell find lib -name '*.dart') \
+		| egrep -v '^ */' \
+		| egrep -v '^ *$$' \
+		| egrep -v '^ *[)},]+, *$$' \
+		| wc -l \
+		| numfmt --grouping); \
+	numf=$$(find lib -name "*.dart" -type f | wc -l); \
+	output=$$(find lib -name "*.dart" -exec sh -c ' \
+		lines=$$(bash $(LOC) "$$1"); \
+		if [ $$lines -gt $(LINES) ]; then \
+			printf "%4d %s\n" $$lines "$$1"; \
+		fi \
+	' _ {} \; | sort -nr); \
+	locm=$$(echo $$output | wc -w | awk '{print $$1/2}'); \
+	if [ -n "$$output" ]; then \
+		echo "$$output"; \
+		echo "Total $$loc lines of code across $$numf files."; \
+		echo "$(CROSS) Error: Found $$locm files with more than $(LINES) lines of code."; \
+		exit 1; \
+	else \
+		echo "Total $$loc lines of code across $$numf files."; \
+		echo "$(TICK) All files are under $(LINES) lines"; \
+	fi
+
+
+# dart pub global activate dependency_validator
+
+.PHONY: markdown
+markdown:
+	@echo "Markdown: MARKDOWN FORMAT CHECK."
+	-markdownlint *.md lib assets installers
+	@echo
 	@echo $(SEPARATOR)
 
 .PHONY: ignore
 ignore:
 	@echo "Files that override lint checks with IGNORE:\n"
-	@-if grep -r -n ignore: lib; then exit 1; else exit 0; fi
+	@-if grep -r -n 'ignore: ' lib; then exit 1; else exit 0; fi
 	@echo $(SEPARATOR)
 
 .PHONY: todo
 todo:
 	@echo "Files that include TODO items to be resolved:\n"
-	@-if grep -r -n ' TODO ' lib; then exit 1; else exit 0; fi
+	@-if grep -r -n ' TODO ' lib; then echo; exit 1; else exit 0; fi
 	@echo $(SEPARATOR)
 
 .PHONY: license
 license:
 	@echo "Files without a LICENSE:\n"
-	@-find lib -type f -name '*.dart' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
+	@-output=$$(find lib -type f -not -name '*~' -not -name 'README*' -not -name '*.g.dart' \
+	! -exec grep -qE '^(///? Copyright|///? Licensed)' {} \; -print | xargs printf "\t%s\n"); \
+	if [ $$(echo "$$output" | wc -w) -ne 0 ]; then \
+		echo "$$output"; \
+		echo "\n$(CROSS) Error: Files with no license found."; \
+		exit 1; \
+	else \
+		echo "$(TICK) All source files contain a license."; \
+	fi
 	@echo $(SEPARATOR)
 
 .PHONY: riverpod
@@ -242,7 +333,7 @@ desktops:
 .PHONY: test
 test:
 	@echo "Unit TEST:"
-	-flutter test test
+	@-if [ -d test ]; then flutter test; else echo "\nNo test folder found."; fi
 	@echo $(SEPARATOR)
 
 # For a specific interactive test we think of it as providing a
@@ -250,11 +341,12 @@ test:
 # create a narrated video. A INTERACT of 5 or more is then useful.
 
 %.itest:
-	@device_id=$(shell flutter devices | grep -E 'linux|macos|windows' | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|'); \
-	if [ -z "$$device_id" ]; then \
-		echo "No desktop device found. Please ensure you have the correct desktop platform enabled."; \
-		exit 1; \
-	fi; \
+	@case "$$(uname -s)" in \
+		Linux*) device_id="linux" ;; \
+		Darwin*) device_id="macos" ;; \
+		MINGW*|MSYS*|CYGWIN*) device_id="windows" ;; \
+		*) echo "Unsupported platform: $$(uname -s)"; exit 1 ;; \
+	esac; \
 	flutter test --dart-define=INTERACT=5 --device-id $$device_id integration_test/$*.dart
 
 # For a run over all tests interactively we INTERACT a little but not as
@@ -262,11 +354,12 @@ test:
 
 .PHONY: itest
 itest:
-	@device_id=$(shell flutter devices | grep -E 'linux|macos|windows' | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|'); \
-	if [ -z "$$device_id" ]; then \
-		echo "No desktop device found. Please ensure you have the correct desktop platform enabled."; \
-		exit 1; \
-	fi; \
+	@case "$$(uname -s)" in \
+		Linux*) device_id="linux" ;; \
+		Darwin*) device_id="macos" ;; \
+		MINGW*|MSYS*|CYGWIN*) device_id="windows" ;; \
+		*) echo "Unsupported platform: $$(uname -s)"; exit 1 ;; \
+	esac; \
 	for t in integration_test/*.dart; do flutter test --dart-define=INTERACT=2 --device-id $$device_id $$t; done
 	@echo $(SEPARATOR)
 
@@ -275,31 +368,37 @@ itest:
 
 .PHONY: qtest
 qtest:
-	@device_id=$(shell flutter devices | grep -E 'linux|macos|windows' | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|'); \
-	if [ -z "$$device_id" ]; then \
-		echo "No desktop device found. Please ensure you have the correct desktop platform enabled."; \
-		exit 1; \
-	fi; \
-	for t in integration_test/*.dart; do \
+	@case "$$(uname -s)" in \
+		Linux*) device_id="linux" ;; \
+		Darwin*) device_id="macos" ;; \
+		MINGW*|MSYS*|CYGWIN*) device_id="windows" ;; \
+		*) echo "Unsupported platform: $$(uname -s)"; exit 1 ;; \
+	esac; \
+	for t in $$(find integration_test -name "*_test.dart" | sort); do \
 		echo "========================================"; \
 		echo $$t; /bin/echo -n $$t >&2; \
 		echo "========================================"; \
 		flutter test --dart-define=INTERACT=0 --device-id $$device_id --reporter failures-only  $$t 2>/dev/null; \
-		if [ "$$?" -eq 0 ]; then /bin/echo ' YES' >&2; else /bin/echo ' NO *****' >&2; fi; \
+		if [ "$$?" -eq 0 ]; then /bin/echo ' YES' >&2; else /bin/echo -n ' ...' >&2; \
+		echo '****************************************> TRY AGAIN'; \
+		flutter test --dart-define=INTERACT=0 --device-id $$device_id --reporter failures-only  $$t 2>/dev/null; \
+		if [ "$$?" -eq 0 ]; then /bin/echo ' YES' >&2; else /bin/echo ' NO *****' >&2; fi; fi; \
 	done
 	@echo $(SEPARATOR)
 
 %.qtest:
-	@device_id=$(shell flutter devices | grep -E 'linux|macos|windows' | perl -pe 's|^[^•]*• ([^ ]*) .*|\1|'); \
-	if [ -z "$$device_id" ]; then \
-		echo "No desktop device found. Please ensure you have the correct desktop platform enabled."; \
-		exit 1; \
-	fi; \
+	@case "$$(uname -s)" in \
+		Linux*) device_id="linux" ;; \
+		Darwin*) device_id="macos" ;; \
+		MINGW*|MSYS*|CYGWIN*) device_id="windows" ;; \
+		*) echo "Unsupported platform: $$(uname -s)"; exit 1 ;; \
+	esac; \
 	flutter test --dart-define=INTERACT=0 --device-id $$device_id --reporter failures-only integration_test/$*.dart 2>/dev/null
-
 
 .PHONY: qtest.all
 qtest.all:
+	@echo $(APP) `egrep '^version: ' pubspec.yaml`
+	@echo "flutter version:" `flutter --version | head -1 | cut -d ' ' -f 2`
 	make qtest > qtest_$(shell date +%Y%m%d%H%M%S).txt
 
 clean::
@@ -346,8 +445,11 @@ apk::
 	cp build/app/outputs/flutter-apk/app-release.apk installers/$(APP).apk
 	cp build/app/outputs/flutter-apk/app-release.apk installers/$(APP)-$(VER).apk
 
-appbundle:
+appbundle::
+	flutter clean
 	flutter build appbundle --release
+	cp build/app/outputs/bundle/release/app-release.aab installers/$(APP).aab
+	cp build/app/outputs/bundle/release/app-release.aab installers/$(APP)-$(VER).aab
 
 realclean::
 	flutter clean
@@ -376,8 +478,47 @@ endif
 publish:
 	dart pub publish
 
-### TODO THESE SHOULD BE CHECKED AND CLEANED UP
+# dart pub global activate import_order_lint
 
+.PHONY: import_order
+import_order:
+	@echo "Dart: CHECK IMPORT ORDER"
+	@which import_order > /dev/null 2>&1 \
+	|| { echo "Error: Install with 'dart pub global activate import_order_lint'."; exit 1; }
+	import_order --check $(DART_CODE)
+	@echo $(SEPARATOR)
+
+.PHONY: import_order_fix
+import_order_fix:
+	@echo "Dart: FIX IMPORT ORDER"
+	@import_order --check $(DART_CODE) \
+	|| import_order lib $(DART_CODE)
+	@echo $(SEPARATOR)
+
+# dart pub global activate dart_code_metrics
+
+.PHONY: dcm
+dcm: unused_code unused_files
+
+.PHONY: unused_code
+unused_code:
+	@echo "Dart Code Metrics: UNUSED CODE"
+	-metrics check-unused-code --disable-sunset-warning lib
+	@echo $(SEPARATOR)
+
+.PHONY: unused_files
+unused_files:
+	@echo "Dart Code Metrics: UNUSED FILES"
+	-metrics check-unused-files --disable-sunset-warning lib
+	@echo $(SEPARATOR)
+
+.PHONY: lychee
+lychee:
+	@echo "Lychee: CHECK LINKS."
+	-lychee --no-progress --format compact *.md ./**/*.dart $(if $(wildcard ./**/*.md),./**/*.md) $(if $(wildcard ./**/*.html),./**/*.html)
+	@echo $(SEPARATOR)
+
+### TODO THESE SHOULD BE CHECKED AND CLEANED UP
 
 .PHONY: docs
 docs::
@@ -385,14 +526,14 @@ docs::
 
 .PHONY: versions
 versions:
-	perl -pi -e 's|applicationVersion = ".*";|applicationVersion = "$(VER)";|' \
-	lib/constants/app.dart
+	if [ -d snap ]; then perl -pi -e 's|^version:.*|version: $(VER)|' snap/snapcraft.yaml; fi
 
-.PHONY: wc
-wc: lib/*.dart
-	@cat lib/*.dart lib/*/*.dart lib/*/*/*.dart \
-	| egrep -v '^/' \
+.PHONY: loc
+loc: lib/*.dart
+	@cat $(shell find lib -name '*.dart') \
+	| egrep -v '^ */' \
 	| egrep -v '^ *$$' \
+	| egrep -v '^ *[)},]+, *$$' \
 	| wc -l
 
 #

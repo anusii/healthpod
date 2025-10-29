@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -50,7 +50,8 @@ class SurveyData {
   /// Acts as main entry point.
 
   static Future<List<Map<String, dynamic>>> fetchAllSurveyData(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     List<Map<String, dynamic>> allData = [];
 
     // Fetch POD data.
@@ -62,8 +63,10 @@ class SurveyData {
 
     // Sort all data by timestamp.
 
-    allData.sort((a, b) => DateTime.parse(a['timestamp'])
-        .compareTo(DateTime.parse(b['timestamp'])));
+    allData.sort(
+      (a, b) => DateTime.parse(a['timestamp'])
+          .compareTo(DateTime.parse(b['timestamp'])),
+    );
 
     // Remove duplicate date entries - keeping only the latest entry for each day.
 
@@ -85,8 +88,10 @@ class SurveyData {
     // Convert back to list and re-sort.
 
     allData = uniqueDayEntries.values.toList();
-    allData.sort((a, b) => DateTime.parse(a['timestamp'])
-        .compareTo(DateTime.parse(b['timestamp'])));
+    allData.sort(
+      (a, b) => DateTime.parse(a['timestamp'])
+          .compareTo(DateTime.parse(b['timestamp'])),
+    );
 
     return allData;
   }
@@ -94,7 +99,8 @@ class SurveyData {
   /// Fetches survey data from POD storage.
 
   static Future<List<Map<String, dynamic>>> fetchPodSurveyData(
-      BuildContext context) async {
+    BuildContext context,
+  ) async {
     List<Map<String, dynamic>> podData = [];
     try {
       // Get the directory URL for the bp folder.
@@ -110,7 +116,7 @@ class SurveyData {
       for (var fileName in resources.files) {
         if (!fileName.endsWith('.enc.ttl')) continue;
 
-        // Construct the full path including healthpod/data/bp.
+        // Construct the full path including healthpod/data/blood_pressure.
 
         final filePath = '$bpDir/$fileName';
 
@@ -118,19 +124,33 @@ class SurveyData {
 
         // Read the file content.
 
-        final result = await readPod(
-          filePath,
-          context,
-          const Text('Reading survey data'),
-        );
+        String result;
+        try {
+          result = await readPod(
+            filePath,
+            context,
+            const Text('Reading survey data'),
+          );
+        } catch (e) {
+          // File might not exist anymore (deleted, moved, or corrupted).
+
+          debugPrint('Error reading survey file $fileName: $e');
+          continue;
+        }
 
         // Handle the response based on its type.
 
         if (result != SolidFunctionCallStatus.fail.toString() &&
             result != SolidFunctionCallStatus.notLoggedIn.toString()) {
           try {
-            // The result is the JSON string directly.
+            // Check if returns RDF instead of JSON.
 
+            if (result.toString().startsWith('@prefix') ||
+                result.toString().contains('<http')) {
+              continue;
+            }
+
+            // The result is the JSON string directly.
             final data = json.decode(result.toString());
             podData.add(data);
           } catch (e) {

@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Kevin Wang.
 
@@ -128,7 +128,9 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                       padding: isNarrowScreen
                           ? const EdgeInsets.all(12)
                           : const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 16),
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
                       backgroundColor:
                           Theme.of(context).colorScheme.primaryContainer,
                       foregroundColor:
@@ -317,9 +319,11 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
 
                   return DataRow(
                     cells: [
-                      DataCell(Text(
-                        '${obs.timestamp.year}-${obs.timestamp.month.toString().padLeft(2, '0')}-${obs.timestamp.day.toString().padLeft(2, '0')}',
-                      )),
+                      DataCell(
+                        Text(
+                          '${obs.timestamp.year}-${obs.timestamp.month.toString().padLeft(2, '0')}-${obs.timestamp.day.toString().padLeft(2, '0')}',
+                        ),
+                      ),
                       DataCell(Text(obs.vaccineName)),
                       DataCell(Text(obs.provider)),
                       DataCell(Text(obs.professional)),
@@ -337,12 +341,39 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () async {
-                                await editorState.deleteObservation(
-                                  context,
-                                  editorService,
-                                  obs,
-                                );
-                                _loadData();
+                                try {
+                                  await editorState.deleteObservation(
+                                    context,
+                                    editorService,
+                                    obs,
+                                  );
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Vaccination record deleted successfully.',
+                                        ),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Error deleting vaccination: ${e.toString()}',
+                                        ),
+                                        backgroundColor: Colors.red,
+                                      ),
+                                    );
+                                  }
+                                } finally {
+                                  // Always reload data to reflect current state.
+
+                                  _loadData();
+                                }
                               },
                             ),
                           ],

@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Kevin Wang
 
@@ -32,7 +32,6 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/table/vaccination_editor/model.dart';
-
 import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
@@ -57,12 +56,23 @@ class VaccinationEditorService {
 
       if (!context.mounted) continue;
 
-      final filePath = getFeaturePath(feature, file);
-      final content = await readPod(
-        filePath,
-        context,
-        const Text('Loading file'),
-      );
+      // Use relative path for file operations to match writePod behaviour.
+
+      final filePath = '$feature/$file';
+
+      String content;
+      try {
+        content = await readPod(
+          filePath,
+          context,
+          const Text('Loading file'),
+        );
+      } catch (e) {
+        // File might not exist anymore (deleted, moved, or corrupted).
+
+        debugPrint('Error reading vaccination file $file: $e');
+        continue;
+      }
 
       if (content == SolidFunctionCallStatus.fail.toString() ||
           content == SolidFunctionCallStatus.notLoggedIn.toString()) {

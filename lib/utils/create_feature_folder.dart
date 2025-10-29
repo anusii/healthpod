@@ -4,7 +4,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html.
+/// License: https://opensource.org/license/gpl-3-0.
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -56,7 +56,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
 
     bool existsAsDir = resources.subDirs.contains(featureName);
     if (existsAsDir) {
-      debugPrint('Feature folder $featureName already exists as directory');
+      // debugPrint('Feature folder $featureName already exists as directory');
       onSuccess.call();
       return SolidFunctionCallStatus.success;
     }
@@ -66,7 +66,8 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
     bool existsAsFile = resources.files.contains(featureName);
     if (existsAsFile) {
       debugPrint(
-          'Removing existing file $featureName before creating directory');
+        'Removing existing file $featureName before creating directory',
+      );
       if (!context.mounted) return SolidFunctionCallStatus.fail;
 
       // Full path for deletion needs to include healthpod/data.

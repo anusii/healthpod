@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Zheyuan Xu
 
@@ -33,6 +33,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/features/resources/service/resource_service.dart';
 import 'package:healthpod/theme/card_style.dart';
 import 'package:healthpod/utils/fetch_health_plan_data.dart';
+import 'package:healthpod/utils/is_logged_in.dart';
 import 'package:healthpod/utils/save_health_plan_data.dart';
 
 /// A widget to display and edit a health management plan.
@@ -67,28 +68,39 @@ class _ManagePlanState extends State<ManagePlan> {
     });
 
     try {
-      final healthPlanData = await fetchHealthPlanData(context);
+      // First check if user is logged in.
 
-      // Check if the returned data has planItems list.
+      final loggedIn = await isLoggedIn();
 
-      final List<String> loadedPlanItems =
-          (healthPlanData['planItems'] as List?)?.cast<String>() ?? [];
+      if (loggedIn) {
+        if (!mounted) return;
+        final healthPlanData = await fetchHealthPlanData(context);
 
-      setState(() {
-        title =
-            healthPlanData['title'] as String? ?? 'My Health Management Plan';
-        planItems =
-            loadedPlanItems; // Use the loaded items, which might be empty
-        isLoading = false;
-      });
+        // Check if the returned data has planItems list.
+
+        final List<String> loadedPlanItems =
+            (healthPlanData['planItems'] as List?)?.cast<String>() ?? [];
+
+        setState(() {
+          title =
+              healthPlanData['title'] as String? ?? 'My Health Management Plan';
+          planItems = loadedPlanItems;
+          isLoading = false;
+        });
+      } else {
+        // User not logged in, use default values.
+
+        setState(() {
+          title = 'My Health Management Plan';
+          planItems = [];
+          isLoading = false;
+        });
+      }
     } catch (e) {
-      debugPrint('Error loading health plan: $e');
-
-      // Use empty list on error.
+      // In case of error, show the default title.
 
       setState(() {
         title = 'My Health Management Plan';
-        planItems = [];
         isLoading = false;
       });
     }
@@ -295,78 +307,83 @@ class _ManagePlanState extends State<ManagePlan> {
                   const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                        'No health plan items added yet. Click edit to add items.'),
+                      'No health plan items added yet. Click edit to add items.',
+                    ),
                   )
                 else
-                  ...planItems.map((item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• '),
-                            Expanded(
-                              child: MarkdownBody(
-                                data: item,
-                                selectable: true,
-                                onTapLink: (text, href, title) {
-                                  if (href != null) {
-                                    ResourceService.openExternalLink(
-                                        context, href);
-                                  }
-                                },
-                                styleSheet: MarkdownStyleSheet(
-                                  p: const TextStyle(fontSize: 14),
-                                  strong: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  ),
-                                  em: TextStyle(
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 14,
-                                    color:
-                                        Theme.of(context).colorScheme.secondary,
-                                  ),
-                                  blockquote: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Theme.of(context).colorScheme.tertiary
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .secondary,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                  blockquoteDecoration: BoxDecoration(
-                                    color: Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .surfaceContainerHighest
-                                            .withValues(alpha: 0.6)
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .secondaryContainer
-                                            .withValues(alpha: 0.5),
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border(
-                                      left: BorderSide(
-                                        width: 4,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .primary,
-                                      ),
+                  ...planItems.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('• '),
+                          Expanded(
+                            child: MarkdownBody(
+                              data: item,
+                              selectable: true,
+                              onTapLink: (text, href, title) {
+                                if (href != null) {
+                                  ResourceService.openExternalLink(
+                                    context,
+                                    href,
+                                  );
+                                }
+                              },
+                              styleSheet: MarkdownStyleSheet(
+                                p: const TextStyle(fontSize: 14),
+                                strong: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                em: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 14,
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                ),
+                                blockquote: TextStyle(
+                                  fontSize: 14,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Theme.of(context).colorScheme.tertiary
+                                      : Theme.of(context).colorScheme.secondary,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                blockquoteDecoration: BoxDecoration(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest
+                                          .withValues(alpha: 0.6)
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .secondaryContainer
+                                          .withValues(alpha: 0.5),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border(
+                                    left: BorderSide(
+                                      width: 4,
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
                                     ),
                                   ),
-                                  blockquotePadding: const EdgeInsets.only(
-                                      left: 12, top: 4, bottom: 4, right: 4),
+                                ),
+                                blockquotePadding: const EdgeInsets.only(
+                                  left: 12,
+                                  top: 4,
+                                  bottom: 4,
+                                  right: 4,
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                      )),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
     );

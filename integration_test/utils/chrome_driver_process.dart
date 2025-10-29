@@ -6,7 +6,7 @@
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
-/// License: https://www.gnu.org/licenses/gpl-3.0.en.html
+/// License: https://opensource.org/license/gpl-3-0
 //
 // This program is free software: you can redistribute it and/or modify it under
 // the terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,7 @@
 // details.
 //
 // You should have received a copy of the GNU General Public License along with
-// this program.  If not, see <https://www.gnu.org/licenses/>.
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
 /// Authors: Ashley Tang
 
@@ -194,7 +194,8 @@ class ChromeDriverProcess {
 
       if (!await _isPortAvailable(TestConfig.chromeDriverPort)) {
         throw StateError(
-            '⚠️ Port ${TestConfig.chromeDriverPort} is already in use. Please close other instances.');
+          '⚠️ Port ${TestConfig.chromeDriverPort} is already in use. Please close other instances.',
+        );
       }
 
       // Configure and start process.
@@ -253,7 +254,8 @@ class ChromeDriverProcess {
           const Duration(seconds: 5),
           onTimeout: () {
             Logger.warn(
-                '⚠️ ChromeDriver graceful shutdown timed out, forcing termination');
+              '⚠️ ChromeDriver graceful shutdown timed out, forcing termination',
+            );
             _process!.kill(ProcessSignal.sigkill);
             return -1;
           },

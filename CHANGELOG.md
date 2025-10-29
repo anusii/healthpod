@@ -3,18 +3,50 @@
 Recorded here are the high level changes for the HealthPod app.
 
 Guide: Each version update is recorded here with a short user-oriented
-description of the update. Updates in the 0.1.n series are heading
-toward a 0.2 release.
+description of the update. Updates in the 1.0.n series are heading
+toward a 1.1 release. The `[version timestamp user]` string is
+utilised by the flutter version_widget package.
 
-Binaries to download latest version:
-[**GNU/Linux**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
-[**MacOS**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
-[**Windows**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
+Run the app online: [**web**](https://healthpod.solidcommunity.au).
 
-Run in browser: [**Web**](https://healthpod.solidcommunity.au).
+Download the latest version:
+GNU/Linux
+[**deb**](https://solidcommunity.au/installers/healthpod_amd64.deb) or
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
+Android
+[**apk**](https://solidcommunity.au/installers/healthpod.apk) -
+macOS
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
+Windows
+[**zip**](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
+[**inno**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
 
-## 1.0 First stable release
+Coding documentation is available from [solid community
+au](https://solidcommunity.au/docs/healthpod)
 
+## 1.1
+
++ Release to solidcommunity.org [1.0.0 20251028 gjw]
+
+## 0.3 Test and Make Robust
+
++ Re-engineer logout/login for status bar [0.2.4 20251013 tonypioneer]
++ Review and get snap build working [0.2.3 20251013 gjw]
++ Cleanup the README. Test snap build. [0.2.2 20251012 gjw]
++ Lychee checks and template updates [0.2.1 20250929 gjw]
++ Begin new series to test and make robust [0.2.0 20250918 gjw]
+
+## 0.2 First stable release with SolidScaffold
+
++ LINT: Remove unused code and split long files [0.1.23 20250918 tonypioneer]
++ Get installer builds working [0.1.22 20250917 gjw]
++ Migrate to solidscaffold [0.1.21 20250917 tonypioneer]
++ Update solidpod dependency for CSS v7.1.7 [0.1.20 20250815 gjw]
++ Fix support csv import for blood pressure [0.1.19 20250809 atangster]
++ Bug fix exception when delting on chrome/web [0.1.18 20250809 atangster]
++ Bug fix CSV import of blood pressure [0.1.17 20250808 gjw]
++ Various bug fixes and code cleanup [0.1.16 20250808 gjw]
++ CARD: Flutter breaking change fixed [0.1.15 20250626 gjw]
 + MEDICATION: import/export [0.1.14 20250508 atangster]
 + DIARY: Collapse into tabs rather then separate tab [0.1.13 20250508 kev]
 + DIARY: import/export [0.1.12 20250508 kev]
@@ -30,7 +62,7 @@ Run in browser: [**Web**](https://healthpod.solidcommunity.au).
 + Resync [0.1.2 20250423 gjw]
 + HOME: Concept dashboard and vaccinations [0.1.1 20250402 misc]
 
-## 0.1 Initial beta release.
+## 0.1 Initial beta release
 
 + Ready for beta release [0.1.0 20250326 gjw]
 + Deploy navigator [0.0.9 20250218 kev]

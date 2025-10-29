@@ -1,21 +1,25 @@
 name: Lint Checks
 
-# Always run the checks on a push to dev and a PR.
+# Always run the checks on a push and a PR.
+#
+# 20250914 gjw Run the tests as separate jobs so we see the individual
+# results. We can instead run then as a single job with multiple
+# steps, but then it stops on the first fail and so not as
+# informative.
 
 on:
   push:
-    branches:
-      - dev
   pull_request:
     types: [opened, reopened, synchronize]
 
 env:
-  FLUTTER_VERSION: '3.29.2'
+  FLUTTER_VERSION: '3.35.7'
 
 jobs:
 
   analyze:
     runs-on: ubuntu-latest
+    if: github.event.repository.private == false
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -27,6 +31,7 @@ jobs:
 
   format:
     runs-on: ubuntu-latest
+    if: github.event.repository.private == false
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -36,8 +41,9 @@ jobs:
       - run: flutter pub get
       - run: dart format --set-exit-if-changed .
 
-  import_order:
+  unused_code:
     runs-on: ubuntu-latest
+    if: github.event.repository.private == false
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -45,40 +51,142 @@ jobs:
           channel: 'stable'
           flutter-version: ${{env.FLUTTER_VERSION}}
       - run: flutter pub get
-      - run: dart run custom_lint
+      - run: dart pub global activate dart_code_metrics
+      - run: metrics check-unused-code --disable-sunset-warning lib
+
+  unused_files:
+    runs-on: ubuntu-latest
+    if: github.event.repository.private == false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: ${{env.FLUTTER_VERSION}}
+      - run: flutter pub get
+      - run: dart pub global activate dart_code_metrics
+      - run: metrics check-unused-files --disable-sunset-warning lib
+
+  import_order:
+    runs-on: ubuntu-latest
+    if: github.event.repository.private == false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: ${{env.FLUTTER_VERSION}}
+      - run: flutter pub get
+      - run: dart pub global activate import_order_lint
+      - run: import_order --check
 
   markdown:
     runs-on: ubuntu-latest
+    if: github.event.repository.private == false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 18
       - run: npm install -g markdownlint-cli
-      - run: markdownlint assets/markdown
-        # -p .markdownlintignore -c .markdownlint.yaml
+      - run: markdownlint *.md lib assets installers
+
+  link_checker:
+    runs-on: ubuntu-latest
+    if: github.event.repository.private == false
+    permissions:
+      issues: write # required for peter-evans/create-issue-from-file
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Link Checker
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with: # Don't fail for now but then create an issue - useful?
+          args:
+            --verbose
+            --no-progress
+            'assets/**/*.md'
+            'assets/**/*.html'
+            'lib/**/*.dart'
+          fail: false
+
+      - name: Create Issue From File
+        if: steps.lychee.outputs.exit_code != 0
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: Link Checker Report
+          content-filepath: ./lychee/out.md
+          labels: report, automated issue
+
+  locmax:
+    runs-on: ubuntu-latest
+    if: github.event.repository.private == false
+    steps:
+      - uses: actions/checkout@v4
+      - run: make locmax-enforce
 
   copyright:
     runs-on: ubuntu-latest
+    if: github.event.repository.private == false
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version: ${{env.FLUTTER_VERSION}}
-      - run: flutter pub get
-      - run: find lib -type f -name '*.dart' ! -exec grep -qE '^(/// .*|/// Copyright|/// Licensed)' {} \; -print | xargs printf "\t%s\n"
+      - name: Check copyright headers
+        run: |
+          # Find Dart files without proper copyright headers, excluding generated files
+          missing_copyright=$(find lib -type f -name '*.dart' \
+            ! -name '*.g.dart' \
+            ! -name '*.gr.dart' \
+            ! -name '*.freezed.dart' \
+            ! -name '*.chopper.dart' \
+            ! -name '*.part.dart' \
+            ! -name '*.config.dart' \
+            -exec grep -L "Copyright" {} \;)
+          if [ -n "$missing_copyright" ]; then
+            echo "❌ Files missing copyright headers:"
+            echo "$missing_copyright"
+            echo ""
+            echo "💡 Note: Generated files (*.g.dart, *.freezed.dart, etc.) are automatically excluded"
+            exit 1
+          else
+            echo "✅ All non-generated Dart files have copyright headers"
+          fi
 
-  build:
+  # 20251017 gjw The usual command for running the integration tests
+  # is `flutter test interaction_test` and each `*_test.dart`  is
+  # run. However for our testing of apps using solidui we need to
+  # authenticate through an external browser login. The usual `flutter
+  # test` will not properly authenticate. Instead, we should run `make
+  # qtest.all` to run the tests. This action
+
+  test_enforcement:
     runs-on: ubuntu-latest
+    if: github.event.repository.private == false
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          flutter-version: ${{env.FLUTTER_VERSION}}
-      - run: sudo apt update
-      - run: sudo apt-get install -y clang cmake curl libgtk-3-dev ninja-build pkg-config unzip libunwind-dev libsecret-1-dev
-      - run: sudo apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libgstreamer-plugins-bad1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav gstreamer1.0-tools gstreamer1.0-x gstreamer1.0-alsa gstreamer1.0-gl gstreamer1.0-gtk3 gstreamer1.0-qt5 gstreamer1.0-pulseaudio
-      - run: flutter pub get
-      - run: flutter build linux -v
+      - name: Check for batch test commands
+        run: |
+          # Check for disallowed "flutter test integration_test/" usage in scripts/workflows
+          # Exclude comments and this CI check itself
+          batch_test_found=$(grep -r "flutter test integration_test" \
+            .github/workflows/ \
+            support/ \
+            scripts/ \
+            Makefile 2>/dev/null | \
+            grep -v "# Check for disallowed" | \
+            grep -v "batch_test_found=" | \
+            grep -v "echo.*flutter test integration_test/" || true)
+          if [ -n "$batch_test_found" ]; then
+            echo "❌ Found disallowed batch test command 'flutter test integration_test/'"
+            echo ""
+            echo "Found in:"
+            echo "$batch_test_found"
+            echo ""
+            echo "⚠️  Batch testing fails on desktop due to Flutter framework limitations."
+            echo "✅ Use 'make qtest' instead - it runs tests individually."
+            echo ""
+            echo "See docs/TESTING_GUIDE.md for details."
+            exit 1
+          else
+            echo "✅ No batch test commands found - using recommended 'make qtest' approach"
+          fi
