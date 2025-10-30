@@ -24,7 +24,7 @@ env:
   APP: healthpod
   RELEASE: dev
   LINUX_PKGS: libsecret-1-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad
-  FLUTTER_VERSION: '3.35.6'
+  FLUTTER_VERSION: '3.35.7'
 
 jobs:
 

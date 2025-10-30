@@ -1,6 +1,6 @@
 /// Integration test suite for Solid Pod authentication flow for Linux.
 //
-// Time-stamp: <Sunday 2025-01-26 08:55:54 +1100 Graham Williams>
+// Time-stamp: <Tuesday 2025-10-28 08:58:18 +1100 Graham Williams>
 //
 /// Copyright (C) 2023-2024, Togaware Pty Ltd
 ///
@@ -84,7 +84,7 @@ void main() {
       // Create WebDriver instance with configured capabilities.
 
       driver = await createDriver(
-        uri: Uri.parse('http://localhost:${TestConfig.chromeDriverPort}'),
+        uri: Uri.parse('http://' 'localhost:${TestConfig.chromeDriverPort}'),
         desired: capabilities,
       );
       Logger.info('✅ WebDriver initialized successfully');

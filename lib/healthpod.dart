@@ -1,6 +1,6 @@
 /// HealthPod - Collect and analyse health data preserving privacy using PODs.
 ///
-// Time-stamp: <Wednesday 2025-07-23 16:30:10 +1000 Graham Williams>
+// Time-stamp: <Saturday 2025-10-25 06:03:34 +1100 Graham Williams>
 ///
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -60,7 +60,7 @@ class _HealthPodState extends ConsumerState<HealthPod> {
     SolidAuthHandler.instance.configure(
       SolidAuthConfig(
         loginPageBuilder: (context) => createSolidLogin(context),
-        defaultServerUrl: 'https://pods.dev.solidcommunity.au',
+        defaultServerUrl: 'https://pods.solidcommunity.au',
         appTitle: 'HEALTH POD',
         appDirectory: 'healthpod',
         appImage: const AssetImage('assets/images/app_image.png'),

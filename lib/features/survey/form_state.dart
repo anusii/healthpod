@@ -143,4 +143,12 @@ class HealthSurveyFormController {
   void updateResponse(String fieldName, dynamic value) {
     responses[fieldName] = value;
   }
+
+  /// Resets the form state and clears all responses.
+
+  void reset() {
+    responses.clear();
+    notesController.clear();
+    formKey.currentState?.reset();
+  }
 }
