@@ -33,18 +33,20 @@ The latest version of the app can be run online at
 with no installation required, or downloaded and installed for your
 platform from the [Solid Community AU](https://solidcommunity.au):
 
++ **Web**
+  [solidcommunity](https://healthpod.solidcommunity.au/);
 + **Android**
-[apk](https://solidcommunity.au/installers/healthpod.apk);
+  [apk](https://solidcommunity.au/installers/healthpod.apk);
 + **GNU/Linux**
-[snap](https://solidcommunity.au/installers/healthpod_amd64.snap) or
-[deb](https://solidcommunity.au/installers/healthpod_amd64.deb) or
-[zip](https://solidcommunity.au/installers/healthpod-dev-linux.zip);
+  [snap](https://solidcommunity.au/installers/healthpod_amd64.snap) or
+  [deb](https://solidcommunity.au/installers/healthpod_amd64.deb) or
+  [zip](https://solidcommunity.au/installers/healthpod-dev-linux.zip);
 + **macOS**
-[zip](https://solidcommunity.au/installers/healthpod-dev-macos.zip);
+  [zip](https://solidcommunity.au/installers/healthpod-dev-macos.zip);
 + **Windows**
-[zip](https://solidcommunity.au/installers/healthpod-dev-windows.zip)
-or
-[inno](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
+  [zip](https://solidcommunity.au/installers/healthpod-dev-windows.zip)
+  or
+  [inno](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
 
 Contributions are welcome. Visit
 [github](https://github.com/anusii/healthpod) to submit an issue or,
@@ -116,7 +118,7 @@ The grid items include:
   to interact with the data collection.
 
 <!-- markdownlint-disable MD036 -->
-*Time-stamp: <Tuesday 2025-10-28 11:59:35 +1100 Graham Williams>*
+*Time-stamp: <Thursday 2025-10-30 14:04:53 +1100 Graham Williams>*
 <!-- markdownlint-enable MD036 -->
 
 <!-- markdownlint-disable MD053 -->
