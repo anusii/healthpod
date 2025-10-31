@@ -141,16 +141,13 @@ class _HealthSurveyCategoricalInputState
             mainAxisSize: MainAxisSize.min,
             children: [
               // Build a radio button for each option.
+              ...widget.question.options!.asMap().entries.map((entry) {
+                final optionIndex = entry.key;
+                final option = entry.value;
+                return _buildOption(context, field, option, optionIndex);
+              }),
 
-              ...widget.question.options!.asMap().entries.map(
-                (entry) {
-                  final optionIndex = entry.key;
-                  final option = entry.value;
-                  return _buildOption(context, field, option, optionIndex);
-                },
-              ),
               // Show error message if validation fails.
-
               if (field.hasError)
                 Padding(
                   padding: const EdgeInsets.only(left: 12, top: 8),
@@ -214,8 +211,10 @@ class _HealthSurveyCategoricalInputState
             if (event.logicalKey == LogicalKeyboardKey.space ||
                 event.logicalKey == LogicalKeyboardKey.enter) {
               field.didChange(option);
-              widget.controller
-                  .updateResponse(widget.question.fieldName, option);
+              widget.controller.updateResponse(
+                widget.question.fieldName,
+                option,
+              );
               setState(() {
                 selectedValue = option;
               });
@@ -231,8 +230,10 @@ class _HealthSurveyCategoricalInputState
           child: InkWell(
             onTap: () {
               field.didChange(option);
-              widget.controller
-                  .updateResponse(widget.question.fieldName, option);
+              widget.controller.updateResponse(
+                widget.question.fieldName,
+                option,
+              );
               setState(() {
                 selectedValue = option;
               });

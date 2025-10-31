@@ -42,22 +42,14 @@ class DiaryImporter extends HealthDataImporterBase {
   String get timestampField => 'date';
 
   @override
-  List<String> get requiredColumns => [
-        'date',
-        'title',
-        'description',
-      ];
+  List<String> get requiredColumns => ['date', 'title', 'description'];
 
   @override
   List<String> get optionalColumns => [];
 
   @override
   Map<String, dynamic> createDefaultResponseMap() {
-    return {
-      'title': '',
-      'description': '',
-      'isPast': false,
-    };
+    return {'title': '', 'description': '', 'isPast': false};
   }
 
   @override

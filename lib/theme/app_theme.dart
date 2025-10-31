@@ -87,17 +87,12 @@ class AppTheme {
           letterSpacing: 0.1,
         ),
       ),
-      iconTheme: const IconThemeData(
-        color: AppColors.navUnselected,
-        size: 24,
-      ),
+      iconTheme: const IconThemeData(color: AppColors.navUnselected, size: 24),
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.surface,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
-        iconTheme: IconThemeData(
-          color: AppColors.primary,
-        ),
+        iconTheme: IconThemeData(color: AppColors.primary),
         titleTextStyle: TextStyle(
           color: AppColors.textPrimary,
           fontSize: 20,
@@ -111,10 +106,7 @@ class AppTheme {
         shadowColor: AppColors.textPrimary.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(
-            color: AppColors.cardBorder,
-            width: 1,
-          ),
+          side: const BorderSide(color: AppColors.cardBorder, width: 1),
         ),
       ),
       dividerTheme: const DividerThemeData(
@@ -187,9 +179,7 @@ class AppTheme {
         backgroundColor: AppColors.surfaceDark,
         foregroundColor: AppColors.textPrimaryDark,
         elevation: 0,
-        iconTheme: IconThemeData(
-          color: AppColors.primaryDark,
-        ),
+        iconTheme: IconThemeData(color: AppColors.primaryDark),
         titleTextStyle: TextStyle(
           color: AppColors.textPrimaryDark,
           fontSize: 20,
@@ -203,10 +193,7 @@ class AppTheme {
         shadowColor: AppColors.textPrimaryDark.withValues(alpha: 0.2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(
-            color: AppColors.cardBorderDark,
-            width: 1,
-          ),
+          side: const BorderSide(color: AppColors.cardBorderDark, width: 1),
         ),
       ),
       dividerTheme: const DividerThemeData(

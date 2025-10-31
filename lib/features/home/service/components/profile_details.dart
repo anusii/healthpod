@@ -175,9 +175,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
     if (nameController.text.trim().isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Name is required')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Name is required')));
       }
       return;
     }
@@ -186,9 +186,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
     if (!ProfileDataManager.hasDataChanged(_controllers, _profileData)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No changes detected')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('No changes detected')));
       }
       return;
     }
@@ -327,9 +327,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     );
 
     return Container(
-      constraints: const BoxConstraints(
-        maxWidth: 400,
-      ),
+      constraints: const BoxConstraints(maxWidth: 400),
       padding: const EdgeInsets.all(16.0),
       decoration: getHomeCardDecoration(context),
       child: Stack(
@@ -339,7 +337,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Title and edit button row.
-
               ProfileUIComponents.buildTitleRow(
                 context,
                 widget.showEditButton,
@@ -368,7 +365,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
               const SizedBox(height: 8),
 
               // Personal Identification Details section.
-
               if (_isLoading)
                 ...ProfileUIComponents.buildLoadingRows(context)
               else
@@ -382,8 +378,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                 ),
             ],
           ),
-          // Loading/saving overlay.
 
+          // Loading/saving overlay.
           if (_isLoading || _isSaving)
             ProfileUIComponents.buildLoadingOverlay(
               context,

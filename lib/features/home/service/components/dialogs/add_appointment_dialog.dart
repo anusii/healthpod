@@ -32,10 +32,7 @@ import 'package:healthpod/features/diary/service.dart';
 /// details.
 
 class AddAppointmentDialog extends StatefulWidget {
-  const AddAppointmentDialog({
-    super.key,
-    required this.onAppointmentAdded,
-  });
+  const AddAppointmentDialog({super.key, required this.onAppointmentAdded});
 
   final Function(Appointment appointment) onAppointmentAdded;
 
@@ -107,10 +104,7 @@ class _AddAppointmentDialogState extends State<AddAppointmentDialog> {
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: _addAppointment,
-          child: const Text('Add'),
-        ),
+        ElevatedButton(onPressed: _addAppointment, child: const Text('Add')),
       ],
     );
   }

@@ -37,10 +37,7 @@ import 'package:healthpod/utils/parse_numeric_input.dart';
 /// Main line chart widget for displaying blood pressure trends.
 
 class BPLineChart extends StatelessWidget {
-  const BPLineChart({
-    super.key,
-    required this.surveyData,
-  });
+  const BPLineChart({super.key, required this.surveyData});
 
   final List<Map<String, dynamic>> surveyData;
 
@@ -50,9 +47,7 @@ class BPLineChart extends StatelessWidget {
 
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: LineChart(
@@ -64,7 +59,6 @@ class BPLineChart extends StatelessWidget {
                 ///
                 /// Uses a dashed red line to indicate dangerous systolic
                 /// levels.
-
                 HorizontalLine(
                   y: 180,
                   color: theme.colorScheme.error,
@@ -85,7 +79,6 @@ class BPLineChart extends StatelessWidget {
                 ///
                 /// Uses a dashed purple line matching the systolic data color.
                 /// Upper systolic threshold line (120 mmHg).
-
                 HorizontalLine(
                   y: 120,
                   color: theme.colorScheme.primary.withValues(alpha: 0.7),
@@ -100,7 +93,6 @@ class BPLineChart extends StatelessWidget {
                 ///
                 /// Uses a dashed teal line matching the diastolic data color.
                 /// Upper diastolic threshold line (80 mmHg).
-
                 HorizontalLine(
                   y: 80,
                   color: theme.colorScheme.secondary.withValues(alpha: 0.7),
@@ -114,7 +106,6 @@ class BPLineChart extends StatelessWidget {
             ),
 
             /// Touch interaction configuration for data point inspection.
-
             lineTouchData: LineTouchData(
               touchTooltipData: LineTouchTooltipData(
                 getTooltipColor: (touchedSpots) =>
@@ -135,7 +126,6 @@ class BPLineChart extends StatelessWidget {
 
                 /// Custom tooltip content generator showing pressure values
                 /// and additional data.
-
                 getTooltipItems: (List<LineBarSpot> touchedSpots) =>
                     _buildTooltipItems(touchedSpots, theme),
               ),
@@ -144,7 +134,6 @@ class BPLineChart extends StatelessWidget {
             ),
 
             /// Grid configuration for better data readability.
-
             gridData: FlGridData(
               show: true,
               drawVerticalLine: true,
@@ -167,10 +156,8 @@ class BPLineChart extends StatelessWidget {
             ),
 
             // Configure axis titles and labels.
-
             titlesData: FlTitlesData(
               /// X-axis shows dates with dynamic year display.
-
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
@@ -182,7 +169,6 @@ class BPLineChart extends StatelessWidget {
               ),
 
               // Y-axis configuration showing pressure values.
-
               leftTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
@@ -194,7 +180,6 @@ class BPLineChart extends StatelessWidget {
               ),
 
               /// Hide unnecessary axis titles.
-
               rightTitles: const AxisTitles(
                 sideTitles: SideTitles(showTitles: false),
               ),
@@ -204,21 +189,18 @@ class BPLineChart extends StatelessWidget {
             ),
 
             /// Chart border for visual containment.
-
             borderData: FlBorderData(
               show: true,
               border: Border.all(color: theme.dividerColor),
             ),
 
             /// Chart value range configuration.
-
             minX: 0,
             maxX: (surveyData.length - 1).toDouble(),
             minY: 40, // Minimum expected diastolic pressure.
             maxY: 200, // Maximum expected systolic pressure.
             lineBarsData: [
               // Systolic pressure line configuration.
-
               LineChartBarData(
                 spots: BPChartDataManager.getSystolicData(surveyData),
                 isCurved: true,
@@ -239,7 +221,6 @@ class BPLineChart extends StatelessWidget {
               ),
 
               // Diastolic pressure line configuration.
-
               LineChartBarData(
                 spots: BPChartDataManager.getDiastolicData(surveyData),
                 isCurved: true,
@@ -336,12 +317,7 @@ class BPLineChart extends StatelessWidget {
           ),
         );
       } else {
-        items.add(
-          const LineTooltipItem(
-            '',
-            TextStyle(fontSize: 0),
-          ),
-        );
+        items.add(const LineTooltipItem('', TextStyle(fontSize: 0)));
       }
     }
 

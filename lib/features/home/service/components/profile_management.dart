@@ -95,7 +95,6 @@ class _ProfileManagementState extends State<ProfileManagement> {
                 const SizedBox(height: 24),
 
                 // Combined Profile Details Section with photo editing capability.
-
                 _buildSection(
                   title: 'Profile Details',
                   child: ProfileDetails(
@@ -118,10 +117,7 @@ class _ProfileManagementState extends State<ProfileManagement> {
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
         child,

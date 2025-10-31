@@ -113,11 +113,7 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
 
   Future<void> _handleDelete(MedicationObservation obs) async {
     try {
-      await editorState.deleteObservation(
-        context,
-        editorService,
-        obs,
-      );
+      await editorState.deleteObservation(context, editorService, obs);
     } catch (e) {
       debugPrint('Error in medication deletion UI: $e');
     } finally {
@@ -128,11 +124,7 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
   /// Handles saving a medication observation.
 
   Future<void> _handleSave(int index) async {
-    await editorState.saveObservation(
-      context,
-      editorService,
-      index,
-    );
+    await editorState.saveObservation(context, editorService, index);
     _loadData();
   }
 
@@ -192,13 +184,16 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
                               horizontal: 16,
                               vertical: 16,
                             ),
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onPrimaryContainer,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer,
+                      foregroundColor: Theme.of(
+                        context,
+                      ).colorScheme.onPrimaryContainer,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(isNarrowScreen ? 12 : 8),
+                        borderRadius: BorderRadius.circular(
+                          isNarrowScreen ? 12 : 8,
+                        ),
                       ),
                       minimumSize: isNarrowScreen ? const Size(46, 46) : null,
                     ),
@@ -210,9 +205,9 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
                             children: [
                               Icon(
                                 Icons.add_circle,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
                               ),
                               const SizedBox(width: 8),
                               const Text('Add New Medication'),

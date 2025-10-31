@@ -92,8 +92,9 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
     try {
       // First, try to load data from the medication directory in the pod.
 
-      final medicationData =
-          await MedicationData.fetchAllMedicationData(context);
+      final medicationData = await MedicationData.fetchAllMedicationData(
+        context,
+      );
 
       // Validate each record and fix issues.
 
@@ -195,9 +196,9 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
 
           _surveyData = _getSampleData();
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading data: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading data: $e')));
       }
     }
   }
@@ -253,12 +254,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
 
   List<Widget> _buildStatItems() {
     if (_surveyData.isEmpty) {
-      return [
-        const StatItem(
-          label: 'Medications',
-          value: 'No data available',
-        ),
-      ];
+      return [const StatItem(label: 'Medications', value: 'No data available')];
     }
 
     // Count medications by frequency.
@@ -298,34 +294,20 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
     });
 
     return [
-      StatItem(
-        label: 'Total Medications',
-        value: '${_surveyData.length}',
-      ),
-      Container(
-        height: 40,
-        width: 1,
-        color: theme.dividerColor,
-      ),
-      StatItem(
-        label: 'Most Common Frequency',
-        value: mostCommonFrequency,
-      ),
+      StatItem(label: 'Total Medications', value: '${_surveyData.length}'),
+      Container(height: 40, width: 1, color: theme.dividerColor),
+      StatItem(label: 'Most Common Frequency', value: mostCommonFrequency),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null && _surveyData.isEmpty) {
-      return Center(
-        child: Text(_error!),
-      );
+      return Center(child: Text(_error!));
     }
 
     // Sort medications by start date, most recent first.
@@ -368,7 +350,6 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Statistics section.
-
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               child: Row(
@@ -380,7 +361,6 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
             const Divider(height: 32),
 
             // Medication Timeline.
-
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: _buildMedicationTimeline(sortedData),
@@ -456,10 +436,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
               width: 15,
               color: theme.primaryColor,
             ),
-            beforeLineStyle: LineStyle(
-              color: theme.primaryColor,
-              thickness: 2,
-            ),
+            beforeLineStyle: LineStyle(color: theme.primaryColor, thickness: 2),
             endChild: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 0, 24),
               child: Column(

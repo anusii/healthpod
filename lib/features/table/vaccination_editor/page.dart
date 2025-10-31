@@ -70,8 +70,9 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
       final observations = await editorService.loadData(context);
       setState(() {
         editorState.observations = observations;
-        editorState.observations
-            .sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        editorState.observations.sort(
+          (a, b) => b.timestamp.compareTo(a.timestamp),
+        );
         editorState.isLoading = false;
         editorState.error = null;
       });
@@ -131,13 +132,16 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                               horizontal: 16,
                               vertical: 16,
                             ),
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onPrimaryContainer,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer,
+                      foregroundColor: Theme.of(
+                        context,
+                      ).colorScheme.onPrimaryContainer,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(isNarrowScreen ? 12 : 8),
+                        borderRadius: BorderRadius.circular(
+                          isNarrowScreen ? 12 : 8,
+                        ),
                       ),
                       minimumSize: isNarrowScreen ? const Size(46, 46) : null,
                     ),
@@ -167,11 +171,7 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.assignment,
-                  size: 64,
-                  color: Colors.blue,
-                ),
+                const Icon(Icons.assignment, size: 64, color: Colors.blue),
                 const SizedBox(height: 16),
                 MarkdownBody(
                   data:
@@ -187,13 +187,8 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                 MarkdownBody(
                   data: '**Error details:** $error',
                   styleSheet: MarkdownStyleSheet(
-                    p: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                    strong: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    p: const TextStyle(fontSize: 12, color: Colors.grey),
+                    strong: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -214,175 +209,171 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                 DataColumn(label: Text('Notes')),
                 DataColumn(label: Text('Actions')),
               ],
-              rows: List<DataRow>.generate(
-                observations.length,
-                (index) {
-                  final obs = observations[index];
+              rows: List<DataRow>.generate(observations.length, (index) {
+                final obs = observations[index];
 
-                  if (editorState.editingIndex == index) {
-                    // Editing row.
-
-                    return DataRow(
-                      cells: [
-                        DataCell(
-                          TextButton(
-                            onPressed: () async {
-                              final currentDate = obs.timestamp;
-                              final pickedDate = await showDatePicker(
-                                context: context,
-                                initialDate: currentDate,
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime.now(),
-                              );
-                              if (pickedDate != null && context.mounted) {
-                                setState(() {
-                                  if (editorState.currentEdit != null) {
-                                    editorState.currentEdit =
-                                        editorState.currentEdit!.copyWith(
-                                      timestamp: pickedDate,
-                                    );
-                                  }
-                                });
-                              }
-                            },
-                            child: Text(
-                              '${obs.timestamp.year}-${obs.timestamp.month.toString().padLeft(2, '0')}-${obs.timestamp.day.toString().padLeft(2, '0')}',
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          TextField(
-                            controller: editorState.vaccineNameController,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter vaccine name',
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          TextField(
-                            controller: editorState.providerController,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter provider',
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          TextField(
-                            controller: editorState.professionalController,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter professional',
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          TextField(
-                            controller: editorState.costController,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter cost',
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          TextField(
-                            controller: editorState.notesController,
-                            decoration: const InputDecoration(
-                              hintText: 'Enter notes',
-                            ),
-                          ),
-                        ),
-                        DataCell(
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.save),
-                                onPressed: () async {
-                                  await editorState.saveObservation(
-                                    context,
-                                    editorService,
-                                    index,
-                                  );
-                                  _loadData();
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.cancel),
-                                onPressed: _handleCancelEdit,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-
-                  // Display row.
+                if (editorState.editingIndex == index) {
+                  // Editing row.
 
                   return DataRow(
                     cells: [
                       DataCell(
-                        Text(
-                          '${obs.timestamp.year}-${obs.timestamp.month.toString().padLeft(2, '0')}-${obs.timestamp.day.toString().padLeft(2, '0')}',
+                        TextButton(
+                          onPressed: () async {
+                            final currentDate = obs.timestamp;
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: currentDate,
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime.now(),
+                            );
+                            if (pickedDate != null && context.mounted) {
+                              setState(() {
+                                if (editorState.currentEdit != null) {
+                                  editorState.currentEdit = editorState
+                                      .currentEdit!
+                                      .copyWith(timestamp: pickedDate);
+                                }
+                              });
+                            }
+                          },
+                          child: Text(
+                            '${obs.timestamp.year}-${obs.timestamp.month.toString().padLeft(2, '0')}-${obs.timestamp.day.toString().padLeft(2, '0')}',
+                          ),
                         ),
                       ),
-                      DataCell(Text(obs.vaccineName)),
-                      DataCell(Text(obs.provider)),
-                      DataCell(Text(obs.professional)),
-                      DataCell(Text(obs.cost)),
-                      DataCell(Text(obs.notes)),
+                      DataCell(
+                        TextField(
+                          controller: editorState.vaccineNameController,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter vaccine name',
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        TextField(
+                          controller: editorState.providerController,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter provider',
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        TextField(
+                          controller: editorState.professionalController,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter professional',
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        TextField(
+                          controller: editorState.costController,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter cost',
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        TextField(
+                          controller: editorState.notesController,
+                          decoration: const InputDecoration(
+                            hintText: 'Enter notes',
+                          ),
+                        ),
+                      ),
                       DataCell(
                         Row(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () => setState(() {
-                                editorState.enterEditMode(index);
-                              }),
+                              icon: const Icon(Icons.save),
+                              onPressed: () async {
+                                await editorState.saveObservation(
+                                  context,
+                                  editorService,
+                                  index,
+                                );
+                                _loadData();
+                              },
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () async {
-                                try {
-                                  await editorState.deleteObservation(
-                                    context,
-                                    editorService,
-                                    obs,
-                                  );
-
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text(
-                                          'Vaccination record deleted successfully.',
-                                        ),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          'Error deleting vaccination: ${e.toString()}',
-                                        ),
-                                        backgroundColor: Colors.red,
-                                      ),
-                                    );
-                                  }
-                                } finally {
-                                  // Always reload data to reflect current state.
-
-                                  _loadData();
-                                }
-                              },
+                              icon: const Icon(Icons.cancel),
+                              onPressed: _handleCancelEdit,
                             ),
                           ],
                         ),
                       ),
                     ],
                   );
-                },
-              ),
+                }
+
+                // Display row.
+
+                return DataRow(
+                  cells: [
+                    DataCell(
+                      Text(
+                        '${obs.timestamp.year}-${obs.timestamp.month.toString().padLeft(2, '0')}-${obs.timestamp.day.toString().padLeft(2, '0')}',
+                      ),
+                    ),
+                    DataCell(Text(obs.vaccineName)),
+                    DataCell(Text(obs.provider)),
+                    DataCell(Text(obs.professional)),
+                    DataCell(Text(obs.cost)),
+                    DataCell(Text(obs.notes)),
+                    DataCell(
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => setState(() {
+                              editorState.enterEditMode(index);
+                            }),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () async {
+                              try {
+                                await editorState.deleteObservation(
+                                  context,
+                                  editorService,
+                                  obs,
+                                );
+
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Vaccination record deleted successfully.',
+                                      ),
+                                      backgroundColor: Colors.green,
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Error deleting vaccination: ${e.toString()}',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              } finally {
+                                // Always reload data to reflect current state.
+
+                                _loadData();
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              }),
             ),
           ),
         );

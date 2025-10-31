@@ -35,22 +35,10 @@ import 'package:healthpod/features/diary/tab.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> chartPanels = [
-  {
-    'title': 'Appointments',
-    'widget': const DiaryTab(),
-  },
-  {
-    'title': 'Blood Pressure',
-    'widget': const BPCombinedVisualisation(),
-  },
-  {
-    'title': 'Medications',
-    'widget': const MedicationVisualisation(),
-  },
-  {
-    'title': 'Vaccinations',
-    'widget': const VaccinationVisualisation(),
-  },
+  {'title': 'Appointments', 'widget': const DiaryTab()},
+  {'title': 'Blood Pressure', 'widget': const BPCombinedVisualisation()},
+  {'title': 'Medications', 'widget': const MedicationVisualisation()},
+  {'title': 'Vaccinations', 'widget': const VaccinationVisualisation()},
 ];
 
 class ChartTab extends ConsumerStatefulWidget {
@@ -99,9 +87,7 @@ class _ChartTabState extends ConsumerState<ChartTab>
             }
           },
           tabs: chartPanels.map((tab) {
-            return Tab(
-              text: tab['title'],
-            );
+            return Tab(text: tab['title']);
           }).toList(),
         ),
         Expanded(

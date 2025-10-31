@@ -45,7 +45,6 @@ class BPChartAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         children: [
           // Main title with basic BP explanation.
-
           MarkdownTooltip(
             message: '''
 
@@ -79,7 +78,6 @@ class BPChartAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: theme.colorScheme.surface,
       actions: [
         // MarkdownTooltip explaining BP Classification ranges.
-
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: MarkdownTooltip(
@@ -108,7 +106,6 @@ class BPChartAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
 
         // MarkdownTooltip for additional BP information.
-
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4.0),
           child: MarkdownTooltip(
@@ -141,7 +138,6 @@ class BPChartAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
 
         // AHA Link Button.
-
         Padding(
           padding: const EdgeInsets.only(left: 4.0, right: 8.0),
           child: MarkdownTooltip(
@@ -153,10 +149,7 @@ class BPChartAppBar extends StatelessWidget implements PreferredSizeWidget {
 
             ''',
             child: IconButton(
-              icon: Icon(
-                Icons.open_in_new,
-                color: theme.colorScheme.error,
-              ),
+              icon: Icon(Icons.open_in_new, color: theme.colorScheme.error),
               onPressed: () => UrlLauncherUtil.launchAHA(context),
             ),
           ),

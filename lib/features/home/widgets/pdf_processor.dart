@@ -53,9 +53,7 @@ class PdfProcessor {
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
 
       // Read PDF file.
@@ -98,8 +96,9 @@ class PdfProcessor {
       final jsonFile = File(
         '${tempDir.path}/${path.basenameWithoutExtension(file.path)}_final.json',
       );
-      await jsonFile
-          .writeAsString(const JsonEncoder.withIndent('  ').convert(finalJson));
+      await jsonFile.writeAsString(
+        const JsonEncoder.withIndent('  ').convert(finalJson),
+      );
 
       // Upload both files to POD.
 

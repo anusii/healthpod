@@ -88,9 +88,9 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading data: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading data: $e')));
       }
     }
   }
@@ -110,14 +110,12 @@ class _BPCombinedVisualisationState extends State<BPCombinedVisualisation> {
       child: Column(
         children: [
           const BPChartAppBar(),
+
           // Main chart area showing blood pressure trends.
-
-          Expanded(
-            child: BPLineChart(surveyData: _surveyData),
-          ),
+          Expanded(child: BPLineChart(surveyData: _surveyData)),
           const SizedBox(height: 16),
-          // Legend and statistics card.
 
+          // Legend and statistics card.
           BPLegendStats(surveyData: _surveyData),
         ],
       ),

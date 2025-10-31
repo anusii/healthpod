@@ -62,46 +62,40 @@ class HealthSurveyNumberInput extends StatelessWidget {
     final theme = Theme.of(context);
     return TextFormField(
       // Sets focus for this input field.
-
       focusNode: controller.focusNodes[index][0],
       keyboardType: TextInputType.number,
       style: theme.textTheme.bodyLarge,
       decoration: InputDecoration(
         hintText: 'Enter value',
-        // Displays unit if applicable.
 
+        // Displays unit if applicable.
         suffixText: question.unit,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         filled: true,
         fillColor: theme.colorScheme.surface,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 16,
+        ),
       ),
 
       // Validates the input using predefined validation logic.
-
       validator: (value) =>
           HealthSurveyValidator.validateNumberInput(value, question),
 
       // Handles field submission event.
-
       onFieldSubmitted: (_) => controller.handleFieldSubmitted(index),
 
       // Unfocuses the text field when tapping outside.
-
       onTapOutside: (event) => FocusScope.of(context).unfocus(),
 
       // Saves the entered value in the form state.
-
       onSaved: (value) => controller.updateResponse(
         question.fieldName,
         double.tryParse(value ?? ''),
       ),
 
       // Restricts input to numeric values (including decimals).
-
       inputFormatters: [
         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
       ],

@@ -107,9 +107,9 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
         // Only show error if we couldn't load any data.
 
         if (_records.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error loading data: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error loading data: $e')));
         }
       }
     }
@@ -181,15 +181,11 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null && _records.isEmpty) {
-      return Center(
-        child: Text(_error!),
-      );
+      return Center(child: Text(_error!));
     }
 
     /// Sort records by date, most recent first.
@@ -246,9 +242,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                         child: MarkdownBody(
                           data: 'No vaccination records found',
                           styleSheet: MarkdownStyleSheet(
-                            p: const TextStyle(
-                              fontSize: 16,
-                            ),
+                            p: const TextStyle(fontSize: 16),
                           ),
                         ),
                       ),
@@ -325,9 +319,9 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                                     width: 120,
                                     child: Text(
                                       // Australian date format.
-
-                                      DateFormat('dd/MM/yyyy')
-                                          .format(record.date),
+                                      DateFormat(
+                                        'dd/MM/yyyy',
+                                      ).format(record.date),
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,

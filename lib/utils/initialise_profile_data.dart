@@ -129,8 +129,9 @@ Future<void> _ensureRequiredFields(BuildContext context) async {
 
     // Create a map that starts with the existing data.
 
-    final Map<String, dynamic> updatedData =
-        Map<String, dynamic>.from(existingData);
+    final Map<String, dynamic> updatedData = Map<String, dynamic>.from(
+      existingData,
+    );
 
     // Only add fields that don't exist at all
     for (final key in defaultProfileData['data'].keys) {

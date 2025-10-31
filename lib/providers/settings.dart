@@ -40,8 +40,10 @@ Future<String> _initSetting(String key, String defaultValue) async {
 // Provider to initialise settings.
 
 final settingsInitializerProvider = FutureProvider<void>((ref) async {
-  final serverUrl =
-      await _initSetting('server_url', 'https://pods.solidcommunity.au');
+  final serverUrl = await _initSetting(
+    'server_url',
+    'https://pods.solidcommunity.au',
+  );
   final email = await _initSetting('email', 'test@anu.edu.au');
   final password = await _initSetting('password', 'SuperSecure123');
   final secretKey = await _initSetting('secret_key', 'YourSecretKey123');
@@ -54,8 +56,9 @@ final settingsInitializerProvider = FutureProvider<void>((ref) async {
 
 // Default server URL for the Solid Pod server.
 
-final serverURLProvider =
-    StateProvider<String>((ref) => 'https://pods.solidcommunity.au');
+final serverURLProvider = StateProvider<String>(
+  (ref) => 'https://pods.solidcommunity.au',
+);
 
 // Stores the user's Solid Pod email.
 

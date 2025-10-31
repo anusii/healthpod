@@ -71,11 +71,13 @@ class VaccinationEditorControllers {
 
     // Create new controllers if they don't exist.
 
-    vaccineNameController ??=
-        TextEditingController(text: observation.vaccineName);
+    vaccineNameController ??= TextEditingController(
+      text: observation.vaccineName,
+    );
     providerController ??= TextEditingController(text: observation.provider);
-    professionalController ??=
-        TextEditingController(text: observation.professional);
+    professionalController ??= TextEditingController(
+      text: observation.professional,
+    );
     costController ??= TextEditingController(text: observation.cost);
     notesController ??= TextEditingController(text: observation.notes);
 
@@ -130,9 +132,7 @@ class VaccinationEditorControllers {
     _costListener = () {
       if (_currentState == null) return;
 
-      _currentState = _currentState!.copyWith(
-        cost: costController!.text,
-      );
+      _currentState = _currentState!.copyWith(cost: costController!.text);
       onObservationChanged(_currentState!);
     };
     costController?.addListener(_costListener!);
@@ -140,9 +140,7 @@ class VaccinationEditorControllers {
     _notesListener = () {
       if (_currentState == null) return;
 
-      _currentState = _currentState!.copyWith(
-        notes: notesController!.text,
-      );
+      _currentState = _currentState!.copyWith(notes: notesController!.text);
       onObservationChanged(_currentState!);
     };
     notesController?.addListener(_notesListener!);

@@ -43,16 +43,21 @@ class ProfileEditDialog {
     final tempControllers = <String, TextEditingController>{
       'name': TextEditingController(text: currentData['name']),
       'address': TextEditingController(text: currentData['address']),
-      'bestContactPhone':
-          TextEditingController(text: currentData['bestContactPhone']),
-      'bestContactEmail':
-          TextEditingController(text: currentData['bestContactEmail']),
-      'emergencyName':
-          TextEditingController(text: currentData['emergencyName']),
-      'emergencyPhone':
-          TextEditingController(text: currentData['emergencyPhone']),
-      'alternativeContactNumber':
-          TextEditingController(text: currentData['alternativeContactNumber']),
+      'bestContactPhone': TextEditingController(
+        text: currentData['bestContactPhone'],
+      ),
+      'bestContactEmail': TextEditingController(
+        text: currentData['bestContactEmail'],
+      ),
+      'emergencyName': TextEditingController(
+        text: currentData['emergencyName'],
+      ),
+      'emergencyPhone': TextEditingController(
+        text: currentData['emergencyPhone'],
+      ),
+      'alternativeContactNumber': TextEditingController(
+        text: currentData['alternativeContactNumber'],
+      ),
       'email': TextEditingController(text: currentData['email']),
       'dateOfBirth': TextEditingController(text: currentData['dateOfBirth']),
       'gender': TextEditingController(text: currentData['gender']),
@@ -364,8 +369,10 @@ Spaces, dashes and parentheses are allowed.
                     controller: controller,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       suffixIcon: Icon(Icons.calendar_today),
                     ),
                     keyboardType: TextInputType.datetime,
@@ -400,22 +407,15 @@ Spaces, dashes and parentheses are allowed.
                 initialValue: controller.text.isEmpty ? null : controller.text,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                 ),
                 items: const [
-                  DropdownMenuItem(
-                    value: null,
-                    child: Text('Select gender'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Male',
-                    child: Text('Male'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Female',
-                    child: Text('Female'),
-                  ),
+                  DropdownMenuItem(value: null, child: Text('Select gender')),
+                  DropdownMenuItem(value: 'Male', child: Text('Male')),
+                  DropdownMenuItem(value: 'Female', child: Text('Female')),
                   DropdownMenuItem(
                     value: 'Non-binary',
                     child: Text('Non-binary'),

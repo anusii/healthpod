@@ -79,11 +79,7 @@ class BPEditorService {
 
       String content;
       try {
-        content = await readPod(
-          filePath,
-          context,
-          const Text('Loading file'),
-        );
+        content = await readPod(filePath, context, const Text('Loading file'));
       } catch (e) {
         // File might not exist anymore (deleted, moved, or corrupted).
 

@@ -67,15 +67,10 @@ class MedicationUIComponents {
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: colorScheme.primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
       ),
-      style: TextStyle(
-        color: colorScheme.onSurface,
-      ),
+      style: TextStyle(color: colorScheme.onSurface),
     );
   }
 
@@ -93,9 +88,7 @@ class MedicationUIComponents {
       decoration: InputDecoration(
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(4),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
         filled: true,
         fillColor: isDarkMode ? colorScheme.surface : null,
         enabledBorder: OutlineInputBorder(
@@ -106,15 +99,10 @@ class MedicationUIComponents {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(
-            color: colorScheme.primary,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: colorScheme.primary, width: 2),
         ),
       ),
-      style: TextStyle(
-        color: colorScheme.onSurface,
-      ),
+      style: TextStyle(color: colorScheme.onSurface),
     );
   }
 

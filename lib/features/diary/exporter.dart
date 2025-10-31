@@ -42,11 +42,7 @@ class DiaryExporter extends HealthDataExporterBase {
   String get timestampField => 'date';
 
   @override
-  List<String> get csvHeaders => [
-        'date',
-        'title',
-        'description',
-      ];
+  List<String> get csvHeaders => ['date', 'title', 'description'];
 
   @override
   Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
@@ -82,11 +78,7 @@ class DiaryExporter extends HealthDataExporterBase {
     String dt = date?.toIso8601String() ?? '';
     dt = dt.substring(0, dt.lastIndexOf(':'));
 
-    return {
-      'date': dt,
-      'title': title,
-      'description': description,
-    };
+    return {'date': dt, 'title': title, 'description': description};
   }
 
   /// Static method to maintain backward compatibility with existing code.

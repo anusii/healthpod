@@ -48,10 +48,7 @@ class AppointmentInfoDisplay extends StatelessWidget {
       children: [
         Text(
           subtitle,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 16),
         _buildInfoRow(
@@ -59,10 +56,7 @@ class AppointmentInfoDisplay extends StatelessWidget {
           'Monday, ${DateFormat('d MMMM').format(appointment.date)}',
         ),
         const SizedBox(height: 8),
-        _buildInfoRow(
-          'Time:',
-          DateFormat('h:mm a').format(appointment.date),
-        ),
+        _buildInfoRow('Time:', DateFormat('h:mm a').format(appointment.date)),
         const SizedBox(height: 8),
         _buildInfoRow('Description:', appointment.description),
       ],
@@ -82,14 +76,10 @@ class AppointmentInfoDisplay extends StatelessWidget {
           width: 90,
           child: Text(
             label,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
-        Expanded(
-          child: Text(value),
-        ),
+        Expanded(child: Text(value)),
       ],
     );
   }

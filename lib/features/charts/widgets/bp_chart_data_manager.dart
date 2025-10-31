@@ -47,8 +47,9 @@ class BPChartDataManager {
     List<FlSpot> spots = [];
     for (var i = 0; i < surveyData.length; i++) {
       final data = surveyData[i]['responses'];
-      double value =
-          parseNumericValue(data[HealthSurveyConstants.fieldSystolic]);
+      double value = parseNumericValue(
+        data[HealthSurveyConstants.fieldSystolic],
+      );
       spots.add(FlSpot(i.toDouble(), value));
     }
     return spots;
@@ -64,8 +65,9 @@ class BPChartDataManager {
     List<FlSpot> spots = [];
     for (var i = 0; i < surveyData.length; i++) {
       final data = surveyData[i]['responses'];
-      double value =
-          parseNumericValue(data[HealthSurveyConstants.fieldDiastolic]);
+      double value = parseNumericValue(
+        data[HealthSurveyConstants.fieldDiastolic],
+      );
       spots.add(FlSpot(i.toDouble(), value));
     }
     return spots;
@@ -95,10 +97,12 @@ class BPChartDataManager {
   ) {
     // Extract values for calculations.
 
-    final systolicValues =
-        getSystolicData(surveyData).map((spot) => spot.y).toList();
-    final diastolicValues =
-        getDiastolicData(surveyData).map((spot) => spot.y).toList();
+    final systolicValues = getSystolicData(
+      surveyData,
+    ).map((spot) => spot.y).toList();
+    final diastolicValues = getDiastolicData(
+      surveyData,
+    ).map((spot) => spot.y).toList();
 
     // Calculate statistics for systolic pressure.
 
@@ -122,21 +126,13 @@ class BPChartDataManager {
         value: '${parseNumericInput(systolicAvg)}/'
             '${parseNumericInput(diastolicAvg)} mmHg',
       ),
-      Container(
-        height: 40,
-        width: 1,
-        color: theme.dividerColor,
-      ),
+      Container(height: 40, width: 1, color: theme.dividerColor),
       StatItem(
         label: 'Min',
         value: '${parseNumericInput(systolicMin)}/'
             '${parseNumericInput(diastolicMin)} mmHg',
       ),
-      Container(
-        height: 40,
-        width: 1,
-        color: theme.dividerColor,
-      ),
+      Container(height: 40, width: 1, color: theme.dividerColor),
       StatItem(
         label: 'Max',
         value:

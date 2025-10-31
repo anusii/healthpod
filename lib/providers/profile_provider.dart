@@ -39,11 +39,7 @@ class ProfileState {
   final bool isLoading;
   final String? error;
 
-  ProfileState({
-    required this.profileData,
-    this.isLoading = false,
-    this.error,
-  });
+  ProfileState({required this.profileData, this.isLoading = false, this.error});
 
   /// Constructor for initial state.
 
@@ -99,10 +95,7 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
         return;
       }
 
-      state = state.copyWith(
-        profileData: data,
-        isLoading: false,
-      );
+      state = state.copyWith(profileData: data, isLoading: false);
     } catch (e) {
       debugPrint('Error refreshing profile data: $e');
       state = state.copyWith(
@@ -133,7 +126,8 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
 /// Global provider for profile state.
 
-final profileProvider =
-    StateNotifierProvider<ProfileNotifier, ProfileState>((ref) {
+final profileProvider = StateNotifierProvider<ProfileNotifier, ProfileState>((
+  ref,
+) {
   return ProfileNotifier();
 });

@@ -86,10 +86,7 @@ class BPEditorUtils {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: label,
-        suffixText: suffix,
-      ),
+      decoration: InputDecoration(labelText: label, suffixText: suffix),
     );
   }
 }

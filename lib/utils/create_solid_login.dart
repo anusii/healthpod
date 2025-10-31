@@ -43,11 +43,7 @@ import 'package:healthpod/services/chrome_login_service.dart';
 
 /// Enum to represent the outcome of an auto-login attempt.
 
-enum AutoLoginStatus {
-  success,
-  chromeDriverNotAvailable,
-  generalFailure,
-}
+enum AutoLoginStatus { success, chromeDriverNotAvailable, generalFailure }
 
 /// Solid POD Authentication Widget Creator
 ///
@@ -162,15 +158,17 @@ Future<AutoLoginStatus> _attemptAutoLogin(
   try {
     final attemptLogicFuture = Future.any([
       _attemptLogin(serverUrl, username, password, loginService),
-      // Timeout for login attempt after 5 seconds.
 
+      // Timeout for login attempt after 5 seconds.
       Future.delayed(const Duration(seconds: 5), () => false),
     ]);
 
     // Minimum splash screen duration, runs in parallel with attemptLogicFuture.
 
-    final minDisplayFuture =
-        Future.delayed(const Duration(seconds: 1), () => true);
+    final minDisplayFuture = Future.delayed(
+      const Duration(seconds: 1),
+      () => true,
+    );
 
     // Wait for both the attempt (which includes its own timeout) and the minimum display duration.
 

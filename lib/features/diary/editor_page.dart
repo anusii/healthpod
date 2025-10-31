@@ -131,13 +131,16 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
       date: _editingDate ?? originalAppointment.date,
       title: _titleController.text,
       description: _descriptionController.text,
-      isPast:
-          (_editingDate ?? originalAppointment.date).isBefore(DateTime.now()),
+      isPast: (_editingDate ?? originalAppointment.date).isBefore(
+        DateTime.now(),
+      ),
     );
 
     if (mounted) {
-      final success =
-          await DiaryService.saveAppointment(context, newAppointment);
+      final success = await DiaryService.saveAppointment(
+        context,
+        newAppointment,
+      );
       if (success && mounted) {
         // Delete the old appointment after saving the new one.
 
@@ -156,8 +159,9 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Appointment'),
-        content:
-            Text('Are you sure you want to delete "${appointment.title}"?'),
+        content: Text(
+          'Are you sure you want to delete "${appointment.title}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -172,8 +176,10 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
     );
 
     if (confirmed == true && mounted) {
-      final success =
-          await DiaryService.deleteAppointment(context, appointment);
+      final success = await DiaryService.deleteAppointment(
+        context,
+        appointment,
+      );
       if (success && mounted) {
         _loadAppointments();
       }
@@ -244,15 +250,17 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                                 }
                               },
                               child: Text(
-                                DateFormat('dd MMM, yyyy')
-                                    .format(_editingDate ?? appointment.date),
+                                DateFormat(
+                                  'dd MMM, yyyy',
+                                ).format(_editingDate ?? appointment.date),
                               ),
                             ),
                           ),
                           DataCell(
                             Text(
-                              DateFormat('hh:mm a')
-                                  .format(_editingDate ?? appointment.date),
+                              DateFormat(
+                                'hh:mm a',
+                              ).format(_editingDate ?? appointment.date),
                             ),
                           ),
                           DataCell(
@@ -273,8 +281,9 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                           ),
                           DataCell(
                             Text(
-                              (_editingDate ?? appointment.date)
-                                      .isBefore(DateTime.now())
+                              (_editingDate ?? appointment.date).isBefore(
+                                DateTime.now(),
+                              )
                                   ? 'Past'
                                   : 'Upcoming',
                             ),
@@ -284,14 +293,13 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 // Save button.
-
                                 IconButton(
                                   icon: const Icon(Icons.save),
                                   onPressed: () => _saveEditing(appointment),
                                   color: Colors.green,
                                 ),
-                                // Cancel button.
 
+                                // Cancel button.
                                 IconButton(
                                   icon: const Icon(Icons.cancel),
                                   onPressed: _cancelEditing,
@@ -314,9 +322,7 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                           ),
                         ),
                         DataCell(
-                          Text(
-                            DateFormat('hh:mm a').format(appointment.date),
-                          ),
+                          Text(DateFormat('hh:mm a').format(appointment.date)),
                         ),
                         DataCell(Text(appointment.title)),
                         DataCell(Text(appointment.description)),
@@ -328,15 +334,14 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               // Edit button.
-
                               IconButton(
                                 icon: const Icon(Icons.edit),
                                 onPressed: () =>
                                     _startEditing(index, appointment),
                                 color: Colors.blue,
                               ),
-                              // Delete button.
 
+                              // Delete button.
                               IconButton(
                                 icon: const Icon(Icons.delete),
                                 onPressed: () =>

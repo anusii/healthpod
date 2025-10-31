@@ -147,9 +147,7 @@ class VaccinationEditorState with ChangeNotifier {
     if (!controllers.hasRequiredValues()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Please enter a vaccine name',
-          ),
+          content: Text('Please enter a vaccine name'),
           backgroundColor: Colors.red,
         ),
       );

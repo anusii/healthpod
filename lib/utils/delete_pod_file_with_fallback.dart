@@ -94,8 +94,10 @@ Future<bool> deletePodFileWithFallback({
       '${dataType}_${formatTimestampForFilenameWithUnderscore(timestamp)}.json.enc.ttl';
 
   if (resources.files.contains(filenameWithUnderscore)) {
-    final filePathWithUnderscore =
-        constructPodPath(dataType, filenameWithUnderscore);
+    final filePathWithUnderscore = constructPodPath(
+      dataType,
+      filenameWithUnderscore,
+    );
     try {
       await deleteFile(filePathWithUnderscore);
       // debugPrint('Deleted file with underscore: $filenameWithUnderscore');
@@ -159,8 +161,10 @@ Future<bool> deletePodFileWithFallback({
       resources.files.where((file) => file.contains(datePart)).toList();
 
   if (moreFlexibleMatches.isNotEmpty) {
-    final flexibleMatchPath =
-        constructPodPath(dataType, moreFlexibleMatches.first);
+    final flexibleMatchPath = constructPodPath(
+      dataType,
+      moreFlexibleMatches.first,
+    );
     try {
       await deleteFile(flexibleMatchPath);
       // debugPrint(

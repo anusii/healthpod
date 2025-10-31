@@ -35,22 +35,10 @@ import 'package:healthpod/features/vaccination/survey.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> surveyPanels = [
-  {
-    'title': 'Appointments',
-    'widget': AppointmentSurvey(),
-  },
-  {
-    'title': 'Blood Pressure',
-    'widget': BPSurvey(),
-  },
-  {
-    'title': 'Medications',
-    'widget': MedicationSurvey(),
-  },
-  {
-    'title': 'Vaccinations',
-    'widget': VaccinationSurvey(),
-  },
+  {'title': 'Appointments', 'widget': AppointmentSurvey()},
+  {'title': 'Blood Pressure', 'widget': BPSurvey()},
+  {'title': 'Medications', 'widget': MedicationSurvey()},
+  {'title': 'Vaccinations', 'widget': VaccinationSurvey()},
 ];
 
 class SurveyTab extends ConsumerStatefulWidget {
@@ -99,9 +87,7 @@ class _SurveyTabState extends ConsumerState<SurveyTab>
             }
           },
           tabs: surveyPanels.map((tab) {
-            return Tab(
-              text: tab['title'],
-            );
+            return Tab(text: tab['title']);
           }).toList(),
         ),
         Expanded(

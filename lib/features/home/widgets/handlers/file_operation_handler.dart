@@ -76,9 +76,7 @@ class FileOperationHandler {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Confirm Delete'),
-          content: Text(
-            'Are you sure you want to delete "$fileName"?',
-          ),
+          content: Text('Are you sure you want to delete "$fileName"?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -133,10 +131,7 @@ class FileOperationHandler {
               : 'Delete failed: ${e.toString()}';
 
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(message), backgroundColor: Colors.red),
           );
         }
       }

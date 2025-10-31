@@ -189,9 +189,7 @@ class MedicationEditorState with ChangeNotifier {
     if (!controllers.hasRequiredValues()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Please enter values for Name, Dosage, and Frequency.',
-          ),
+          content: Text('Please enter values for Name, Dosage, and Frequency.'),
           backgroundColor: Colors.red,
         ),
       );
@@ -223,10 +221,7 @@ class MedicationEditorState with ChangeNotifier {
         oldObservation: originalObservation,
       );
     } else {
-      await editorService.saveObservationToPod(
-        context,
-        updatedObs,
-      );
+      await editorService.saveObservationToPod(context, updatedObs);
     }
 
     // Clean up edit state.
@@ -276,10 +271,7 @@ class MedicationEditorState with ChangeNotifier {
 
     if (!context.mounted) return;
 
-    await editorService.deleteObservationFromPod(
-      context,
-      observation,
-    );
+    await editorService.deleteObservationFromPod(context, observation);
 
     // Remove from local list if it exists.
 

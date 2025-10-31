@@ -40,10 +40,7 @@ import 'package:healthpod/utils/fetch_profile_data.dart';
 class AvatarName extends StatefulWidget {
   final bool isEditing;
 
-  const AvatarName({
-    super.key,
-    this.isEditing = false,
-  });
+  const AvatarName({super.key, this.isEditing = false});
 
   @override
   State<AvatarName> createState() => _AvatarNameState();
@@ -103,17 +100,17 @@ class _AvatarNameState extends State<AvatarName> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // User avatar with lock icon indicator.
-
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
                     const CircleAvatar(
                       radius: 24,
-                      backgroundImage:
-                          AssetImage('assets/images/sample_avatar_image.png'),
+                      backgroundImage: AssetImage(
+                        'assets/images/sample_avatar_image.png',
+                      ),
                     ),
-                    // Positioned lock icon at bottom-right.
 
+                    // Positioned lock icon at bottom-right.
                     Positioned(
                       bottom: -2,
                       right: -2,
@@ -136,7 +133,6 @@ class _AvatarNameState extends State<AvatarName> {
                 const SizedBox(width: 12),
 
                 // User's name only.
-
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -166,7 +162,6 @@ class _AvatarNameState extends State<AvatarName> {
                 const SizedBox(width: 12),
 
                 // Notification bell with notification count badge.
-
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -175,8 +170,8 @@ class _AvatarNameState extends State<AvatarName> {
                       size: 28,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
-                    // Show notification count badge only if notifications exist.
 
+                    // Show notification count badge only if notifications exist.
                     if (notificationCount > 0)
                       Positioned(
                         right: -2,

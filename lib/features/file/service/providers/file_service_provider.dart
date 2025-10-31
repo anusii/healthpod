@@ -83,10 +83,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
   Future<void> handleUpload(BuildContext context) async {
     if (state.uploadFile == null) return;
 
-    state = state.copyWith(
-      uploadInProgress: true,
-      uploadDone: false,
-    );
+    state = state.copyWith(uploadInProgress: true, uploadDone: false);
 
     final result = await FileUploadHandler.handleUpload(
       context,
@@ -108,10 +105,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
   Future<void> handleDownload(BuildContext context) async {
     if (state.remoteFileName == null || state.currentPath == null) return;
 
-    state = state.copyWith(
-      downloadInProgress: true,
-      downloadDone: false,
-    );
+    state = state.copyWith(downloadInProgress: true, downloadDone: false);
 
     final success = await FileDownloadHandler.handleDownload(
       context,
@@ -120,10 +114,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       cleanFileName: state.cleanFileName,
     );
 
-    state = state.copyWith(
-      downloadDone: success,
-      downloadInProgress: false,
-    );
+    state = state.copyWith(downloadDone: success, downloadInProgress: false);
   }
 
   /// Updates the selected file for upload.
@@ -158,10 +149,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
   Future<void> handleDelete(BuildContext context) async {
     if (state.remoteFileName == null || state.currentPath == null) return;
 
-    state = state.copyWith(
-      deleteInProgress: true,
-      deleteDone: false,
-    );
+    state = state.copyWith(deleteInProgress: true, deleteDone: false);
 
     final success = await FileDeleteHandler.handleDelete(
       context,
@@ -170,10 +158,7 @@ class FileServiceNotifier extends StateNotifier<FileState> {
       refreshCallback: _refreshCallback,
     );
 
-    state = state.copyWith(
-      deleteDone: success,
-      deleteInProgress: false,
-    );
+    state = state.copyWith(deleteDone: success, deleteInProgress: false);
   }
 
   /// Toggles the preview visibility.

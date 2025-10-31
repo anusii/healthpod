@@ -159,10 +159,7 @@ class _MobileEditCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Edit Reading',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+            Text('Edit Reading', style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 16),
             InkWell(
               onTap: () => _selectDateTime(context),
@@ -206,15 +203,9 @@ class _MobileEditCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
-                  onPressed: onCancel,
-                  child: const Text('Cancel'),
-                ),
+                TextButton(onPressed: onCancel, child: const Text('Cancel')),
                 const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: onSave,
-                  child: const Text('Save'),
-                ),
+                ElevatedButton(onPressed: onSave, child: const Text('Save')),
               ],
             ),
           ],

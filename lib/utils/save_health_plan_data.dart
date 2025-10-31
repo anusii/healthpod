@@ -48,10 +48,7 @@ Future<bool> saveHealthPlanData({
 
     final healthPlanData = {
       'timestamp': DateTime.now().toIso8601String(),
-      'data': {
-        'title': title,
-        'planItems': planItems,
-      },
+      'data': {'title': title, 'planItems': planItems},
       if (additionalData != null) ...additionalData,
     };
 

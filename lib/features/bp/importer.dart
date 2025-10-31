@@ -131,10 +131,9 @@ class BPImporter extends HealthDataImporterBase {
     String dirPath,
     BuildContext context, {
     // Optional: provide content directly for web.
-
     String? fileContent,
-    // Progress callback.
 
+    // Progress callback.
     void Function(String message, double progress)? onProgress,
   }) async {
     // Remove verbose debug logs for cleaner console output.

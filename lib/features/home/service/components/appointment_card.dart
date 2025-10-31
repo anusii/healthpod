@@ -147,10 +147,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(
-        maxWidth: 400,
-        minHeight: 300,
-      ),
+      constraints: const BoxConstraints(maxWidth: 400, minHeight: 300),
       padding: const EdgeInsets.all(16.0),
       decoration: getHomeCardDecoration(context),
       child: Column(

@@ -109,8 +109,10 @@ class _DiaryTabState extends State<DiaryTab> {
             isPast: date.isBefore(DateTime.now()),
           );
 
-          final success =
-              await DiaryService.saveAppointment(dialogContext, appointment);
+          final success = await DiaryService.saveAppointment(
+            dialogContext,
+            appointment,
+          );
           if (success && mounted) {
             setState(() {
               _appointments.add(appointment);
@@ -131,8 +133,9 @@ class _DiaryTabState extends State<DiaryTab> {
         context: context,
         builder: (dialogContext) => AlertDialog(
           title: const Text('Delete Appointment'),
-          content:
-              Text('Are you sure you want to delete "${appointment.title}"?'),
+          content: Text(
+            'Are you sure you want to delete "${appointment.title}"?',
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
@@ -176,8 +179,10 @@ class _DiaryTabState extends State<DiaryTab> {
         children: [
           // Add month and year selector.
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(8),
@@ -194,12 +199,15 @@ class _DiaryTabState extends State<DiaryTab> {
               children: [
                 // Month dropdown.
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color:
-                          Theme.of(context).colorScheme.outline.withAlpha(51),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withAlpha(51),
                     ),
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -223,9 +231,9 @@ class _DiaryTabState extends State<DiaryTab> {
                               (month) => DropdownMenuItem<int>(
                                 value: month,
                                 child: Text(
-                                  DateFormat('MMMM').format(
-                                    DateTime(_focusedDay.year, month),
-                                  ),
+                                  DateFormat(
+                                    'MMMM',
+                                  ).format(DateTime(_focusedDay.year, month)),
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ),
@@ -249,12 +257,15 @@ class _DiaryTabState extends State<DiaryTab> {
                 const SizedBox(width: 16),
                 // Year dropdown.
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color:
-                          Theme.of(context).colorScheme.outline.withAlpha(51),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withAlpha(51),
                     ),
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -300,8 +311,8 @@ class _DiaryTabState extends State<DiaryTab> {
                   ),
                 ),
                 const SizedBox(width: 16),
-                // Today button.
 
+                // Today button.
                 TextButton.icon(
                   onPressed: _goToToday,
                   icon: Icon(
@@ -310,13 +321,16 @@ class _DiaryTabState extends State<DiaryTab> {
                   ),
                   label: const Text('Today'),
                   style: TextButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                       side: BorderSide(
-                        color:
-                            Theme.of(context).colorScheme.outline.withAlpha(51),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.outline.withAlpha(51),
                       ),
                     ),
                   ),
@@ -372,8 +386,9 @@ class _DiaryTabState extends State<DiaryTab> {
             child: ListView.builder(
               itemCount: _getAppointmentsForDay(_selectedDay!).length,
               itemBuilder: (context, index) {
-                final appointment =
-                    _getAppointmentsForDay(_selectedDay!)[index];
+                final appointment = _getAppointmentsForDay(
+                  _selectedDay!,
+                )[index];
                 return Card(
                   margin: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -428,10 +443,7 @@ ${appointment.isPast ? 'Past' : 'Upcoming'}
             ),
             const SizedBox(width: 8),
             Expanded(
-              child: Text(
-                appointment.title,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(appointment.title, overflow: TextOverflow.ellipsis),
             ),
           ],
         ),

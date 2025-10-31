@@ -44,9 +44,7 @@ Future<T?> showConstrainedDialog<T>({
       return AlertDialog(
         title: title,
         content: Container(
-          constraints: BoxConstraints(
-            maxHeight: maxHeight,
-          ),
+          constraints: BoxConstraints(maxHeight: maxHeight),
           child: content,
         ),
         actions: actions,
@@ -84,10 +82,7 @@ Future<bool> showConstrainedConfirmationDialog({
           onConfirm();
           Navigator.of(context).pop(true);
         },
-        child: Text(
-          confirmText,
-          style: TextStyle(color: confirmColor),
-        ),
+        child: Text(confirmText, style: TextStyle(color: confirmColor)),
       ),
     ],
   );

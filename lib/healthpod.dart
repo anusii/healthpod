@@ -89,9 +89,7 @@ class _HealthPodState extends ConsumerState<HealthPod> {
       title: 'Solid Health Pod',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: SelectionArea(
-        child: _loginWidget ?? createSolidLogin(context),
-      ),
+      home: SelectionArea(child: _loginWidget ?? createSolidLogin(context)),
     );
   }
 }

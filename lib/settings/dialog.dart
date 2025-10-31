@@ -136,15 +136,14 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
           children: [
             Container(
               width: size.width,
-              // 80% of screen height.
 
+              // 80% of screen height.
               height: size.height * 0.8,
               constraints: const BoxConstraints(
                 // Maximum height in logical pixels.
-
                 maxHeight: 600,
-                // Minimum height in logical pixels.
 
+                // Minimum height in logical pixels.
                 minHeight: 300,
               ),
               decoration: BoxDecoration(
@@ -172,9 +171,7 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                           color: Theme.of(context).textTheme.titleLarge?.color,
                         ),
                       ),
-                      Divider(
-                        color: Theme.of(context).dividerColor,
-                      ),
+                      Divider(color: Theme.of(context).dividerColor),
                       SettingField(
                         label: 'Server URL',
                         hint: 'https://pods.solidcommunity.au',
@@ -337,10 +334,9 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Theme.of(context).brightness ==
                                         Brightness.dark
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .error
-                                        .withValues(alpha: 0.2)
+                                    ? Theme.of(
+                                        context,
+                                      ).colorScheme.error.withValues(alpha: 0.2)
                                     : Colors.red[50],
                               ),
                               child: Text(

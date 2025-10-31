@@ -340,8 +340,9 @@ class _ManagePlanState extends State<ManagePlan> {
                                 em: TextStyle(
                                   fontStyle: FontStyle.italic,
                                   fontSize: 14,
-                                  color:
-                                      Theme.of(context).colorScheme.secondary,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.secondary,
                                 ),
                                 blockquote: TextStyle(
                                   fontSize: 14,
@@ -366,8 +367,9 @@ class _ManagePlanState extends State<ManagePlan> {
                                   border: Border(
                                     left: BorderSide(
                                       width: 4,
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     ),
                                   ),
                                 ),
