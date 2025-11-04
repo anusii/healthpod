@@ -26,8 +26,8 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:solidpod/solidpod.dart'
-    show getKeyFromUserIfRequired, readPod, SolidFunctionCallStatus;
+import 'package:solidpod/solidpod.dart' show readPod, SolidFunctionCallStatus;
+import 'package:solidui/solidui.dart' show getKeyFromUserIfRequired;
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/save_decrypted_content.dart';

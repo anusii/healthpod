@@ -4,7 +4,8 @@
 	"name": "Sam Song",
 	"address": "14 Example Street, Actor, ACT",
 	"bestContactPhone": "0412 456 789",
-	"alternativeContactNumber": "(02) 1234 5678",
+	"emergencyContact": "John Song",
+	"emergencyNumber": "(02) 1234 5678",
 	"email": "sam.song@togaware.com",
 	"dateOfBirth": "1990-07-24",
 	"gender": "Female"

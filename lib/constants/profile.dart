@@ -31,7 +31,6 @@ final Map<String, dynamic> defaultProfileData = {
     'name': '',
     'address': '',
     'bestContactPhone': '',
-    'alternativeContactNumber': '',
     'email': '',
     'dateOfBirth': '',
     'gender': '',
