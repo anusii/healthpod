@@ -113,6 +113,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   /// Load profile data from the pod and update state.
 
   Future<void> _loadProfileData() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
     });
@@ -121,6 +122,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       final profileData = await ProfileDataManager.loadProfileData(context);
       _profileData = profileData;
 
+      if (!mounted) return;
       setState(() {
         // Populate controllers with profile data or defaults.
 
@@ -134,6 +136,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -143,17 +146,20 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   /// Load profile photo from pod.
 
   Future<void> _loadProfilePhoto() async {
+    if (!mounted) return;
     setState(() {
       _isLoadingPhoto = true;
     });
 
     try {
       final photoProvider = await ProfilePhotoManager.loadProfilePhoto(context);
+      if (!mounted) return;
       setState(() {
         _profilePhoto = photoProvider;
         _isLoadingPhoto = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _profilePhoto = null;
         _isLoadingPhoto = false;
@@ -192,6 +198,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       return;
     }
 
+    if (!mounted) return;
     setState(() {
       _isSaving = true;
     });
@@ -257,9 +264,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         );
       }
     } finally {
-      setState(() {
-        _isSaving = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
   }
 
@@ -307,6 +316,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     // If user saved changes, update controllers and save data.
 
     if (updatedData != null) {
+      if (!mounted) return;
       setState(() {
         _controllers.forEach((controller, fieldName) {
           controller.text = updatedData[fieldName] ?? '';
@@ -436,9 +446,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       _profilePhoto,
       nameController.text,
       (photo) {
-        setState(() {
-          _profilePhoto = photo;
-        });
+        if (mounted) {
+          setState(() {
+            _profilePhoto = photo;
+          });
+        }
       },
       widget.onDataChanged,
       _isLoading,

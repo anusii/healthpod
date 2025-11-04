@@ -63,6 +63,7 @@ class _ManagePlanState extends State<ManagePlan> {
   /// Loads the health plan data from the pod.
 
   Future<void> _loadHealthPlanData() async {
+    if (!mounted) return;
     setState(() {
       isLoading = true;
     });
@@ -81,6 +82,7 @@ class _ManagePlanState extends State<ManagePlan> {
         final List<String> loadedPlanItems =
             (healthPlanData['planItems'] as List?)?.cast<String>() ?? [];
 
+        if (!mounted) return;
         setState(() {
           title =
               healthPlanData['title'] as String? ?? 'My Health Management Plan';
@@ -90,6 +92,7 @@ class _ManagePlanState extends State<ManagePlan> {
       } else {
         // User not logged in, use default values.
 
+        if (!mounted) return;
         setState(() {
           title = 'My Health Management Plan';
           planItems = [];
@@ -99,6 +102,7 @@ class _ManagePlanState extends State<ManagePlan> {
     } catch (e) {
       // In case of error, show the default title.
 
+      if (!mounted) return;
       setState(() {
         title = 'My Health Management Plan';
         isLoading = false;
