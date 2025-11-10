@@ -32,9 +32,9 @@ import 'package:solidpod/solidpod.dart'
         SolidFunctionCallStatus,
         getResourcesInContainer,
         getDirUrl,
-        readPod,
-        getKeyFromUserIfRequired;
-import 'package:solidui/solidui.dart';
+        readPod;
+import 'package:solidui/solidui.dart'
+    show getKeyFromUserIfRequired, SolidSecurityKeyCentralManager;
 
 import 'package:healthpod/utils/construct_pod_path.dart';
 
