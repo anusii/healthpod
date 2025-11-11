@@ -31,6 +31,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
+import 'package:healthpod/features/pathology/pdf_viewer.dart';
 
 /// Widget for displaying pathology reports in a list format.
 
@@ -92,10 +93,20 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
         // Extract filename from URL if it's a full URL.
 
         final name = fileName.contains('/')
-            ? Uri.parse(fileName).pathSegments.last
-            : fileName;
+            ? Uri.decodeComponent(Uri.parse(fileName).pathSegments.last)
+            : Uri.decodeComponent(fileName);
+        
+        // Check for encrypted PDF files (.pdf.enc.ttl)
+        final isEncryptedPdf = name.toLowerCase().endsWith('.pdf.enc.ttl');
+        final isPlainPdf = name.toLowerCase().endsWith('.pdf');
 
-        if (name.toLowerCase().endsWith('.pdf')) {
+        if (isEncryptedPdf || isPlainPdf) {
+          // Extract the original PDF filename.
+
+          final pdfName = isEncryptedPdf 
+              ? name.substring(0, name.length - '.enc.ttl'.length)
+              : name;
+
           // Try to extract date from filename or use modified date.
 
           DateTime date;
@@ -103,7 +114,7 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
             // Try to parse date from filename (e.g., report_2024-03-15.pdf).
 
             final dateRegex = RegExp(r'(\d{4})[_-]?(\d{2})[_-]?(\d{2})');
-            final match = dateRegex.firstMatch(name);
+            final match = dateRegex.firstMatch(pdfName);
 
             if (match != null) {
               date = DateTime(
@@ -121,9 +132,9 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
           }
 
           reports.add(PathologyReport(
-            fileName: name,
+            fileName: pdfName,  // Display name without .enc.ttl
             date: date,
-            filePath: '$pathologyPath/$name',
+            filePath: '$pathologyPath/$name',  // Actual storage path
           ));
         }
       }
@@ -149,87 +160,22 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
     }
   }
 
-  /// Opens a PDF report for viewing.
+  /// Opens a PDF report for viewing in the app.
 
   Future<void> _openReport(PathologyReport report) async {
-    try {
-      // Show loading indicator.
+    if (!mounted) return;
 
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
-      );
+    // Navigate to the PDF viewer page.
 
-      // Download the PDF file to a temporary location.
-
-      final result = await readPod(
-        report.filePath,
-        context,
-        const Text('Loading report'),
-      );
-
-      if (mounted) {
-        Navigator.pop(context); // Close loading dialog.
-      }
-
-      if (result == SolidFunctionCallStatus.fail.toString() ||
-          result == SolidFunctionCallStatus.notLoggedIn.toString()) {
-        throw Exception('Failed to load report from POD');
-      }
-
-      // For web platform, we can't directly open PDFs.
-      // Show a message explaining how to access the file via the Files tab.
-
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.info_outline, color: Colors.blue),
-                SizedBox(width: 8),
-                Text('View Report'),
-              ],
-            ),
-            content: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Report: ${report.fileName}'),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'To view this PDF report, please navigate to the Files '
-                    'tab and download the file from the pathology directory.',
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
-              ),
-            ],
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        // Close loading dialog if still open.
-
-        Navigator.of(context).popUntil((route) => route.isFirst);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to open report: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PathologyPdfViewer(
+          fileName: report.fileName,
+          filePath: report.filePath,
+        ),
+      ),
+    );
   }
 
   @override
