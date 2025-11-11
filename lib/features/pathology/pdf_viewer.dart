@@ -31,8 +31,6 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
-import 'package:healthpod/constants/paths.dart';
-
 /// Widget for viewing PDF pathology reports.
 
 class PathologyPdfViewer extends StatefulWidget {
@@ -101,14 +99,17 @@ class _PathologyPdfViewerState extends State<PathologyPdfViewer> {
       } else if (result is List<int>) {
         final resultList = result as List<int>;
         bytes = Uint8List.fromList(resultList);
-      } else // If it's a string, it might be base64 encoded.
+      } else {
+        // If it's a string, it might be base64 encoded.
+
         final resultString = result;
-      try {
-        bytes = base64Decode(resultString);
-      } catch (e) {
-        debugPrint('PDF VIEWER: Base64 decode failed: $e');
-        // Try as raw bytes from string
-        bytes = Uint8List.fromList(resultString.codeUnits);
+        try {
+          bytes = base64Decode(resultString);
+        } catch (e) {
+          debugPrint('PDF VIEWER: Base64 decode failed: $e');
+          // Try as raw bytes from string.
+          bytes = Uint8List.fromList(resultString.codeUnits);
+        }
       }
 
       if (mounted) {
@@ -142,7 +143,7 @@ class _PathologyPdfViewerState extends State<PathologyPdfViewer> {
               color: Theme.of(context).cardColor,
               border: Border(
                 bottom: BorderSide(
-                  color: Colors.grey.withOpacity(0.2),
+                  color: Colors.grey.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),

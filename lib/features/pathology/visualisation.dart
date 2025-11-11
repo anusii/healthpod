@@ -31,6 +31,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
+import 'package:healthpod/features/pathology/model.dart';
 import 'package:healthpod/features/pathology/pdf_viewer.dart';
 
 /// Widget for displaying pathology reports in a list format.
@@ -40,20 +41,6 @@ class PathologyVisualisation extends StatefulWidget {
 
   @override
   State<PathologyVisualisation> createState() => _PathologyVisualisationState();
-}
-
-/// Represents a pathology report file.
-
-class PathologyReport {
-  final String fileName;
-  final DateTime date;
-  final String filePath;
-
-  PathologyReport({
-    required this.fileName,
-    required this.date,
-    required this.filePath,
-  });
 }
 
 /// State for the PathologyVisualisation widget.
@@ -322,16 +309,16 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
 
         Container(
           padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
           child: Row(
             children: [
               IconButton(
