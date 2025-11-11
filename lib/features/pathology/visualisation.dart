@@ -62,6 +62,7 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
   List<PathologyReport> _reports = [];
   bool _isLoading = true;
   String? _error;
+  PathologyReport? _selectedReport;
 
   @override
   void initState() {
@@ -95,7 +96,7 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
         final name = fileName.contains('/')
             ? Uri.decodeComponent(Uri.parse(fileName).pathSegments.last)
             : Uri.decodeComponent(fileName);
-        
+
         // Check for encrypted PDF files (.pdf.enc.ttl)
         final isEncryptedPdf = name.toLowerCase().endsWith('.pdf.enc.ttl');
         final isPlainPdf = name.toLowerCase().endsWith('.pdf');
@@ -103,7 +104,7 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
         if (isEncryptedPdf || isPlainPdf) {
           // Extract the original PDF filename.
 
-          final pdfName = isEncryptedPdf 
+          final pdfName = isEncryptedPdf
               ? name.substring(0, name.length - '.enc.ttl'.length)
               : name;
 
@@ -131,11 +132,13 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
             date = DateTime.now();
           }
 
-          reports.add(PathologyReport(
-            fileName: pdfName,  // Display name without .enc.ttl
-            date: date,
-            filePath: '$pathologyPath/$name',  // Actual storage path
-          ));
+          reports.add(
+            PathologyReport(
+              fileName: pdfName, // Display name without .enc.ttl
+              date: date,
+              filePath: '$pathologyPath/$name', // Actual storage path
+            ),
+          );
         }
       }
 
@@ -160,26 +163,32 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
     }
   }
 
-  /// Opens a PDF report for viewing in the app.
+  /// Opens a PDF report for viewing within the current view.
 
-  Future<void> _openReport(PathologyReport report) async {
-    if (!mounted) return;
+  void _openReport(PathologyReport report) {
+    setState(() {
+      _selectedReport = report;
+    });
+  }
 
-    // Navigate to the PDF viewer page.
+  /// Closes the PDF viewer and returns to the list.
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PathologyPdfViewer(
-          fileName: report.fileName,
-          filePath: report.filePath,
-        ),
-      ),
-    );
+  void _closeReport() {
+    setState(() {
+      _selectedReport = null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // If a report is selected, show the PDF viewer.
+
+    if (_selectedReport != null) {
+      return _buildPdfViewer();
+    }
+
+    // Otherwise, show the report list.
+
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -301,6 +310,72 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Builds the PDF viewer for the selected report.
+
+  Widget _buildPdfViewer() {
+    return Column(
+      children: [
+        // Header with back button and file name.
+
+        Container(
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back),
+                tooltip: 'Back to list',
+                onPressed: _closeReport,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _selectedReport!.fileName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'Date: ${DateFormat('dd MMMM yyyy').format(_selectedReport!.date)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // PDF viewer.
+
+        Expanded(
+          child: PathologyPdfViewer(
+            fileName: _selectedReport!.fileName,
+            filePath: _selectedReport!.filePath,
+            showAppBar: false,
+          ),
+        ),
+      ],
     );
   }
 }

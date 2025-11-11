@@ -38,10 +38,12 @@ import 'package:healthpod/constants/paths.dart';
 class PathologyPdfViewer extends StatefulWidget {
   final String fileName;
   final String filePath;
+  final bool showAppBar; // Whether to show the app bar with zoom controls.
 
   const PathologyPdfViewer({
     required this.fileName,
     required this.filePath,
+    this.showAppBar = true,
     super.key,
   });
 
@@ -92,25 +94,21 @@ class _PathologyPdfViewerState extends State<PathologyPdfViewer> {
 
       // Convert result to bytes based on type.
       late Uint8List bytes;
-      
+
       if (result is Uint8List) {
         final resultBytes = result as Uint8List;
         bytes = resultBytes;
       } else if (result is List<int>) {
         final resultList = result as List<int>;
         bytes = Uint8List.fromList(resultList);
-      } else if (result is String) {
-        // If it's a string, it might be base64 encoded.
-        final resultString = result as String;
-        try {
-          bytes = base64Decode(resultString);
-        } catch (e) {
-          debugPrint('PDF VIEWER: Base64 decode failed: $e');
-          // Try as raw bytes from string
-          bytes = Uint8List.fromList(resultString.codeUnits);
-        }
-      } else {
-        throw Exception('Unexpected data type: ${result.runtimeType}');
+      } else // If it's a string, it might be base64 encoded.
+        final resultString = result;
+      try {
+        bytes = base64Decode(resultString);
+      } catch (e) {
+        debugPrint('PDF VIEWER: Base64 decode failed: $e');
+        // Try as raw bytes from string
+        bytes = Uint8List.fromList(resultString.codeUnits);
       }
 
       if (mounted) {
@@ -131,6 +129,53 @@ class _PathologyPdfViewerState extends State<PathologyPdfViewer> {
 
   @override
   Widget build(BuildContext context) {
+    // If showAppBar is false, return just the body.
+
+    if (!widget.showAppBar) {
+      return Column(
+        children: [
+          // Zoom controls bar.
+
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              border: Border(
+                bottom: BorderSide(
+                  color: Colors.grey.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.zoom_out),
+                  tooltip: 'Zoom Out',
+                  onPressed: () {
+                    _pdfViewerController.zoomLevel =
+                        _pdfViewerController.zoomLevel - 0.25;
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.zoom_in),
+                  tooltip: 'Zoom In',
+                  onPressed: () {
+                    _pdfViewerController.zoomLevel =
+                        _pdfViewerController.zoomLevel + 0.25;
+                  },
+                ),
+              ],
+            ),
+          ),
+          Expanded(child: _buildBody()),
+        ],
+      );
+    }
+
+    // Otherwise, return with full Scaffold including app bar.
+
     return Scaffold(
       appBar: AppBar(
         title: Text(

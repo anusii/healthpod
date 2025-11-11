@@ -28,11 +28,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart'
-    show
-        SolidFunctionCallStatus,
-        getResourcesInContainer,
-        getDirUrl,
-        readPod;
+    show SolidFunctionCallStatus, getResourcesInContainer, getDirUrl, readPod;
 import 'package:solidui/solidui.dart'
     show getKeyFromUserIfRequired, SolidSecurityKeyCentralManager;
 

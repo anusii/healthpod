@@ -77,9 +77,7 @@ class _PathologySurveyState extends ConsumerState<PathologySurvey> {
           ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
 
           if (mounted) {
-            await ref
-                .read(fileServiceProvider.notifier)
-                .handleUpload(context);
+            await ref.read(fileServiceProvider.notifier).handleUpload(context);
           }
 
           setState(() {
