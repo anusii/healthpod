@@ -23,6 +23,8 @@
 
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -40,8 +42,22 @@ class PathologyEditorPage extends StatefulWidget {
   State<PathologyEditorPage> createState() => _PathologyEditorPageState();
 }
 
+/// Represents a report with its associated tests.
+
+class ReportData {
+  final String fileName;
+  final DateTime date;
+  final List<PathologyTest> tests;
+
+  ReportData({
+    required this.fileName,
+    required this.date,
+    required this.tests,
+  });
+}
+
 class _PathologyEditorPageState extends State<PathologyEditorPage> {
-  List<PathologyReport> _reports = [];
+  List<ReportData> _reports = [];
   bool _isLoading = true;
   String? _error;
 
@@ -54,6 +70,8 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
   /// Loads pathology reports from the POD.
 
   Future<void> _loadReports() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _error = null;
@@ -67,18 +85,19 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
       final dirUrl = await getDirUrl(pathologyPath);
       final resources = await getResourcesInContainer(dirUrl);
 
-      // Parse the result to extract PDF files.
+      // Parse the result to extract report files and their associated test data.
 
-      final List<PathologyReport> reports = [];
+      final Map<String, ReportData> reportsMap = {};
+
+      // First, find all PDF files (reports).
 
       for (var fileName in resources.files) {
-        // Extract filename from URL if it's a full URL.
-
         final name = fileName.contains('/')
             ? Uri.decodeComponent(Uri.parse(fileName).pathSegments.last)
             : Uri.decodeComponent(fileName);
 
-        // Check for encrypted PDF files (.pdf.enc.ttl).
+        // Check for encrypted PDF files (.pdf.enc.ttl) or plain PDF files.
+
         final isEncryptedPdf = name.toLowerCase().endsWith('.pdf.enc.ttl');
         final isPlainPdf = name.toLowerCase().endsWith('.pdf');
 
@@ -89,7 +108,7 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
               ? name.substring(0, name.length - '.enc.ttl'.length)
               : name;
 
-          // Try to extract date from filename or use modified date.
+          // Try to extract date from filename or use current date.
 
           DateTime date;
           try {
@@ -113,23 +132,94 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
             date = DateTime.now();
           }
 
-          reports.add(
-            PathologyReport(
-              fileName: pdfName,
-              date: date,
-              filePath: '$pathologyPath/$name',
-            ),
+          // Initialise report with empty test list.
+
+          reportsMap[pdfName] = ReportData(
+            fileName: pdfName,
+            date: date,
+            tests: [],
           );
         }
       }
 
-      // Sort reports by date, most recent first.
+      // Then, find JSON files and associate them with reports.
 
-      reports.sort((a, b) => b.date.compareTo(a.date));
+      for (var fileName in resources.files) {
+        final name = fileName.contains('/')
+            ? Uri.decodeComponent(Uri.parse(fileName).pathSegments.last)
+            : Uri.decodeComponent(fileName);
+
+        // Check for JSON files.
+
+        if (name.toLowerCase().endsWith('.json')) {
+          try {
+            if (!mounted) break;
+
+            // Read and parse the JSON file.
+
+            final filePath = '$pathologyPath/$name';
+            final content = await readPod(
+              filePath,
+              context,
+              const Text('Loading pathology data'),
+            );
+
+            // Parse the JSON content.
+
+            final jsonData = jsonDecode(content) as Map<String, dynamic>;
+
+            // Extract test data from JSON.
+
+            final reportName = jsonData['report_name'] ?? name;
+            final testsList = jsonData['tests'] as List<dynamic>?;
+
+            final List<PathologyTest> tests = [];
+            if (testsList != null) {
+              for (var test in testsList) {
+                tests.add(PathologyTest.fromJson(test, reportName));
+              }
+            }
+
+            // Try to match JSON file to a PDF report.
+
+            String? matchedPdfName;
+            for (var pdfName in reportsMap.keys) {
+              // Check if JSON filename corresponds to PDF filename.
+
+              if (name.toLowerCase().startsWith(
+                      pdfName.toLowerCase().replaceAll('.pdf', ''))) {
+                matchedPdfName = pdfName;
+                break;
+              }
+            }
+
+            if (matchedPdfName != null) {
+              // Add tests to the matched report.
+
+              reportsMap[matchedPdfName] = ReportData(
+                fileName: reportsMap[matchedPdfName]!.fileName,
+                date: reportsMap[matchedPdfName]!.date,
+                tests: tests,
+              );
+            }
+            // If JSON file doesn't match any PDF, skip it.
+            // Only PDF files should be displayed as reports.
+          } catch (e) {
+            // Skip files that can't be parsed.
+
+            continue;
+          }
+        }
+      }
+
+      // Convert map to list and sort by date, most recent first.
+
+      final reportsList = reportsMap.values.toList();
+      reportsList.sort((a, b) => b.date.compareTo(a.date));
 
       if (mounted) {
         setState(() {
-          _reports = reports;
+          _reports = reportsList;
           _isLoading = false;
         });
       }
@@ -197,8 +287,8 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
             const Icon(Icons.biotech, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             MarkdownBody(
-              data:
-                  'No pathology reports found.\n\nUpload reports using the **Add** tab.',
+              data: 'No pathology reports found.\n\n'
+                  'Upload reports using the **Add** tab.',
               styleSheet: MarkdownStyleSheet(
                 p: const TextStyle(
                   fontSize: 16,
@@ -211,31 +301,234 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
       );
     }
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: SingleChildScrollView(
-        child: DataTable(
-          columns: const [
-            DataColumn(label: Text('Date')),
-            DataColumn(label: Text('Report Filename')),
-          ],
-          rows: List<DataRow>.generate(_reports.length, (index) {
-            final report = _reports[index];
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemCount: _reports.length,
+      itemBuilder: (context, index) {
+        final report = _reports[index];
+        return _buildReportCard(report);
+      },
+    );
+  }
 
-            return DataRow(
-              cells: [
-                DataCell(
-                  Text(
-                    '${report.date.year}-${report.date.month.toString().padLeft(2, '0')}-${report.date.day.toString().padLeft(2, '0')}',
+  /// Builds a card for a single report with its test results.
+
+  Widget _buildReportCard(ReportData report) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Report header.
+
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(4.0),
+                topRight: Radius.circular(4.0),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.description,
+                  color: Colors.blue.shade700,
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        report.fileName,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade900,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Date: ${report.date.day.toString().padLeft(2, '0')}/'
+                            '${report.date.month.toString().padLeft(2, '0')}/'
+                            '${report.date.year}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                DataCell(
-                  Text(report.fileName),
-                ),
               ],
-            );
-          }),
-        ),
+            ),
+          ),
+
+          // Test results section.
+
+          if (report.tests.isEmpty)
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 48,
+                      color: Colors.grey.shade400,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'No test data available for this report',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Table header.
+
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0,
+                      vertical: 8.0,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(4.0),
+                        topRight: Radius.circular(4.0),
+                      ),
+                    ),
+                    child: const Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            'Test Name',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            'Result',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: Text(
+                            'Units',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            'Reference Range',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Test rows.
+
+                  ...report.tests.asMap().entries.map((entry) {
+                    final test = entry.value;
+                    final isEven = entry.key % 2 == 0;
+
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0,
+                        vertical: 12.0,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isEven ? Colors.white : Colors.grey.shade50,
+                        border: Border(
+                          left: BorderSide(color: Colors.grey.shade300),
+                          right: BorderSide(color: Colors.grey.shade300),
+                          bottom: BorderSide(color: Colors.grey.shade300),
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              test.testName,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              test.result,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              test.units,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              test.referenceInterval,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+        ],
       ),
     );
   }
