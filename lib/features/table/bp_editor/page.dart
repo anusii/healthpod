@@ -215,6 +215,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
       appBar: AppBar(
         title: const Text('Blood Pressure Observations'),
         backgroundColor: Theme.of(context).colorScheme.surface,
+        automaticallyImplyLeading: false,
         actions: [
           if (!isLoading)
             Padding(

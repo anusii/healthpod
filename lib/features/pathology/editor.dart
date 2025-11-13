@@ -149,13 +149,22 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
             ? Uri.decodeComponent(Uri.parse(fileName).pathSegments.last)
             : Uri.decodeComponent(fileName);
 
-        // Check for JSON files.
+        // Check for encrypted JSON files (.json.enc.ttl) or plain JSON files.
 
-        if (name.toLowerCase().endsWith('.json')) {
+        final isEncryptedJson = name.toLowerCase().endsWith('.json.enc.ttl');
+        final isPlainJson = name.toLowerCase().endsWith('.json');
+
+        if (isEncryptedJson || isPlainJson) {
           try {
             if (!mounted) break;
 
-            // Read and parse the JSON file.
+            // Extract the original JSON filename (without .enc.ttl if encrypted).
+
+            final jsonName = isEncryptedJson
+                ? name.substring(0, name.length - '.enc.ttl'.length)
+                : name;
+
+            // Read and parse the JSON file (readPod handles decryption).
 
             final filePath = '$pathologyPath/$name';
             final content = await readPod(
@@ -164,13 +173,23 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
               const Text('Loading pathology data'),
             );
 
+            // Skip if read failed or returned TTL format (decryption failed).
+
+            if (content.isEmpty ||
+                content == SolidFunctionCallStatus.fail.toString() ||
+                content == SolidFunctionCallStatus.notLoggedIn.toString() ||
+                content.trim().startsWith('@prefix')) {
+              debugPrint('Failed to read or decrypt JSON file: $name');
+              continue;
+            }
+
             // Parse the JSON content.
 
             final jsonData = jsonDecode(content) as Map<String, dynamic>;
 
             // Extract test data from JSON.
 
-            final reportName = jsonData['report_name'] ?? name;
+            final reportName = jsonData['report_name'] ?? jsonName;
             final testsList = jsonData['tests'] as List<dynamic>?;
 
             final List<PathologyTest> tests = [];
@@ -186,7 +205,7 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
             for (var pdfName in reportsMap.keys) {
               // Check if JSON filename corresponds to PDF filename.
 
-              if (name.toLowerCase().startsWith(
+              if (jsonName.toLowerCase().startsWith(
                       pdfName.toLowerCase().replaceAll('.pdf', ''))) {
                 matchedPdfName = pdfName;
                 break;
@@ -201,12 +220,16 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
                 date: reportsMap[matchedPdfName]!.date,
                 tests: tests,
               );
+              debugPrint(
+                'Matched JSON data to PDF: $jsonName -> $matchedPdfName',
+              );
             }
             // If JSON file doesn't match any PDF, skip it.
             // Only PDF files should be displayed as reports.
           } catch (e) {
             // Skip files that can't be parsed.
 
+            debugPrint('Error parsing JSON file $name: $e');
             continue;
           }
         }
@@ -239,6 +262,7 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
       appBar: AppBar(
         title: const Text('Pathology Reports'),
         backgroundColor: Theme.of(context).colorScheme.surface,
+        automaticallyImplyLeading: false,
       ),
       body: _buildBody(),
     );
