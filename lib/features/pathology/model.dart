@@ -146,3 +146,25 @@ class PathologyTest {
     };
   }
 }
+
+/// Represents a report with its associated tests.
+
+class ReportData {
+  /// The display name of the report file.
+
+  final String fileName;
+
+  /// The date associated with this report.
+
+  final DateTime date;
+
+  /// The list of test results for this report.
+
+  final List<PathologyTest> tests;
+
+  ReportData({
+    required this.fileName,
+    required this.date,
+    required this.tests,
+  });
+}
