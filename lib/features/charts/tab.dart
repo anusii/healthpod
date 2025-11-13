@@ -32,6 +32,7 @@ import 'package:healthpod/features/charts/bp_combined_visualisation.dart';
 import 'package:healthpod/features/charts/medication_visualisation.dart';
 import 'package:healthpod/features/charts/vaccination_visualisation.dart';
 import 'package:healthpod/features/diary/tab.dart';
+import 'package:healthpod/features/pathology/visualisation.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> chartPanels = [
@@ -39,6 +40,7 @@ final List<Map<String, dynamic>> chartPanels = [
   {'title': 'Blood Pressure', 'widget': const BPCombinedVisualisation()},
   {'title': 'Medications', 'widget': const MedicationVisualisation()},
   {'title': 'Vaccinations', 'widget': const VaccinationVisualisation()},
+  {'title': 'Pathology', 'widget': const PathologyVisualisation()},
 ];
 
 class ChartTab extends ConsumerStatefulWidget {

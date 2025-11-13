@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/features/diary/editor_page.dart';
+import 'package:healthpod/features/pathology/editor.dart';
 import 'package:healthpod/features/table/bp_editor/page.dart';
 import 'package:healthpod/features/table/medication_editor/page.dart';
 import 'package:healthpod/features/table/vaccination_editor/page.dart';
@@ -39,6 +40,7 @@ final List<Map<String, dynamic>> tablePanels = [
   {'title': 'Blood Pressure', 'widget': const BPEditorPage()},
   {'title': 'Medications', 'widget': const MedicationEditorPage()},
   {'title': 'Vaccinations', 'widget': const VaccinationEditorPage()},
+  {'title': 'Pathology', 'widget': const PathologyEditorPage()},
 ];
 
 class TableTab extends ConsumerStatefulWidget {

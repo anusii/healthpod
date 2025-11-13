@@ -115,6 +115,7 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
       appBar: AppBar(
         title: const Text('Vaccination Records'),
         backgroundColor: Theme.of(context).colorScheme.surface,
+        automaticallyImplyLeading: false,
         actions: [
           if (!isLoading)
             Padding(

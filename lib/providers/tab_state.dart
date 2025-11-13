@@ -35,7 +35,7 @@ class TabState {
 
   /// The maximum number of tabs across all features.
 
-  static const int maxTabs = 4;
+  static const int maxTabs = 5;
 
   /// Creates a new [TabState] with the given index.
 

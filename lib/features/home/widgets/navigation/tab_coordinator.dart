@@ -51,6 +51,9 @@ class TabCoordinator {
       case 3:
         featureDir = 'vaccination'; // Vaccinations
         break;
+      case 4:
+        featureDir = 'pathology'; // Pathology
+        break;
       default:
         featureDir = ''; // Default to home
         break;
@@ -83,6 +86,7 @@ class TabCoordinator {
     // Index 1: Blood Pressure → blood_pressure
     // Index 2: Medications → medication
     // Index 3: Vaccinations → vaccination
+    // Index 4: Pathology → pathology
 
     String featureDir;
     switch (selectedIndex) {
@@ -97,6 +101,9 @@ class TabCoordinator {
         break;
       case 3:
         featureDir = 'vaccination'; // Vaccinations
+        break;
+      case 4:
+        featureDir = 'pathology'; // Pathology
         break;
       default:
         featureDir = ''; // Default to home
@@ -139,6 +146,9 @@ class TabCoordinator {
           break;
         case 3:
           initialPath = '$basePath/vaccination'; // Vaccinations
+          break;
+        case 4:
+          initialPath = '$basePath/pathology'; // Pathology
           break;
         default:
           initialPath = basePath; // Default to home
