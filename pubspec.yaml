@@ -40,7 +40,8 @@ dependencies:
     git:
       url: https://github.com/anusii/solidui.git
       ref: dev
-  syncfusion_flutter_pdf: ^30.1.37
+  syncfusion_flutter_pdf: ^31.2.5
+  syncfusion_flutter_pdfviewer: ^31.2.5
   table_calendar: ^3.0.9
   timeline_tile: ^2.0.0
   universal_io: ^2.2.2

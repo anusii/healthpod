@@ -167,6 +167,7 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
       appBar: AppBar(
         title: const Text('Medication Records'),
         backgroundColor: Theme.of(context).colorScheme.surface,
+        automaticallyImplyLeading: false,
         actions: [
           if (!isLoading)
             Padding(
