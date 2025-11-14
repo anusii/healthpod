@@ -41,7 +41,6 @@ class ProfileValidator {
       'name',
       'address',
       'bestContactPhone',
-      'alternativeContactNumber',
       'email',
       'dateOfBirth',
       'gender',
@@ -66,8 +65,10 @@ class ProfileValidator {
     if (jsonData.containsKey('data') &&
         jsonData['data'] is Map<String, dynamic>) {
       final nestedData = jsonData['data'] as Map<String, dynamic>;
-      final dataMissingFields =
-          _checkRequiredFields(nestedData, requiredFields);
+      final dataMissingFields = _checkRequiredFields(
+        nestedData,
+        requiredFields,
+      );
       if (dataMissingFields.isEmpty) {
         return {
           'isValid': true,
@@ -82,8 +83,10 @@ class ProfileValidator {
     if (jsonData.containsKey('responses') &&
         jsonData['responses'] is Map<String, dynamic>) {
       final nestedData = jsonData['responses'] as Map<String, dynamic>;
-      final responsesMissingFields =
-          _checkRequiredFields(nestedData, requiredFields);
+      final responsesMissingFields = _checkRequiredFields(
+        nestedData,
+        requiredFields,
+      );
       if (responsesMissingFields.isEmpty) {
         return {
           'isValid': true,

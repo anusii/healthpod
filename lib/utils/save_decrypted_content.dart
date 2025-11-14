@@ -51,8 +51,9 @@ Future<void> saveDecryptedContent(
 
     try {
       final jsonData = jsonDecode(decryptedContent);
-      await file
-          .writeAsString(const JsonEncoder.withIndent('  ').convert(jsonData));
+      await file.writeAsString(
+        const JsonEncoder.withIndent('  ').convert(jsonData),
+      );
       return;
     } catch (jsonError) {
       debugPrint('JSON parsing failed: $jsonError');

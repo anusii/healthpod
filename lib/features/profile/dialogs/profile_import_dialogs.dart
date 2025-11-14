@@ -44,11 +44,7 @@ class ProfileImportDialogs {
         return AlertDialog(
           title: const Text('Validation Error'),
           content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(message),
-              ],
-            ),
+            child: ListBody(children: <Widget>[Text(message)]),
           ),
           actions: <Widget>[
             TextButton(
@@ -196,9 +192,7 @@ class ProfileImportDialogs {
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  constraints: const BoxConstraints(
-                    maxHeight: 150,
-                  ),
+                  constraints: const BoxConstraints(maxHeight: 150),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(8),
@@ -257,28 +251,26 @@ class ProfileImportDialogs {
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
                 style: TextButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                 ),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(fontSize: 16),
-                ),
+                child: const Text('Cancel', style: TextStyle(fontSize: 16)),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                 ),
                 child: const Text(
                   'Replace Profile',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
             ],

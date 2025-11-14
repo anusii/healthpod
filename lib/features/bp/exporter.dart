@@ -55,8 +55,10 @@ class BPExporter extends HealthDataExporterBase {
 
   @override
   Map<String, dynamic> processRecord(Map<String, dynamic> jsonData) {
-    var timestamp =
-        normaliseTimestamp(jsonData[BPCSVFields.fieldTimestamp], toIso: true);
+    var timestamp = normaliseTimestamp(
+      jsonData[BPCSVFields.fieldTimestamp],
+      toIso: true,
+    );
 
     final responses = jsonData['responses'];
 
@@ -170,8 +172,9 @@ class BPExporter extends HealthDataExporterBase {
       // Sort readings by timestamp.
 
       allReadings.sort(
-        (a, b) => a[BPCSVFields.fieldTimestamp]
-            .compareTo(b[BPCSVFields.fieldTimestamp]),
+        (a, b) => a[BPCSVFields.fieldTimestamp].compareTo(
+          b[BPCSVFields.fieldTimestamp],
+        ),
       );
 
       // Prepare CSV data.

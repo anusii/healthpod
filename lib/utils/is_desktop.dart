@@ -53,4 +53,5 @@ class PlatformWrapper {
   bool get isWeb => kIsWeb;
   bool get isWindows => Platform.isWindows;
 }
+
 // coverage:ignore-end

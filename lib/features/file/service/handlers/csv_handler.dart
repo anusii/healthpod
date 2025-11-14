@@ -377,8 +377,9 @@ class CsvHandler {
           if (success) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content:
-                    Text('${feature.displayName} data exported successfully'),
+                content: Text(
+                  '${feature.displayName} data exported successfully',
+                ),
                 backgroundColor: Theme.of(context).colorScheme.tertiary,
               ),
             );

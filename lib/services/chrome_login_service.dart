@@ -56,15 +56,18 @@ class ChromeLoginService {
     try {
       _driver = createDriver(
         spec: WebDriverSpec.W3c,
-        uri: Uri.parse('http' '://localhost:9515'),
+        uri: Uri.parse(
+          'http'
+          '://localhost:9515',
+        ),
         desired: {
           'browserName': 'chrome',
           'goog:chromeOptions': {
             'args': [
               '--no-sandbox',
               '--disable-dev-shm-usage',
-              // Run in headless mode (no UI).
 
+              // Run in headless mode (no UI).
               '--headless',
             ],
           },

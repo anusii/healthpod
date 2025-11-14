@@ -88,35 +88,23 @@ class MedicationEditorControllers {
     // Listen for changes and update the observation.
 
     _nameController!.addListener(() {
-      onObservationChanged(
-        observation.copyWith(
-          name: _nameController!.text,
-        ),
-      );
+      onObservationChanged(observation.copyWith(name: _nameController!.text));
     });
 
     _dosageController!.addListener(() {
       onObservationChanged(
-        observation.copyWith(
-          dosage: _dosageController!.text,
-        ),
+        observation.copyWith(dosage: _dosageController!.text),
       );
     });
 
     _frequencyController!.addListener(() {
       onObservationChanged(
-        observation.copyWith(
-          frequency: _frequencyController!.text,
-        ),
+        observation.copyWith(frequency: _frequencyController!.text),
       );
     });
 
     _notesController!.addListener(() {
-      onObservationChanged(
-        observation.copyWith(
-          notes: _notesController!.text,
-        ),
-      );
+      onObservationChanged(observation.copyWith(notes: _notesController!.text));
     });
   }
 

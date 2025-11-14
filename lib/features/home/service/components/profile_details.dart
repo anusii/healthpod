@@ -102,9 +102,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       TextEditingController(): 'address',
       TextEditingController(): 'bestContactPhone',
       TextEditingController(): 'bestContactEmail',
-      TextEditingController(): 'emergencyName',
-      TextEditingController(): 'emergencyPhone',
-      TextEditingController(): 'alternativeContactNumber',
+      TextEditingController(): 'emergencyContact',
+      TextEditingController(): 'emergencyNumber',
       TextEditingController(): 'email',
       TextEditingController(): 'dateOfBirth',
       TextEditingController(): 'gender',
@@ -114,6 +113,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   /// Load profile data from the pod and update state.
 
   Future<void> _loadProfileData() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
     });
@@ -122,6 +122,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       final profileData = await ProfileDataManager.loadProfileData(context);
       _profileData = profileData;
 
+      if (!mounted) return;
       setState(() {
         // Populate controllers with profile data or defaults.
 
@@ -135,6 +136,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
@@ -144,17 +146,20 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   /// Load profile photo from pod.
 
   Future<void> _loadProfilePhoto() async {
+    if (!mounted) return;
     setState(() {
       _isLoadingPhoto = true;
     });
 
     try {
       final photoProvider = await ProfilePhotoManager.loadProfilePhoto(context);
+      if (!mounted) return;
       setState(() {
         _profilePhoto = photoProvider;
         _isLoadingPhoto = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _profilePhoto = null;
         _isLoadingPhoto = false;
@@ -175,9 +180,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
     if (nameController.text.trim().isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Name is required')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Name is required')));
       }
       return;
     }
@@ -186,13 +191,14 @@ class _ProfileDetailsState extends State<ProfileDetails> {
 
     if (!ProfileDataManager.hasDataChanged(_controllers, _profileData)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No changes detected')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('No changes detected')));
       }
       return;
     }
 
+    if (!mounted) return;
     setState(() {
       _isSaving = true;
     });
@@ -258,9 +264,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         );
       }
     } finally {
-      setState(() {
-        _isSaving = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
   }
 
@@ -308,6 +316,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     // If user saved changes, update controllers and save data.
 
     if (updatedData != null) {
+      if (!mounted) return;
       setState(() {
         _controllers.forEach((controller, fieldName) {
           controller.text = updatedData[fieldName] ?? '';
@@ -327,9 +336,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     );
 
     return Container(
-      constraints: const BoxConstraints(
-        maxWidth: 400,
-      ),
+      constraints: const BoxConstraints(maxWidth: 400),
       padding: const EdgeInsets.all(16.0),
       decoration: getHomeCardDecoration(context),
       child: Stack(
@@ -339,7 +346,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Title and edit button row.
-
               ProfileUIComponents.buildTitleRow(
                 context,
                 widget.showEditButton,
@@ -368,7 +374,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
               const SizedBox(height: 8),
 
               // Personal Identification Details section.
-
               if (_isLoading)
                 ...ProfileUIComponents.buildLoadingRows(context)
               else
@@ -382,8 +387,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                 ),
             ],
           ),
-          // Loading/saving overlay.
 
+          // Loading/saving overlay.
           if (_isLoading || _isSaving)
             ProfileUIComponents.buildLoadingOverlay(
               context,
@@ -401,9 +406,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     final fieldLabels = {
       'address': 'Address:',
       'bestContactPhone': 'Phone:',
-      'emergencyName': 'Emergency Name:',
-      'emergencyPhone': 'Emergency Phone:',
-      'alternativeContactNumber': 'Alternative:',
+      'emergencyContact': 'Emergency Contact:',
+      'emergencyNumber': 'Emergency Number:',
       'email': 'Email:',
       'dateOfBirth': 'Date of Birth:',
       'gender': 'Gender:',
@@ -442,9 +446,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       _profilePhoto,
       nameController.text,
       (photo) {
-        setState(() {
-          _profilePhoto = photo;
-        });
+        if (mounted) {
+          setState(() {
+            _profilePhoto = photo;
+          });
+        }
       },
       widget.onDataChanged,
       _isLoading,

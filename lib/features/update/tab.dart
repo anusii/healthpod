@@ -31,26 +31,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/diary/survey.dart';
 import 'package:healthpod/features/medication/survey.dart';
+import 'package:healthpod/features/pathology/importer.dart';
 import 'package:healthpod/features/vaccination/survey.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> surveyPanels = [
-  {
-    'title': 'Appointments',
-    'widget': AppointmentSurvey(),
-  },
-  {
-    'title': 'Blood Pressure',
-    'widget': BPSurvey(),
-  },
-  {
-    'title': 'Medications',
-    'widget': MedicationSurvey(),
-  },
-  {
-    'title': 'Vaccinations',
-    'widget': VaccinationSurvey(),
-  },
+  {'title': 'Appointments', 'widget': AppointmentSurvey()},
+  {'title': 'Blood Pressure', 'widget': BPSurvey()},
+  {'title': 'Medications', 'widget': MedicationSurvey()},
+  {'title': 'Vaccinations', 'widget': VaccinationSurvey()},
+  {'title': 'Pathology', 'widget': const PathologySurvey()},
 ];
 
 class SurveyTab extends ConsumerStatefulWidget {
@@ -99,9 +89,7 @@ class _SurveyTabState extends ConsumerState<SurveyTab>
             }
           },
           tabs: surveyPanels.map((tab) {
-            return Tab(
-              text: tab['title'],
-            );
+            return Tab(text: tab['title']);
           }).toList(),
         ),
         Expanded(

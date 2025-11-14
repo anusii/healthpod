@@ -132,10 +132,7 @@ class _AppointmentManagementDialogState
           onPressed: () => Navigator.pop(context),
           child: const Text('Cancel'),
         ),
-        ElevatedButton(
-          onPressed: _saveChanges,
-          child: const Text('Save'),
-        ),
+        ElevatedButton(onPressed: _saveChanges, child: const Text('Save')),
       ],
     );
   }
@@ -172,18 +169,18 @@ class _AppointmentManagementDialogState
 
   void _showImportComingSoon() {
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Import feature coming soon')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Import feature coming soon')));
   }
 
   /// Shows a placeholder message for export functionality.
 
   void _showExportComingSoon() {
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Export feature coming soon')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Export feature coming soon')));
   }
 
   /// Saves changes and updates the parent widget.

@@ -50,9 +50,7 @@ class HealthPodMenuBuilder {
     **Home:** Tap here to view your HealthPod overview and dashboard.
 
     ''',
-          child: HomePage(
-            onNavigateToProfile: () {},
-          ),
+          child: HomePage(onNavigateToProfile: () {}),
         ),
         const SolidMenuItem(
           title: 'Add',
@@ -105,9 +103,7 @@ class HealthPodMenuBuilder {
     to **delete** files from your pod storage.
 
     ''',
-          child: FileManagementContent(
-            hasUserSelectedFeatureTab: false,
-          ),
+          child: FileManagementContent(hasUserSelectedFeatureTab: false),
         ),
         const SolidMenuItem(
           title: 'Support',

@@ -48,12 +48,10 @@ class ProfileUIComponents {
     return Row(
       children: [
         // User avatar with lock icon.
-
         Stack(
           clipBehavior: Clip.none,
           children: [
             // Profile photo with loading indicator or initials.
-
             ProfilePhotoHandler.buildProfileAvatar(
               context: context,
               photo: profilePhoto,
@@ -82,7 +80,6 @@ class ProfileUIComponents {
             ),
 
             // Edit photo indicator.
-
             if (!isLoadingPhoto && !isUploadingPhoto)
               Positioned(
                 top: -2,
@@ -109,7 +106,6 @@ class ProfileUIComponents {
         const SizedBox(width: 12),
 
         // Display user name.
-
         Expanded(
           child: Text(
             userName,
@@ -120,7 +116,6 @@ class ProfileUIComponents {
         ),
 
         // Notification bell with notification count badge.
-
         Stack(
           clipBehavior: Clip.none,
           children: [
@@ -129,8 +124,8 @@ class ProfileUIComponents {
               size: 28,
               color: theme.colorScheme.onSurfaceVariant,
             ),
-            // Notification counter badge.
 
+            // Notification counter badge.
             if (notificationCount > 0)
               Positioned(
                 right: -2,
@@ -169,10 +164,7 @@ class ProfileUIComponents {
       children: [
         const Text(
           'Profile Details',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         if (showEditButton)
           MarkdownTooltip(
@@ -201,11 +193,7 @@ Your data is securely stored in your personal pod.
 
   /// Builds a single data row with label and value.
 
-  static Widget buildDataRow(
-    BuildContext context,
-    String label,
-    String value,
-  ) {
+  static Widget buildDataRow(BuildContext context, String label, String value) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -213,10 +201,7 @@ Your data is securely stored in your personal pod.
           width: 100,
           child: Text(
             '$label ',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 13,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
           ),
         ),
         Expanded(
@@ -224,10 +209,9 @@ Your data is securely stored in your personal pod.
             value.isEmpty ? '—' : value,
             style: TextStyle(
               color: value.isEmpty
-                  ? Theme.of(context)
-                      .colorScheme
-                      .onSurfaceVariant
-                      .withValues(alpha: 0.5)
+                  ? Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
                   : Theme.of(context).colorScheme.onSurface,
             ),
           ),
@@ -252,10 +236,9 @@ Your data is securely stored in your personal pod.
                 height: 14,
                 width: 80,
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurfaceVariant
-                      .withValues(alpha: 0.2),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -264,10 +247,9 @@ Your data is securely stored in your personal pod.
               child: Container(
                 height: 14,
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSurfaceVariant
-                      .withValues(alpha: 0.1),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),

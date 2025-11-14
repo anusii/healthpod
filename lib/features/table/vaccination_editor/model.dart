@@ -130,9 +130,7 @@ class VaccinationObservation {
       // Check if it's a CSV format by looking for 'date' and 'vaccine' keys.
 
       if (data.containsKey('date') && data.containsKey('vaccine')) {
-        return VaccinationObservation.fromCsv(
-          Map<String, String>.from(data),
-        );
+        return VaccinationObservation.fromCsv(Map<String, String>.from(data));
       }
       // Otherwise treat as JSON.
 

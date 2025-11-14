@@ -126,8 +126,5 @@ class FooterData {
   final String? webId;
   final bool isKeySaved;
 
-  const FooterData({
-    required this.webId,
-    required this.isKeySaved,
-  });
+  const FooterData({required this.webId, required this.isKeySaved});
 }

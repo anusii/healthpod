@@ -43,16 +43,18 @@ class ProfileEditDialog {
     final tempControllers = <String, TextEditingController>{
       'name': TextEditingController(text: currentData['name']),
       'address': TextEditingController(text: currentData['address']),
-      'bestContactPhone':
-          TextEditingController(text: currentData['bestContactPhone']),
-      'bestContactEmail':
-          TextEditingController(text: currentData['bestContactEmail']),
-      'emergencyName':
-          TextEditingController(text: currentData['emergencyName']),
-      'emergencyPhone':
-          TextEditingController(text: currentData['emergencyPhone']),
-      'alternativeContactNumber':
-          TextEditingController(text: currentData['alternativeContactNumber']),
+      'bestContactPhone': TextEditingController(
+        text: currentData['bestContactPhone'],
+      ),
+      'bestContactEmail': TextEditingController(
+        text: currentData['bestContactEmail'],
+      ),
+      'emergencyContact': TextEditingController(
+        text: currentData['emergencyContact'],
+      ),
+      'emergencyNumber': TextEditingController(
+        text: currentData['emergencyNumber'],
+      ),
       'email': TextEditingController(text: currentData['email']),
       'dateOfBirth': TextEditingController(text: currentData['dateOfBirth']),
       'gender': TextEditingController(text: currentData['gender']),
@@ -81,12 +83,12 @@ class ProfileEditDialog {
                   const SizedBox(height: 12),
                   _buildPhoneField(tempControllers['bestContactPhone']!),
                   const SizedBox(height: 12),
-                  _buildEmergencyNameField(tempControllers['emergencyName']!),
+                  _buildEmergencyContactField(
+                    tempControllers['emergencyContact']!,
+                  ),
                   const SizedBox(height: 12),
-                  _buildEmergencyPhoneField(tempControllers['emergencyPhone']!),
-                  const SizedBox(height: 12),
-                  _buildAlternativePhoneField(
-                    tempControllers['alternativeContactNumber']!,
+                  _buildEmergencyNumberField(
+                    tempControllers['emergencyNumber']!,
                   ),
                   const SizedBox(height: 12),
                   _buildEmailField(tempControllers['email']!),
@@ -127,20 +129,25 @@ class ProfileEditDialog {
         updatedData[entry.key] = entry.value.text;
       }
 
-      // Clean up temporary controllers.
+      // Delay disposal until after the current frame to avoid
+      // "controller used after disposal" errors.
 
-      for (var controller in tempControllers.values) {
-        controller.dispose();
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        for (var controller in tempControllers.values) {
+          controller.dispose();
+        }
+      });
 
       return updatedData;
     }
 
-    // Clean up temporary controllers.
+    // Delay disposal until after the current frame.
 
-    for (var controller in tempControllers.values) {
-      controller.dispose();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      for (var controller in tempControllers.values) {
+        controller.dispose();
+      }
+    });
 
     return null;
   }
@@ -222,13 +229,13 @@ Spaces, dashes and parentheses are allowed.
     );
   }
 
-  /// Builds the emergency name field.
+  /// Builds the emergency contact field.
 
-  static Widget _buildEmergencyNameField(TextEditingController controller) {
+  static Widget _buildEmergencyContactField(TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Emergency Name'),
+        const Text('Emergency Contact'),
         TextFormField(
           controller: controller,
           decoration: const InputDecoration(
@@ -240,48 +247,13 @@ Spaces, dashes and parentheses are allowed.
     );
   }
 
-  /// Builds the emergency phone field with tooltip.
+  /// Builds the emergency number field with tooltip.
 
-  static Widget _buildEmergencyPhoneField(TextEditingController controller) {
+  static Widget _buildEmergencyNumberField(TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Emergency Phone'),
-        MarkdownTooltip(
-          message: '''
-
-**Valid Phone Number Formats:**
-
-- **Australian Mobile:** +61 4XX XXX XXX or 04XX XXX XXX
-- **Australian Landline:** +61 X XXXX XXXX or 0X XXXX XXXX
-- **International:** +[country code] followed by number
-
-Spaces, dashes and parentheses are allowed.
-
-''',
-          child: TextFormField(
-            controller: controller,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              hintText: 'e.g. +61 4 1234 5678 or 04 1234 5678',
-              suffixIcon: Icon(Icons.info_outline),
-            ),
-            validator: ProfileFormValidators.validatePhone,
-            keyboardType: TextInputType.phone,
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Builds the alternative phone field with tooltip.
-
-  static Widget _buildAlternativePhoneField(TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Alternative Phone'),
+        const Text('Emergency Number'),
         MarkdownTooltip(
           message: '''
 
@@ -364,8 +336,10 @@ Spaces, dashes and parentheses are allowed.
                     controller: controller,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       suffixIcon: Icon(Icons.calendar_today),
                     ),
                     keyboardType: TextInputType.datetime,
@@ -400,22 +374,15 @@ Spaces, dashes and parentheses are allowed.
                 value: controller.text.isEmpty ? null : controller.text,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                 ),
                 items: const [
-                  DropdownMenuItem(
-                    value: null,
-                    child: Text('Select gender'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Male',
-                    child: Text('Male'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Female',
-                    child: Text('Female'),
-                  ),
+                  DropdownMenuItem(value: null, child: Text('Select gender')),
+                  DropdownMenuItem(value: 'Male', child: Text('Male')),
+                  DropdownMenuItem(value: 'Female', child: Text('Female')),
                   DropdownMenuItem(
                     value: 'Non-binary',
                     child: Text('Non-binary'),

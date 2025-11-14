@@ -35,19 +35,15 @@ class TabState {
 
   /// The maximum number of tabs across all features.
 
-  static const int maxTabs = 4;
+  static const int maxTabs = 5;
 
   /// Creates a new [TabState] with the given index.
 
-  const TabState({
-    this.selectedIndex = -1,
-  });
+  const TabState({this.selectedIndex = -1});
 
   /// Creates a copy of this [TabState] with the given fields replaced with new values.
 
-  TabState copyWith({
-    int selectedIndex = -1,
-  }) {
+  TabState copyWith({int selectedIndex = -1}) {
     return TabState(
       selectedIndex: selectedIndex != -1
           ? _normalizeIndex(selectedIndex)
@@ -66,8 +62,9 @@ class TabState {
 
 /// Provider for the tab state.
 
-final tabStateProvider =
-    StateNotifierProvider<TabStateNotifier, TabState>((ref) {
+final tabStateProvider = StateNotifierProvider<TabStateNotifier, TabState>((
+  ref,
+) {
   return TabStateNotifier();
 });
 

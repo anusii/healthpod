@@ -69,35 +69,34 @@ class BPEditorDesktopLayout extends StatelessWidget {
       child: SingleChildScrollView(
         child: DataTable(
           columns: columns,
-          rows: List<DataRow>.generate(
-            editorState.observations.length,
-            (index) {
-              final obs = editorState.observations[index];
+          rows: List<DataRow>.generate(editorState.observations.length, (
+            index,
+          ) {
+            final obs = editorState.observations[index];
 
-              if (editorState.editingIndex == index) {
-                return buildEditingRow(
-                  context: context,
-                  width: width,
-                  editorState: editorState,
-                  editorService: editorService,
-                  observation: obs,
-                  index: index,
-                  onCancel: onCancelEdit,
-                  onSave: () => onSave(index),
-                  onTimestampChanged: onTimestampChanged,
-                );
-              }
-
-              return buildDisplayRow(
+            if (editorState.editingIndex == index) {
+              return buildEditingRow(
                 context: context,
                 width: width,
+                editorState: editorState,
+                editorService: editorService,
                 observation: obs,
                 index: index,
-                onEdit: onEdit(index),
-                onDelete: () => onDelete(obs, index),
+                onCancel: onCancelEdit,
+                onSave: () => onSave(index),
+                onTimestampChanged: onTimestampChanged,
               );
-            },
-          ),
+            }
+
+            return buildDisplayRow(
+              context: context,
+              width: width,
+              observation: obs,
+              index: index,
+              onEdit: onEdit(index),
+              onDelete: () => onDelete(obs, index),
+            );
+          }),
         ),
       ),
     );

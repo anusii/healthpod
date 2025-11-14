@@ -90,18 +90,14 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
   /// Initialises all required data including footer data and feature folders.
 
   Future<void> _initialiseData() async {
-    await HomeStateManager.initialiseData(
-      context,
-      _webId,
-      (webId, isKeySaved) {
-        if (mounted) {
-          setState(() {
-            _webId = webId;
-            _isKeySaved = isKeySaved;
-          });
-        }
-      },
-    );
+    await HomeStateManager.initialiseData(context, _webId, (webId, isKeySaved) {
+      if (mounted) {
+        setState(() {
+          _webId = webId;
+          _isKeySaved = isKeySaved;
+        });
+      }
+    });
   }
 
   /// Updates the key saved status in the state and triggers a rebuild.
@@ -223,9 +219,7 @@ Tap to visit your server in the browser.
 ''',
               )
             : null,
-        loginStatus: SolidLoginStatus(
-          webId: _webId,
-        ),
+        loginStatus: SolidLoginStatus(webId: _webId),
         securityKeyStatus: SolidSecurityKeyStatus(
           isKeySaved: _isKeySaved,
           onKeyStatusChanged: _updateKeyStatus,

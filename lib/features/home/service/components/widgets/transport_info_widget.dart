@@ -54,10 +54,7 @@ class TransportInfoWidget extends StatelessWidget {
             children: [
               Icon(Icons.directions_bus, color: Colors.green),
               SizedBox(width: 8),
-              Text(
-                'Transport:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              Text('Transport:', style: TextStyle(fontWeight: FontWeight.bold)),
               Icon(Icons.check, color: Colors.green),
             ],
           ),
@@ -86,9 +83,7 @@ class TransportInfoWidget extends StatelessWidget {
                         text: transportNote,
                         style: const TextStyle(fontStyle: FontStyle.italic),
                       ),
-                      const TextSpan(
-                        text: ' to change or request transport.',
-                      ),
+                      const TextSpan(text: ' to change or request transport.'),
                     ],
                   ),
                 ),

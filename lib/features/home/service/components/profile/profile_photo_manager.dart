@@ -57,7 +57,6 @@ class ProfilePhotoManager {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Display current photo or avatar.
-
                 SizedBox(
                   height: 100,
                   width: 100,
@@ -69,8 +68,8 @@ class ProfilePhotoManager {
                   ),
                 ),
                 const SizedBox(height: 20),
-                // Photo action buttons.
 
+                // Photo action buttons.
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -100,8 +99,9 @@ class ProfilePhotoManager {
                         label: const Text('Remove'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).colorScheme.error,
-                          foregroundColor:
-                              Theme.of(context).colorScheme.onError,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onError,
                         ),
                       ),
                   ],

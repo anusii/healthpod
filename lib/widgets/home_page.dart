@@ -33,10 +33,7 @@ import 'package:healthpod/features/home/service/components/components.dart';
 class HomePage extends StatefulWidget {
   final VoidCallback onNavigateToProfile;
 
-  const HomePage({
-    super.key,
-    required this.onNavigateToProfile,
-  });
+  const HomePage({super.key, required this.onNavigateToProfile});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -117,11 +114,10 @@ class _HomePageState extends State<HomePage> {
           children: [
             _buildHeader(context),
             const SizedBox(height: 24),
-            // Replace GridView with a more flexible layout that respects natural heights.
 
+            // Replace GridView with a more flexible layout that respects natural heights.
             if (maxWidth < 1200)
               // Two column layout.
-
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -136,11 +132,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   const SizedBox(width: 24),
-                  // Second column - Profile Details.
 
-                  Expanded(
-                    child: _buildGridItem(2),
-                  ),
+                  // Second column - Profile Details.
+                  Expanded(child: _buildGridItem(2)),
                 ],
               )
             else
@@ -149,22 +143,15 @@ class _HomePageState extends State<HomePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // First column.
-
-                  Expanded(
-                    child: _buildGridItem(0),
-                  ),
+                  Expanded(child: _buildGridItem(0)),
                   const SizedBox(width: 24),
+
                   // Second column.
-
-                  Expanded(
-                    child: _buildGridItem(1),
-                  ),
+                  Expanded(child: _buildGridItem(1)),
                   const SizedBox(width: 24),
-                  // Third column - Profile Details.
 
-                  Expanded(
-                    child: _buildGridItem(2),
-                  ),
+                  // Third column - Profile Details.
+                  Expanded(child: _buildGridItem(2)),
                 ],
               ),
           ],

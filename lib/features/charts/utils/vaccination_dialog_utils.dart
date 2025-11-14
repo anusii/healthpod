@@ -26,10 +26,7 @@ void showVaccinationDetails(BuildContext context, VaccinationRecord record) {
     builder: (context) => AlertDialog(
       title: Row(
         children: [
-          Icon(
-            Icons.vaccines,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          Icon(Icons.vaccines, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 8),
           Text(record.name),
         ],
@@ -43,9 +40,7 @@ void showVaccinationDetails(BuildContext context, VaccinationRecord record) {
               data:
                   '**Date:** ${DateFormat('dd MMM yyyy').format(record.date)}',
               styleSheet: MarkdownStyleSheet(
-                p: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
+                p: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               ),
             ),
             if (record.provider != null && record.provider!.isNotEmpty)

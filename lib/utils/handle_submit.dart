@@ -68,10 +68,7 @@ Future<void> handleSurveySubmit({
               const SizedBox(height: 12),
               const Text(
                 'Note: POD saving requires setting up your security key first.',
-                style: TextStyle(
-                  color: Colors.orange,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.orange, fontSize: 12),
               ),
             ],
           ],
@@ -86,9 +83,7 @@ Future<void> handleSurveySubmit({
                 isKeySaved ? () => Navigator.of(context).pop('pod') : null,
             child: Text(
               'Save to POD',
-              style: TextStyle(
-                color: isKeySaved ? null : Colors.grey,
-              ),
+              style: TextStyle(color: isKeySaved ? null : Colors.grey),
             ),
           ),
           TextButton(
@@ -96,18 +91,13 @@ Future<void> handleSurveySubmit({
                 isKeySaved ? () => Navigator.of(context).pop('both') : null,
             child: Text(
               'Save Both Places',
-              style: TextStyle(
-                color: isKeySaved ? null : Colors.grey,
-              ),
+              style: TextStyle(color: isKeySaved ? null : Colors.grey),
             ),
           ),
           const SizedBox(width: 8),
           TextButton(
             onPressed: () => Navigator.of(context).pop('cancel'),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Cancel', style: TextStyle(color: Colors.red)),
           ),
         ],
       );

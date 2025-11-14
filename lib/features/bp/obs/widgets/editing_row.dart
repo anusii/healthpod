@@ -60,7 +60,6 @@ DataRow buildEditingRow({
 }) {
   final cells = <DataCell>[
     // Timestamp cell.
-
     DataCell(
       InkWell(
         onTap: () async {
@@ -90,9 +89,9 @@ DataRow buildEditingRow({
           }
         },
         child: Text(
-          DateFormat('yyyy-MM-dd HH:mm').format(
-            editorState.currentEdit?.timestamp ?? observation.timestamp,
-          ),
+          DateFormat(
+            'yyyy-MM-dd HH:mm',
+          ).format(editorState.currentEdit?.timestamp ?? observation.timestamp),
           style: const TextStyle(
             decoration: TextDecoration.underline,
             color: Colors.blue,
@@ -102,14 +101,12 @@ DataRow buildEditingRow({
     ),
 
     // Systolic cell.
-
     numericCell(
       controller: editorState.systolicController,
       onValueChange: (_) {},
     ),
 
     // Diastolic cell.
-
     numericCell(
       controller: editorState.diastolicController,
       onValueChange: (_) {},

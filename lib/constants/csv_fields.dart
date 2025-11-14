@@ -47,9 +47,7 @@ class BPCSVFields {
   ];
 
   /// Optional CSV fields for blood pressure data.
-  static const List<String> optionalFields = [
-    fieldNotes,
-  ];
+  static const List<String> optionalFields = [fieldNotes];
 
   // Individual field names
   static const String fieldTimestamp = 'timestamp';

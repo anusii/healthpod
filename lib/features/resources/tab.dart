@@ -45,13 +45,10 @@ class ResourcesTab extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Health Resources',
-              style: theme.textTheme.headlineLarge,
-            ),
+            Text('Health Resources', style: theme.textTheme.headlineLarge),
             const SizedBox(height: 24),
-            // Health Information section.
 
+            // Health Information section.
             _buildSection(
               context,
               title: 'Health Information',
@@ -62,25 +59,21 @@ class ResourcesTab extends StatelessWidget {
                   description:
                       'Understanding blood pressure readings and management',
                   icon: Icons.favorite,
-                  onTap: () => ResourceService.showHealthInfo(
-                    context,
-                    'blood-pressure',
-                  ),
+                  onTap: () =>
+                      ResourceService.showHealthInfo(context, 'blood-pressure'),
                 ),
                 ResourceCard(
                   title: 'Vaccination Information',
                   description: 'Latest guidelines and schedules',
                   icon: Icons.vaccines,
-                  onTap: () => ResourceService.showHealthInfo(
-                    context,
-                    'vaccination',
-                  ),
+                  onTap: () =>
+                      ResourceService.showHealthInfo(context, 'vaccination'),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            // External Resources section.
 
+            // External Resources section.
             _buildSection(
               context,
               title: 'External Resources',
@@ -109,8 +102,8 @@ class ResourcesTab extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            // Tools & Calculators section.
 
+            // Tools & Calculators section.
             _buildSection(
               context,
               title: 'Tools & Calculators',
@@ -120,19 +113,14 @@ class ResourcesTab extends StatelessWidget {
                   title: 'BMI Calculator',
                   description: 'Calculate and track your Body Mass Index',
                   icon: Icons.monitor_weight,
-                  onTap: () => ResourceService.showCalculator(
-                    context,
-                    'bmi',
-                  ),
+                  onTap: () => ResourceService.showCalculator(context, 'bmi'),
                 ),
                 ResourceCard(
                   title: 'Health Goal Tracker',
                   description: 'Set and monitor your health goals',
                   icon: Icons.track_changes,
-                  onTap: () => ResourceService.showTracker(
-                    context,
-                    'health-goals',
-                  ),
+                  onTap: () =>
+                      ResourceService.showTracker(context, 'health-goals'),
                 ),
               ],
             ),
@@ -162,25 +150,17 @@ class ResourcesTab extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section header with icon.
-
         Row(
           children: [
             Icon(icon, color: theme.colorScheme.primary),
             const SizedBox(width: 8),
-            Text(
-              title,
-              style: theme.textTheme.headlineMedium,
-            ),
+            Text(title, style: theme.textTheme.headlineMedium),
           ],
         ),
         const SizedBox(height: 16),
-        // Wrap cards in a responsive grid.
 
-        Wrap(
-          spacing: 16,
-          runSpacing: 16,
-          children: cards,
-        ),
+        // Wrap cards in a responsive grid.
+        Wrap(spacing: 16, runSpacing: 16, children: cards),
       ],
     );
   }

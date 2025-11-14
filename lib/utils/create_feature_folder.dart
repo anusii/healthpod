@@ -72,9 +72,7 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
 
       // Full path for deletion needs to include healthpod/data.
 
-      await deleteFile(
-        '$basePath/$featureName',
-      );
+      await deleteFile('$basePath/$featureName');
     }
 
     if (!context.mounted) {

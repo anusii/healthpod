@@ -37,14 +37,8 @@ DataCell actionButtonsCell({
     Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          icon: const Icon(Icons.save),
-          onPressed: onSave,
-        ),
-        IconButton(
-          icon: const Icon(Icons.cancel),
-          onPressed: onCancel,
-        ),
+        IconButton(icon: const Icon(Icons.save), onPressed: onSave),
+        IconButton(icon: const Icon(Icons.cancel), onPressed: onCancel),
       ],
     ),
   );

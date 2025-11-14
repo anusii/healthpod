@@ -126,9 +126,9 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
         Expanded(
           child: Text(
             '${index + 1}. ${question.question}',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
       ],

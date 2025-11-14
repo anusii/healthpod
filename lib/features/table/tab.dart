@@ -29,28 +29,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/features/diary/editor_page.dart';
+import 'package:healthpod/features/pathology/editor.dart';
 import 'package:healthpod/features/table/bp_editor/page.dart';
 import 'package:healthpod/features/table/medication_editor/page.dart';
 import 'package:healthpod/features/table/vaccination_editor/page.dart';
 import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> tablePanels = [
-  {
-    'title': 'Appointments',
-    'widget': const AppointmentEditorPage(),
-  },
-  {
-    'title': 'Blood Pressure',
-    'widget': const BPEditorPage(),
-  },
-  {
-    'title': 'Medications',
-    'widget': const MedicationEditorPage(),
-  },
-  {
-    'title': 'Vaccinations',
-    'widget': const VaccinationEditorPage(),
-  },
+  {'title': 'Appointments', 'widget': const AppointmentEditorPage()},
+  {'title': 'Blood Pressure', 'widget': const BPEditorPage()},
+  {'title': 'Medications', 'widget': const MedicationEditorPage()},
+  {'title': 'Vaccinations', 'widget': const VaccinationEditorPage()},
+  {'title': 'Pathology', 'widget': const PathologyEditorPage()},
 ];
 
 class TableTab extends ConsumerStatefulWidget {
@@ -99,9 +89,7 @@ class _TableTabState extends ConsumerState<TableTab>
             }
           },
           tabs: tablePanels.map((tab) {
-            return Tab(
-              text: tab['title'],
-            );
+            return Tab(text: tab['title']);
           }).toList(),
         ),
         Expanded(

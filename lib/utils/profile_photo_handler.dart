@@ -120,8 +120,8 @@ class ProfilePhotoHandler {
         'timestamp': timestamp.toIso8601String(),
         'imageData': base64Image,
         'format': imageFile.path.split('.').last.toLowerCase(),
-        // Add a type marker to clearly identify this as a photo file.
 
+        // Add a type marker to clearly identify this as a photo file.
         'type': 'profile_photo',
       };
 

@@ -66,36 +66,35 @@ class MedicationDesktopLayout extends StatelessWidget {
       child: SingleChildScrollView(
         child: DataTable(
           columns: columns,
-          rows: List<DataRow>.generate(
-            editorState.observations.length,
-            (index) {
-              final obs = editorState.observations[index];
+          rows: List<DataRow>.generate(editorState.observations.length, (
+            index,
+          ) {
+            final obs = editorState.observations[index];
 
-              // If this row is being edited, build the editing row.
+            // If this row is being edited, build the editing row.
 
-              if (editorState.editingIndex == index) {
-                return MedicationDataRowBuilder.buildEditingDataRow(
-                  context,
-                  editorState,
-                  obs,
-                  index,
-                  onCancelEdit,
-                  () => onSave(index),
-                );
-              }
-
-              // Otherwise show regular display row.
-
-              return MedicationDataRowBuilder.buildDataRow(
+            if (editorState.editingIndex == index) {
+              return MedicationDataRowBuilder.buildEditingDataRow(
                 context,
+                editorState,
                 obs,
                 index,
-                width,
-                onEdit(index),
-                () => onDelete(obs),
+                onCancelEdit,
+                () => onSave(index),
               );
-            },
-          ),
+            }
+
+            // Otherwise show regular display row.
+
+            return MedicationDataRowBuilder.buildDataRow(
+              context,
+              obs,
+              index,
+              width,
+              onEdit(index),
+              () => onDelete(obs),
+            );
+          }),
         ),
       ),
     );
@@ -293,9 +292,9 @@ class MedicationDataRowBuilder {
           }
         },
         child: Text(
-          DateFormat('yyyy-MM-dd').format(
-            editorState.currentEdit?.startDate ?? observation.startDate,
-          ),
+          DateFormat(
+            'yyyy-MM-dd',
+          ).format(editorState.currentEdit?.startDate ?? observation.startDate),
           style: TextStyle(
             decoration: TextDecoration.underline,
             color: isDarkMode ? colorScheme.primaryContainer : Colors.blue,

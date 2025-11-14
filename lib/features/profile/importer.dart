@@ -79,8 +79,9 @@ class ProfileImporter {
 
       // Validate the profile data.
 
-      final validationResult =
-          ProfileValidator.validateProfileData(profileData);
+      final validationResult = ProfileValidator.validateProfileData(
+        profileData,
+      );
 
       if (!validationResult['isValid']) {
         // Show validation error dialog instead of a snackbar.
@@ -125,8 +126,9 @@ class ProfileImporter {
 
       if (finalData.containsKey('data') &&
           finalData['data'] is Map<String, dynamic> &&
-          (finalData['data'] as Map<String, dynamic>)
-              .containsKey('timestamp')) {
+          (finalData['data'] as Map<String, dynamic>).containsKey(
+            'timestamp',
+          )) {
         final nestedTimestamp =
             (finalData['data'] as Map<String, dynamic>)['timestamp'];
         if (nestedTimestamp is String) {

@@ -176,8 +176,9 @@ class MedicationExporter extends HealthDataExporterBase {
       // Sort readings by timestamp.
 
       allReadings.sort(
-        (a, b) => a[MedicationCSVFields.fieldTimestamp]
-            .compareTo(b[MedicationCSVFields.fieldTimestamp]),
+        (a, b) => a[MedicationCSVFields.fieldTimestamp].compareTo(
+          b[MedicationCSVFields.fieldTimestamp],
+        ),
       );
 
       // Prepare CSV data.

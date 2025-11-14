@@ -87,8 +87,10 @@ class HealthImporterFileManager {
               if (dateStr.length >= 10 &&
                   dateStr[4] == '-' &&
                   dateStr[7] == '-') {
-                final datePart =
-                    dateStr.substring(0, 10); // Take only YYYY-MM-DD
+                final datePart = dateStr.substring(
+                  0,
+                  10,
+                ); // Take only YYYY-MM-DD
                 if (!existingFileDateIndex.containsKey(datePart)) {
                   existingFileDateIndex[datePart] = [];
                 }

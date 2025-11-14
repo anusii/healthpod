@@ -35,8 +35,8 @@ import 'package:solidpod/solidpod.dart'
         getResourcesInContainer,
         getDirUrl,
         readPod,
-        writePod,
-        getKeyFromUserIfRequired;
+        writePod;
+import 'package:solidui/solidui.dart' show getKeyFromUserIfRequired;
 
 import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
@@ -79,11 +79,7 @@ class BPEditorService {
 
       String content;
       try {
-        content = await readPod(
-          filePath,
-          context,
-          const Text('Loading file'),
-        );
+        content = await readPod(filePath, context, const Text('Loading file'));
       } catch (e) {
         // File might not exist anymore (deleted, moved, or corrupted).
 

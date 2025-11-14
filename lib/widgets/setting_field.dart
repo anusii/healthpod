@@ -96,17 +96,13 @@ class SettingField extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // Fixed-width container for consistent label alignment.
-
               SizedBox(
                 width: 120,
-                child: Text(
-                  label,
-                  style: const TextStyle(fontSize: 16),
-                ),
+                child: Text(label, style: const TextStyle(fontSize: 16)),
               ),
               const SizedBox(width: 16),
-              // Expandable text field that fills remaining space.
 
+              // Expandable text field that fills remaining space.
               Expanded(
                 child: TextField(
                   controller: TextEditingController(text: value)
@@ -141,7 +137,9 @@ class SettingField extends ConsumerWidget {
                             onPressed: () {
                               ref
                                   .read(
-                                    isPasswordVisibleProvider(label).notifier,
+                                    isPasswordVisibleProvider(
+                                      label,
+                                    ).notifier,
                                   )
                                   .state = !showPassword;
                             },

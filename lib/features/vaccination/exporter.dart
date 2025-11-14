@@ -199,8 +199,9 @@ class VaccinationExporter extends HealthDataExporterBase {
       // Sort all records by timestamp in ascending order.
 
       allRecords.sort(
-        (a, b) => a[VaccinationSurveyConstants.fieldDate]
-            .compareTo(b[VaccinationSurveyConstants.fieldDate]),
+        (a, b) => a[VaccinationSurveyConstants.fieldDate].compareTo(
+          b[VaccinationSurveyConstants.fieldDate],
+        ),
       );
 
       // Define the CSV column headers.

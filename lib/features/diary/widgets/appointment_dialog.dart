@@ -44,10 +44,7 @@ class AppointmentDialog extends StatefulWidget {
   /// [onSave] is the callback function that will be called when the user
   /// taps the save button with valid input.
 
-  const AppointmentDialog({
-    super.key,
-    required this.onSave,
-  });
+  const AppointmentDialog({super.key, required this.onSave});
 
   @override
   State<AppointmentDialog> createState() => _AppointmentDialogState();
@@ -70,11 +67,11 @@ class _AppointmentDialogState extends State<AppointmentDialog> {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDate,
+
       // Allow dates from 2000.
-
       firstDate: DateTime(2000, 1, 1),
-      // Allow dates until 2100.
 
+      // Allow dates until 2100.
       lastDate: DateTime(2100, 12, 31),
     );
     if (picked != null) {

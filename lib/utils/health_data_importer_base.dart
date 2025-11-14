@@ -120,11 +120,9 @@ abstract class HealthDataImporterBase {
     String dirPath,
     BuildContext context, {
     // Optional: provide content directly for web.
-
     String? fileContent,
 
     // Progress callback.
-
     void Function(String message, double progress)? onProgress,
   }) async {
     // Remove verbose debug logs for cleaner console output.
@@ -212,8 +210,9 @@ abstract class HealthDataImporterBase {
       // First pass: collect all timestamps from the CSV file.
 
       for (var i = 1; i < fields.length; i++) {
-        final row =
-            List<String>.from(fields[i].map((f) => f?.toString() ?? ''));
+        final row = List<String>.from(
+          fields[i].map((f) => f?.toString() ?? ''),
+        );
         if (row.isEmpty) continue;
 
         while (row.length < headers.length) {
@@ -226,8 +225,9 @@ abstract class HealthDataImporterBase {
 
           if (header == timestampField.toLowerCase() && value.isNotEmpty) {
             try {
-              final timestamp =
-                  normaliseTimestamp(roundTimestampToSecond(value));
+              final timestamp = normaliseTimestamp(
+                roundTimestampToSecond(value),
+              );
               if (isValidTimestamp(timestamp)) {
                 allTimestamps.add(timestamp);
               }
@@ -311,8 +311,9 @@ abstract class HealthDataImporterBase {
         try {
           // Convert row data to a list of strings, handling null values.
 
-          final row =
-              List<String>.from(fields[i].map((f) => f?.toString() ?? ''));
+          final row = List<String>.from(
+            fields[i].map((f) => f?.toString() ?? ''),
+          );
           if (row.isEmpty) continue;
 
           // Pad the row with empty strings if it has fewer columns than headers.
@@ -371,10 +372,7 @@ abstract class HealthDataImporterBase {
 
           // Create the JSON data structure for the current record.
 
-          final jsonData = {
-            timestampField: timestamp,
-            'responses': responses,
-          };
+          final jsonData = {timestampField: timestamp, 'responses': responses};
 
           // Generate a safe filename using the timestamp.
 

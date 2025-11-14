@@ -61,11 +61,9 @@ class HealthSurveyTextInput extends StatelessWidget {
     final theme = Theme.of(context);
     return TextFormField(
       // Sets focus for this input field.
-
       focusNode: controller.focusNodes[index][0],
 
       // Allows multiple lines for longer text input.
-
       maxLines: null,
       minLines: 3,
 
@@ -73,28 +71,23 @@ class HealthSurveyTextInput extends StatelessWidget {
 
       decoration: InputDecoration(
         hintText: 'Enter your response',
-        // Displays unit if applicable.
 
+        // Displays unit if applicable.
         suffixText: question.unit,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         filled: true,
         fillColor: theme.colorScheme.surface,
         contentPadding: const EdgeInsets.all(12),
       ),
 
       // Validates the text input using predefined validation logic.
-
       validator: (value) =>
           HealthSurveyValidator.validateTextInput(value, question),
 
       // Handles field submission event.
-
       onFieldSubmitted: (_) => controller.handleFieldSubmitted(index),
 
       // Saves the entered text response in the form state.
-
       onSaved: (value) => controller.updateResponse(question.fieldName, value),
     );
   }

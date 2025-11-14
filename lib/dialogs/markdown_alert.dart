@@ -62,18 +62,17 @@ Future<void> markdownAlert(
           child: MarkdownBody(
             data: markdownContent,
             selectable: true,
-            // Handle link taps by opening them in external browser.
 
+            // Handle link taps by opening them in external browser.
             onTapLink: (text, href, title) {
               if (href != null) {
                 ResourceService.openExternalLink(context, href);
               }
             },
-            // Configure markdown styling to match app theme.
 
+            // Configure markdown styling to match app theme.
             styleSheet: MarkdownStyleSheet(
               // Text styles.
-
               h1: Theme.of(context).textTheme.headlineMedium,
               h2: Theme.of(context).textTheme.titleLarge,
               p: Theme.of(context).textTheme.bodyMedium,
@@ -81,8 +80,8 @@ Future<void> markdownAlert(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              // Blockquote styles.
 
+              // Blockquote styles.
               blockquote: TextStyle(
                 color: Theme.of(context).colorScheme.secondary,
                 fontStyle: FontStyle.italic,
@@ -91,8 +90,8 @@ Future<void> markdownAlert(
                 color: Theme.of(context).colorScheme.secondaryContainer,
                 borderRadius: BorderRadius.circular(4),
               ),
-              // Table styles.
 
+              // Table styles.
               tableHead: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.primary,
@@ -104,8 +103,8 @@ Future<void> markdownAlert(
               ),
               tableColumnWidth: const FlexColumnWidth(),
               tableBody: Theme.of(context).textTheme.bodyMedium,
-              // List and link styles.
 
+              // List and link styles.
               listBullet: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.primary,
                   ),

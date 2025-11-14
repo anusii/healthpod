@@ -286,7 +286,6 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
           'name',
           'address',
           'bestContactPhone',
-          'alternativeContactNumber',
           'email',
           'dateOfBirth',
           'gender',

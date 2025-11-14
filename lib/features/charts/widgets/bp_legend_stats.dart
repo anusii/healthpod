@@ -32,10 +32,7 @@ import 'package:healthpod/features/charts/widgets/bp_chart_data_manager.dart';
 /// Widget displaying legend and statistics for blood pressure chart.
 
 class BPLegendStats extends StatelessWidget {
-  const BPLegendStats({
-    super.key,
-    required this.surveyData,
-  });
+  const BPLegendStats({super.key, required this.surveyData});
 
   final List<Map<String, dynamic>> surveyData;
 
@@ -45,30 +42,22 @@ class BPLegendStats extends StatelessWidget {
 
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: theme.colorScheme.surface,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-          vertical: 16.0,
-          horizontal: 12.0,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
         child: Column(
           children: [
             // Legend items.
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Systolic pressure legend item.
-
                 Flexible(
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Colour indicator dot.
-
                       Flexible(
                         child: Container(
                           width: 12,
@@ -80,9 +69,9 @@ class BPLegendStats extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
+
                       // Systolic blood pressure tooltip explaining the
                       // measurement.
-
                       MarkdownTooltip(
                         message: '''
 
@@ -103,8 +92,8 @@ class BPLegendStats extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            // Info icon.
 
+                            // Info icon.
                             Flexible(
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
@@ -122,14 +111,13 @@ class BPLegendStats extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 24),
-                // Diastolic pressure legend item.
 
+                // Diastolic pressure legend item.
                 Flexible(
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Colour indicator dot.
-
                       Flexible(
                         child: Container(
                           width: 12,
@@ -141,9 +129,9 @@ class BPLegendStats extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
+
                       // Diastolic blood pressure tooltip explaining the
                       // measurement.
-
                       MarkdownTooltip(
                         message: '''
 
@@ -157,8 +145,8 @@ class BPLegendStats extends StatelessWidget {
                           children: [
                             const Flexible(child: Text('Diastolic')),
                             const SizedBox(width: 4),
-                            // Info icon.
 
+                            // Info icon.
                             Flexible(
                               child: FittedBox(
                                 fit: BoxFit
@@ -181,7 +169,6 @@ class BPLegendStats extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Scrollable stats row.
-
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(

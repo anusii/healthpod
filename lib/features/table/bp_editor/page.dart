@@ -81,8 +81,9 @@ class _BPEditorPageState extends State<BPEditorPage> {
 
       setState(() {
         editorState.observations = observations;
-        editorState.observations
-            .sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        editorState.observations.sort(
+          (a, b) => b.timestamp.compareTo(a.timestamp),
+        );
         editorState.isLoading = false;
         editorState.error = null;
       });
@@ -124,11 +125,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
   Future<void> _handleSave(int index) async {
     if (!mounted) return;
 
-    await editorState.saveObservation(
-      context,
-      editorService,
-      index,
-    );
+    await editorState.saveObservation(context, editorService, index);
     if (mounted) {
       _loadData();
     }
@@ -140,18 +137,12 @@ class _BPEditorPageState extends State<BPEditorPage> {
     if (!mounted) return;
 
     try {
-      await editorState.deleteObservation(
-        context,
-        editorService,
-        obs,
-      );
+      await editorState.deleteObservation(context, editorService, obs);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'Blood pressure reading deleted successfully.',
-            ),
+            content: Text('Blood pressure reading deleted successfully.'),
             backgroundColor: Colors.green,
           ),
         );
@@ -224,6 +215,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
       appBar: AppBar(
         title: const Text('Blood Pressure Observations'),
         backgroundColor: Theme.of(context).colorScheme.surface,
+        automaticallyImplyLeading: false,
         actions: [
           if (!isLoading)
             Padding(
@@ -241,13 +233,16 @@ class _BPEditorPageState extends State<BPEditorPage> {
                               horizontal: 16,
                               vertical: 16,
                             ),
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
-                      foregroundColor:
-                          Theme.of(context).colorScheme.onPrimaryContainer,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer,
+                      foregroundColor: Theme.of(
+                        context,
+                      ).colorScheme.onPrimaryContainer,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(isNarrowScreen ? 12 : 8),
+                        borderRadius: BorderRadius.circular(
+                          isNarrowScreen ? 12 : 8,
+                        ),
                       ),
                       minimumSize: isNarrowScreen ? const Size(46, 46) : null,
                     ),
@@ -259,9 +254,9 @@ class _BPEditorPageState extends State<BPEditorPage> {
                             children: [
                               Icon(
                                 Icons.add_circle,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
                               ),
                               const SizedBox(width: 8),
                               const Text('Add New Reading'),

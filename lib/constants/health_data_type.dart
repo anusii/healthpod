@@ -27,10 +27,4 @@ library;
 
 /// Enum representing the types of data that can be collected in a health survey.
 
-enum HealthDataType {
-  text,
-  number,
-  categorical,
-  date,
-  datetime,
-}
+enum HealthDataType { text, number, categorical, date, datetime }
