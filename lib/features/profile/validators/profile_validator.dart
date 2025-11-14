@@ -41,7 +41,6 @@ class ProfileValidator {
       'name',
       'address',
       'bestContactPhone',
-      'alternativeContactNumber',
       'email',
       'dateOfBirth',
       'gender',
