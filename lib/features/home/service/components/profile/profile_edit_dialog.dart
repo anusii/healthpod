@@ -371,7 +371,7 @@ Spaces, dashes and parentheses are allowed.
           children: [
             Expanded(
               child: DropdownButtonFormField<String?>(
-                value: controller.text.isEmpty ? null : controller.text,
+                initialValue: controller.text.isEmpty ? null : controller.text,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(

@@ -59,12 +59,12 @@ class PathologyReportCard extends StatelessWidget {
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: isDark 
+        color: isDark
             ? theme.colorScheme.surfaceContainerHighest
             : Colors.blue.shade50,
         borderRadius: const BorderRadius.only(
@@ -133,7 +133,7 @@ class PathologyReportCard extends StatelessWidget {
 
   Widget _buildEmptyState(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Center(
@@ -164,20 +164,18 @@ class PathologyReportCard extends StatelessWidget {
   Widget _buildTableHeader(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 12.0,
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: isDark 
+        color: isDark
             ? theme.colorScheme.surfaceContainerHigh
             : Colors.grey.shade100,
         border: Border.all(
-          color: isDark 
-              ? theme.colorScheme.outline
-              : Colors.grey.shade300,
+          color: isDark ? theme.colorScheme.outline : Colors.grey.shade300,
         ),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(4.0),
@@ -240,7 +238,7 @@ class PathologyReportCard extends StatelessWidget {
   List<Widget> _buildTestRows(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return report.tests.asMap().entries.map((entry) {
       final test = entry.value;
       final isEven = entry.key % 2 == 0;
@@ -252,25 +250,19 @@ class PathologyReportCard extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isDark
-              ? (isEven 
-                  ? theme.colorScheme.surface 
+              ? (isEven
+                  ? theme.colorScheme.surface
                   : theme.colorScheme.surfaceContainerHighest)
               : (isEven ? Colors.white : Colors.grey.shade50),
           border: Border(
             left: BorderSide(
-              color: isDark 
-                  ? theme.colorScheme.outline
-                  : Colors.grey.shade300,
+              color: isDark ? theme.colorScheme.outline : Colors.grey.shade300,
             ),
             right: BorderSide(
-              color: isDark 
-                  ? theme.colorScheme.outline
-                  : Colors.grey.shade300,
+              color: isDark ? theme.colorScheme.outline : Colors.grey.shade300,
             ),
             bottom: BorderSide(
-              color: isDark 
-                  ? theme.colorScheme.outline
-                  : Colors.grey.shade300,
+              color: isDark ? theme.colorScheme.outline : Colors.grey.shade300,
             ),
           ),
         ),
