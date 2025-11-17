@@ -53,6 +53,18 @@ class HealthPodMenuBuilder {
           child: HomePage(onNavigateToProfile: () {}),
         ),
         const SolidMenuItem(
+          title: 'View',
+          icon: Icons.show_chart,
+          tooltip: '''
+
+    **View:** Tap here to visualise your health data that is stored in your
+      pod. Your **blood pressure** observations will show trends over time and
+      other health metrics. Your **vaccinations** will be shown as a timeline.
+
+    ''',
+          child: ChartTab(),
+        ),
+        const SolidMenuItem(
           title: 'Add',
           icon: Icons.assignment,
           tooltip: '''
@@ -64,18 +76,6 @@ class HealthPodMenuBuilder {
 
     ''',
           child: SurveyTab(),
-        ),
-        const SolidMenuItem(
-          title: 'View',
-          icon: Icons.show_chart,
-          tooltip: '''
-
-    **View:** Tap here to visualise your health data that is stored in your
-      pod. Your **blood pressure** observations will show trends over time and
-      other health metrics. Your **vaccinations** will be shown as a timeline.
-
-    ''',
-          child: ChartTab(),
         ),
         const SolidMenuItem(
           title: 'Data',
