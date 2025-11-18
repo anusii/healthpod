@@ -35,7 +35,7 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
-import 'package:healthpod/features/home/widgets/pdf_processor.dart';
+import 'package:healthpod/features/pathology/pdf_processor.dart';
 
 /// Handles file content operations including preview, visualisation, and PDF
 /// conversion.

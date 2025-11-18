@@ -351,15 +351,19 @@ class PdfProcessor {
 
       // Try to merge multi-line data if current line looks incomplete.
       // Check if next 1-2 lines might be continuation.
+
       if (i + 1 < lines.length) {
         final nextLine = lines[i + 1].trim();
+
         // If next line looks like a reference range or units, merge it.
+
         if (RegExp(r'^\([<>]?[\d.]+-?[\d.]*\)$').hasMatch(nextLine) ||
             RegExp(r'^[a-zA-Zµ°×]+(/[a-zA-Zµ°×0-9.²³]+)*$').hasMatch(nextLine)) {
           line = '$line $nextLine';
           i++; // Skip next line as we've merged it.
 
           // Check if there's another line to merge (for 3-line format).
+
           if (i + 1 < lines.length) {
             final thirdLine = lines[i + 1].trim();
             if (RegExp(r'^[a-zA-Zµ°×]+(/[a-zA-Zµ°×0-9.²³]+)*$')
@@ -377,13 +381,16 @@ class PdfProcessor {
       // Standard test result lines have 2-5 main columns, but may have more
       // due to multi-word test names or parenthesised ranges.
       // Skip lines with too few or too many parts.
+
       if (parts.length < 2 || parts.length > 10) continue;
 
       // Skip lines that don't start with a letter (uppercase or lowercase).
       // This allows test names like eGFR, pH, etc.
+
       if (!RegExp(r'^[A-Za-z]').hasMatch(parts[0])) continue;
 
       // Skip common address patterns and non-test lines.
+
       final firstWord = parts[0].toLowerCase();
       if (firstWord == 'unit' ||
           firstWord == 'street' ||
@@ -402,6 +409,7 @@ class PdfProcessor {
       }
 
       // Skip lines containing state/territory codes (ACT, NSW, VIC, etc.).
+
       if (parts.any((p) =>
           p == 'ACT' ||
           p == 'NSW' ||
@@ -414,10 +422,12 @@ class PdfProcessor {
         continue;
       }
 
-      // Skip lines that look like phone numbers (contain lots of digits with dashes/spaces).
+      // Skip lines that look like phone numbers (contain lots of digits with
+      // dashes/spaces).
+
       final lineStr = parts.join(' ');
-      if (RegExp(r'\d{4}[\s-]\d{4}').hasMatch(lineStr) || // Phone pattern
-          RegExp(r'\d{10,}').hasMatch(lineStr) || // Long number sequence
+      if (RegExp(r'\d{4}[\s-]\d{4}').hasMatch(lineStr) || // Phone pattern.
+          RegExp(r'\d{10,}').hasMatch(lineStr) || // Long number sequence.
           lineStr.toLowerCase().contains('ref:') ||
           lineStr.toLowerCase().contains('reference:')) {
         continue;
@@ -433,6 +443,7 @@ class PdfProcessor {
         var part = parts[j];
 
         // Check for numeric value (may have < or > prefix).
+
         final cleanPart = part.replaceAll(RegExp(r'^[<>]'), '');
 
         if (double.tryParse(cleanPart) != null) {
@@ -445,6 +456,7 @@ class PdfProcessor {
       if (result == null || resultIndex == null) continue;
 
       // Result should not be in first position (that's the test name).
+
       if (resultIndex == 0) continue;
 
       // Extract test name (everything before the result).
@@ -456,12 +468,15 @@ class PdfProcessor {
 
       // Check if test name looks valid (not an address or random text).
       // Valid test names are typically 2-50 characters.
+
       if (testName.length < 2 || testName.length > 50) continue;
 
       // Skip if test name contains postal code patterns (4 digits).
+
       if (RegExp(r'\b\d{4}\b').hasMatch(testName)) continue;
 
       // Skip if test name contains common address words.
+
       final testNameLower = testName.toLowerCase();
       if (testNameLower.contains('unit') ||
           testNameLower.contains('street') ||
@@ -476,6 +491,7 @@ class PdfProcessor {
       }
 
       // Check for H/L flag in the next column after result.
+
       String comment = '';
       int nextIndex = resultIndex + 1;
 
@@ -497,21 +513,25 @@ class PdfProcessor {
           final part = parts[j];
 
           // Skip if this looks like a reference range (not units).
+
           if (RegExp(r'^[<>]?\d+\.?\d*-\d+\.?\d*$').hasMatch(part) ||
               RegExp(r'^\([<>]?\d+\.?\d*-\d+\.?\d*\)$').hasMatch(part) ||
               RegExp(r'^[<>]\d+\.?\d*$').hasMatch(part)) {
             break; // This is reference range, not units.
           }
 
-          // Check if it looks like a unit (contains /, letters, or special chars).
-          // Common patterns: mmol/L, g/L, U/L, mL/min, mg/dL, µmol/L, etc.
+          // Check if it looks like a unit (contains /, letters, or special
+          // chars). Common patterns: mmol/L, g/L, U/L, mL/min, mg/dL,
+          // µmol/L, etc.
+
           if (RegExp(r'^[a-zA-Zµ°×]+(/[a-zA-Zµ°×0-9.²³]+)*$').hasMatch(part)) {
             units = part;
             nextIndex = j + 1; // Update nextIndex for reference range search.
             break;
           }
 
-          // Also check for compound units like "mL/min/1.73m²" or "× 10⁹/L"
+          // Also check for compound units like "mL/min/1.73m²" or "× 10⁹/L".
+
           if (part.contains('/') && RegExp(r'[a-zA-Z]').hasMatch(part)) {
             units = part;
             nextIndex = j + 1;
@@ -519,8 +539,10 @@ class PdfProcessor {
           }
 
           // Check for "x 10^9/L" style units.
+
           if (part == '×' || part.toLowerCase() == 'x') {
             // Combine with next parts for units like "× 10⁹/L"
+
             final unitParts = <String>[part];
             for (var k = j + 1; k < parts.length && k < j + 3; k++) {
               unitParts.add(parts[k]);
@@ -537,6 +559,7 @@ class PdfProcessor {
       String referenceInterval = '';
 
       // First try to find range in parentheses.
+
       final rangePattern1 = RegExp(r'\(([^)]+)\)');
       final rangeMatch1 = rangePattern1.firstMatch(line);
       if (rangeMatch1 != null) {
@@ -544,10 +567,12 @@ class PdfProcessor {
       } else {
         // Look for standalone range pattern like "135-145" or ">60" or "<5.5"
         // Search in the parts after units (or after H/L if no units).
+
         for (var j = nextIndex; j < parts.length; j++) {
           final part = parts[j];
           if (RegExp(r'^([<>]\s*[\d.]+|[\d.]+-[\d.]+)$').hasMatch(part)) {
             // Make sure this isn't the result itself.
+
             if (part != result) {
               referenceInterval = part;
               break;

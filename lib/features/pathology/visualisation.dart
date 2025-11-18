@@ -477,13 +477,16 @@ class _PathologyVisualisationState
       // Standard test result lines have 2-5 main columns, but may have more
       // due to multi-word test names or parenthesised ranges.
       // Skip lines with too few or too many parts.
+
       if (parts.length < 2 || parts.length > 10) continue;
 
       // Skip lines that don't start with a letter (uppercase or lowercase).
       // This allows test names like eGFR, pH, etc.
+
       if (!RegExp(r'^[A-Za-z]').hasMatch(parts[0])) continue;
 
       // Skip common address patterns and non-test lines.
+
       final firstWord = parts[0].toLowerCase();
       if (firstWord == 'unit' ||
           firstWord == 'street' ||
@@ -502,6 +505,7 @@ class _PathologyVisualisationState
       }
 
       // Skip lines containing state/territory codes (ACT, NSW, VIC, etc.).
+
       if (parts.any((p) =>
           p == 'ACT' ||
           p == 'NSW' ||
@@ -514,10 +518,12 @@ class _PathologyVisualisationState
         continue;
       }
 
-      // Skip lines that look like phone numbers (contain lots of digits with dashes/spaces).
+      // Skip lines that look like phone numbers (contain lots of digits with
+      // dashes/spaces).
+
       final lineStr = parts.join(' ');
-      if (RegExp(r'\d{4}[\s-]\d{4}').hasMatch(lineStr) || // Phone pattern
-          RegExp(r'\d{10,}').hasMatch(lineStr) || // Long number sequence
+      if (RegExp(r'\d{4}[\s-]\d{4}').hasMatch(lineStr) || // Phone pattern.
+          RegExp(r'\d{10,}').hasMatch(lineStr) || // Long number sequence.
           lineStr.toLowerCase().contains('ref:') ||
           lineStr.toLowerCase().contains('reference:')) {
         continue;
@@ -533,6 +539,7 @@ class _PathologyVisualisationState
         var part = parts[j];
 
         // Check for numeric value (may have < or > prefix).
+
         final cleanPart = part.replaceAll(RegExp(r'^[<>]'), '');
 
         if (double.tryParse(cleanPart) != null) {
@@ -545,6 +552,7 @@ class _PathologyVisualisationState
       if (result == null || resultIndex == null) continue;
 
       // Result should not be in first position (that's the test name).
+
       if (resultIndex == 0) continue;
 
       // Extract test name (everything before the result).
@@ -556,12 +564,15 @@ class _PathologyVisualisationState
 
       // Check if test name looks valid (not an address or random text).
       // Valid test names are typically 2-50 characters.
+
       if (testName.length < 2 || testName.length > 50) continue;
 
       // Skip if test name contains postal code patterns (4 digits).
+
       if (RegExp(r'\b\d{4}\b').hasMatch(testName)) continue;
 
       // Skip if test name contains common address words.
+
       final testNameLower = testName.toLowerCase();
       if (testNameLower.contains('unit') ||
           testNameLower.contains('street') ||
@@ -576,6 +587,7 @@ class _PathologyVisualisationState
       }
 
       // Check for H/L flag in the next column after result.
+
       String comment = '';
       int nextIndex = resultIndex + 1;
 
@@ -588,15 +600,22 @@ class _PathologyVisualisationState
       }
 
       // Extract units - look for patterns like mmol/L, g/L, U/L, etc.
-      // Units are optional - some tests like eGFR may not have units shown.
+      // Units can appear in different positions:
+      // - Format 1: Test Name | Result | Units | Reference Range
+      // - Format 2: Test Name | Result | H/L | Units | Reference Range
+      // We search from the position after the result/flag.
 
       String units = '';
+      int unitsIndex = -1; // Track where we found units.
 
       if (nextIndex < parts.length) {
         for (var j = nextIndex; j < parts.length; j++) {
           final part = parts[j];
 
           // Skip if this looks like a reference range (not units).
+          // Reference ranges typically contain numeric patterns like "3.5-5.0"
+          // or "<10".
+
           if (RegExp(r'^[<>]?\d+\.?\d*-\d+\.?\d*$').hasMatch(part) ||
               RegExp(r'^\([<>]?\d+\.?\d*-\d+\.?\d*\)$').hasMatch(part) ||
               RegExp(r'^[<>]\d+\.?\d*$').hasMatch(part)) {
@@ -605,28 +624,44 @@ class _PathologyVisualisationState
 
           // Check if it looks like a unit (contains /, letters, or special chars).
           // Common patterns: mmol/L, g/L, U/L, mL/min, mg/dL, µmol/L, etc.
-          if (RegExp(r'^[a-zA-Zµ°×]+(/[a-zA-Zµ°×0-9.²³]+)*$').hasMatch(part)) {
+          // Also allow units like "sec", "min", "hr", "L", "mL", "%".
+
+          if (RegExp(r'^[a-zA-Zµ°×%]+(/[a-zA-Zµ°×0-9.²³]+)*$').hasMatch(part)) {
             units = part;
+            unitsIndex = j;
             nextIndex = j + 1; // Update nextIndex for reference range search.
             break;
           }
 
           // Also check for compound units like "mL/min/1.73m²" or "× 10⁹/L"
+          // These contain multiple slashes or special characters.
+
           if (part.contains('/') && RegExp(r'[a-zA-Z]').hasMatch(part)) {
             units = part;
+            unitsIndex = j;
             nextIndex = j + 1;
             break;
           }
 
-          // Check for "x 10^9/L" style units.
+          // Check for "x 10^9/L" style units (with multiplication sign).
+
           if (part == '×' || part.toLowerCase() == 'x') {
-            // Combine with next parts for units like "× 10⁹/L"
+            // Combine with next parts for units like "× 10⁹/L".
+
             final unitParts = <String>[part];
             for (var k = j + 1; k < parts.length && k < j + 3; k++) {
               unitParts.add(parts[k]);
             }
             units = unitParts.join(' ');
+            unitsIndex = j;
             nextIndex = j + unitParts.length;
+            break;
+          }
+
+          // If we've checked 3-4 positions after the result and found nothing,
+          // there might be no units (which is valid for some tests like eGFR).
+
+          if (j - nextIndex >= 3) {
             break;
           }
         }
@@ -637,6 +672,7 @@ class _PathologyVisualisationState
       String referenceInterval = '';
 
       // First try to find range in parentheses.
+
       final rangePattern1 = RegExp(r'\(([^)]+)\)');
       final rangeMatch1 = rangePattern1.firstMatch(line);
       if (rangeMatch1 != null) {
@@ -644,10 +680,12 @@ class _PathologyVisualisationState
       } else {
         // Look for standalone range pattern like "135-145" or ">60" or "<5.5"
         // Search in the parts after units (or after H/L if no units).
+
         for (var j = nextIndex; j < parts.length; j++) {
           final part = parts[j];
           if (RegExp(r'^([<>]\s*[\d.]+|[\d.]+-[\d.]+)$').hasMatch(part)) {
             // Make sure this isn't the result itself.
+
             if (part != result) {
               referenceInterval = part;
               break;
