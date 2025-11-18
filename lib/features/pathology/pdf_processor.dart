@@ -81,11 +81,8 @@ class PdfProcessor {
       // Extract final structured data.
 
       final fileName = path.basename(file.path);
-      final Map<String, dynamic> finalJson = _createBaseJsonStructure(fileName);
-
-      // Parse the extracted text.
-
-      _parseExtractedText(lines, finalJson);
+      final Map<String, dynamic> finalJson =
+          createPathologyJson(fileName, lines);
 
       // Create a temporary file for the final JSON.
 
@@ -138,9 +135,12 @@ class PdfProcessor {
   ///
   /// Uses a flexible structure with a tests array to support various test types.
 
-  static Map<String, dynamic> _createBaseJsonStructure(String fileName) {
+  static Map<String, dynamic> createPathologyJson(
+    String fileName,
+    List<String> lines,
+  ) {
     final now = DateTime.now();
-    return {
+    final jsonData = {
       'report_name': fileName,
       'requested_date': '',
       'collected_time': '',
@@ -150,13 +150,19 @@ class PdfProcessor {
       'laboratory': '',
       'tests': <Map<String, dynamic>>[],
     };
+
+    // Extract metadata and test results.
+
+    parseExtractedText(lines, jsonData);
+
+    return jsonData;
   }
 
   /// Parses extracted text and populates the JSON structure.
   ///
   /// This method extracts only essential metadata and test results from the PDF text.
 
-  static void _parseExtractedText(
+  static void parseExtractedText(
     List<String> lines,
     Map<String, dynamic> finalJson,
   ) {
@@ -193,12 +199,12 @@ class PdfProcessor {
 
     // Extract test results using improved pattern matching.
 
-    _extractTestResults(lines, finalJson);
+    extractTestResults(lines, finalJson);
   }
 
   /// Helper method to extract text after colon.
 
-  static String _extractAfterColon(String line) {
+  static String extractAfterColon(String line) {
     final parts = line.split(':');
     if (parts.length >= 2) {
       return parts.sublist(1).join(':').trim();
@@ -212,9 +218,9 @@ class PdfProcessor {
     String line,
     Map<String, dynamic> finalJson,
   ) {
-    final dateTime = _extractAfterColon(line);
+    final dateTime = extractAfterColon(line);
     if (dateTime.isNotEmpty) {
-      final formatted = _formatDateTime(dateTime);
+      final formatted = formatDateTime(dateTime);
       if (formatted.isNotEmpty) {
         finalJson['collected_time'] = formatted;
       }
@@ -227,9 +233,9 @@ class PdfProcessor {
     String line,
     Map<String, dynamic> finalJson,
   ) {
-    final dateStr = _extractAfterColon(line);
+    final dateStr = extractAfterColon(line);
     if (dateStr.isNotEmpty) {
-      final formatted = _formatDate(dateStr);
+      final formatted = formatDate(dateStr);
       if (formatted.isNotEmpty) {
         finalJson['requested_date'] = formatted;
       }
@@ -242,9 +248,9 @@ class PdfProcessor {
     String line,
     Map<String, dynamic> finalJson,
   ) {
-    final dateTime = _extractAfterColon(line);
+    final dateTime = extractAfterColon(line);
     if (dateTime.isNotEmpty) {
-      final formatted = _formatDateTime(dateTime);
+      final formatted = formatDateTime(dateTime);
       if (formatted.isNotEmpty) {
         finalJson['received_time'] = formatted;
       }
@@ -258,7 +264,7 @@ class PdfProcessor {
       // Try to extract lab name from common patterns.
 
       if (line.contains('Lab:')) {
-        finalJson['laboratory'] = _extractAfterColon(line);
+        finalJson['laboratory'] = extractAfterColon(line);
       } else if (line.contains('Pathology')) {
         finalJson['laboratory'] = line.trim();
       }
@@ -267,7 +273,7 @@ class PdfProcessor {
 
   /// Formats a date string to ISO format (YYYY-MM-DD).
 
-  static String _formatDate(String dateStr) {
+  static String formatDate(String dateStr) {
     // Try different date formats.
     // Format: DD/MM/YYYY or D/M/YYYY
 
@@ -293,7 +299,7 @@ class PdfProcessor {
 
   /// Formats a date-time string to ISO format (YYYY-MM-DDTHH:MM:SS).
 
-  static String _formatDateTime(String dateTimeStr) {
+  static String formatDateTime(String dateTimeStr) {
     // Try to parse date and time separately.
     // Format: DD/MM/YYYY HH:MM or similar
 
@@ -313,7 +319,7 @@ class PdfProcessor {
 
     // Try just date format.
 
-    final dateOnly = _formatDate(dateTimeStr);
+    final dateOnly = formatDate(dateTimeStr);
     if (dateOnly.isNotEmpty) {
       return '${dateOnly}T00:00:00';
     }
@@ -327,7 +333,7 @@ class PdfProcessor {
   /// Test Name | Result | [H/L Flag] | [Units] | [Reference Range]
   /// Also handles multi-line formats where data spans 2-3 lines.
 
-  static void _extractTestResults(
+  static void extractTestResults(
     List<String> lines,
     Map<String, dynamic> finalJson,
   ) {
@@ -504,15 +510,21 @@ class PdfProcessor {
       }
 
       // Extract units - look for patterns like mmol/L, g/L, U/L, etc.
-      // Units are optional - some tests like eGFR may not have units shown.
+      // Units can appear in different positions:
+      // - Format 1: Test Name | Result | Units | Reference Range
+      // - Format 2: Test Name | Result | H/L | Units | Reference Range
+      // We search from the position after the result/flag.
 
       String units = '';
+      int unitsIndex = -1; // Track where we found units.
 
       if (nextIndex < parts.length) {
         for (var j = nextIndex; j < parts.length; j++) {
           final part = parts[j];
 
           // Skip if this looks like a reference range (not units).
+          // Reference ranges typically contain numeric patterns like "3.5-5.0"
+          // or "<10".
 
           if (RegExp(r'^[<>]?\d+\.?\d*-\d+\.?\d*$').hasMatch(part) ||
               RegExp(r'^\([<>]?\d+\.?\d*-\d+\.?\d*\)$').hasMatch(part) ||
@@ -520,35 +532,46 @@ class PdfProcessor {
             break; // This is reference range, not units.
           }
 
-          // Check if it looks like a unit (contains /, letters, or special
-          // chars). Common patterns: mmol/L, g/L, U/L, mL/min, mg/dL,
-          // µmol/L, etc.
+          // Check if it looks like a unit (contains /, letters, or special chars).
+          // Common patterns: mmol/L, g/L, U/L, mL/min, mg/dL, µmol/L, etc.
+          // Also allow units like "sec", "min", "hr", "L", "mL", "%".
 
-          if (RegExp(r'^[a-zA-Zµ°×]+(/[a-zA-Zµ°×0-9.²³]+)*$').hasMatch(part)) {
+          if (RegExp(r'^[a-zA-Zµ°×%]+(/[a-zA-Zµ°×0-9.²³]+)*$').hasMatch(part)) {
             units = part;
+            unitsIndex = j;
             nextIndex = j + 1; // Update nextIndex for reference range search.
             break;
           }
 
-          // Also check for compound units like "mL/min/1.73m²" or "× 10⁹/L".
+          // Also check for compound units like "mL/min/1.73m²" or "× 10⁹/L"
+          // These contain multiple slashes or special characters.
 
           if (part.contains('/') && RegExp(r'[a-zA-Z]').hasMatch(part)) {
             units = part;
+            unitsIndex = j;
             nextIndex = j + 1;
             break;
           }
 
-          // Check for "x 10^9/L" style units.
+          // Check for "x 10^9/L" style units (with multiplication sign).
 
           if (part == '×' || part.toLowerCase() == 'x') {
-            // Combine with next parts for units like "× 10⁹/L"
+            // Combine with next parts for units like "× 10⁹/L".
 
             final unitParts = <String>[part];
             for (var k = j + 1; k < parts.length && k < j + 3; k++) {
               unitParts.add(parts[k]);
             }
             units = unitParts.join(' ');
+            unitsIndex = j;
             nextIndex = j + unitParts.length;
+            break;
+          }
+
+          // If we've checked 3-4 positions after the result and found nothing,
+          // there might be no units (which is valid for some tests like eGFR).
+
+          if (j - nextIndex >= 3) {
             break;
           }
         }
