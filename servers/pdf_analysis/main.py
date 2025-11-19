@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Pathology Report Analysis API",
     description="API for analysing pathology reports using LLM",
-    version="1.0.0"
+    version="0.1.0"
 )
 
 # Configure CORS
