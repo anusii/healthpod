@@ -59,13 +59,15 @@ Return the results in the following JSON format:
 }}
 
 Important guidelines:
+- Extract all test results from the report
+- Keep test names, units, and values exactly as they appear in the report
+- Preserve the original language and format for all fields
+- Do not translate or standardise test names or units
 - Only extract actual test results, ignore headers, footers, and addresses
 - If a value is not found, use an empty string ""
-- Keep test names as they appear in the report
-- Preserve any "H" or "L" flags in the comment field
-- For reference intervals, keep the exact format from the report (e.g., 
-"135-145", ">60", "<5.5")
-- If a date/time is not in ISO format, convert it to ISO format
+- Preserve any "H" (high) or "L" (low) flags in the comment field
+- Keep reference intervals in their exact format (e.g., "135-145", ">60", "<5.5")
+- Convert dates/times to ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS)
 
 Here is the pathology report text to analyse:
 
@@ -78,10 +80,10 @@ Return ONLY the JSON object, with no additional text or explanation.
 def create_analysis_prompt(report_text: str) -> str:
     """
     Create the analysis prompt with the report text.
-    
+
     Args:
         report_text: The extracted text from the pathology report
-        
+
     Returns:
         The formatted prompt ready to send to the LLM
     """

@@ -44,7 +44,7 @@ def test_health_check():
 def test_text_analysis():
     """Test the text analysis endpoint."""
     print("\n=== Testing Text Analysis ===")
-    
+
     # Sample pathology report text
     sample_text = """
     Example Pathology Laboratory
@@ -70,37 +70,34 @@ def test_text_analysis():
     LDL Cholesterol    3.1      mmol/L    (<3.0)
     Triglycerides      1.5      mmol/L    (<2.0)
     """
-    
-    payload = {
-        "text": sample_text,
-        "report_name": "test_report.pdf"
-    }
-    
+
+    payload = {"text": sample_text, "report_name": "test_report.pdf"}
+
     try:
         response = requests.post(
-            "http://localhost:8000/analyse/text",
-            json=payload,
-            timeout=60
+            "http://localhost:8000/analyse/text", json=payload, timeout=60
         )
         print(f"Status Code: {response.status_code}")
-        
+
         if response.status_code == 200:
             result = response.json()
             print("\n✅ Analysis successful!")
             print(f"Laboratory: {result.get('laboratory')}")
             print(f"Tests found: {len(result.get('tests', []))}")
             print("\nFirst few tests:")
-            for test in result.get('tests', [])[:3]:
-                print(f"  - {test.get('test_name')}: {test.get('result')} "
-                      f"{test.get('units')}")
-            
+            for test in result.get("tests", [])[:3]:
+                print(
+                    f"  - {test.get('test_name')}: {test.get('result')} "
+                    f"{test.get('units')}"
+                )
+
             print("\nFull response:")
             print(json.dumps(result, indent=2))
             return True
         else:
             print(f"❌ Error: {response.text}")
             return False
-            
+
     except Exception as e:
         print(f"❌ Error: {e}")
         return False
@@ -109,24 +106,21 @@ def test_text_analysis():
 def test_pdf_analysis(pdf_path=None):
     """Test the PDF analysis endpoint."""
     print("\n=== Testing PDF Analysis ===")
-    
+
     if not pdf_path:
         print("⚠️  No PDF file provided, skipping PDF test")
-        print("To test PDF analysis, run: python test_server.py "
-              "/path/to/file.pdf")
+        print("To test PDF analysis, run: python test_server.py " "/path/to/file.pdf")
         return True
-    
+
     try:
-        with open(pdf_path, 'rb') as f:
-            files = {'file': (pdf_path, f, 'application/pdf')}
+        with open(pdf_path, "rb") as f:
+            files = {"file": (pdf_path, f, "application/pdf")}
             response = requests.post(
-                "http://localhost:8000/analyse/pdf",
-                files=files,
-                timeout=60
+                "http://localhost:8000/analyse/pdf", files=files, timeout=60
             )
-        
+
         print(f"Status Code: {response.status_code}")
-        
+
         if response.status_code == 200:
             result = response.json()
             print("\n✅ Analysis successful!")
@@ -138,7 +132,7 @@ def test_pdf_analysis(pdf_path=None):
         else:
             print(f"❌ Error: {response.text}")
             return False
-            
+
     except FileNotFoundError:
         print(f"❌ Error: File not found: {pdf_path}")
         return False
@@ -152,7 +146,7 @@ def main():
     print("=" * 60)
     print("PDF Analysis Server Test Suite")
     print("=" * 60)
-    
+
     # Check if server is running
     try:
         requests.get("http://localhost:8000", timeout=2)
@@ -160,20 +154,20 @@ def main():
         print("\n❌ Server is not running!")
         print("Please start the server first: python main.py")
         sys.exit(1)
-    
+
     results = []
-    
+
     # Run tests
     results.append(("Health Check", test_health_check()))
     results.append(("Text Analysis", test_text_analysis()))
-    
+
     # Optional PDF test
     if len(sys.argv) > 1:
         pdf_path = sys.argv[1]
         results.append(("PDF Analysis", test_pdf_analysis(pdf_path)))
     else:
         test_pdf_analysis(None)
-    
+
     # Summary
     print("\n" + "=" * 60)
     print("Test Summary")
@@ -181,9 +175,9 @@ def main():
     for name, result in results:
         status = "✅ PASS" if result else "❌ FAIL"
         print(f"{name}: {status}")
-    
+
     print("\n")
-    
+
     # Exit with appropriate code
     if all(r for _, r in results):
         print("✅ All tests passed!")

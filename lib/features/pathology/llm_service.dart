@@ -41,7 +41,7 @@ class PathologyLLMService {
 
   PathologyLLMService({
     this.baseUrl = 'http://localhost:8000',
-    this.timeout = const Duration(seconds: 180), // 180 seconds (3 minutes)
+    this.timeout = const Duration(seconds: 900), // 900 seconds (15 minutes)
   });
 
   /// Analyses a PDF file using the LLM server.

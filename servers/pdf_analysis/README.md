@@ -202,8 +202,9 @@ cd servers/pdf_analysis
 - PDF file too large
 
 **Solutions**:
-- Wait longer (subsequent requests will be much faster)
-- Increase timeout settings
+- The default timeout is set to 15 minutes (900 seconds), which should be sufficient for most reports
+- Wait longer (subsequent requests will be much faster after the initial model loading)
+- If still timing out, you can increase timeout settings further via the OLLAMA_TIMEOUT environment variable
 - Use a smaller model (e.g., qwen3:4b)
 
 ### 5. Insufficient Memory
@@ -276,12 +277,21 @@ if __name__ == "__main__":
 
 ### Modifying Timeout Duration
 
-In Flutter code:
+Server-side timeout (default is 900 seconds / 15 minutes):
+
+Set the `OLLAMA_TIMEOUT` environment variable before starting the server:
+
+```bash
+export OLLAMA_TIMEOUT=1200  # 20 minutes
+./run.sh
+```
+
+Flutter client-side timeout:
 
 ```dart
 final llmService = PathologyLLMService(
   baseUrl: 'http://localhost:8000',
-  timeout: const Duration(seconds: 180),  // Increase timeout
+  timeout: const Duration(seconds: 900),  // Should match or exceed server timeout
 );
 ```
 

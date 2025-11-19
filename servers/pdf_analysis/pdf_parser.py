@@ -34,20 +34,20 @@ logger = logging.getLogger(__name__)
 
 class PDFParser:
     """Utility class for extracting text from PDF files."""
-    
+
     @staticmethod
     def extract_text_pdfplumber(pdf_path: str) -> str:
         """
         Extract text from a PDF file using pdfplumber.
-        
+
         This method provides better text extraction for complex layouts.
-        
+
         Args:
             pdf_path: Path to the PDF file
-            
+
         Returns:
             Extracted text from all pages
-            
+
         Raises:
             FileNotFoundError: If the PDF file does not exist
             Exception: For other PDF processing errors
@@ -59,33 +59,32 @@ class PDFParser:
                     page_text = page.extract_text()
                     if page_text:
                         text += page_text + "\n"
-            
+
             logger.info(
-                f"Successfully extracted {len(text)} "
-                "characters using pdfplumber"
+                f"Successfully extracted {len(text)} " "characters using pdfplumber"
             )
             return text
-            
+
         except FileNotFoundError:
             logger.error(f"PDF file not found: {pdf_path}")
             raise
         except Exception as e:
             logger.error(f"Error extracting text with pdfplumber: {e}")
             raise
-            
+
     @staticmethod
     def extract_text_pypdf2(pdf_path: str) -> str:
         """
         Extract text from a PDF file using PyPDF2.
-        
+
         This is a fallback method for simpler PDFs.
-        
+
         Args:
             pdf_path: Path to the PDF file
-            
+
         Returns:
             Extracted text from all pages
-            
+
         Raises:
             FileNotFoundError: If the PDF file does not exist
             Exception: For other PDF processing errors
@@ -93,35 +92,36 @@ class PDFParser:
         try:
             text = ""
             reader = PdfReader(pdf_path)
-            
+
             for page in reader.pages:
                 page_text = page.extract_text()
                 if page_text:
                     text += page_text + "\n"
-            
-            logger.info(f"Successfully extracted {len(text)} characters "
-                        "using PyPDF2")
+
+            logger.info(
+                f"Successfully extracted {len(text)} characters " "using PyPDF2"
+            )
             return text
-            
+
         except FileNotFoundError:
             logger.error(f"PDF file not found: {pdf_path}")
             raise
         except Exception as e:
             logger.error(f"Error extracting text with PyPDF2: {e}")
             raise
-            
+
     @staticmethod
     def extract_text(pdf_path: str, method: str = "pdfplumber") -> str:
         """
         Extract text from a PDF file using the specified method.
-        
+
         Args:
             pdf_path: Path to the PDF file
             method: Extraction method to use ("pdfplumber" or "pypdf2")
-            
+
         Returns:
             Extracted text from all pages
-            
+
         Raises:
             ValueError: If an invalid method is specified
             FileNotFoundError: If the PDF file does not exist
@@ -133,20 +133,20 @@ class PDFParser:
             return PDFParser.extract_text_pypdf2(pdf_path)
         else:
             raise ValueError(f"Invalid extraction method: {method}")
-            
+
     @staticmethod
     def extract_text_with_fallback(pdf_path: str) -> str:
         """
         Extract text from a PDF file with automatic fallback.
-        
+
         Tries pdfplumber first, falls back to PyPDF2 if that fails.
-        
+
         Args:
             pdf_path: Path to the PDF file
-            
+
         Returns:
             Extracted text from all pages
-            
+
         Raises:
             Exception: If both methods fail
         """
