@@ -25,6 +25,7 @@ dependencies:
   fl_chart: ^1.0.0
   flutter_markdown: ^0.7.3
   flutter_riverpod: ^2.6.1
+  http: ^1.6.0
   intl: any
   markdown_tooltip: ^0.0.7
   package_info_plus: ^8.3.1

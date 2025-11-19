@@ -1,0 +1,8 @@
+fastapi==0.115.0
+uvicorn==0.32.0
+pydantic==2.9.2
+python-multipart==0.0.12
+pdfplumber==0.11.4
+PyPDF2==3.0.1
+requests==2.32.3
+python-dotenv==1.0.1

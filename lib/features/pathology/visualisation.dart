@@ -36,6 +36,7 @@ import 'package:solidpod/solidpod.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:healthpod/constants/paths.dart';
+import 'package:healthpod/features/pathology/llm_service.dart';
 import 'package:healthpod/features/pathology/model.dart';
 import 'package:healthpod/features/pathology/pdf_processor.dart';
 import 'package:healthpod/features/pathology/pdf_viewer.dart';
@@ -174,7 +175,7 @@ class _PathologyVisualisationState
     });
   }
 
-  /// Extracts test results from the currently viewed PDF.
+  /// Extracts test results from the currently viewed PDF using LLM.
 
   Future<void> _extractResults() async {
     if (_selectedReport == null) return;
@@ -193,7 +194,7 @@ class _PathologyVisualisationState
               CircularProgressIndicator(),
               SizedBox(height: 16),
               Text(
-                'Extracting PDF content...',
+                'Extracting PDF content with LLM...',
                 style: TextStyle(color: Colors.white),
               ),
             ],
@@ -222,35 +223,72 @@ class _PathologyVisualisationState
         pdfBytes = result as Uint8List;
       } else if (result is List<int>) {
         pdfBytes = result as List<int>;
-      } else if (result is String) {
-        // If it's a string, it might be base64 encoded.
+      } else // If it's a string, it might be base64 encoded.
         try {
-          pdfBytes = base64Decode(result as String);
+          pdfBytes = base64Decode(result);
         } catch (e) {
           debugPrint('PDF decode failed: $e');
-          // Try as raw bytes from string.
-          pdfBytes = (result as String).codeUnits;
-        }
-      } else {
-        throw Exception('Unrecognized PDF data format');
-      }
 
-      // Load PDF document.
+          // Try as raw bytes from string.
+
+          pdfBytes = (result).codeUnits;
+        }
+
+      // Extract text from PDF for LLM analysis.
 
       final PdfDocument pdf = PdfDocument(inputBytes: pdfBytes);
-
-      // Extract text from all pages.
-
       String text = '';
       for (var i = 0; i < pdf.pages.count; i++) {
         text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
       }
 
-      // Parse text and create JSON structure.
+      // Try LLM analysis first.
 
-      final lines = text.split('\n');
-      final jsonData =
-          PdfProcessor.createPathologyJson(_selectedReport!.fileName, lines);
+      Map<String, dynamic> jsonData;
+
+      try {
+        // Create LLM service instance.
+
+        final llmService = PathologyLLMService(
+          baseUrl: 'http://localhost:8000',
+          timeout: const Duration(seconds: 180), // 180 seconds (3 minutes)
+        );
+
+        // Check if LLM server is available.
+
+        final isConnected = await llmService.checkConnection();
+
+        if (isConnected) {
+          // Use LLM to analyse the extracted text.
+
+          jsonData = await llmService.analyseText(
+            text,
+            _selectedReport!.fileName,
+          );
+
+          debugPrint('Successfully analysed with LLM');
+        } else {
+          // Fall back to traditional parsing if LLM server not available.
+
+          debugPrint('LLM server not available, using traditional parsing');
+          final lines = text.split('\n');
+          jsonData = PdfProcessor.createPathologyJson(
+            _selectedReport!.fileName,
+            lines,
+          );
+        }
+      } catch (llmError) {
+        // If LLM fails, fall back to traditional parsing.
+
+        debugPrint('LLM analysis failed: $llmError');
+        debugPrint('Falling back to traditional parsing');
+
+        final lines = text.split('\n');
+        jsonData = PdfProcessor.createPathologyJson(
+          _selectedReport!.fileName,
+          lines,
+        );
+      }
 
       // Close loading dialog.
 
@@ -283,12 +321,16 @@ class _PathologyVisualisationState
         throw Exception('Failed to upload JSON file');
       }
 
-      // Show success message.
+      // Show success message with test count.
 
       if (mounted) {
+        final testCount = jsonData['tests']?.length ?? 0;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Successfully extracted and saved results to $jsonFileName'),
+            content: Text(
+              'Successfully extracted $testCount tests '
+                  'and saved to $jsonFileName',
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 3),
           ),
