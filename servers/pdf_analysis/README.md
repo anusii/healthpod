@@ -1,10 +1,59 @@
 # Pathology Report Analysis Server
 
-A FastAPI-based server that uses locally-deployed LLM (Ollama with Qwen3:8b) to intelligently analyse pathology laboratory reports, replacing traditional string parsing methods with more accurate and flexible data extraction.
+A lightweight FastAPI-based LLM server that intelligently analyses pathology 
+laboratory report text using locally-deployed Ollama with Qwen3:8b.
 
 ## Overview
 
-This system provides intelligent pathology report analysis using Large Language Models, offering superior accuracy and adaptability compared to traditional regex-based parsing methods.
+This server provides **LLM-based text analysis only**. It does not handle PDF 
+processing or OCR.
+
+### Architecture
+
+```
+┌─────────────────────────────────┐
+│       Flutter Client            │
+│                                 │
+│  • PDF text extraction          │
+│  • OCR fallback (if needed)     │
+│  • UI/UX handling               │
+└────────────┬────────────────────┘
+             │ HTTP POST /analyse/text
+             │ (sends extracted text only)
+             ↓
+┌─────────────────────────────────┐
+│      Python LLM Server          │
+│                                 │
+│  • Receives text                │
+│  • LLM analysis (Ollama+Qwen)   │
+│  • Returns structured data      │
+└─────────────────────────────────┘
+```
+
+**Server Responsibilities**:
+- ✅ Receive text input via REST API
+- ✅ Send text to LLM for analysis
+- ✅ Parse and structure LLM responses
+- ✅ Return JSON results
+
+**Client Responsibilities**:
+- ✅ Extract text from PDF files
+- ✅ Perform OCR if text extraction returns empty results
+- ✅ Send extracted text to server
+
+This design provides:
+- ✅ Lightweight, focused server
+- ✅ Minimal dependencies
+- ✅ Better scalability
+- ✅ Improved privacy
+
+## Prerequisites
+
+### Server Requirements
+
+The Python LLM server requires:
+- **Python 3.8 or higher**
+- **Ollama** (for running the LLM locally)
 
 ## Quick Start
 
@@ -57,7 +106,7 @@ chmod +x setup.sh
 This script will:
 - Verify Python and Ollama installation
 - Create a virtual environment
-- Install all dependencies
+- Install minimal dependencies (LLM server only)
 - Validate the installation
 
 ### 5. Start the Server
@@ -77,13 +126,6 @@ Starting FastAPI server on http://localhost:8000
 
 ```bash
 curl http://localhost:8000/health
-```
-
-### Analyse PDF Files
-
-```bash
-curl -X POST "http://localhost:8000/analyse/pdf" \
-  -F "file=@pathology_report.pdf"
 ```
 
 ### Analyse Text
@@ -215,6 +257,30 @@ cd servers/pdf_analysis
 - Ensure at least 8GB of available RAM
 - Close other large applications
 - Use a smaller model
+
+### 6. "Report text is empty" Error
+
+**Symptoms**: Error message "Failed to analyse text: Report text is empty"
+
+**Cause**: The Flutter client sent empty or whitespace-only text.
+
+**Solution**: Ensure proper text extraction and OCR fallback on the Flutter client:
+
+```dart
+import 'package:healthpod/features/pathology/pdf_extractor.dart';
+
+// This handles both standard extraction and OCR fallback
+String text = await PdfExtractor.extractTextWithFallback(pdfPath);
+
+if (text.isEmpty) {
+  // Handle case where no text could be extracted
+  showError('No text found in PDF');
+  return;
+}
+
+// Send to server
+final result = await llmService.analyseText(text, fileName);
+```
 
 ## Performance Notes
 

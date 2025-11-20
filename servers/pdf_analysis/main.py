@@ -1,5 +1,5 @@
 """
-PDF Analysis Server.
+LLM Text Analysis Server for Pathology Reports.
 
 Copyright (C) 2025, Software Innovation Institute ANU
 
@@ -25,17 +25,15 @@ Authors: Tony Chen
 
 import logging
 import os
-import tempfile
 from datetime import datetime
 from typing import Dict, Any
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from llm_prompts import create_analysis_prompt
 from ollama_client import OllamaClient
-from pdf_parser import PDFParser
 
 # Configure logging
 logging.basicConfig(
@@ -45,8 +43,11 @@ logger = logging.getLogger(__name__)
 
 # Initialise FastAPI app
 app = FastAPI(
-    title="Pathology Report Analysis API",
-    description="API for analysing pathology reports using LLM",
+    title="Pathology Report LLM Analysis API",
+    description="LLM-based text analysis for pathology reports. "
+                "Receives text input, performs LLM analysis, returns "
+                "structured data. PDF extraction and OCR handled by Flutter "
+                "client.",
     version="0.1.0",
 )
 
@@ -113,72 +114,6 @@ async def health_check():
     }
 
 
-@app.post("/analyse/pdf", response_model=PathologyResponse)
-async def analyse_pdf(file: UploadFile = File(..., description="PDF file to analyse")):
-    """
-    Analyse a pathology report PDF file.
-
-    NOTE: This endpoint is deprecated. Flutter app now extracts text locally
-    and uses the /analyse/text endpoint instead. This endpoint is kept for
-    backward compatibility but is not actively used.
-
-    Args:
-        file: The PDF file to analyse
-
-    Returns:
-        Structured pathology report data
-
-    Raises:
-        HTTPException: If the file processing or analysis fails
-    """
-    logger.warning(f"PDF endpoint called (deprecated): {file.filename}")
-    logger.info("Consider using /analyse/text endpoint - Flutter extracts text locally")
-
-    # Validate file type
-    if not file.filename.endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="File must be a PDF")
-
-    # Create a temporary file
-    temp_file = None
-    try:
-        # Save uploaded file to temporary location
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-            content = await file.read()
-            temp_file.write(content)
-            temp_file_path = temp_file.name
-
-        logger.info(f"Saved PDF to temporary file: {temp_file_path}")
-
-        # Extract text from PDF
-        try:
-            report_text = PDFParser.extract_text_with_fallback(temp_file_path)
-            logger.info(f"Extracted {len(report_text)} characters from PDF")
-        except Exception as e:
-            logger.error(f"Failed to extract text from PDF: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to extract text from PDF: {str(e)}"
-            )
-
-        # Analyse text using LLM
-        try:
-            result = await analyse_text_internal(report_text, file.filename)
-            return result
-        except Exception as e:
-            logger.error(f"Failed to analyse PDF content: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Failed to analyse PDF content: {str(e)}"
-            )
-
-    finally:
-        # Clean up a temporary file
-        if temp_file and os.path.exists(temp_file_path):
-            try:
-                os.unlink(temp_file_path)
-                logger.info(f"Deleted temporary file: {temp_file_path}")
-            except Exception as e:
-                logger.warning(f"Failed to delete temporary file: {e}")
-
-
 @app.post("/analyse/text", response_model=PathologyResponse)
 async def analyse_text(request: TextAnalysisRequest):
     """
@@ -188,22 +123,42 @@ async def analyse_text(request: TextAnalysisRequest):
     and uses an LLM to parse and structure the test results.
 
     Args:
-        request: The text analysis request
+        request: The text analysis request, containing
+        - text: The extracted text from the pathology report
+        - report_name: Name of the report file
 
     Returns:
-        Structured pathology report data
+        Structured pathology report data, including
+        - report_name: Name of the report
+        - requested_date: Date the tests were requested
+        - collected_time: When the sample was collected
+        - received_time: When the lab received the sample
+        - report_upload_date: When the report was uploaded
+        - laboratory: Name of the laboratory
+        - tests: List of test results with values, units, and reference ranges
 
     Raises:
-        HTTPException: If the analysis fails
+        HTTPException: If the analysis fails or text is empty
     """
     logger.info(f"Received text analysis request for report: {request.report_name}")
 
     try:
         result = await analyse_text_internal(request.text, request.report_name)
         return result
+    except ValueError as e:
+        logger.error(f"Text validation failed: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Failed to analyse text: {str(e)}. "
+            )
+        )
     except Exception as e:
         logger.error(f"Failed to analyse text: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to analyse text: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to analyse text: {str(e)}"
+        )
 
 
 async def analyse_text_internal(

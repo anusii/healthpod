@@ -184,14 +184,25 @@ class _PathologyVisualisationState
     if (!confirmed) return;
 
     try {
-      // Show loading dialog.
+      // Show loading dialogue.
 
-      _showLoadingDialog('Extracting PDF content with LLM...');
+      _showLoadingDialog('Extracting text from PDF (with OCR if needed)...');
 
-      // Read and process PDF.
+      // Read PDF bytes from POD.
 
       final pdfBytes = await _readPdfFromPod();
-      final text = PdfExtractor.extractTextFromPdf(pdfBytes);
+
+      // Extract text with automatic OCR fallback.
+      // This will try: standard extraction → Tesseract OCR (system command)
+
+      final text = await PdfExtractor.extractTextFromBytesWithFallback(pdfBytes);
+
+      // Update loading message.
+
+      if (mounted) {
+        Navigator.pop(context);
+        _showLoadingDialog('Analysing with LLM...');
+      }
 
       // Analyse with LLM.
 
@@ -218,7 +229,7 @@ class _PathologyVisualisationState
     }
   }
 
-  /// Shows a confirmation dialog before sending data to third-party server.
+  /// Shows a confirmation dialogue before sending data to third-party server.
 
   Future<bool> _showConfirmationDialog() async {
     if (!mounted) return false;
@@ -230,7 +241,7 @@ class _PathologyVisualisationState
         title: const Text('Data Processing Confirmation'),
         content: const Text(
           'Your data will be transmitted to a third-party server '
-          'for processing. '
+          'for processing.\n\n'
           'Do you wish to proceed?',
         ),
         actions: [
@@ -249,7 +260,7 @@ class _PathologyVisualisationState
     return result ?? false;
   }
 
-  /// Shows a completion dialog after extraction is finished.
+  /// Shows a completion dialogue after extraction is finished.
 
   Future<void> _showCompletionDialog(Map<String, dynamic> jsonData) async {
     if (!mounted) return;
@@ -275,7 +286,7 @@ class _PathologyVisualisationState
     );
   }
 
-  /// Shows a loading dialog with a message.
+  /// Shows a loading dialogue with a message.
 
   void _showLoadingDialog(String message) {
     if (!mounted) return;
@@ -343,7 +354,7 @@ class _PathologyVisualisationState
   /// Handles extraction errors.
 
   void _handleExtractionError(Object error) {
-    // Close loading dialog if open.
+    // Close loading dialogue if open.
 
     if (mounted && Navigator.canPop(context)) {
       Navigator.pop(context);

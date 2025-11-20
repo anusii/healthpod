@@ -34,6 +34,7 @@ import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
 import 'package:healthpod/features/pathology/llm_service.dart';
+import 'package:healthpod/features/pathology/pdf_extractor.dart';
 
 /// Utility class for processing PDF files and converting them to JSON.
 
@@ -234,17 +235,9 @@ class PdfProcessor {
         ),
       );
 
-      // Read PDF file and extract text.
+      // Extract text from PDF with OCR fallback.
 
-      final bytes = await file.readAsBytes();
-      final PdfDocument pdf = PdfDocument(inputBytes: bytes);
-
-      // Extract text from all pages.
-
-      String text = '';
-      for (var i = 0; i < pdf.pages.count; i++) {
-        text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
-      }
+      String text = await PdfExtractor.extractTextWithFallback(file.path);
 
       // Update loading message.
 

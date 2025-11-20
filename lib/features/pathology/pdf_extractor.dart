@@ -24,13 +24,14 @@
 library;
 
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:healthpod/features/pathology/llm_service.dart';
+import 'package:healthpod/features/pathology/pdf_ocr_service.dart';
 import 'package:healthpod/features/pathology/pdf_processor.dart';
 
 /// Utility class for extracting and analysing PDF content.
@@ -60,17 +61,119 @@ class PdfExtractor {
     }
   }
 
-  /// Extracts text from PDF bytes.
+  /// Extracts text from PDF bytes with OCR fallback.
 
-  static String extractTextFromPdf(List<int> pdfBytes) {
-    final PdfDocument pdf = PdfDocument(inputBytes: pdfBytes);
-    String text = '';
+  static Future<String> extractTextFromBytesWithFallback(List<int> pdfBytes) async {
+    try {
+      // Step 1: Try standard text extraction from bytes.
 
-    for (var i = 0; i < pdf.pages.count; i++) {
-      text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
+      final PdfDocument pdf = PdfDocument(inputBytes: pdfBytes);
+      String text = '';
+
+      for (var i = 0; i < pdf.pages.count; i++) {
+        text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
+      }
+
+      if (text.trim().isNotEmpty) {
+        debugPrint(
+          'Successfully extracted text using standard method: '
+          '${text.length} characters',
+        );
+        return text.trim();
+      }
+
+      // Step 2: Text is empty, need to use OCR.
+      // Save bytes to temporary file for OCR processing.
+
+      final tempDir = Directory.systemTemp;
+      final tempFile = File(
+        '${tempDir.path}/temp_pdf_${DateTime.now().millisecondsSinceEpoch}.pdf',
+      );
+
+      try {
+        // Write bytes to temp file.
+
+        await tempFile.writeAsBytes(pdfBytes);
+        debugPrint('Created temporary file for OCR: ${tempFile.path}');
+
+        // Use Tesseract OCR.
+
+        text = await PdfOcrService.performOcr(tempFile.path);
+
+        if (text.trim().isNotEmpty) {
+          debugPrint(
+            'Successfully extracted text using OCR: ${text.length} characters',
+          );
+          return text.trim();
+        }
+
+        // OCR returned empty text.
+
+        throw Exception(
+          'No text could be extracted from the PDF. '
+          'The document may be empty or contain only images without '
+          'recognisable text. Tried: standard extraction and OCR.',
+        );
+      } finally {
+        // Clean up temporary file.
+
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+          debugPrint('Deleted temporary file: ${tempFile.path}');
+        }
+      }
+    } catch (e) {
+      debugPrint('Text extraction from bytes failed: $e');
+      rethrow;
     }
+  }
 
-    return text;
+  /// Extracts text from PDF file path with automatic OCR fallback.
+
+  static Future<String> extractTextWithFallback(String pdfPath) async {
+    try {
+      // Step 1: Try standard text extraction from file.
+
+      final pdfFile = File(pdfPath);
+      final bytes = await pdfFile.readAsBytes();
+      
+      final PdfDocument pdf = PdfDocument(inputBytes: bytes);
+      String text = '';
+
+      for (var i = 0; i < pdf.pages.count; i++) {
+        text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
+      }
+
+      if (text.trim().isNotEmpty) {
+        debugPrint(
+          'Successfully extracted text using standard method: '
+          '${text.length} characters',
+        );
+        return text.trim();
+      }
+
+      // Step 2: Text is empty, try OCR.
+
+      text = await PdfOcrService.performOcr(pdfPath);
+
+      if (text.trim().isNotEmpty) {
+        debugPrint(
+          'Successfully extracted text using OCR: ${text.length} characters',
+        );
+        return text.trim();
+      }
+
+      // Step 3: OCR returned empty text.
+
+      throw Exception(
+        'No text could be extracted from the PDF. '
+        'The document may be empty or contain only images without '
+        'recognisable text. Tried: standard extraction and OCR.',
+      );
+    } catch (e) {
+      debugPrint('Text extraction failed: $e');
+      rethrow;
+    }
   }
 
   /// Analyses text using LLM with fallback to traditional parsing.

@@ -155,7 +155,6 @@ python -c "
 import sys
 try:
     from fastapi import FastAPI
-    from pdfplumber import PDF
     import requests
     print('✓ All imports successful')
     sys.exit(0)
