@@ -45,9 +45,9 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Pathology Report LLM Analysis API",
     description="LLM-based text analysis for pathology reports. "
-                "Receives text input, performs LLM analysis, returns "
-                "structured data. PDF extraction and OCR handled by Flutter "
-                "client.",
+    "Receives text input, performs LLM analysis, returns "
+    "structured data. PDF extraction and OCR handled by Flutter "
+    "client.",
     version="0.1.0",
 )
 
@@ -148,17 +148,11 @@ async def analyse_text(request: TextAnalysisRequest):
     except ValueError as e:
         logger.error(f"Text validation failed: {e}")
         raise HTTPException(
-            status_code=400,
-            detail=(
-                f"Failed to analyse text: {str(e)}. "
-            )
+            status_code=400, detail=(f"Failed to analyse text: {str(e)}. ")
         )
     except Exception as e:
         logger.error(f"Failed to analyse text: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to analyse text: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to analyse text: {str(e)}")
 
 
 async def analyse_text_internal(

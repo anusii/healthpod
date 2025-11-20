@@ -195,7 +195,8 @@ class _PathologyVisualisationState
       // Extract text with automatic OCR fallback.
       // This will try: standard extraction → Tesseract OCR (system command)
 
-      final text = await PdfExtractor.extractTextFromBytesWithFallback(pdfBytes);
+      final text =
+          await PdfExtractor.extractTextFromBytesWithFallback(pdfBytes);
 
       // Update loading message.
 

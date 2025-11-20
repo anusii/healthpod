@@ -28,6 +28,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 import 'package:healthpod/features/pathology/llm_service.dart';
@@ -63,7 +64,9 @@ class PdfExtractor {
 
   /// Extracts text from PDF bytes with OCR fallback.
 
-  static Future<String> extractTextFromBytesWithFallback(List<int> pdfBytes) async {
+  static Future<String> extractTextFromBytesWithFallback(
+    List<int> pdfBytes,
+  ) async {
     try {
       // Step 1: Try standard text extraction from bytes.
 
@@ -124,54 +127,6 @@ class PdfExtractor {
       }
     } catch (e) {
       debugPrint('Text extraction from bytes failed: $e');
-      rethrow;
-    }
-  }
-
-  /// Extracts text from PDF file path with automatic OCR fallback.
-
-  static Future<String> extractTextWithFallback(String pdfPath) async {
-    try {
-      // Step 1: Try standard text extraction from file.
-
-      final pdfFile = File(pdfPath);
-      final bytes = await pdfFile.readAsBytes();
-      
-      final PdfDocument pdf = PdfDocument(inputBytes: bytes);
-      String text = '';
-
-      for (var i = 0; i < pdf.pages.count; i++) {
-        text += PdfTextExtractor(pdf).extractText(startPageIndex: i);
-      }
-
-      if (text.trim().isNotEmpty) {
-        debugPrint(
-          'Successfully extracted text using standard method: '
-          '${text.length} characters',
-        );
-        return text.trim();
-      }
-
-      // Step 2: Text is empty, try OCR.
-
-      text = await PdfOcrService.performOcr(pdfPath);
-
-      if (text.trim().isNotEmpty) {
-        debugPrint(
-          'Successfully extracted text using OCR: ${text.length} characters',
-        );
-        return text.trim();
-      }
-
-      // Step 3: OCR returned empty text.
-
-      throw Exception(
-        'No text could be extracted from the PDF. '
-        'The document may be empty or contain only images without '
-        'recognisable text. Tried: standard extraction and OCR.',
-      );
-    } catch (e) {
-      debugPrint('Text extraction failed: $e');
       rethrow;
     }
   }

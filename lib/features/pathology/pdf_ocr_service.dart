@@ -24,15 +24,13 @@
 library;
 
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_tesseract_ocr/flutter_tesseract_ocr.dart';
+
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf_render/pdf_render.dart';
-import 'package:path/path.dart' as path;
 
 /// Service for performing OCR on PDF documents.
 
@@ -45,7 +43,7 @@ class PdfOcrService {
     try {
       debugPrint('=== System Tesseract Command ===');
       debugPrint('Image path: $imagePath');
-      
+
       // Verify image file exists.
 
       final imageFile = File(imagePath);
@@ -53,22 +51,22 @@ class PdfOcrService {
         debugPrint('ERROR: Image file does not exist!');
         return '';
       }
-      
+
       final fileSize = await imageFile.length();
-      debugPrint('Image file size: ${fileSize} bytes');
-      
+      debugPrint('Image file size: $fileSize bytes');
+
       // Call tesseract directly via system command.
       // tesseract <input> stdout will output to stdout.
 
       debugPrint('Running: tesseract "$imagePath" stdout -l eng');
-      
+
       final result = await Process.run(
         'tesseract',
         [imagePath, 'stdout', '-l', 'eng'],
       );
-      
+
       debugPrint('Tesseract exit code: ${result.exitCode}');
-      
+
       if (result.exitCode == 0) {
         final text = result.stdout.toString().trim();
         debugPrint('System Tesseract SUCCESS: ${text.length} characters');
@@ -83,28 +81,6 @@ class PdfOcrService {
       debugPrint('System Tesseract command exception: $e');
       debugPrint('Stack trace: $stackTrace');
       return '';
-    }
-  }
-  
-  /// Checks if Tesseract OCR is available and properly configured.
-
-  static Future<bool> checkTesseractAvailability() async {
-    try {
-      debugPrint('Checking Tesseract availability...');
-      
-      // Check if tesseract command is available.
-
-      final result = await Process.run('which', ['tesseract']);
-      if (result.exitCode == 0) {
-        debugPrint('Tesseract found at: ${result.stdout.toString().trim()}');
-        return true;
-      } else {
-        debugPrint('Tesseract not found in system PATH');
-        return false;
-      }
-    } catch (e) {
-      debugPrint('Tesseract check failed: $e');
-      return false;
     }
   }
 
@@ -160,37 +136,38 @@ class PdfOcrService {
 
           await pageImage.createImageIfNotAvailable();
           final image = await pageImage.createImageDetached();
-          
+
           // Convert ui.Image to PNG bytes.
 
-          final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+          final byteData =
+              await image.toByteData(format: ui.ImageByteFormat.png);
           if (byteData == null) {
             debugPrint('Failed to convert image to bytes for page $pageNum');
             continue;
           }
-          
+
           final imageBytes = byteData.buffer.asUint8List();
-          
+
           // Save PNG image to file.
 
           final File imageFile = File(tempImagePath);
           await imageFile.writeAsBytes(imageBytes);
 
           final fileSize = await imageFile.length();
-          debugPrint('Saved temporary image: $tempImagePath (${fileSize} bytes)');
+          debugPrint('Saved temporary image: $tempImagePath ($fileSize bytes)');
 
           // Perform OCR on the image.
 
           String pageText = '';
-          
+
           // Use system command (desktop/mobile platforms).
 
           if (!kIsWeb) {
             try {
               pageText = await _extractTextUsingSystemCommand(tempImagePath);
-              
+
               if (pageText.isNotEmpty) {
-                combinedText += pageText + '\n';
+                combinedText += '$pageText\n';
                 debugPrint(
                   'Page $pageNum: Extracted ${pageText.length} characters',
                 );
@@ -235,22 +212,11 @@ class PdfOcrService {
             debugPrint('Deleted temporary image: $imagePath');
           }
         } catch (e) {
-          debugPrint('Warning: Failed to delete temporary image $imagePath: $e');
+          debugPrint(
+            'Warning: Failed to delete temporary image $imagePath: $e',
+          );
         }
       }
-    }
-  }
-
-  /// Checks if OCR is available on the current platform.
-
-  static Future<bool> isOcrAvailable() async {
-    try {
-      // Try to extract text from a test string to see if Tesseract is
-      // available.
-      return true; // Assume available, actual check happens when OCR is called.
-    } catch (e) {
-      debugPrint('OCR not available: $e');
-      return false;
     }
   }
 }
