@@ -178,6 +178,11 @@ class _PathologyVisualisationState
   Future<void> _extractResults() async {
     if (_selectedReport == null) return;
 
+    // Show confirmation dialog before proceeding.
+
+    final confirmed = await _showConfirmationDialog();
+    if (!confirmed) return;
+
     try {
       // Show loading dialog.
 
@@ -205,12 +210,69 @@ class _PathologyVisualisationState
 
       await _uploadJsonToPod(jsonData);
 
-      // Show success message.
+      // Show completion dialog.
 
-      _showSuccessMessage(jsonData);
+      await _showCompletionDialog(jsonData);
     } catch (e) {
       _handleExtractionError(e);
     }
+  }
+
+  /// Shows a confirmation dialog before sending data to third-party server.
+
+  Future<bool> _showConfirmationDialog() async {
+    if (!mounted) return false;
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Data Processing Confirmation'),
+        content: const Text(
+          'Your data will be transmitted to a third-party server '
+          'for processing. '
+          'Do you wish to proceed?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+
+    return result ?? false;
+  }
+
+  /// Shows a completion dialog after extraction is finished.
+
+  Future<void> _showCompletionDialog(Map<String, dynamic> jsonData) async {
+    if (!mounted) return;
+
+    final testCount = jsonData['tests']?.length ?? 0;
+    final jsonFileName =
+        _selectedReport!.fileName.replaceAll('.pdf', '.json.enc.ttl');
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Extraction Complete'),
+        content: Text(
+          'Successfully extracted $testCount tests and saved to $jsonFileName.',
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Shows a loading dialog with a message.
@@ -276,26 +338,6 @@ class _PathologyVisualisationState
     if (writeResult != SolidFunctionCallStatus.success) {
       throw Exception('Failed to upload JSON file');
     }
-  }
-
-  /// Shows success message with test count.
-
-  void _showSuccessMessage(Map<String, dynamic> jsonData) {
-    if (!mounted) return;
-
-    final testCount = jsonData['tests']?.length ?? 0;
-    final jsonFileName =
-        _selectedReport!.fileName.replaceAll('.pdf', '.json.enc.ttl');
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Successfully extracted $testCount tests and saved to $jsonFileName',
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 3),
-      ),
-    );
   }
 
   /// Handles extraction errors.
