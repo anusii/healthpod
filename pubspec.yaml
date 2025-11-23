@@ -30,8 +30,8 @@ dependencies:
   package_info_plus: ^8.3.1
   path: ^1.9.0
   shared_preferences: ^2.5.2
-  solidpod: ^0.8.3
-  solidui: ^0.0.8
+  solidpod: 0.8.3
+  solidui: 0.0.8
   syncfusion_flutter_pdf: ^31.2.5
   syncfusion_flutter_pdfviewer: ^31.2.5
   table_calendar: ^3.0.9
