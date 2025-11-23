@@ -25,15 +25,19 @@ Authors: Tony Chen
 
 import logging
 import os
+import tempfile
 from datetime import datetime
 from typing import Dict, Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from llm_prompts import create_analysis_prompt
 from ollama_client import OllamaClient
+from pdf_extractor import PdfTextExtractor
+from ocr_service import OcrService
+from unit_validator import UnitValidator
 
 # Configure logging
 logging.basicConfig(
@@ -43,11 +47,10 @@ logger = logging.getLogger(__name__)
 
 # Initialise FastAPI app
 app = FastAPI(
-    title="Pathology Report LLM Analysis API",
-    description="LLM-based text analysis for pathology reports. "
-    "Receives text input, performs LLM analysis, returns "
-    "structured data. PDF extraction and OCR handled by Flutter "
-    "client.",
+    title="Pathology Report Analysis API",
+    description="Complete pathology report analysis service. "
+    "Accepts PDF files, performs text extraction (with OCR fallback), "
+    "LLM analysis, unit validation, and returns structured data.",
     version="0.1.0",
 )
 
@@ -60,12 +63,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialise Ollama client
+# Initialise services
 ollama_client = OllamaClient(
     base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
     model=os.getenv("OLLAMA_MODEL", "qwen3:8b"),
     timeout=int(os.getenv("OLLAMA_TIMEOUT", "900")),  # 900 seconds (15 minutes)
 )
+ocr_service = OcrService()
+unit_validator = UnitValidator()
 
 
 class TextAnalysisRequest(BaseModel):
@@ -243,8 +248,106 @@ async def analyse_text_internal(
         tests=parsed_data.get("tests", []),
     )
 
+    # Validate and normalise units
+    result.tests = unit_validator.validate_results(result.tests)
+
     logger.info(f"Successfully analysed report with {len(result.tests)} tests")
     return result
+
+
+@app.post("/analyse/pdf", response_model=PathologyResponse)
+async def analyse_pdf(file: UploadFile = File(...)):
+    """
+    Analyse a PDF pathology report.
+
+    This endpoint accepts a PDF file and performs the complete analysis workflow:
+    1. PDF text extraction (tries multiple methods)
+    2. OCR fallback if text extraction returns empty results
+    3. LLM analysis to structure the data
+    4. Unit validation and normalisation
+
+    Args:
+        file: The PDF file to analyse
+
+    Returns:
+        Structured pathology report data, including
+        - report_name: Name of the report
+        - requested_date: Date the tests were requested
+        - collected_time: When the sample was collected
+        - received_time: When the lab received the sample
+        - report_upload_date: When the report was uploaded
+        - laboratory: Name of the laboratory
+        - tests: List of test results with validated units
+
+    Raises:
+        HTTPException: If the analysis fails or file is invalid
+    """
+    logger.info(f"Received PDF file for analysis: {file.filename}")
+
+    # Validate file type.
+    if not file.filename.endswith(".pdf"):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file type. Only PDF files are supported.",
+        )
+
+    # Save uploaded file to temporary location.
+    temp_file = None
+    try:
+        # Create temporary files.
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp:
+            temp_file = temp.name
+            content = await file.read()
+            temp.write(content)
+            logger.info(f"Saved PDF to temporary file: {temp_file}")
+
+        # Step 1: Try text extraction.
+        logger.info("Step 1: Attempting PDF text extraction")
+        text = PdfTextExtractor.extract_text(temp_file)
+
+        # Step 2: If text extraction failed or returned empty, use OCR.
+        if not text or len(text.strip()) < 50:
+            logger.warning(
+                "Text extraction returned empty or insufficient text. "
+                "Falling back to OCR."
+            )
+            logger.info("Step 2: Performing OCR on PDF")
+            text = ocr_service.extract_text_from_pdf(
+                temp_file,
+                dpi=300,  # High resolution for better accuracy.
+                use_easyocr=False,  # Start with Tesseract, fallback to EasyOCR.
+            )
+
+            if not text:
+                raise ValueError(
+                    "Failed to extract text from PDF. "
+                    "The document may be empty or contain unrecognisable content."
+                )
+
+        logger.info(f"Successfully extracted {len(text)} characters from PDF")
+
+        # Step 3: Analyse with LLM.
+        logger.info("Step 3: Analysing text with LLM")
+        result = await analyse_text_internal(text, file.filename)
+
+        return result
+
+    except ValueError as e:
+        logger.error(f"PDF validation failed: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Failed to analyse PDF: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to analyse PDF: {str(e)}"
+        )
+    finally:
+        # Clean up temporary files.
+        if temp_file and os.path.exists(temp_file):
+            try:
+                os.unlink(temp_file)
+                logger.info(f"Deleted temporary file: {temp_file}")
+            except Exception as e:
+                logger.warning(f"Failed to delete temporary file: {e}")
 
 
 if __name__ == "__main__":

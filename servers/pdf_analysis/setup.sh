@@ -77,6 +77,31 @@ else
     exit 1
 fi
 
+# Check if Tesseract is installed
+if command -v tesseract &> /dev/null; then
+    TESSERACT_VERSION=$(tesseract --version 2>&1 | head -n1)
+    success "Tesseract OCR found: $TESSERACT_VERSION"
+else
+    error "Tesseract OCR not found"
+    info "Please install Tesseract:"
+    info "  macOS: brew install tesseract"
+    info "  Ubuntu/Debian: sudo apt-get install tesseract-ocr"
+    info "  Fedora/RHEL: sudo dnf install tesseract"
+    exit 1
+fi
+
+# Check if Poppler is installed (optional but recommended)
+if command -v pdfinfo &> /dev/null; then
+    POPPLER_VERSION=$(pdfinfo -v 2>&1 | grep -i version | head -n1)
+    success "Poppler found: $POPPLER_VERSION"
+else
+    warning "Poppler not found (optional, but recommended for pdf2image)"
+    info "To install Poppler:"
+    info "  macOS: brew install poppler"
+    info "  Ubuntu/Debian: sudo apt-get install poppler-utils"
+    info "  Fedora/RHEL: sudo dnf install poppler-utils"
+fi
+
 echo ""
 echo "Step 2: Setting up Python environment..."
 echo ""
@@ -156,6 +181,9 @@ import sys
 try:
     from fastapi import FastAPI
     import requests
+    import pdfplumber
+    import pytesseract
+    import fitz  # PyMuPDF
     print('✓ All imports successful')
     sys.exit(0)
 except ImportError as e:
@@ -182,6 +210,7 @@ echo "   ./run.sh"
 echo ""
 echo "2. Test the server:"
 echo "   python test_server.py"
+echo "   python test_server.py /path/to/sample.pdf"
 echo ""
 echo "3. View API documentation:"
 echo "   http://localhost:8000/docs"
@@ -190,5 +219,11 @@ echo "4. Update your Flutter app:"
 echo "   cd ../.."
 echo "   flutter pub get"
 echo ""
-success "Ready to analyse pathology reports with LLM!"
+echo "The server now provides complete PDF analysis:"
+echo "  • PDF text extraction (PyMuPDF, pdfplumber, PyPDF2)"
+echo "  • OCR fallback (Tesseract, EasyOCR)"
+echo "  • LLM analysis (Ollama + Qwen3:8b)"
+echo "  • Unit validation and normalisation"
+echo ""
+success "Ready to analyse pathology reports!"
 echo ""

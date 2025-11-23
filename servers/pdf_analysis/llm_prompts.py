@@ -61,13 +61,16 @@ Return the results in the following JSON format:
 Important guidelines:
 - Extract all test results from the report
 - Keep test names, units, and values exactly as they appear in the report
+- Preserve units exactly as written - do not convert or translate
 - Preserve the original language and format for all fields
-- Do not translate or standardise test names or units
+- Do not translate or standardise test names
 - Only extract actual test results, ignore headers, footers, and addresses
 - If a value is not found, use an empty string ""
 - Preserve any "H" (high) or "L" (low) flags in the comment field
 - Keep reference intervals in their exact format (e.g., "135-145", ">60", "<5.5")
 - Convert dates/times to ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS)
+- Pay special attention to unit symbols: µ (micro), ² (squared), etc.
+- Do not confuse similar characters: L vs l, O vs 0, µ vs u
 
 Here is the pathology report text to analyse:
 

@@ -1,12 +1,12 @@
 # Pathology Report Analysis Server
 
-A lightweight FastAPI-based LLM server that intelligently analyses pathology 
-laboratory report text using locally-deployed Ollama with Qwen3:8b.
+A comprehensive FastAPI-based server that handles complete pathology report 
+analysis using locally-deployed Ollama with Qwen3:8b.
 
 ## Overview
 
-This server provides **LLM-based text analysis only**. It does not handle PDF 
-processing or OCR.
+This server provides complete PDF analysis workflow, including PDF processing, 
+OCR, LLM analysis, and unit validation.
 
 ### Architecture
 
@@ -14,52 +14,72 @@ processing or OCR.
 ┌─────────────────────────────────┐
 │       Flutter Client            │
 │                                 │
-│  • PDF text extraction          │
-│  • OCR fallback (if needed)     │
+│  • File selection/upload        │
 │  • UI/UX handling               │
+│  • Display results              │
 └────────────┬────────────────────┘
-             │ HTTP POST /analyse/text
-             │ (sends extracted text only)
+             │ HTTP POST /analyse/pdf
+             │ (sends PDF file)
              ↓
 ┌─────────────────────────────────┐
-│      Python LLM Server          │
+│      Python Analysis Server     │
 │                                 │
-│  • Receives text                │
-│  • LLM analysis (Ollama+Qwen)   │
-│  • Returns structured data      │
+│  1. PDF Text Extraction         │
+│     • PyMuPDF (primary)         │
+│     • pdfplumber (fallback)     │
+│     • PyPDF2 (fallback)         │
+│                                 │
+│  2. OCR Fallback (if needed)    │
+│     • Convert to high-res images│
+│     • Tesseract OCR (primary)   │
+│     • EasyOCR (fallback)        │
+│                                 │
+│  3. LLM Analysis                │
+│     • Ollama + Qwen3:8b         │
+│     • Structured data extraction│
+│                                 │
+│  4. Unit Validation             │
+│     • Normalise units           │
+│     • Validate test-unit pairs  │
+│                                 │
+│  • Returns structured JSON      │
 └─────────────────────────────────┘
 ```
 
 **Server Responsibilities**:
-- ✅ Receive text input via REST API
-- ✅ Send text to LLM for analysis
-- ✅ Parse and structure LLM responses
-- ✅ Return JSON results
+- ✅ Accept PDF file uploads via REST API
+- ✅ Extract text from PDF (multiple methods)
+- ✅ Perform OCR if text extraction fails
+- ✅ Analyse text with LLM
+- ✅ Validate and normalise measurement units
+- ✅ Return structured JSON results
 
 **Client Responsibilities**:
-- ✅ Extract text from PDF files
-- ✅ Perform OCR if text extraction returns empty results
-- ✅ Send extracted text to server
+- ✅ Select and upload PDF files
+- ✅ Display results and handle UI/UX
 
 This design provides:
-- ✅ Lightweight, focused server
-- ✅ Minimal dependencies
-- ✅ Better scalability
-- ✅ Improved privacy
+- ✅ Complete server-side processing
+- ✅ Consistent PDF handling across platforms
+- ✅ Better accuracy with multiple extraction methods
+- ✅ Unit validation for data quality
+- ✅ Simplified client implementation
 
 ## Prerequisites
 
 ### Server Requirements
 
-The Python LLM server requires:
+The Python analysis server requires:
 - **Python 3.8 or higher**
 - **Ollama** (for running the LLM locally)
+- **Tesseract OCR** (for optical character recognition)
+- **Poppler** (for pdf2image, optional but recommended)
 
 ## Quick Start
 
-### 1. Install Ollama
+### 1. Install System Dependencies
 
-If you haven't installed Ollama yet:
+#### Install Ollama
 
 ```bash
 # macOS
@@ -70,6 +90,38 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 # Windows or macOS alternative
 # Download from https://ollama.com
+```
+
+#### Install Tesseract OCR
+
+```bash
+# macOS
+brew install tesseract
+
+# Ubuntu/Debian
+sudo apt-get install tesseract-ocr
+
+# Fedora/Red Hat
+sudo dnf install tesseract
+
+# Windows
+# Download from https://github.com/UB-Mannheim/tesseract/wiki
+```
+
+#### Install Poppler (Optional, for pdf2image)
+
+```bash
+# macOS
+brew install poppler
+
+# Ubuntu/Debian
+sudo apt-get install poppler-utils
+
+# Fedora/Red Hat
+sudo dnf install poppler-utils
+
+# Windows
+# Download from http://blog.alivate.com.au/poppler-windows/
 ```
 
 ### 2. Start Ollama Service
@@ -104,9 +156,9 @@ chmod +x setup.sh
 ```
 
 This script will:
-- Verify Python and Ollama installation
+- Verify Python, Ollama, and Tesseract installation
 - Create a virtual environment
-- Install minimal dependencies (LLM server only)
+- Install all dependencies (PDF processing, OCR, LLM)
 - Validate the installation
 
 ### 5. Start the Server
@@ -128,7 +180,20 @@ Starting FastAPI server on http://localhost:8000
 curl http://localhost:8000/health
 ```
 
-### Analyse Text
+### Analyse PDF (Recommended)
+
+```bash
+curl -X POST "http://localhost:8000/analyse/pdf" \
+  -F "file=@/path/to/pathology_report.pdf"
+```
+
+This endpoint automatically:
+1. Extracts text from the PDF
+2. Falls back to OCR if text extraction fails
+3. Analyses with LLM
+4. Validates and normalises units
+
+### Analyse Text (Legacy)
 
 ```bash
 curl -X POST "http://localhost:8000/analyse/text" \
@@ -138,6 +203,9 @@ curl -X POST "http://localhost:8000/analyse/text" \
     "report_name": "pathology_report.pdf"
   }'
 ```
+
+Note: The text endpoint is still available for cases where text has already 
+been extracted client-side.
 
 ## 7. Server Testing
 
@@ -181,20 +249,60 @@ The server returns JSON in the following format:
     {
       "test_name": "Sodium",
       "result": "140",
-      "units": "mmol/L",
+      "units": "mmol/l",
       "reference_interval": "135-145",
-      "comment": ""
+      "comment": "",
+      "validation_metadata": {
+        "test_name": {
+          "original": "Na",
+          "standardised": "Sodium",
+          "was_changed": true
+        },
+        "unit": {
+          "is_valid": true,
+          "original": "mmol/L",
+          "corrected": "mmol/L",
+          "expected": "mmol/L",
+          "was_corrected": false
+        }
+      }
     },
     {
-      "test_name": "Potassium",
-      "result": "4.5",
-      "units": "mmol/L",
-      "reference_interval": "3.5-5.0",
-      "comment": "H"
+      "test_name": "eGFR",
+      "result": ">60",
+      "units": "mL/min/1.73m²",
+      "reference_interval": ">60",
+      "comment": "",
+      "validation_metadata": {
+        "test_name": {
+          "original": "eGFR mL/min/1.73m*2",
+          "standardised": "eGFR",
+          "was_changed": true
+        },
+        "unit": {
+          "is_valid": false,
+          "original": "mL/min/1.73m*2",
+          "corrected": "mL/min/1.73m²",
+          "expected": "mL/min/1.73m²",
+          "was_corrected": true
+        }
+      }
     }
   ]
 }
 ```
+
+Each test result includes `validation_metadata` showing:
+- **Test name standardisation**:
+  - `original`: Original test name as extracted
+  - `standardised`: Standardised test name
+  - `was_changed`: Whether the name was modified
+- **Unit validation and correction**:
+  - `is_valid`: Whether the original unit was correct
+  - `original`: Original unit as extracted
+  - `corrected`: Corrected unit (automatically applied)
+  - `expected`: Expected unit for this test
+  - `was_corrected`: Whether the unit was automatically corrected
 
 ## Common Issues
 
@@ -258,28 +366,30 @@ cd servers/pdf_analysis
 - Close other large applications
 - Use a smaller model
 
-### 6. "Report text is empty" Error
+### 6. "Failed to extract text from PDF" Error
 
-**Symptoms**: Error message "Failed to analyse text: Report text is empty"
+**Symptoms**: Error message "Failed to extract text from PDF"
 
-**Cause**: The Flutter client sent empty or whitespace-only text.
+**Cause**: All text extraction and OCR methods failed.
 
-**Solution**: Ensure proper text extraction and OCR fallback on the Flutter client:
+**Possible Reasons**:
+- PDF is password-protected or encrypted
+- PDF is corrupted
+- PDF contains only unrecognisable images
+- Tesseract is not installed or not in PATH
 
-```dart
-import 'package:healthpod/features/pathology/pdf_extractor.dart';
+**Solution**:
+```bash
+# Verify Tesseract installation
+tesseract --version
 
-// This handles both standard extraction and OCR fallback
-String text = await PdfExtractor.extractTextWithFallback(pdfPath);
+# If not installed, install it (see installation instructions above)
 
-if (text.isEmpty) {
-  // Handle case where no text could be extracted
-  showError('No text found in PDF');
-  return;
-}
+# For macOS
+brew install tesseract
 
-// Send to server
-final result = await llmService.analyseText(text, fileName);
+# For Ubuntu/Debian
+sudo apt-get install tesseract-ocr
 ```
 
 ## Performance Notes
@@ -321,7 +431,13 @@ curl http://localhost:8000/health
 ```bash
 cd servers/pdf_analysis
 source venv/bin/activate
-python -c "import fastapi, pdfplumber; print('OK')"
+python -c "import fastapi, pdfplumber, pytesseract, easyocr; print('OK')"
+```
+
+### Checking Tesseract Installation
+
+```bash
+tesseract --version
 ```
 
 ## Custom Configuration
@@ -359,6 +475,9 @@ final llmService = PathologyLLMService(
   baseUrl: 'http://localhost:8000',
   timeout: const Duration(seconds: 900),  // Should match or exceed server timeout
 );
+
+// Now simply upload the PDF file
+final result = await llmService.analysePdf(pdfFile);
 ```
 
 ### Adjusting LLM Temperature Parameter

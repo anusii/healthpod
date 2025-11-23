@@ -1,0 +1,212 @@
+{
+  "report_name": "sample_20250215_pathology_biochemistry_4cyte.pdf",
+  "requested_date": "2025-02-14",
+  "collected_time": "2025-02-15T08:30:00",
+  "received_time": "2025-02-15T09:15:00",
+  "report_upload_date": "2025-02-15",
+  "tests": [
+    {
+      "test_name": "Sodium",
+      "result": "140",
+      "units": "mmol/L",
+      "reference_interval": "135-145",
+      "comment": ""
+    },
+    {
+      "test_name": "Potassium",
+      "result": "4.2",
+      "units": "mmol/L",
+      "reference_interval": "3.5-5.0",
+      "comment": ""
+    },
+    {
+      "test_name": "Chloride",
+      "result": "102",
+      "units": "mmol/L",
+      "reference_interval": "95-110",
+      "comment": ""
+    },
+    {
+      "test_name": "Bicarbonate",
+      "result": "25",
+      "units": "mmol/L",
+      "reference_interval": "22-32",
+      "comment": ""
+    },
+    {
+      "test_name": "Urea",
+      "result": "6.5",
+      "units": "mmol/L",
+      "reference_interval": "2.5-8.0",
+      "comment": ""
+    },
+    {
+      "test_name": "Creatinine",
+      "result": "95",
+      "units": "µmol/L",
+      "reference_interval": "60-110",
+      "comment": ""
+    },
+    {
+      "test_name": "eGFR",
+      "result": "65",
+      "units": "mL/min/1.73m²",
+      "reference_interval": ">60",
+      "comment": "Mildly decreased"
+    },
+    {
+      "test_name": "Glucose (Fasting)",
+      "result": "5.2",
+      "units": "mmol/L",
+      "reference_interval": "3.0-5.5",
+      "comment": ""
+    },
+    {
+      "test_name": "HbA1c",
+      "result": "5.4",
+      "units": "%",
+      "reference_interval": "<5.7",
+      "comment": "Non-diabetic range"
+    },
+    {
+      "test_name": "Total Cholesterol",
+      "result": "4.8",
+      "units": "mmol/L",
+      "reference_interval": "<5.5",
+      "comment": ""
+    },
+    {
+      "test_name": "HDL Cholesterol",
+      "result": "1.5",
+      "units": "mmol/L",
+      "reference_interval": ">1.0",
+      "comment": ""
+    },
+    {
+      "test_name": "LDL Cholesterol",
+      "result": "2.8",
+      "units": "mmol/L",
+      "reference_interval": "<3.0",
+      "comment": ""
+    },
+    {
+      "test_name": "Triglycerides",
+      "result": "1.1",
+      "units": "mmol/L",
+      "reference_interval": "<2.0",
+      "comment": ""
+    },
+    {
+      "test_name": "Total Protein",
+      "result": "72",
+      "units": "g/L",
+      "reference_interval": "60-80",
+      "comment": ""
+    },
+    {
+      "test_name": "Albumin",
+      "result": "42",
+      "units": "g/L",
+      "reference_interval": "35-50",
+      "comment": ""
+    },
+    {
+      "test_name": "Globulin",
+      "result": "30",
+      "units": "g/L",
+      "reference_interval": "20-40",
+      "comment": ""
+    },
+    {
+      "test_name": "Bilirubin (Total)",
+      "result": "12",
+      "units": "µmol/L",
+      "reference_interval": "<20",
+      "comment": ""
+    },
+    {
+      "test_name": "ALT",
+      "result": "28",
+      "units": "U/L",
+      "reference_interval": "<40",
+      "comment": ""
+    },
+    {
+      "test_name": "AST",
+      "result": "32",
+      "units": "U/L",
+      "reference_interval": "<40",
+      "comment": ""
+    },
+    {
+      "test_name": "ALP",
+      "result": "85",
+      "units": "U/L",
+      "reference_interval": "30-120",
+      "comment": ""
+    },
+    {
+      "test_name": "GGT",
+      "result": "38",
+      "units": "U/L",
+      "reference_interval": "<50",
+      "comment": ""
+    },
+    {
+      "test_name": "Haemoglobin",
+      "result": "145",
+      "units": "g/L",
+      "reference_interval": "130-180",
+      "comment": ""
+    },
+    {
+      "test_name": "RBC",
+      "result": "4.8",
+      "units": "× 10¹²/L",
+      "reference_interval": "4.5-5.5",
+      "comment": ""
+    },
+    {
+      "test_name": "WBC",
+      "result": "6.2",
+      "units": "× 10⁹/L",
+      "reference_interval": "4.0-11.0",
+      "comment": ""
+    },
+    {
+      "test_name": "Platelets",
+      "result": "245",
+      "units": "× 10⁹/L",
+      "reference_interval": "150-400",
+      "comment": ""
+    },
+    {
+      "test_name": "TSH",
+      "result": "2.1",
+      "units": "mU/L",
+      "reference_interval": "0.5-5.0",
+      "comment": ""
+    },
+    {
+      "test_name": "Vitamin D (25-OH)",
+      "result": "75",
+      "units": "nmol/L",
+      "reference_interval": ">50",
+      "comment": "Adequate"
+    },
+    {
+      "test_name": "Vitamin B12",
+      "result": "350",
+      "units": "pmol/L",
+      "reference_interval": "150-700",
+      "comment": ""
+    },
+    {
+      "test_name": "Ferritin",
+      "result": "180",
+      "units": "µg/L",
+      "reference_interval": "30-400",
+      "comment": ""
+    }
+  ]
+}

@@ -24,17 +24,20 @@
 library;
 
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
+import 'package:healthpod/features/pathology/llm_service.dart';
 import 'package:healthpod/features/pathology/model.dart';
-import 'package:healthpod/features/pathology/pdf_extractor.dart';
 import 'package:healthpod/features/pathology/pdf_viewer.dart';
 import 'package:healthpod/features/pathology/widgets/pdf_viewer_header.dart';
 import 'package:healthpod/features/pathology/widgets/report_list_item.dart';
@@ -186,51 +189,58 @@ class _PathologyVisualisationState
     try {
       // Show loading dialogue.
 
-      _showLoadingDialog('Extracting text from PDF (with OCR if needed)...');
+      _showLoadingDialog(
+        'Analysing report...',
+      );
 
       // Read PDF bytes from POD.
 
       final pdfBytes = await _readPdfFromPod();
 
-      // Extract text with automatic OCR fallback.
-      // This will try: standard extraction → Tesseract OCR (system command)
+      // Create temporary file for the PDF.
 
-      final text =
-          await PdfExtractor.extractTextFromBytesWithFallback(pdfBytes);
-
-      // Update loading message.
-
-      if (mounted) {
-        Navigator.pop(context);
-        _showLoadingDialog('Analysing with LLM...');
-      }
-
-      // Analyse with LLM.
-
-      final jsonData = await PdfExtractor.analyseTextWithLLM(
-        text: text,
-        fileName: _selectedReport!.fileName,
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File(
+        '${tempDir.path}/temp_${DateTime.now().millisecondsSinceEpoch}.pdf',
       );
+      await tempFile.writeAsBytes(pdfBytes);
 
-      // Close loading dialog.
+      try {
+        // Send PDF to Python server for complete processing.
 
-      if (mounted) {
-        Navigator.pop(context);
+        final llmService = PathologyLLMService(
+          baseUrl: 'http://localhost:8000',
+          timeout: const Duration(seconds: 900), // 15 minutes
+        );
+
+        final jsonData = await llmService.analysePdf(tempFile);
+
+        // Close loading dialog.
+
+        if (mounted) {
+          Navigator.pop(context);
+        }
+
+        // Upload JSON to POD.
+
+        await _uploadJsonToPod(jsonData);
+
+        // Show completion dialog.
+
+        await _showCompletionDialog(jsonData);
+      } finally {
+        // Clean up temporary file.
+
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
       }
-
-      // Upload JSON to POD.
-
-      await _uploadJsonToPod(jsonData);
-
-      // Show completion dialog.
-
-      await _showCompletionDialog(jsonData);
     } catch (e) {
       _handleExtractionError(e);
     }
   }
 
-  /// Shows a confirmation dialogue before sending data to third-party server.
+  /// Shows a confirmation dialogue before sending data to server.
 
   Future<bool> _showConfirmationDialog() async {
     if (!mounted) return false;
@@ -241,8 +251,7 @@ class _PathologyVisualisationState
       builder: (context) => AlertDialog(
         title: const Text('Data Processing Confirmation'),
         content: const Text(
-          'Your data will be transmitted to a third-party server '
-          'for processing.\n\n'
+          'The report will be sent to the analysis server for processing.\n\n'
           'Do you wish to proceed?',
         ),
         actions: [
@@ -325,7 +334,29 @@ class _PathologyVisualisationState
       throw Exception('Failed to read PDF from POD');
     }
 
-    return PdfExtractor.convertToBytes(result);
+    return _convertToBytes(result);
+  }
+
+  /// Converts various byte formats to List<int>.
+
+  List<int> _convertToBytes(dynamic result) {
+    if (result is Uint8List) {
+      return result;
+    } else if (result is List<int>) {
+      return result;
+    } else {
+      // If it's a string, it might be base64 encoded.
+
+      try {
+        return base64Decode(result);
+      } catch (e) {
+        debugPrint('PDF decode failed: $e');
+
+        // Try as raw bytes from string.
+
+        return (result as String).codeUnits;
+      }
+    }
   }
 
   /// Uploads JSON data to POD.
