@@ -33,12 +33,8 @@ dependencies:
   path_provider: ^2.1.5
   pdf_render: ^1.4.12
   shared_preferences: ^2.5.2
-  solidpod: ^0.8.0
-  # solidui: ^0.0.4
-  solidui:
-    git:
-      url: https://github.com/anusii/solidui.git
-      ref: dev
+  solidpod: 0.8.3
+  solidui: 0.0.8
   syncfusion_flutter_pdf: ^31.2.5
   syncfusion_flutter_pdfviewer: ^31.2.5
   table_calendar: ^3.0.9

@@ -78,6 +78,8 @@ option:
 
 ![Blood Pressure Visualisation](assets/screenshots/sample_blood_pressure_view.png)
 
+![Pathology View](assets/screenshots/sample_pathology_view.png)
+
 ## Milestones
 
 + [X] Basic Icon-Based GUI with Solid Pod login
@@ -118,7 +120,7 @@ The grid items include:
   to interact with the data collection.
 
 <!-- markdownlint-disable MD036 -->
-*Time-stamp: <Thursday 2025-10-30 20:51:48 +1100 Graham Williams>*
+*Time-stamp: <Friday 2025-11-21 19:43:36 +1100 Graham Williams>*
 <!-- markdownlint-enable MD036 -->
 
 <!-- markdownlint-disable MD053 -->

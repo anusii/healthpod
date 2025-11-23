@@ -57,11 +57,16 @@ class PathologyReportCard extends StatelessWidget {
   /// Builds the report header with filename and date.
 
   Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: isDark
+            ? theme.colorScheme.surfaceContainerHighest
+            : Colors.blue.shade50,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(4.0),
           topRight: Radius.circular(4.0),
@@ -71,7 +76,7 @@ class PathologyReportCard extends StatelessWidget {
         children: [
           Icon(
             Icons.description,
-            color: Colors.blue.shade700,
+            color: theme.colorScheme.primary,
             size: 28,
           ),
           const SizedBox(width: 12),
@@ -84,7 +89,7 @@ class PathologyReportCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade900,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -94,7 +99,7 @@ class PathologyReportCard extends StatelessWidget {
                   '${report.date.year}',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey.shade700,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -109,7 +114,7 @@ class PathologyReportCard extends StatelessWidget {
 
   Widget _buildTestResults(BuildContext context) {
     if (report.tests.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     return Padding(
@@ -126,7 +131,9 @@ class PathologyReportCard extends StatelessWidget {
 
   /// Builds the empty state when no test data is available.
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Center(
@@ -135,14 +142,14 @@ class PathologyReportCard extends StatelessWidget {
             Icon(
               Icons.info_outline,
               size: 48,
-              color: Colors.grey.shade400,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(height: 12),
             Text(
               'No test data available for this report',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: theme.colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -155,20 +162,27 @@ class PathologyReportCard extends StatelessWidget {
   /// Builds the table header.
 
   Widget _buildTableHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 12.0,
         vertical: 8.0,
       ),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        border: Border.all(color: Colors.grey.shade300),
+        color: isDark
+            ? theme.colorScheme.surfaceContainerHigh
+            : Colors.grey.shade100,
+        border: Border.all(
+          color: isDark ? theme.colorScheme.outline : Colors.grey.shade300,
+        ),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(4.0),
           topRight: Radius.circular(4.0),
         ),
       ),
-      child: const Row(
+      child: Row(
         children: [
           Expanded(
             flex: 2,
@@ -177,6 +191,7 @@ class PathologyReportCard extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -187,6 +202,7 @@ class PathologyReportCard extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -197,6 +213,7 @@ class PathologyReportCard extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -207,6 +224,7 @@ class PathologyReportCard extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -218,6 +236,9 @@ class PathologyReportCard extends StatelessWidget {
   /// Builds the test result rows.
 
   List<Widget> _buildTestRows(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return report.tests.asMap().entries.map((entry) {
       final test = entry.value;
       final isEven = entry.key % 2 == 0;
@@ -228,11 +249,21 @@ class PathologyReportCard extends StatelessWidget {
           vertical: 12.0,
         ),
         decoration: BoxDecoration(
-          color: isEven ? Colors.white : Colors.grey.shade50,
+          color: isDark
+              ? (isEven
+                  ? theme.colorScheme.surface
+                  : theme.colorScheme.surfaceContainerHighest)
+              : (isEven ? Colors.white : Colors.grey.shade50),
           border: Border(
-            left: BorderSide(color: Colors.grey.shade300),
-            right: BorderSide(color: Colors.grey.shade300),
-            bottom: BorderSide(color: Colors.grey.shade300),
+            left: BorderSide(
+              color: isDark ? theme.colorScheme.outline : Colors.grey.shade300,
+            ),
+            right: BorderSide(
+              color: isDark ? theme.colorScheme.outline : Colors.grey.shade300,
+            ),
+            bottom: BorderSide(
+              color: isDark ? theme.colorScheme.outline : Colors.grey.shade300,
+            ),
           ),
         ),
         child: Row(
@@ -242,16 +273,20 @@ class PathologyReportCard extends StatelessWidget {
               flex: 2,
               child: Text(
                 test.testName,
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: theme.colorScheme.onSurface,
+                ),
               ),
             ),
             Expanded(
               flex: 1,
               child: Text(
                 test.result,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ),
@@ -261,7 +296,7 @@ class PathologyReportCard extends StatelessWidget {
                 test.units,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade700,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -271,7 +306,7 @@ class PathologyReportCard extends StatelessWidget {
                 test.referenceInterval,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey.shade700,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
