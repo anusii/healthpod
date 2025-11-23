@@ -337,7 +337,7 @@ class _PathologyVisualisationState
     return _convertToBytes(result);
   }
 
-  /// Converts various byte formats to List<int>.
+  /// Converts various byte formats to List(int).
 
   List<int> _convertToBytes(dynamic result) {
     if (result is Uint8List) {

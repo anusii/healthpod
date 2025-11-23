@@ -24,8 +24,6 @@ Authors: Tony Chen
 """
 
 import logging
-import os
-import tempfile
 from typing import List, Optional
 
 import easyocr
@@ -53,9 +51,7 @@ class OcrService:
             logger.info("EasyOCR reader initialised successfully")
         return self._easyocr_reader
 
-    def pdf_to_images_pymupdf(
-        self, pdf_path: str, dpi: int = 300
-    ) -> List[Image.Image]:
+    def pdf_to_images_pymupdf(self, pdf_path: str, dpi: int = 300) -> List[Image.Image]:
         """
         Convert PDF pages to high-resolution images using PyMuPDF.
 
@@ -83,12 +79,6 @@ class OcrService:
                 pix = page.get_pixmap(matrix=matrix)
 
                 # Convert pixmap to PIL Image.
-                img_data = pix.tobytes("png")
-                img = Image.open(tempfile.NamedTemporaryFile(suffix=".png", delete=False))
-                img.save(img.name)
-                img = Image.open(tempfile.NamedTemporaryFile(suffix=".png", delete=False))
-
-                # More efficient approach.
                 img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
                 images.append(img)
 
@@ -245,9 +235,7 @@ class OcrService:
 
             if page_text:
                 combined_text += page_text + "\n\n"
-                logger.info(
-                    f"Page {page_num}: Extracted {len(page_text)} characters"
-                )
+                logger.info(f"Page {page_num}: Extracted {len(page_text)} characters")
             else:
                 logger.warning(f"Page {page_num}: No text extracted")
 

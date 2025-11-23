@@ -46,8 +46,7 @@ UNIT_MAPPINGS = {
     "µL": ["µl", "uL", "μL", "microlitre", "microliter"],
     # Count units.
     "10^9/L": ["10^9/l", "x10^9/L", "×10^9/L", "x10⁹/L", "10⁹/L", "*10^9/L"],
-    "10^12/L": ["10^12/l", "x10^12/L", "×10^12/L", "x10¹²/L", "10¹²/L",
-                "*10^12/L"],
+    "10^12/L": ["10^12/l", "x10^12/L", "×10^12/L", "x10¹²/L", "10¹²/L", "*10^12/L"],
     "cells/µL": ["cells/µl", "cells/μL", "cells/uL"],
     # Percentage.
     "%": ["percent", "pct"],
@@ -200,7 +199,7 @@ class UnitValidator:
         for standard, variations in UNIT_MAPPINGS.items():
             for variation in variations:
                 self.normalisation_map[variation.lower()] = standard
-        
+
         # Create reverse mapping for test name standardisation.
         self.test_name_map = {}
         for variation, standard in STANDARD_TEST_NAMES.items():
@@ -251,14 +250,6 @@ class UnitValidator:
         Returns:
             Corrected unit string
         """
-        # Common OCR substitutions.
-        corrections = {
-            "0": "O",  # Zero to letter O in some contexts.
-            "l": "L",  # Lowercase L to uppercase L.
-            "rn": "m",  # rn often misread as m.
-            "u": "µ",  # u often misread as micro symbol.
-        }
-
         corrected = unit
         # Apply corrections contextually.
         corrected = re.sub(r"(\d+)\^", r"\1^", corrected)  # Fix exponent spacing.
@@ -286,20 +277,18 @@ class UnitValidator:
             }
 
         test_lower = test_name.lower().strip()
-        
+
         # Try exact match first.
         if test_lower in self.test_name_map:
             standardised = self.test_name_map[test_lower]
             if standardised != test_name:
-                logger.info(
-                    f"Standardised test name: '{test_name}' → '{standardised}'"
-                )
+                logger.info(f"Standardised test name: '{test_name}' → '{standardised}'")
             return {
                 "original_name": test_name,
                 "standardised_name": standardised,
                 "was_changed": True,
             }
-        
+
         # Try partial match.
         for pattern, standard in self.test_name_map.items():
             if pattern in test_lower or test_lower in pattern:
@@ -311,7 +300,7 @@ class UnitValidator:
                     "standardised_name": standard,
                     "was_changed": True,
                 }
-        
+
         # No match found, return original.
         return {
             "original_name": test_name,
@@ -319,9 +308,7 @@ class UnitValidator:
             "was_changed": False,
         }
 
-    def validate_test_unit(
-        self, test_name: str, unit: str
-    ) -> Dict[str, Optional[str]]:
+    def validate_test_unit(self, test_name: str, unit: str) -> Dict[str, Optional[str]]:
         """
         Validate if the unit is appropriate for the given test.
         If a mismatch is found and we know the expected unit, use the expected unit.
@@ -433,7 +420,7 @@ class UnitValidator:
                     f"✓ Corrected unit for '{test_name}': "
                     f"'{validation['original_unit']}' → '{validation['corrected_unit']}'"
                 )
-            
+
             if name_standardisation["was_changed"]:
                 logger.info(
                     f"✓ Standardised test name: "

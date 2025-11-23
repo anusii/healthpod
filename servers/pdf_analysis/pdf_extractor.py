@@ -61,9 +61,7 @@ class PdfTextExtractor:
                     )
 
                 if text.strip():
-                    logger.info(
-                        f"PyPDF2 extraction successful: {len(text)} characters"
-                    )
+                    logger.info(f"PyPDF2 extraction successful: {len(text)} characters")
                     return text.strip()
                 else:
                     logger.warning("PyPDF2 returned empty text")
@@ -128,7 +126,9 @@ class PdfTextExtractor:
                 page_text = page.get_text()
                 if page_text:
                     text += page_text + "\n"
-                logger.debug(f"Page {page_num + 1}: Extracted {len(page_text)} characters")
+                logger.debug(
+                    f"Page {page_num + 1}: Extracted {len(page_text)} characters"
+                )
 
             doc.close()
 

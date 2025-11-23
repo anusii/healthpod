@@ -337,9 +337,7 @@ async def analyse_pdf(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to analyse PDF: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Failed to analyse PDF: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to analyse PDF: {str(e)}")
     finally:
         # Clean up temporary files.
         if temp_file and os.path.exists(temp_file):
