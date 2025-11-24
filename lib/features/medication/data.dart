@@ -67,11 +67,7 @@ class MedicationData {
 
           String content;
           try {
-            content = await readPod(
-              filePath,
-              context,
-              const Text('Reading medication data'),
-            );
+            content = await readPod(filePath);
           } catch (e) {
             // File might not exist anymore (deleted, moved, or corrupted).
 

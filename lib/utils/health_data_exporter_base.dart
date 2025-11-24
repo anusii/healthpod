@@ -115,11 +115,7 @@ abstract class HealthDataExporterBase {
 
           // Read and decrypt the file contents.
 
-          final content = await readPod(
-            '$dirPath/$fileName',
-            context,
-            Text('Reading $dataType data'),
-          );
+          final content = await readPod('$dirPath/$fileName');
 
           // Skip file if read operation failed.
 

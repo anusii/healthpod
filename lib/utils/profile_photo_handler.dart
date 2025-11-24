@@ -202,11 +202,7 @@ class ProfilePhotoHandler {
 
       if (!context.mounted) return null;
 
-      final fileContent = await readPod(
-        filePath,
-        context,
-        const Text('Loading profile photo'),
-      );
+      final fileContent = await readPod(filePath);
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {

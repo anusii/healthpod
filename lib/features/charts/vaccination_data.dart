@@ -107,11 +107,7 @@ class VaccinationData {
 
         /// Read the file content.
 
-        final result = await readPod(
-          filePath,
-          context,
-          const Text('Reading vaccination data'),
-        );
+        final result = await readPod(filePath);
 
         /// Handle the response based on its type.
 

@@ -120,11 +120,7 @@ class BPExporter extends HealthDataExporterBase {
           // Read and decrypt the file.
 
           if (!context.mounted) return false;
-          final content = await readPod(
-            '$dirPath/$fileName',
-            context,
-            const Text('Reading Blood pressure data'),
-          );
+          final content = await readPod('$dirPath/$fileName');
 
           if (content == SolidFunctionCallStatus.fail.toString() ||
               content == SolidFunctionCallStatus.notLoggedIn.toString()) {

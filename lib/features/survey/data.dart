@@ -129,11 +129,7 @@ class SurveyData {
 
         String result;
         try {
-          result = await readPod(
-            filePath,
-            context,
-            const Text('Reading survey data'),
-          );
+          result = await readPod(filePath);
         } catch (e) {
           // File might not exist anymore (deleted, moved, or corrupted).
 

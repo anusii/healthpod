@@ -83,11 +83,7 @@ class DiaryService {
 
           String content;
           try {
-            content = await readPod(
-              filePath,
-              context,
-              const Text('Loading appointment'),
-            );
+            content = await readPod(filePath);
           } catch (e) {
             // File might not exist anymore (deleted, moved, or corrupted).
 
@@ -204,11 +200,7 @@ class DiaryService {
 
           String content;
           try {
-            content = await readPod(
-              filePath,
-              context,
-              const Text('Loading appointment for deletion'),
-            );
+            content = await readPod(filePath);
           } catch (e) {
             // File might not exist anymore (deleted, moved, or corrupted).
 

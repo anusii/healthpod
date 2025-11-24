@@ -104,11 +104,7 @@ class ProfileExporter {
 
       // Read the file content.
 
-      final fileContent = await readPod(
-        filePath,
-        context,
-        const Text('Downloading profile data'),
-      );
+      final fileContent = await readPod(filePath);
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {

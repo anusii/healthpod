@@ -79,11 +79,7 @@ class MedicationEditorService {
 
         String result;
         try {
-          result = await readPod(
-            filePath,
-            context,
-            const Text('Reading medication data'),
-          );
+          result = await readPod(filePath);
         } catch (e) {
           // File might not exist anymore (deleted, moved, or corrupted).
 
@@ -239,11 +235,7 @@ class MedicationEditorService {
 
       String result;
       try {
-        result = await readPod(
-          filePath,
-          context,
-          const Text('Checking medication data'),
-        );
+        result = await readPod(filePath);
       } catch (e) {
         // File might not exist anymore (deleted, moved, or corrupted).
 

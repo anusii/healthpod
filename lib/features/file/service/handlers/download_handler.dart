@@ -74,11 +74,7 @@ class FileDownloadHandler {
 
       if (!context.mounted) return false;
 
-      final fileContent = await readPod(
-        relativePath,
-        context,
-        const Text('Downloading'),
-      );
+      final fileContent = await readPod(relativePath);
 
       if (!context.mounted) return false;
 
