@@ -241,6 +241,7 @@ ios/RunnerTests/
 **/Pods/
 **/macos/Flutter/GeneratedPluginRegistrant.swift
 **/macos/Flutter/ephemeral
+**/macos/Profile.lock
 **/xcuserdata/
 
 #-----------------------------------------------------------------------
