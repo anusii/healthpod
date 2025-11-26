@@ -89,16 +89,15 @@ class VaccinationExporter extends HealthDataExporterBase {
     String dirPath,
     BuildContext context,
   ) async {
-    return VaccinationExporter().exportToCsv(savePath, dirPath, context);
+    return VaccinationExporter().exportToCsv(savePath, dirPath);
   }
 
   /// Process vaccination JSON files to CSV export.
-  ///
+
   @override
   Future<bool> exportToCsv(
     String savePath,
     String dirPath,
-    BuildContext context,
   ) async {
     try {
       // Get the directory URL for the vaccination folder.
@@ -120,7 +119,7 @@ class VaccinationExporter extends HealthDataExporterBase {
         throw Exception('No vaccination data files found in directory');
       }
 
-      // Initialize list to store all vaccination records.
+      // Initialise list to store all vaccination records.
 
       List<Map<String, dynamic>> allRecords = [];
 
@@ -128,10 +127,6 @@ class VaccinationExporter extends HealthDataExporterBase {
 
       for (var fileName in files) {
         try {
-          // Check if context is still valid before proceeding.
-
-          if (!context.mounted) return false;
-
           // Read and decrypt the file contents.
 
           final content = await readPod('$dirPath/$fileName');

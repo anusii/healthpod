@@ -92,9 +92,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
     try {
       // First, try to load data from the medication directory in the pod.
 
-      final medicationData = await MedicationData.fetchAllMedicationData(
-        context,
-      );
+      final medicationData = await MedicationData.fetchAllMedicationData();
 
       // Validate each record and fix issues.
 

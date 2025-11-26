@@ -58,7 +58,7 @@ class VaccinationData {
 
     if (context.mounted) {
       try {
-        final podData = await fetchPodVaccinationData(context);
+        final podData = await fetchPodVaccinationData();
         allData.addAll(podData);
       } catch (e) {
         debugPrint('Error fetching vaccination data: $e');
@@ -81,9 +81,7 @@ class VaccinationData {
 
   /// Fetches vaccination data from POD storage.
 
-  static Future<List<Map<String, dynamic>>> fetchPodVaccinationData(
-    BuildContext context,
-  ) async {
+  static Future<List<Map<String, dynamic>>> fetchPodVaccinationData() async {
     List<Map<String, dynamic>> podData = [];
     try {
       /// Get the directory URL for the vaccination folder.
@@ -102,8 +100,6 @@ class VaccinationData {
         /// Construct the full path including healthpod/data/vaccination.
 
         final filePath = '$vaccinationDir/$fileName';
-
-        if (!context.mounted) break;
 
         /// Read the file content.
 

@@ -153,7 +153,7 @@ class ProfilePhotoManager {
           // Reload the photo.
 
           if (context.mounted) {
-            final newPhoto = await ProfilePhotoHandler.getProfilePhoto(context);
+            final newPhoto = await ProfilePhotoHandler.getProfilePhoto();
             onPhotoChanged(newPhoto);
           }
 
@@ -218,7 +218,7 @@ class ProfilePhotoManager {
 
   static Future<ImageProvider?> loadProfilePhoto(BuildContext context) async {
     try {
-      return await ProfilePhotoHandler.getProfilePhoto(context);
+      return await ProfilePhotoHandler.getProfilePhoto();
     } catch (e) {
       return null;
     }

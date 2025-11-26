@@ -57,7 +57,7 @@ class SurveyData {
     // Fetch POD data.
 
     if (context.mounted) {
-      final podData = await fetchPodSurveyData(context);
+      final podData = await fetchPodSurveyData();
       allData.addAll(podData);
     }
 
@@ -101,9 +101,7 @@ class SurveyData {
 
   /// Fetches survey data from POD storage.
 
-  static Future<List<Map<String, dynamic>>> fetchPodSurveyData(
-    BuildContext context,
-  ) async {
+  static Future<List<Map<String, dynamic>>> fetchPodSurveyData() async {
     List<Map<String, dynamic>> podData = [];
     try {
       // Get the directory URL for the bp folder.
@@ -122,8 +120,6 @@ class SurveyData {
         // Construct the full path including healthpod/data/blood_pressure.
 
         final filePath = '$bpDir/$fileName';
-
-        if (!context.mounted) break;
 
         // Read the file content.
 

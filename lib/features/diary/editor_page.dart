@@ -88,7 +88,7 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
     });
 
     if (!mounted) return;
-    final appointments = await DiaryService.loadAppointments(context);
+    final appointments = await DiaryService.loadAppointments();
 
     if (mounted) {
       setState(() {
@@ -144,7 +144,7 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
       if (success && mounted) {
         // Delete the old appointment after saving the new one.
 
-        await DiaryService.deleteAppointment(context, originalAppointment);
+        await DiaryService.deleteAppointment(originalAppointment);
         _loadAppointments();
       }
     }
@@ -177,7 +177,6 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
 
     if (confirmed == true && mounted) {
       final success = await DiaryService.deleteAppointment(
-        context,
         appointment,
       );
       if (success && mounted) {

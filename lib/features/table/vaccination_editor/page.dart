@@ -67,7 +67,7 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
 
       // Load observations from storage using the service.
 
-      final observations = await editorService.loadData(context);
+      final observations = await editorService.loadData();
       setState(() {
         editorState.observations = observations;
         editorState.observations.sort(

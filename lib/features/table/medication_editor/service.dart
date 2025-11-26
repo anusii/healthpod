@@ -52,7 +52,7 @@ class MedicationEditorService {
   /// @param context The build context for POD operations.
   /// @returns A list of MedicationObservation objects.
 
-  Future<List<MedicationObservation>> loadData(BuildContext context) async {
+  Future<List<MedicationObservation>> loadData() async {
     List<MedicationObservation> observations = [];
 
     try {
@@ -73,7 +73,6 @@ class MedicationEditorService {
         // Use relative path for file operations to match writePod behaviour.
 
         final filePath = '$feature/$fileName';
-        if (!context.mounted) break;
 
         // Read the file content.
 
@@ -154,7 +153,7 @@ class MedicationEditorService {
 
           // Try to find and delete the old file.
 
-          await _findAndDeleteObservation(context, oldObservation, resources);
+          await _findAndDeleteObservation(oldObservation, resources);
         } catch (e) {
           // Log the error but continue with saving the new version.
 
@@ -221,7 +220,6 @@ class MedicationEditorService {
   /// @returns A Future that completes when the delete operation is done.
 
   Future<void> _findAndDeleteObservation(
-    BuildContext context,
     MedicationObservation observation,
     dynamic resources,
   ) async {
@@ -229,7 +227,6 @@ class MedicationEditorService {
       if (!fileName.endsWith('.enc.ttl')) continue;
 
       final filePath = getFeaturePath(feature, fileName);
-      if (!context.mounted) return;
 
       // Read each file.
 
@@ -296,7 +293,7 @@ class MedicationEditorService {
 
       // Try to find and delete the observation.
 
-      await _findAndDeleteObservation(context, observation, resources);
+      await _findAndDeleteObservation(observation, resources);
 
       // Show success feedback.
 

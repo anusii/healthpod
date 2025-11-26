@@ -79,7 +79,6 @@ abstract class HealthDataExporterBase {
   Future<bool> exportToCsv(
     String savePath,
     String dirPath,
-    BuildContext context,
   ) async {
     try {
       // Get the directory URL for the health data folder.
@@ -109,10 +108,6 @@ abstract class HealthDataExporterBase {
 
       for (var fileName in files) {
         try {
-          // Check if context is still valid before proceeding.
-
-          if (!context.mounted) return false;
-
           // Read and decrypt the file contents.
 
           final content = await readPod('$dirPath/$fileName');

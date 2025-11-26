@@ -84,7 +84,7 @@ class MedicationExporter extends HealthDataExporterBase {
     String dirPath,
     BuildContext context,
   ) async {
-    return MedicationExporter().exportToCsv(savePath, dirPath, context);
+    return MedicationExporter().exportToCsv(savePath, dirPath);
   }
 
   /// Process Medication JSON files to CSV export.
@@ -96,7 +96,6 @@ class MedicationExporter extends HealthDataExporterBase {
   Future<bool> exportToCsv(
     String savePath,
     String dirPath,
-    BuildContext context,
   ) async {
     try {
       // Get the directory URL for the medication folder.
@@ -123,7 +122,6 @@ class MedicationExporter extends HealthDataExporterBase {
         try {
           // Read and decrypt the file.
 
-          if (!context.mounted) return false;
           final content = await readPod('$dirPath/$fileName');
 
           if (content == SolidFunctionCallStatus.fail.toString() ||

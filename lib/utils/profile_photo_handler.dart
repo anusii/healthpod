@@ -159,7 +159,7 @@ class ProfilePhotoHandler {
   ///
   /// Returns ImageProvider object for use in widgets, or null if no photo is found.
 
-  static Future<ImageProvider?> getProfilePhoto(BuildContext context) async {
+  static Future<ImageProvider?> getProfilePhoto() async {
     try {
       // Get directory URL and list files using the full path.
 
@@ -199,8 +199,6 @@ class ProfilePhotoHandler {
       final filePath = '$_profileDirectoryFull/$mostRecentPhoto';
 
       // Read the file content.
-
-      if (!context.mounted) return null;
 
       final fileContent = await readPod(filePath);
 

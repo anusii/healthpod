@@ -49,9 +49,7 @@ class MedicationData {
   /// as we assume all relevant medication data is stored in POD or uploaded from local already.
   /// Acts as main entry point.
 
-  static Future<List<Map<String, dynamic>>> fetchAllMedicationData(
-    BuildContext context,
-  ) async {
+  static Future<List<Map<String, dynamic>>> fetchAllMedicationData() async {
     List<Map<String, dynamic>> allData = [];
 
     // Fetch POD data.
@@ -63,7 +61,6 @@ class MedicationData {
       for (final item in resources.files) {
         if (item.endsWith('.json') || item.endsWith('.enc.ttl')) {
           final filePath = '$medicationDir/$item';
-          if (!context.mounted) continue;
 
           String content;
           try {
