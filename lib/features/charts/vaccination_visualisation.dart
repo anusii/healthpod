@@ -1,6 +1,6 @@
 /// Vaccination timeline chart.
 ///
-// Time-stamp: <Friday 2025-02-21 17:02:01 +1100 Graham Williams>
+// Time-stamp: <Sunday 2025-11-23 20:54:58 +1100 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -26,7 +26,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -224,9 +224,9 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
                   IconButton(
                     icon: const MarkdownTooltip(
                       message: '''
-                      
+
                       **Refresh:** Tap here to reload your vaccination history data.
-                      
+
                       ''',
                       child: Icon(Icons.refresh),
                     ),

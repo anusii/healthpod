@@ -1,7 +1,7 @@
 name: healthpod
 description: "Private and Secure Storage of Health data in your Solid Pod."
 publish_to: "none"
-version: 1.0.0+10
+version: 0.2.6+10
 
 environment:
   sdk: ">=3.2.3 <4.0.0"
@@ -23,11 +23,11 @@ dependencies:
   csv: ^6.0.0
   file_picker: ^10.1.2
   fl_chart: ^1.0.0
-  flutter_markdown: ^0.7.3
+  flutter_markdown_plus: ^1.0.5
   flutter_riverpod: ^2.6.1
   http: ^1.6.0
   intl: any
-  markdown_tooltip: ^0.0.7
+  markdown_tooltip: ^0.0.9
   package_info_plus: ^8.3.1
   path: ^1.9.0
   path_provider: ^2.1.5
@@ -52,7 +52,7 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   #process_run: ^1.2.2+1
   test: ^1.25.15
 

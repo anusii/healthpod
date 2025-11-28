@@ -30,6 +30,8 @@ au](https://solidcommunity.au/docs/healthpod)
 
 ## 0.3 Test and Make Robust
 
++ Migrate to flutter_markdown_plus [0.2.6 20251124 gjw]
++ Dark mode fix for DATA PATHOLOGY listing [0.2.5 20251123 tonypioneer]
 + Re-engineer logout/login for status bar [0.2.4 20251013 tonypioneer]
 + Review and get snap build working [0.2.3 20251013 gjw]
 + Cleanup the README. Test snap build. [0.2.2 20251012 gjw]

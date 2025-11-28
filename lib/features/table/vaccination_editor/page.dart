@@ -1,6 +1,6 @@
 /// Vaccination editor page main entry point.
 //
-// Time-stamp: <Wednesday 2025-04-02 16:23:49 +1100 Graham Williams>
+// Time-stamp: <Sunday 2025-11-23 20:52:11 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU.
 ///
@@ -27,7 +27,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 import 'package:healthpod/features/table/vaccination_editor/service.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
