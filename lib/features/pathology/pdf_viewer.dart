@@ -29,6 +29,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
+import 'package:solidui/solidui.dart' show getKeyFromUserIfRequired;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 /// Widget for viewing PDF pathology reports.
@@ -79,7 +80,10 @@ class _PathologyPdfViewerState extends State<PathologyPdfViewer> {
       // Read the encrypted file from POD.
       // If it's a .enc.ttl file, readPod will automatically decrypt it.
 
-      final result = await readPod(widget.filePath);
+      final result = await readPod(
+        widget.filePath,
+        pathType: PathType.relativeToPod,
+      );
 
       if (result == SolidFunctionCallStatus.fail.toString() ||
           result == SolidFunctionCallStatus.notLoggedIn.toString()) {

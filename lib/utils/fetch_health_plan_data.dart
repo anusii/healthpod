@@ -28,7 +28,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart'
-    show SolidFunctionCallStatus, getResourcesInContainer, getDirUrl, readPod;
+    show
+        SolidFunctionCallStatus,
+        getResourcesInContainer,
+        getDirUrl,
+        readPod,
+        PathType;
 import 'package:solidui/solidui.dart'
     show getKeyFromUserIfRequired, SolidSecurityKeyCentralManager;
 
@@ -107,7 +112,10 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
       return {'title': 'My Health Management Plan', 'planItems': <String>[]};
     }
 
-    final fileContent = await readPod(filePath);
+    final fileContent = await readPod(
+      filePath,
+      pathType: PathType.relativeToPod,
+    );
 
     // Check for errors or empty content.
 

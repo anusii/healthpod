@@ -146,20 +146,29 @@ class FileContentHandler {
     // Construct the full file path by combining directory and filename.
 
     String filePath;
-    if (state.downloadFile != null && state.downloadFile!.isNotEmpty) {
-      filePath = '${state.downloadFile}/${state.remoteFileName}';
+    final dirPath = state.downloadFile ?? state.currentPath;
+    
+    if (dirPath != null && dirPath.isNotEmpty) {
+      filePath = [dirPath, state.remoteFileName].join('/');
     } else {
-      // Fallback to manual construction using currentPath.
+      // Fallback: use basePath if no directory path is available.
 
-      filePath = state.currentPath == basePath
-          ? '$basePath/${state.remoteFileName}'
-          : '${state.currentPath}/${state.remoteFileName}';
+      filePath = [basePath, state.remoteFileName].join('/');
     }
 
     try {
       // Read the file content from POD.
 
-      final fileContent = await readPod(filePath);
+      final webId = await getWebId();
+      if (webId != null) {
+        final fileUrl = webId.replaceAll('profile/card#me', filePath);
+        final hasIndKey = await KeyManager.hasIndividualKey(fileUrl);
+      }
+
+      final fileContent = await readPod(
+        filePath,
+        pathType: PathType.relativeToPod,
+      );
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
@@ -216,15 +225,20 @@ class FileContentHandler {
     }
 
     // Construct the full file path.
+    // The currentPath already contains the full path from pod root.
 
-    final filePath = state.currentPath == basePath
-        ? '$basePath/${state.remoteFileName}'
-        : '${state.currentPath}/${state.remoteFileName}';
+    final dirPath = state.currentPath ?? basePath;
+    final filePath = [dirPath, state.remoteFileName].join('/');
 
     try {
       // Read the file content from POD.
+      // Use PathType.relativeToPod since filePath already contains the full
+      // path from pod root (e.g., "healthpod/data/pathology/file.enc.ttl").
 
-      final fileContent = await readPod(filePath);
+      final fileContent = await readPod(
+        filePath,
+        pathType: PathType.relativeToPod,
+      );
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
