@@ -107,11 +107,7 @@ Future<Map<String, dynamic>> fetchHealthPlanData(BuildContext context) async {
       return {'title': 'My Health Management Plan', 'planItems': <String>[]};
     }
 
-    final fileContent = await readPod(
-      filePath,
-      context,
-      const Text('Reading health plan data'),
-    );
+    final fileContent = await readPod(filePath);
 
     // Check for errors or empty content.
 

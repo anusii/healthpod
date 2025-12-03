@@ -69,7 +69,7 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
     try {
       setState(() => editorState.isLoading = true);
 
-      final observations = await editorService.loadData(context);
+      final observations = await editorService.loadData();
 
       // Sort by startDate descending (newest first).
 

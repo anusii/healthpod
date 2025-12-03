@@ -160,11 +160,7 @@ class FileContentHandler {
     try {
       // Read the file content from POD.
 
-      final fileContent = await readPod(
-        filePath,
-        context,
-        const Text('Reading JSON file'),
-      );
+      final fileContent = await readPod(filePath);
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
@@ -229,11 +225,7 @@ class FileContentHandler {
     try {
       // Read the file content from POD.
 
-      final fileContent = await readPod(
-        filePath,
-        context,
-        const Text('Reading file'),
-      );
+      final fileContent = await readPod(filePath);
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {

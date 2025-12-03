@@ -44,7 +44,7 @@ class VaccinationEditorService {
 
   /// Load all vaccination observations from `healthpod/data/vaccinations` directory.
 
-  Future<List<VaccinationObservation>> loadData(BuildContext context) async {
+  Future<List<VaccinationObservation>> loadData() async {
     final podDirPath = getFeaturePath(feature);
     final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
@@ -54,15 +54,13 @@ class VaccinationEditorService {
     for (final file in resources.files) {
       if (!file.endsWith('.enc.ttl')) continue;
 
-      if (!context.mounted) continue;
-
       // Use relative path for file operations to match writePod behaviour.
 
       final filePath = '$feature/$file';
 
       String content;
       try {
-        content = await readPod(filePath, context, const Text('Loading file'));
+        content = await readPod(filePath);
       } catch (e) {
         // File might not exist anymore (deleted, moved, or corrupted).
 

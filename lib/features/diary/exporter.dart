@@ -88,6 +88,6 @@ class DiaryExporter extends HealthDataExporterBase {
     String dirPath,
     BuildContext context,
   ) async {
-    return DiaryExporter().exportToCsv(filePath, dirPath, context);
+    return DiaryExporter().exportToCsv(filePath, dirPath);
   }
 }

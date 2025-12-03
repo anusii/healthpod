@@ -25,7 +25,7 @@ library;
 
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:solidpod/solidpod.dart';
 
@@ -38,14 +38,8 @@ class PathologyService {
   /// Loads pathology reports from the POD.
   ///
   /// Returns a list of [ReportData] objects sorted by date (most recent first).
-  ///
-  /// Note: BuildContext is used for POD operations which may span async gaps.
-  /// The caller should verify context.mounted before calling this method.
 
-  static Future<List<ReportData>> loadReports(BuildContext context) async {
-    // Verify context is valid at method start.
-
-    if (!context.mounted) return [];
+  static Future<List<ReportData>> loadReports() async {
     final pathologyPath = '$basePath/pathology';
 
     // List files in the pathology directory.
@@ -104,16 +98,6 @@ class PathologyService {
 
       if (isEncryptedJson || isPlainJson) {
         try {
-          // Check context validity before async operation.
-
-          if (!context.mounted) {
-            // Return what we have so far.
-
-            final currentReports = reportsMap.values.toList();
-            currentReports.sort((a, b) => b.date.compareTo(a.date));
-            return currentReports;
-          }
-
           // Extract the original JSON filename (without .enc.ttl if encrypted).
 
           final jsonName = isEncryptedJson
@@ -123,11 +107,7 @@ class PathologyService {
           // Read and parse the JSON file (readPod handles decryption).
 
           final filePath = '$pathologyPath/$name';
-          final content = await readPod(
-            filePath,
-            context,
-            const Text('Loading pathology data'),
-          );
+          final content = await readPod(filePath);
 
           // Skip if read failed or returned TTL format (decryption failed).
 
