@@ -140,7 +140,7 @@ class _AppointmentManagementDialogState
   /// Deletes an appointment from the list.
 
   Future<void> _deleteAppointment(int index, Appointment appointment) async {
-    final success = await DiaryService.deleteAppointment(context, appointment);
+    final success = await DiaryService.deleteAppointment(appointment);
     if (success) {
       setState(() {
         appointments.removeAt(index);

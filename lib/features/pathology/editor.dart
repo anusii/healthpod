@@ -62,7 +62,7 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
     });
 
     try {
-      final reports = await PathologyService.loadReports(context);
+      final reports = await PathologyService.loadReports();
 
       if (mounted) {
         setState(() {

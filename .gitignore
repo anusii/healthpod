@@ -242,6 +242,7 @@ ios/RunnerTests/
 **/Pods/
 **/macos/Flutter/GeneratedPluginRegistrant.swift
 **/macos/Flutter/ephemeral
+**/macos/Profile.lock
 **/xcuserdata/
 
 #-----------------------------------------------------------------------
@@ -283,3 +284,7 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+/android/app/build.gradle.kts
+/android/build.gradle.kts
+/android/settings.gradle.kts
+/servers/pdf_analysis/venv/

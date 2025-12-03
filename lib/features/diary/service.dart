@@ -60,9 +60,7 @@ class DiaryService {
   ///
   /// Returns an empty list if there are any errors during loading.
 
-  static Future<List<Appointment>> loadAppointments(
-    BuildContext context,
-  ) async {
+  static Future<List<Appointment>> loadAppointments() async {
     try {
       // Get the path to the diary directory in the POD.
 
@@ -79,15 +77,10 @@ class DiaryService {
           // Use relative path for file operations to match writePod behaviour.
 
           final filePath = '$feature/$file';
-          if (!context.mounted) return appointments;
 
           String content;
           try {
-            content = await readPod(
-              filePath,
-              context,
-              const Text('Loading appointment'),
-            );
+            content = await readPod(filePath);
           } catch (e) {
             // File might not exist anymore (deleted, moved, or corrupted).
 
@@ -185,7 +178,6 @@ class DiaryService {
   /// 4. Returns true if successful, false otherwise
 
   static Future<bool> deleteAppointment(
-    BuildContext context,
     Appointment appointment,
   ) async {
     try {
@@ -200,15 +192,10 @@ class DiaryService {
       for (final file in resources.files) {
         if (file.endsWith('.enc.ttl')) {
           final filePath = getFeaturePath(feature, file);
-          if (!context.mounted) return false;
 
           String content;
           try {
-            content = await readPod(
-              filePath,
-              context,
-              const Text('Loading appointment for deletion'),
-            );
+            content = await readPod(filePath);
           } catch (e) {
             // File might not exist anymore (deleted, moved, or corrupted).
 

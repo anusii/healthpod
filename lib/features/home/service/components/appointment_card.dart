@@ -101,7 +101,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
     });
 
     if (!mounted) return;
-    final loadedAppointments = await DiaryService.loadAppointments(context);
+    final loadedAppointments = await DiaryService.loadAppointments();
 
     if (mounted) {
       setState(() {

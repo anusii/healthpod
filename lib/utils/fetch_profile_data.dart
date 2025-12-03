@@ -137,11 +137,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
         String? content;
         try {
-          content = await readPod(
-            relativePath,
-            context,
-            const Text('Reading profile data'),
-          );
+          content = await readPod(relativePath);
           // Successfully read profile using relative path.
         } catch (e) {
           // If relative path fails, try full path (backward compatibility).
@@ -151,11 +147,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
             if (!context.mounted) {
               continue;
             }
-            content = await readPod(
-              fullPath,
-              context,
-              const Text('Reading profile data (legacy)'),
-            );
+            content = await readPod(fullPath);
           } catch (e2) {
             debugPrint('Full path also failed: $e2');
             continue;
@@ -187,11 +179,7 @@ Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
 
               // Try reading again with fresh security key.
 
-              content = await readPod(
-                relativePath,
-                context,
-                const Text('Reading profile data (retry)'),
-              );
+              content = await readPod(relativePath);
 
               // Retry read successful.
 

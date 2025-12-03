@@ -62,7 +62,7 @@ class _DiaryTabState extends State<DiaryTab> {
 
   Future<void> _loadAppointments() async {
     if (!mounted) return;
-    final appointments = await DiaryService.loadAppointments(context);
+    final appointments = await DiaryService.loadAppointments();
     if (!mounted) return;
     setState(() {
       _appointments.clear();
@@ -144,7 +144,6 @@ class _DiaryTabState extends State<DiaryTab> {
             TextButton(
               onPressed: () async {
                 final success = await DiaryService.deleteAppointment(
-                  dialogContext,
                   appointment,
                 );
                 if (success && mounted) {

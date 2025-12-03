@@ -78,7 +78,7 @@ class BPExporter extends HealthDataExporterBase {
     String dirPath,
     BuildContext context,
   ) async {
-    return BPExporter().exportToCsv(savePath, dirPath, context);
+    return BPExporter().exportToCsv(savePath, dirPath);
   }
 
   /// Process BP JSON files to CSV export.
@@ -90,7 +90,6 @@ class BPExporter extends HealthDataExporterBase {
   Future<bool> exportToCsv(
     String savePath,
     String dirPath,
-    BuildContext context,
   ) async {
     try {
       // Get the directory URL for the bp folder.
@@ -119,12 +118,7 @@ class BPExporter extends HealthDataExporterBase {
         try {
           // Read and decrypt the file.
 
-          if (!context.mounted) return false;
-          final content = await readPod(
-            '$dirPath/$fileName',
-            context,
-            const Text('Reading Blood pressure data'),
-          );
+          final content = await readPod('$dirPath/$fileName');
 
           if (content == SolidFunctionCallStatus.fail.toString() ||
               content == SolidFunctionCallStatus.notLoggedIn.toString()) {

@@ -52,7 +52,7 @@ class MedicationEditorService {
   /// @param context The build context for POD operations.
   /// @returns A list of MedicationObservation objects.
 
-  Future<List<MedicationObservation>> loadData(BuildContext context) async {
+  Future<List<MedicationObservation>> loadData() async {
     List<MedicationObservation> observations = [];
 
     try {
@@ -73,17 +73,12 @@ class MedicationEditorService {
         // Use relative path for file operations to match writePod behaviour.
 
         final filePath = '$feature/$fileName';
-        if (!context.mounted) break;
 
         // Read the file content.
 
         String result;
         try {
-          result = await readPod(
-            filePath,
-            context,
-            const Text('Reading medication data'),
-          );
+          result = await readPod(filePath);
         } catch (e) {
           // File might not exist anymore (deleted, moved, or corrupted).
 
@@ -158,7 +153,7 @@ class MedicationEditorService {
 
           // Try to find and delete the old file.
 
-          await _findAndDeleteObservation(context, oldObservation, resources);
+          await _findAndDeleteObservation(oldObservation, resources);
         } catch (e) {
           // Log the error but continue with saving the new version.
 
@@ -225,7 +220,6 @@ class MedicationEditorService {
   /// @returns A Future that completes when the delete operation is done.
 
   Future<void> _findAndDeleteObservation(
-    BuildContext context,
     MedicationObservation observation,
     dynamic resources,
   ) async {
@@ -233,17 +227,12 @@ class MedicationEditorService {
       if (!fileName.endsWith('.enc.ttl')) continue;
 
       final filePath = getFeaturePath(feature, fileName);
-      if (!context.mounted) return;
 
       // Read each file.
 
       String result;
       try {
-        result = await readPod(
-          filePath,
-          context,
-          const Text('Checking medication data'),
-        );
+        result = await readPod(filePath);
       } catch (e) {
         // File might not exist anymore (deleted, moved, or corrupted).
 
@@ -304,7 +293,7 @@ class MedicationEditorService {
 
       // Try to find and delete the observation.
 
-      await _findAndDeleteObservation(context, observation, resources);
+      await _findAndDeleteObservation(observation, resources);
 
       // Show success feedback.
 
