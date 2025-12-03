@@ -31,11 +31,12 @@ import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
-import 'package:healthpod/features/home/widgets/pdf_processor.dart';
+import 'package:healthpod/features/pathology/llm_service.dart';
 
 /// Handles file content operations including preview, visualisation, and PDF
 /// conversion.
@@ -257,19 +258,114 @@ class FileContentHandler {
   Future<void> handleConvertToJson() async {
     final state = ref.read(fileServiceProvider);
     if (state.uploadFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No file uploaded for conversion'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No file uploaded for conversion'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
-    await PdfProcessor.convertPDFToJsonUpload(
-      File(state.uploadFile!),
-      context,
-      ref,
-    );
+    try {
+      // Show loading dialog.
+
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text(
+                  'Processing PDF...',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+
+      final pdfFile = File(state.uploadFile!);
+      final fileName = path.basename(pdfFile.path);
+
+      // Send PDF to Python server for analysis.
+
+      final llmService = PathologyLLMService(
+        baseUrl: 'http://localhost:8000',
+        timeout: const Duration(seconds: 900), // 15 minutes.
+      );
+
+      final jsonData = await llmService.analysePdf(pdfFile);
+
+      // Close loading dialog.
+
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      // Create JSON file.
+
+      final jsonFileName = fileName.replaceAll('.pdf', '.json');
+      final tempDir = await getTemporaryDirectory();
+      final jsonFile = File('${tempDir.path}/$jsonFileName');
+      await jsonFile.writeAsString(
+        const JsonEncoder.withIndent('  ').convert(jsonData),
+      );
+
+      // Upload PDF file.
+
+      if (context.mounted) {
+        ref.read(fileServiceProvider.notifier).setUploadFile(pdfFile.path);
+        await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      }
+
+      // Upload JSON file.
+
+      if (context.mounted) {
+        ref.read(fileServiceProvider.notifier).setUploadFile(jsonFile.path);
+        await ref.read(fileServiceProvider.notifier).handleUpload(context);
+      }
+
+      // Clean up temp file.
+
+      if (await jsonFile.exists()) {
+        await jsonFile.delete();
+      }
+
+      // Show success message.
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('PDF analysed and files uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog if open.
+
+      if (context.mounted && Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+
+      // Show error message.
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to process PDF: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }
