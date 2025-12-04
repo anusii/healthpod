@@ -325,8 +325,6 @@ class _PathologyVisualisationState
   Future<List<int>> _readPdfFromPod() async {
     final result = await readPod(
       _selectedReport!.filePath,
-      context,
-      const Text('Reading PDF file'),
     );
 
     if (result == SolidFunctionCallStatus.fail.toString() ||
