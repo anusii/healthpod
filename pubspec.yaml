@@ -34,7 +34,6 @@ dependencies:
   shared_preferences: ^2.5.2
   solidpod: ^0.8.5
   solidui: ^0.0.12
-  syncfusion_flutter_pdf: ^31.2.5
   syncfusion_flutter_pdfviewer: ^31.2.5
   table_calendar: ^3.0.9
   timeline_tile: ^2.0.0
