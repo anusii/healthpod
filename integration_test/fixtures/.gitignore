@@ -1,0 +1,7 @@
+# Ignore all credential files
+credentials.json
+auth_data.json
+test_credentials.json
+complete_auth_data.json
+*.pem
+*.key

@@ -54,6 +54,10 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   #process_run: ^1.2.2+1
+  solid_test:
+    git:
+      url: https://github.com/anusii/solid_test
+      ref: main
   test: ^1.25.15
 
 flutter:
