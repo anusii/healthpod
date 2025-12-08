@@ -29,7 +29,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart';
-import 'package:solidui/solidui.dart' show getKeyFromUserIfRequired;
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 /// Widget for viewing PDF pathology reports.

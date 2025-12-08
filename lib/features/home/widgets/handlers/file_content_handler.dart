@@ -148,7 +148,7 @@ class FileContentHandler {
 
     String filePath;
     final dirPath = state.downloadFile ?? state.currentPath;
-    
+
     if (dirPath != null && dirPath.isNotEmpty) {
       filePath = [dirPath, state.remoteFileName].join('/');
     } else {
