@@ -200,7 +200,10 @@ class ProfilePhotoHandler {
 
       // Read the file content.
 
-      final fileContent = await readPod(filePath);
+      final fileContent = await readPod(
+        filePath,
+        pathType: PathType.relativeToPod,
+      );
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {

@@ -122,7 +122,10 @@ class MedicationExporter extends HealthDataExporterBase {
         try {
           // Read and decrypt the file.
 
-          final content = await readPod('$dirPath/$fileName');
+          final content = await readPod(
+            '$dirPath/$fileName',
+            pathType: PathType.relativeToPod,
+          );
 
           if (content == SolidFunctionCallStatus.fail.toString() ||
               content == SolidFunctionCallStatus.notLoggedIn.toString()) {

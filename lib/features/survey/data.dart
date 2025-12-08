@@ -125,7 +125,10 @@ class SurveyData {
 
         String result;
         try {
-          result = await readPod(filePath);
+          result = await readPod(
+            filePath,
+            pathType: PathType.relativeToPod,
+          );
         } catch (e) {
           // File might not exist anymore (deleted, moved, or corrupted).
 

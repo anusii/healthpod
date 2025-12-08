@@ -79,7 +79,10 @@ class _PathologyPdfViewerState extends State<PathologyPdfViewer> {
       // Read the encrypted file from POD.
       // If it's a .enc.ttl file, readPod will automatically decrypt it.
 
-      final result = await readPod(widget.filePath);
+      final result = await readPod(
+        widget.filePath,
+        pathType: PathType.relativeToPod,
+      );
 
       if (result == SolidFunctionCallStatus.fail.toString() ||
           result == SolidFunctionCallStatus.notLoggedIn.toString()) {

@@ -103,7 +103,10 @@ class VaccinationData {
 
         /// Read the file content.
 
-        final result = await readPod(filePath);
+        final result = await readPod(
+          filePath,
+          pathType: PathType.relativeToPod,
+        );
 
         /// Handle the response based on its type.
 

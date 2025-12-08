@@ -107,7 +107,10 @@ class PathologyService {
           // Read and parse the JSON file (readPod handles decryption).
 
           final filePath = '$pathologyPath/$name';
-          final content = await readPod(filePath);
+          final content = await readPod(
+            filePath,
+            pathType: PathType.relativeToPod,
+          );
 
           // Skip if read failed or returned TTL format (decryption failed).
 

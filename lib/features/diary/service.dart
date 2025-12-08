@@ -195,7 +195,10 @@ class DiaryService {
 
           String content;
           try {
-            content = await readPod(filePath);
+            content = await readPod(
+              filePath,
+              pathType: PathType.relativeToPod,
+            );
           } catch (e) {
             // File might not exist anymore (deleted, moved, or corrupted).
 

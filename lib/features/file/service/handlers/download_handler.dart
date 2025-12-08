@@ -26,7 +26,8 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:solidpod/solidpod.dart' show readPod, SolidFunctionCallStatus;
+import 'package:solidpod/solidpod.dart'
+    show readPod, SolidFunctionCallStatus, PathType;
 import 'package:solidui/solidui.dart' show getKeyFromUserIfRequired;
 
 import 'package:healthpod/constants/paths.dart';
@@ -74,7 +75,10 @@ class FileDownloadHandler {
 
       if (!context.mounted) return false;
 
-      final fileContent = await readPod(relativePath);
+      final fileContent = await readPod(
+        relativePath,
+        pathType: PathType.relativeToPod,
+      );
 
       if (!context.mounted) return false;
 

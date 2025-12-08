@@ -129,7 +129,10 @@ class VaccinationExporter extends HealthDataExporterBase {
         try {
           // Read and decrypt the file contents.
 
-          final content = await readPod('$dirPath/$fileName');
+          final content = await readPod(
+            '$dirPath/$fileName',
+            pathType: PathType.relativeToPod,
+          );
 
           // Skip file if read operation failed.
 

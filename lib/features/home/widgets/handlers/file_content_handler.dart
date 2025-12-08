@@ -147,20 +147,23 @@ class FileContentHandler {
     // Construct the full file path by combining directory and filename.
 
     String filePath;
-    if (state.downloadFile != null && state.downloadFile!.isNotEmpty) {
-      filePath = '${state.downloadFile}/${state.remoteFileName}';
-    } else {
-      // Fallback to manual construction using currentPath.
+    final dirPath = state.downloadFile ?? state.currentPath;
 
-      filePath = state.currentPath == basePath
-          ? '$basePath/${state.remoteFileName}'
-          : '${state.currentPath}/${state.remoteFileName}';
+    if (dirPath != null && dirPath.isNotEmpty) {
+      filePath = [dirPath, state.remoteFileName].join('/');
+    } else {
+      // Fallback: use basePath if no directory path is available.
+
+      filePath = [basePath, state.remoteFileName].join('/');
     }
 
     try {
       // Read the file content from POD.
 
-      final fileContent = await readPod(filePath);
+      final fileContent = await readPod(
+        filePath,
+        pathType: PathType.relativeToPod,
+      );
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
@@ -217,15 +220,20 @@ class FileContentHandler {
     }
 
     // Construct the full file path.
+    // The currentPath already contains the full path from pod root.
 
-    final filePath = state.currentPath == basePath
-        ? '$basePath/${state.remoteFileName}'
-        : '${state.currentPath}/${state.remoteFileName}';
+    final dirPath = state.currentPath ?? basePath;
+    final filePath = [dirPath, state.remoteFileName].join('/');
 
     try {
       // Read the file content from POD.
+      // Use PathType.relativeToPod since filePath already contains the full
+      // path from pod root (e.g., "healthpod/data/pathology/file.enc.ttl").
 
-      final fileContent = await readPod(filePath);
+      final fileContent = await readPod(
+        filePath,
+        pathType: PathType.relativeToPod,
+      );
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {

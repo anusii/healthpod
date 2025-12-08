@@ -26,7 +26,12 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart'
-    show getDirUrl, getResourcesInContainer, readPod, SolidFunctionCallStatus;
+    show
+        getDirUrl,
+        getResourcesInContainer,
+        readPod,
+        SolidFunctionCallStatus,
+        PathType;
 import 'package:solidui/solidui.dart' show getKeyFromUserIfRequired;
 
 import 'package:healthpod/utils/save_decrypted_content.dart';
@@ -104,7 +109,10 @@ class ProfileExporter {
 
       // Read the file content.
 
-      final fileContent = await readPod(filePath);
+      final fileContent = await readPod(
+        filePath,
+        pathType: PathType.relativeToPod,
+      );
 
       if (fileContent == SolidFunctionCallStatus.fail.toString() ||
           fileContent == SolidFunctionCallStatus.notLoggedIn.toString()) {
