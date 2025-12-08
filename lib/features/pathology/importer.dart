@@ -83,15 +83,6 @@ class _PathologySurveyState extends ConsumerState<PathologySurvey> {
           setState(() {
             _isUploading = false;
           });
-
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Pathology report uploaded successfully'),
-                backgroundColor: Colors.green,
-              ),
-            );
-          }
         }
       }
     } catch (e) {

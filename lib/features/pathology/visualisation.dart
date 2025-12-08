@@ -23,29 +23,39 @@
 
 library;
 
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
+import 'package:healthpod/features/pathology/llm_service.dart';
 import 'package:healthpod/features/pathology/model.dart';
 import 'package:healthpod/features/pathology/pdf_viewer.dart';
+import 'package:healthpod/features/pathology/widgets/pdf_viewer_header.dart';
+import 'package:healthpod/features/pathology/widgets/report_list_item.dart';
 
 /// Widget for displaying pathology reports in a list format.
 
-class PathologyVisualisation extends StatefulWidget {
+class PathologyVisualisation extends ConsumerStatefulWidget {
   const PathologyVisualisation({super.key});
 
   @override
-  State<PathologyVisualisation> createState() => _PathologyVisualisationState();
+  ConsumerState<PathologyVisualisation> createState() =>
+      _PathologyVisualisationState();
 }
 
 /// State for the PathologyVisualisation widget.
 
-class _PathologyVisualisationState extends State<PathologyVisualisation> {
+class _PathologyVisualisationState
+    extends ConsumerState<PathologyVisualisation> {
   List<PathologyReport> _reports = [];
   bool _isLoading = true;
   String? _error;
@@ -166,6 +176,233 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
     });
   }
 
+  /// Extracts test results from the currently viewed PDF using LLM.
+
+  Future<void> _extractResults() async {
+    if (_selectedReport == null) return;
+
+    // Show confirmation dialog before proceeding.
+
+    final confirmed = await _showConfirmationDialog();
+    if (!confirmed) return;
+
+    try {
+      // Show loading dialogue.
+
+      _showLoadingDialog(
+        'Analysing report...',
+      );
+
+      // Read PDF bytes from POD.
+
+      final pdfBytes = await _readPdfFromPod();
+
+      // Create temporary file for the PDF.
+
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File(
+        '${tempDir.path}/temp_${DateTime.now().millisecondsSinceEpoch}.pdf',
+      );
+      await tempFile.writeAsBytes(pdfBytes);
+
+      try {
+        // Send PDF to Python server for complete processing.
+
+        final llmService = PathologyLLMService(
+          baseUrl: 'http://localhost:8000',
+          timeout: const Duration(seconds: 900), // 15 minutes
+        );
+
+        final jsonData = await llmService.analysePdf(tempFile);
+
+        // Close loading dialog.
+
+        if (mounted) {
+          Navigator.pop(context);
+        }
+
+        // Upload JSON to POD.
+
+        await _uploadJsonToPod(jsonData);
+
+        // Show completion dialog.
+
+        await _showCompletionDialog(jsonData);
+      } finally {
+        // Clean up temporary file.
+
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+      }
+    } catch (e) {
+      _handleExtractionError(e);
+    }
+  }
+
+  /// Shows a confirmation dialogue before sending data to server.
+
+  Future<bool> _showConfirmationDialog() async {
+    if (!mounted) return false;
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Data Processing Confirmation'),
+        content: const Text(
+          'The report will be sent to the analysis server for processing.\n\n'
+          'Do you wish to proceed?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+
+    return result ?? false;
+  }
+
+  /// Shows a completion dialogue after extraction is finished.
+
+  Future<void> _showCompletionDialog(Map<String, dynamic> jsonData) async {
+    if (!mounted) return;
+
+    final testCount = jsonData['tests']?.length ?? 0;
+    final jsonFileName =
+        _selectedReport!.fileName.replaceAll('.pdf', '.json.enc.ttl');
+
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Extraction Complete'),
+        content: Text(
+          'Successfully extracted $testCount tests and saved to $jsonFileName.',
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Shows a loading dialogue with a message.
+
+  void _showLoadingDialog(String message) {
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Reads PDF bytes from POD.
+
+  Future<List<int>> _readPdfFromPod() async {
+    final result = await readPod(
+      _selectedReport!.filePath,
+    );
+
+    if (result == SolidFunctionCallStatus.fail.toString() ||
+        result == SolidFunctionCallStatus.notLoggedIn.toString()) {
+      throw Exception('Failed to read PDF from POD');
+    }
+
+    return _convertToBytes(result);
+  }
+
+  /// Converts various byte formats to List(int).
+
+  List<int> _convertToBytes(dynamic result) {
+    if (result is Uint8List) {
+      return result;
+    } else if (result is List<int>) {
+      return result;
+    } else {
+      // If it's a string, it might be base64 encoded.
+
+      try {
+        return base64Decode(result);
+      } catch (e) {
+        debugPrint('PDF decode failed: $e');
+
+        // Try as raw bytes from string.
+
+        return (result as String).codeUnits;
+      }
+    }
+  }
+
+  /// Uploads JSON data to POD.
+
+  Future<void> _uploadJsonToPod(Map<String, dynamic> jsonData) async {
+    if (!mounted) return;
+
+    final jsonFileName =
+        _selectedReport!.fileName.replaceAll('.pdf', '.json.enc.ttl');
+    final jsonPath = '$basePath/pathology/$jsonFileName';
+
+    final jsonString = const JsonEncoder.withIndent('  ').convert(jsonData);
+
+    final writeResult = await writePod(
+      jsonPath,
+      jsonString,
+      context,
+      const Text('Uploading JSON file'),
+      encrypted: true,
+    );
+
+    if (writeResult != SolidFunctionCallStatus.success) {
+      throw Exception('Failed to upload JSON file');
+    }
+  }
+
+  /// Handles extraction errors.
+
+  void _handleExtractionError(Object error) {
+    // Close loading dialogue if open.
+
+    if (mounted && Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
+
+    // Show error message.
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Extraction failed: $error'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // If a report is selected, show the PDF viewer.
@@ -265,31 +502,9 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
                       itemCount: _reports.length,
                       itemBuilder: (context, index) {
                         final report = _reports[index];
-
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12.0),
-                          child: ListTile(
-                            leading: const CircleAvatar(
-                              backgroundColor: Colors.blue,
-                              child: Icon(
-                                Icons.picture_as_pdf,
-                                color: Colors.white,
-                              ),
-                            ),
-                            title: Text(
-                              report.fileName,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            subtitle: Text(
-                              'Date: ${DateFormat('dd/MM/yyyy').format(report.date)}',
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            trailing: const Icon(Icons.chevron_right),
-                            onTap: () => _openReport(report),
-                          ),
+                        return ReportListItem(
+                          report: report,
+                          onTap: () => _openReport(report),
                         );
                       },
                     ),
@@ -305,56 +520,11 @@ class _PathologyVisualisationState extends State<PathologyVisualisation> {
   Widget _buildPdfViewer() {
     return Column(
       children: [
-        // Header with back button and file name.
-
-        Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back),
-                tooltip: 'Back to list',
-                onPressed: _closeReport,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _selectedReport!.fileName,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      'Date: ${DateFormat('dd MMMM yyyy').format(_selectedReport!.date)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        PdfViewerHeader(
+          report: _selectedReport!,
+          onBack: _closeReport,
+          onExtract: _extractResults,
         ),
-
-        // PDF viewer.
-
         Expanded(
           child: PathologyPdfViewer(
             fileName: _selectedReport!.fileName,
