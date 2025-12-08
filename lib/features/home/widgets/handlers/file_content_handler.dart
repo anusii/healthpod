@@ -160,12 +160,6 @@ class FileContentHandler {
     try {
       // Read the file content from POD.
 
-      final webId = await getWebId();
-      if (webId != null) {
-        final fileUrl = webId.replaceAll('profile/card#me', filePath);
-        final hasIndKey = await KeyManager.hasIndividualKey(fileUrl);
-      }
-
       final fileContent = await readPod(
         filePath,
         pathType: PathType.relativeToPod,
