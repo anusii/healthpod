@@ -34,6 +34,7 @@ import 'package:solidui/solidui.dart'
         SolidAboutConfig,
         SolidAppBarAction,
         SolidAppBarConfig,
+        SolidAuthHandler,
         SolidLoginStatus,
         SolidMenuItem,
         SolidNavUserInfo,
@@ -271,6 +272,10 @@ Tap to view the complete changelog on GitHub with release notes, bug fixes, and 
 ''',
         ),
       ),
+
+      // LOGOUT.
+
+      onLogout: (context) => SolidAuthHandler.instance.handleLogout(context),
     );
   }
 }

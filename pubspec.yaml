@@ -28,12 +28,15 @@ dependencies:
   http: ^1.6.0
   intl: any
   markdown_tooltip: ^0.0.9
-  package_info_plus: ^8.3.1
+  package_info_plus: ^9.0.0
   path: ^1.9.0
   path_provider: ^2.1.5
   shared_preferences: ^2.5.2
   solidpod: ^0.8.5
-  solidui: ^0.0.12
+  solidui:
+    git:
+      url: https://github.com/anusii/solidui.git
+      ref: tony/135_logout
   syncfusion_flutter_pdfviewer: ^31.2.5
   table_calendar: ^3.0.9
   timeline_tile: ^2.0.0
