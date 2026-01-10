@@ -178,8 +178,6 @@ class MedicationEditorService {
       await writePod(
         '$feature/$filename',
         jsonString,
-        context,
-        const Text('Saving medication data'),
         encrypted: true,
       );
 

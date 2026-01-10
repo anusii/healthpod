@@ -368,17 +368,11 @@ class _PathologyVisualisationState
 
     final jsonString = const JsonEncoder.withIndent('  ').convert(jsonData);
 
-    final writeResult = await writePod(
+    await writePod(
       jsonPath,
       jsonString,
-      context,
-      const Text('Uploading JSON file'),
       encrypted: true,
     );
-
-    if (writeResult != SolidFunctionCallStatus.success) {
-      throw Exception('Failed to upload JSON file');
-    }
   }
 
   /// Handles extraction errors.
