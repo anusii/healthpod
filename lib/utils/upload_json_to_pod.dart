@@ -77,19 +77,15 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
 
     // Use writePod directly with encryption - this works on all platforms.
 
-    final result = await writePod(
+    await writePod(
       filePath,
       jsonString,
-      context,
-      const Text('Saving data'),
       encrypted: true,
     );
 
-    if (result == SolidFunctionCallStatus.success) {
-      onSuccess?.call();
-    }
+    onSuccess?.call();
 
-    return result;
+    return SolidFunctionCallStatus.success;
   } catch (e) {
     debugPrint('💥 uploadJsonToPod: ERROR during upload: $e');
     debugPrint('💥 uploadJsonToPod: Error type: ${e.runtimeType}');

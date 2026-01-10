@@ -120,15 +120,13 @@ class ProfileDataManager {
 
       // Use direct writePod call with relative path to match read operations.
 
-      final result = await writePod(
+      await writePod(
         'profile/$filename',
         json.encode(profileData),
-        context,
-        const Text('Saving profile data'),
         encrypted: true,
       );
 
-      return result;
+      return SolidFunctionCallStatus.success;
     } on Exception catch (e) {
       debugPrint('Exception saving profile: $e');
       return SolidFunctionCallStatus.fail;

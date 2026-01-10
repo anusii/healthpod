@@ -157,8 +157,6 @@ class BPEditorService {
       await writePod(
         '$feature/$newFilename',
         jsonData,
-        context,
-        const Text('Saving'),
         encrypted: true,
       );
     } catch (e) {

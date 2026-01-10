@@ -44,7 +44,7 @@ Future<bool> isLoggedIn() async {
 
     // Check if the user is logged in.
 
-    final loggedIn = await checkLoggedIn();
+    final loggedIn = await isUserLoggedIn();
 
     return loggedIn;
   } catch (e) {

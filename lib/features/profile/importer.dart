@@ -236,28 +236,14 @@ class ProfileImporter {
 
       final fullPath = '$normalizedPath/$filename.enc.ttl';
 
-      final result = await writePod(
+      await writePod(
         fullPath,
         jsonContent,
-        context,
-        const Text('Saving profile data'),
         encrypted: true,
       );
 
-      if (result == SolidFunctionCallStatus.success) {
-        onSuccess?.call();
-        return true;
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error saving profile: $result'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        return false;
-      }
+      onSuccess?.call();
+      return true;
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

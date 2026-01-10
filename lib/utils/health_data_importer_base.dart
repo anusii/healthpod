@@ -413,27 +413,18 @@ abstract class HealthDataImporterBase {
           if (!context.mounted) return false;
 
           // Write the encrypted data to the pod.
-          final SolidFunctionCallStatus result;
+
           try {
-            result = await writePod(
+            await writePod(
               savePath,
               json.encode(jsonData),
-              context,
-              Text('Converting row $i'),
               encrypted: true,
             );
+            successfulSaves++;
           } catch (writeError, writeStackTrace) {
             debugPrint('❌ [CSV Import] WritePod failed: $writeError');
             debugPrint('❌ [CSV Import] Error type: ${writeError.runtimeType}');
             debugPrint('❌ [CSV Import] Stack trace: $writeStackTrace');
-            rethrow;
-          }
-
-          // Track the success status of each save operation.
-
-          if (result == SolidFunctionCallStatus.success) {
-            successfulSaves++;
-          } else {
             allSuccess = false;
           }
         } catch (rowError) {

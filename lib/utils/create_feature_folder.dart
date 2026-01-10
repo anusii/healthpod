@@ -82,21 +82,16 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
 
     // Create the feature folder structure.
 
-    final result = await writePod(
+    await writePod(
       '$featureName/.init',
       '',
-      context,
-      const Text('Creating folder'),
       encrypted: false,
     );
 
-    // If folder creation was successful and initialization file is requested.
-    if (result == SolidFunctionCallStatus.success && createInitFile) {
-      String initContent;
+    // If folder creation was successful and initialisation file is requested.
 
-      // Initialisation content for all features.
-
-      initContent = '''
+    if (createInitFile) {
+      final initContent = '''
 
           {
             "feature": "$featureName",
@@ -106,23 +101,18 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
 
           ''';
 
-      if (!context.mounted) return result;
+      if (!context.mounted) return SolidFunctionCallStatus.success;
 
-      final initResult = await writePod(
+      await writePod(
         '$featureName/init.json',
         initContent,
-        context,
-        const Text('Creating initialization file'),
         encrypted: true,
       );
 
-      if (initResult == SolidFunctionCallStatus.success) {
-        onSuccess.call();
-        return SolidFunctionCallStatus.success;
-      }
+      onSuccess.call();
     }
 
-    return result;
+    return SolidFunctionCallStatus.success;
   } catch (e) {
     debugPrint('Error creating feature folder: $e');
     return SolidFunctionCallStatus.fail;

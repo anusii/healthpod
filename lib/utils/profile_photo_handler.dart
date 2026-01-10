@@ -137,15 +137,13 @@ class ProfilePhotoHandler {
 
       // Upload with encryption.
 
-      final status = await writePod(
+      await writePod(
         filePath,
         jsonString,
-        context,
-        const Text('Uploading profile photo'),
         encrypted: true,
       );
 
-      return status == SolidFunctionCallStatus.success;
+      return true;
     } catch (e) {
       //debugPrint('Error uploading profile photo: $e');
       return false;

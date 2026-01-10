@@ -89,39 +89,28 @@ class FileUploadHandler {
 
       // Upload file with encryption.
 
-      final result = await writePod(
+      await writePod(
         uploadPath,
         fileContent,
-        context,
-        const Text('Upload'),
         encrypted: true,
       );
 
-      final success = result == SolidFunctionCallStatus.success;
+      // Show success message.
 
-      if (success) {
-        // Show success message.
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('File uploaded successfully'),
-              backgroundColor: Theme.of(context).colorScheme.tertiary,
-            ),
-          );
-          // Call the refresh callback to update the browser.
-
-          refreshCallback?.call();
-        }
-      } else if (context.mounted) {
-        showAlert(
-          context,
-          'Upload failed - please check your connection and permissions.',
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('File uploaded successfully'),
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
+          ),
         );
+        // Call the refresh callback to update the browser.
+
+        refreshCallback?.call();
       }
 
       return FileUploadResult(
-        success: success,
+        success: true,
         remoteFileName: remoteFileName,
         cleanFileName: cleanFileName,
       );
