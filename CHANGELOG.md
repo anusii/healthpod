@@ -24,10 +24,6 @@ Windows
 Coding documentation is available from [solid community
 au](https://solidcommunity.au/docs/healthpod)
 
-## 1.1
-
-+ Release to solidcommunity.org [1.0.0 20251028 gjw]
-
 ## 0.3 Test and Make Robust
 
 + Migrate to flutter_markdown_plus [0.2.6 20251124 gjw]
