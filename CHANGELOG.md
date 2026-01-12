@@ -2,7 +2,7 @@
 
 Recorded here are the high level changes for the app.  Each version
 update includes a short user-oriented description.  The next release
-is 1.1 following a 1.0.n series or updates.  The `[version timestamp
+is 0.3 following a 0.2.n series or updates.  The `[version timestamp
 user]` string is utilised by the flutter
 [version_widget](https://pub.dev/packages/version_widget) package.
 
@@ -25,6 +25,7 @@ Coding documentation is
 
 ## 0.3 Test and Make Robust
 
++ Solidpod read/wirte pod API updates [0.2.7 20260112 tonypioneer]
 + Migrate to flutter_markdown_plus [0.2.6 20251124 gjw]
 + Dark mode fix for DATA PATHOLOGY listing [0.2.5 20251123 tonypioneer]
 + Re-engineer logout/login for status bar [0.2.4 20251013 tonypioneer]
