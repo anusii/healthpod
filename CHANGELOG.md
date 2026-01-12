@@ -1,28 +1,27 @@
-# HealthPod Changelog
+# Health Pod Change Log
 
-Recorded here are the high level changes for the HealthPod app.
-
-Guide: Each version update is recorded here with a short user-oriented
-description of the update. Updates in the 1.0.n series are heading
-toward a 1.1 release. The `[version timestamp user]` string is
-utilised by the flutter version_widget package.
+Recorded here are the high level changes for the app.  Each version
+update includes a short user-oriented description.  The next release
+is 1.1 following a 1.0.n series or updates.  The `[version timestamp
+user]` string is utilised by the flutter
+[version_widget](https://pub.dev/packages/version_widget) package.
 
 Run the app online: [**web**](https://healthpod.solidcommunity.au).
 
 Download the latest version:
 GNU/Linux
-[**deb**](https://solidcommunity.au/installers/healthpod_amd64.deb) or
-[**zip**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
+  [**deb**](https://solidcommunity.au/installers/healthpod_amd64.deb) or
+  [**zip**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
 Android
-[**apk**](https://solidcommunity.au/installers/healthpod.apk) -
+  [**apk**](https://solidcommunity.au/installers/healthpod.apk) -
 macOS
-[**zip**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
+  [**zip**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
 Windows
-[**zip**](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
-[**inno**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
+  [**zip**](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
+  [**inno**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
 
-Coding documentation is available from [solid community
-au](https://solidcommunity.au/docs/healthpod)
+Coding documentation is
+[available](https://solidcommunity.au/docs/healthpod).
 
 ## 0.3 Test and Make Robust
 
