@@ -68,7 +68,7 @@ practitioner for them to provide their professional advice.
 
 <!-- markdownlint-disable MD013 -->
 For a **quick start**, first download the [sample blood pressure CSV
-file](https://raw.githubusercontent.com/anusii/healthpod/refs/heads/dev/integration_test/data/sample_blood_pressure.csv). Then
+file](https://raw.githubusercontent.com/anusii/healthpod/refs/heads/dev/integration_test_archive/data/sample_blood_pressure.csv). Then
 within the app navigate to the FILES tab, navigate to the BLOOD
 PRESSURE folder, tap the IMPORT CSV button, navigate to and choose the
 downloaded `sample_blood_pressure.csv`. After the import has
@@ -120,7 +120,7 @@ The grid items include:
   to interact with the data collection.
 
 <!-- markdownlint-disable MD036 -->
-*Time-stamp: <Friday 2025-11-21 19:43:36 +1100 Graham Williams>*
+*Time-stamp: <Monday 2026-01-12 17:08:39 +1100 Graham Williams>*
 <!-- markdownlint-enable MD036 -->
 
 <!-- markdownlint-disable MD053 -->
