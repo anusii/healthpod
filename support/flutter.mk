@@ -384,6 +384,7 @@ qtest:
 		MINGW*|MSYS*|CYGWIN*) device_id="windows" ;; \
 		*) echo "Unsupported platform: $$(uname -s)"; exit 1 ;; \
 	esac; \
+	if [ ! -d integration_test ]; then echo "No integration tests available."; exit 0; fi; \
 	for t in $$(find integration_test -name "*_test.dart" | sort); do \
 		echo "========================================"; \
 		echo $$t; /bin/echo -n $$t >&2; \
@@ -451,11 +452,13 @@ $(APP)-$(VER)-linux-x86_64.tar.gz: clean
 	mv $@ installers/$(APP).tar.gz
 
 apk::
+	@echo '******************** BUILD ANDROID APK'
 	flutter build apk --release
 	cp build/app/outputs/flutter-apk/app-release.apk installers/$(APP).apk
 	cp build/app/outputs/flutter-apk/app-release.apk installers/$(APP)-$(VER).apk
 
 appbundle::
+	@echo '******************** BUILD ANDROID AAB'
 	flutter clean
 	flutter build appbundle --release
 	cp build/app/outputs/bundle/release/app-release.aab installers/$(APP).aab

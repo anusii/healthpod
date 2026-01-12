@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "HealthPod"
-#define MyAppVersion "dev-windows-inno"
+#define MyAppVersion "windows-inno"
 #define MyAppPublisher "Software Innovation Institute ANU"
 #define MyAppURL "https://github.com/anusii/healthpod
 #define MyAppExeName "healthpod.exe"
