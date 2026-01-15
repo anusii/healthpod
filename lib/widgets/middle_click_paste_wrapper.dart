@@ -73,11 +73,6 @@ class MiddleClickPasteWrapper extends StatelessWidget {
   }
 
   /// Handles the middle mouse button click event.
-  ///
-  /// When a middle-click is detected on Linux, this method:
-  /// 1. Requests focus for the text field
-  /// 2. Retrieves text from the system clipboard
-  /// 3. Inserts the text at the current cursor position
 
   Future<void> _handleMiddleClick(BuildContext context) async {
     if (controller == null) return;
@@ -99,24 +94,24 @@ class MiddleClickPasteWrapper extends StatelessWidget {
     final selection = controller!.selection;
 
     // Calculate the insertion point.
-    // If there's a valid selection, use it; otherwise, append to the end.
 
     final int insertionPoint;
-    final int replacementEnd;
 
-    if (selection.isValid && selection.baseOffset >= 0) {
-      insertionPoint = selection.baseOffset;
-      replacementEnd = selection.extentOffset;
+    if (selection.isValid && selection.extentOffset >= 0) {
+      // Insert at the cursor position (extent), preserving all existing text.
+
+      insertionPoint = selection.extentOffset;
     } else {
+      // No valid selection, append to the end.
+
       insertionPoint = currentText.length;
-      replacementEnd = currentText.length;
     }
 
-    // Build the new text with the pasted content.
+    // Build the new text by inserting paste content at the cursor position.
 
     final newText = currentText.substring(0, insertionPoint) +
         pasteText +
-        currentText.substring(replacementEnd);
+        currentText.substring(insertionPoint);
 
     // Update the controller with the new text.
 
