@@ -58,12 +58,14 @@ class MedicationUIComponents {
               ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
               : null,
           labelStyle: TextStyle(
-            color:
-                isDarkMode ? colorScheme.onSurface.withValues(alpha: 0.8) : null,
+            color: isDarkMode
+                ? colorScheme.onSurface.withValues(alpha: 0.8)
+                : null,
           ),
           hintStyle: TextStyle(
-            color:
-                isDarkMode ? colorScheme.onSurface.withValues(alpha: 0.5) : null,
+            color: isDarkMode
+                ? colorScheme.onSurface.withValues(alpha: 0.5)
+                : null,
           ),
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
@@ -94,7 +96,8 @@ class MedicationUIComponents {
         controller: controller,
         decoration: InputDecoration(
           isDense: true,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
           filled: true,
           fillColor: isDarkMode ? colorScheme.surface : null,
