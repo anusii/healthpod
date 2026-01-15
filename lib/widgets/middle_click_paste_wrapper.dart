@@ -31,28 +31,17 @@ import 'package:flutter/services.dart';
 import 'package:universal_io/io.dart' show Platform;
 
 /// A wrapper widget that provides middle-click paste functionality on Linux.
-///
-/// On Linux systems with X11, users commonly use middle-click to paste from
-/// the primary selection clipboard. This wrapper intercepts middle mouse button
-/// events and pastes clipboard content into the associated text field.
-///
-/// The wrapper only activates on Linux desktop platforms; on other platforms,
-/// it simply renders the child widget without modification.
 
-class MiddleClickPasteWrapper extends StatelessWidget {
+class MiddleClickPasteWrapper extends StatefulWidget {
   /// The child widget (typically a TextFormField or TextField).
 
   final Widget child;
 
   /// The TextEditingController associated with the text field.
-  ///
-  /// Required to insert pasted text at the current cursor position.
 
   final TextEditingController? controller;
 
   /// The FocusNode associated with the text field.
-  ///
-  /// Used to request focus before pasting and determine cursor position.
 
   final FocusNode? focusNode;
 
@@ -65,6 +54,16 @@ class MiddleClickPasteWrapper extends StatelessWidget {
     this.focusNode,
   });
 
+  @override
+  State<MiddleClickPasteWrapper> createState() =>
+      _MiddleClickPasteWrapperState();
+}
+
+class _MiddleClickPasteWrapperState extends State<MiddleClickPasteWrapper> {
+  /// Tracks the previous selection to detect selection changes.
+
+  TextSelection? _previousSelection;
+
   /// Checks if the current platform is Linux desktop (not web).
 
   static bool get _isLinuxDesktop {
@@ -72,14 +71,71 @@ class MiddleClickPasteWrapper extends StatelessWidget {
     return Platform.isLinux;
   }
 
-  /// Handles the middle mouse button click event.
+  @override
+  void initState() {
+    super.initState();
+    if (_isLinuxDesktop) {
+      widget.controller?.addListener(_onSelectionChanged);
+    }
+  }
 
-  Future<void> _handleMiddleClick(BuildContext context) async {
+  @override
+  void dispose() {
+    if (_isLinuxDesktop) {
+      widget.controller?.removeListener(_onSelectionChanged);
+    }
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(MiddleClickPasteWrapper oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_isLinuxDesktop && oldWidget.controller != widget.controller) {
+      oldWidget.controller?.removeListener(_onSelectionChanged);
+      widget.controller?.addListener(_onSelectionChanged);
+    }
+  }
+
+  /// Handles selection changes to copy selected text to clipboard.
+  ///
+  /// This simulates X11 primary selection behaviour where selecting text
+  /// automatically copies it to the primary selection buffer.
+
+  void _onSelectionChanged() {
+    final controller = widget.controller;
+    if (controller == null) return;
+
+    final selection = controller.selection;
+    final text = controller.text;
+
+    // Only copy to clipboard when:
+    // 1. There is a valid, non-collapsed selection (user has selected text)
+    // 2. The selection has changed from the previous state
+
+    if (selection.isValid &&
+        !selection.isCollapsed &&
+        selection != _previousSelection) {
+      final selectedText = text.substring(selection.start, selection.end);
+      if (selectedText.isNotEmpty) {
+        Clipboard.setData(ClipboardData(text: selectedText));
+      }
+    }
+
+    _previousSelection = selection;
+  }
+
+  /// Handles the middle mouse button click event.
+  ///
+  /// Pastes clipboard content at the current cursor position without
+  /// replacing any selected text.
+
+  Future<void> _handleMiddleClick() async {
+    final controller = widget.controller;
     if (controller == null) return;
 
     // Request focus for the text field.
 
-    focusNode?.requestFocus();
+    widget.focusNode?.requestFocus();
 
     // Retrieve text from the clipboard.
 
@@ -90,24 +146,20 @@ class MiddleClickPasteWrapper extends StatelessWidget {
 
     // Get the current text and selection.
 
-    final currentText = controller!.text;
-    final selection = controller!.selection;
+    final currentText = controller.text;
+    final selection = controller.selection;
 
-    // Calculate the insertion point.
+    // Calculate the insertion point at the cursor position.
 
     final int insertionPoint;
 
     if (selection.isValid && selection.extentOffset >= 0) {
-      // Insert at the cursor position (extent), preserving all existing text.
-
       insertionPoint = selection.extentOffset;
     } else {
-      // No valid selection, append to the end.
-
       insertionPoint = currentText.length;
     }
 
-    // Build the new text by inserting paste content at the cursor position.
+    // Build the new text by inserting paste content at cursor position.
 
     final newText = currentText.substring(0, insertionPoint) +
         pasteText +
@@ -115,7 +167,7 @@ class MiddleClickPasteWrapper extends StatelessWidget {
 
     // Update the controller with the new text.
 
-    controller!.value = TextEditingValue(
+    controller.value = TextEditingValue(
       text: newText,
       selection: TextSelection.collapsed(
         offset: insertionPoint + pasteText.length,
@@ -128,7 +180,7 @@ class MiddleClickPasteWrapper extends StatelessWidget {
     // Only wrap with Listener on Linux desktop platforms.
 
     if (!_isLinuxDesktop) {
-      return child;
+      return widget.child;
     }
 
     return Listener(
@@ -136,10 +188,10 @@ class MiddleClickPasteWrapper extends StatelessWidget {
         // Check if the middle mouse button was pressed.
 
         if (event.buttons == kMiddleMouseButton) {
-          _handleMiddleClick(context);
+          _handleMiddleClick();
         }
       },
-      child: child,
+      child: widget.child,
     );
   }
 }
