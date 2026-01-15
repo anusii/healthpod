@@ -29,13 +29,14 @@ import 'package:flutter/services.dart';
 import 'package:healthpod/features/survey/form_state.dart';
 import 'package:healthpod/features/survey/question.dart';
 import 'package:healthpod/features/survey/utils/validator.dart';
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
 
 /// A widget for numeric input in a health survey form.
 ///
 /// This widget represents a text field that allows users to input numeric values,
 /// optionally with a unit suffix. The input is validated and stored in the survey form state.
 
-class HealthSurveyNumberInput extends StatelessWidget {
+class HealthSurveyNumberInput extends StatefulWidget {
   /// The survey question associated with this input field.
 
   final HealthSurveyQuestion question;
@@ -58,47 +59,83 @@ class HealthSurveyNumberInput extends StatelessWidget {
   });
 
   @override
+  State<HealthSurveyNumberInput> createState() =>
+      _HealthSurveyNumberInputState();
+}
+
+class _HealthSurveyNumberInputState extends State<HealthSurveyNumberInput> {
+  late final TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return TextFormField(
-      // Sets focus for this input field.
-      focusNode: controller.focusNodes[index][0],
-      keyboardType: TextInputType.number,
-      style: theme.textTheme.bodyLarge,
-      decoration: InputDecoration(
-        hintText: 'Enter value',
+    return MiddleClickPasteWrapper(
+      controller: _textController,
+      focusNode: widget.controller.focusNodes[widget.index][0],
+      child: TextFormField(
+        // Use the local text controller for middle-click paste support.
 
-        // Displays unit if applicable.
-        suffixText: question.unit,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        filled: true,
-        fillColor: theme.colorScheme.surface,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 12,
-          vertical: 16,
+        controller: _textController,
+
+        // Sets focus for this input field.
+
+        focusNode: widget.controller.focusNodes[widget.index][0],
+        keyboardType: TextInputType.number,
+        style: theme.textTheme.bodyLarge,
+        decoration: InputDecoration(
+          hintText: 'Enter value',
+
+          // Displays unit if applicable.
+
+          suffixText: widget.question.unit,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          filled: true,
+          fillColor: theme.colorScheme.surface,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 16,
+          ),
         ),
+
+        // Validates the input using predefined validation logic.
+
+        validator: (value) =>
+            HealthSurveyValidator.validateNumberInput(value, widget.question),
+
+        // Handles field submission event.
+
+        onFieldSubmitted: (_) =>
+            widget.controller.handleFieldSubmitted(widget.index),
+
+        // Unfocuses the text field when tapping outside.
+
+        onTapOutside: (event) => FocusScope.of(context).unfocus(),
+
+        // Saves the entered value in the form state.
+
+        onSaved: (value) => widget.controller.updateResponse(
+          widget.question.fieldName,
+          double.tryParse(value ?? ''),
+        ),
+
+        // Restricts input to numeric values (including decimals).
+
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+        ],
       ),
-
-      // Validates the input using predefined validation logic.
-      validator: (value) =>
-          HealthSurveyValidator.validateNumberInput(value, question),
-
-      // Handles field submission event.
-      onFieldSubmitted: (_) => controller.handleFieldSubmitted(index),
-
-      // Unfocuses the text field when tapping outside.
-      onTapOutside: (event) => FocusScope.of(context).unfocus(),
-
-      // Saves the entered value in the form state.
-      onSaved: (value) => controller.updateResponse(
-        question.fieldName,
-        double.tryParse(value ?? ''),
-      ),
-
-      // Restricts input to numeric values (including decimals).
-      inputFormatters: [
-        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-      ],
     );
   }
 }

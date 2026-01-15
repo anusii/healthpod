@@ -30,6 +30,7 @@ import 'package:intl/intl.dart';
 
 import 'package:healthpod/features/diary/models/appointment.dart';
 import 'package:healthpod/features/diary/service.dart';
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
 
 /// A page that displays and manages appointments in a data table format.
 /// Allows users to view, edit, and delete appointments.
@@ -263,18 +264,24 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                             ),
                           ),
                           DataCell(
-                            TextField(
+                            MiddleClickPasteWrapper(
                               controller: _titleController,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
+                              child: TextField(
+                                controller: _titleController,
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
                               ),
                             ),
                           ),
                           DataCell(
-                            TextField(
+                            MiddleClickPasteWrapper(
                               controller: _descriptionController,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
+                              child: TextField(
+                                controller: _descriptionController,
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
                               ),
                             ),
                           ),

@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/features/diary/models/appointment.dart';
 import 'package:healthpod/features/diary/service.dart';
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
 
 /// Dialog for adding new appointments with form fields for all appointment
 /// details.
@@ -61,19 +62,25 @@ class _AddAppointmentDialogState extends State<AddAppointmentDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
+            MiddleClickPasteWrapper(
               controller: titleController,
-              decoration: const InputDecoration(
-                labelText: 'Appointment Title',
-                border: OutlineInputBorder(),
+              child: TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Appointment Title',
+                  border: OutlineInputBorder(),
+                ),
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
+            MiddleClickPasteWrapper(
               controller: descriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
+              child: TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
               ),
             ),
             const SizedBox(height: 16),

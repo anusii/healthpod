@@ -25,6 +25,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
+
 /// Utility class containing shared methods for blood pressure editor components.
 
 class BPEditorUtils {
@@ -83,10 +85,13 @@ class BPEditorUtils {
     required String label,
     required String suffix,
   }) {
-    return TextField(
+    return MiddleClickPasteWrapper(
       controller: controller,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(labelText: label, suffixText: suffix),
+      child: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(labelText: label, suffixText: suffix),
+      ),
     );
   }
 }

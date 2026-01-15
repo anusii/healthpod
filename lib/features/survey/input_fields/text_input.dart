@@ -28,13 +28,14 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/features/survey/form_state.dart';
 import 'package:healthpod/features/survey/question.dart';
 import 'package:healthpod/features/survey/utils/validator.dart';
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
 
 /// A widget for text input in a health survey form.
 ///
 /// This widget provides a multi-line text field for users to input responses.
 /// The input is validated and stored in the survey form state.
 
-class HealthSurveyTextInput extends StatelessWidget {
+class HealthSurveyTextInput extends StatefulWidget {
   /// The survey question associated with this text input field.
 
   final HealthSurveyQuestion question;
@@ -57,38 +58,73 @@ class HealthSurveyTextInput extends StatelessWidget {
   });
 
   @override
+  State<HealthSurveyTextInput> createState() => _HealthSurveyTextInputState();
+}
+
+class _HealthSurveyTextInputState extends State<HealthSurveyTextInput> {
+  late final TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return TextFormField(
-      // Sets focus for this input field.
-      focusNode: controller.focusNodes[index][0],
+    return MiddleClickPasteWrapper(
+      controller: _textController,
+      focusNode: widget.controller.focusNodes[widget.index][0],
+      child: TextFormField(
+        // Use the local text controller for middle-click paste support.
 
-      // Allows multiple lines for longer text input.
-      maxLines: null,
-      minLines: 3,
+        controller: _textController,
 
-      style: theme.textTheme.bodyLarge,
+        // Sets focus for this input field.
 
-      decoration: InputDecoration(
-        hintText: 'Enter your response',
+        focusNode: widget.controller.focusNodes[widget.index][0],
 
-        // Displays unit if applicable.
-        suffixText: question.unit,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-        filled: true,
-        fillColor: theme.colorScheme.surface,
-        contentPadding: const EdgeInsets.all(12),
+        // Allows multiple lines for longer text input.
+
+        maxLines: null,
+        minLines: 3,
+
+        style: theme.textTheme.bodyLarge,
+
+        decoration: InputDecoration(
+          hintText: 'Enter your response',
+
+          // Displays unit if applicable.
+
+          suffixText: widget.question.unit,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          filled: true,
+          fillColor: theme.colorScheme.surface,
+          contentPadding: const EdgeInsets.all(12),
+        ),
+
+        // Validates the text input using predefined validation logic.
+
+        validator: (value) =>
+            HealthSurveyValidator.validateTextInput(value, widget.question),
+
+        // Handles field submission event.
+
+        onFieldSubmitted: (_) =>
+            widget.controller.handleFieldSubmitted(widget.index),
+
+        // Saves the entered text response in the form state.
+
+        onSaved: (value) =>
+            widget.controller.updateResponse(widget.question.fieldName, value),
       ),
-
-      // Validates the text input using predefined validation logic.
-      validator: (value) =>
-          HealthSurveyValidator.validateTextInput(value, question),
-
-      // Handles field submission event.
-      onFieldSubmitted: (_) => controller.handleFieldSubmitted(index),
-
-      // Saves the entered text response in the form state.
-      onSaved: (value) => controller.updateResponse(question.fieldName, value),
     );
   }
 }

@@ -32,6 +32,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:healthpod/providers/settings.dart';
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
 
 /// A reusable widget for displaying and editing settings with a label and tooltip.
 
@@ -96,6 +97,7 @@ class SettingField extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               // Fixed-width container for consistent label alignment.
+
               SizedBox(
                 width: 120,
                 child: Text(label, style: const TextStyle(fontSize: 16)),
@@ -103,49 +105,59 @@ class SettingField extends ConsumerWidget {
               const SizedBox(width: 16),
 
               // Expandable text field that fills remaining space.
+
               Expanded(
-                child: TextField(
-                  controller: TextEditingController(text: value)
-                    ..selection = TextSelection.collapsed(offset: value.length),
-                  obscureText: isPassword && !showPassword,
-                  onChanged: (value) {
-                    ref.read(provider.notifier).state = value;
-                    saveSetting(value);
-                  },
-                  decoration: InputDecoration(
-                    border: const OutlineInputBorder(),
-                    hintText: hint,
-                    hintStyle: TextStyle(
-                      color: Colors.grey[400],
-                      fontStyle: FontStyle.italic,
-                    ),
-                    suffixIcon: isPassword
-                        ? IconButton(
-                            icon: MarkdownTooltip(
-                              message: '''
+                child: Builder(
+                  builder: (context) {
+                    final controller = TextEditingController(text: value)
+                      ..selection =
+                          TextSelection.collapsed(offset: value.length);
+                    return MiddleClickPasteWrapper(
+                      controller: controller,
+                      child: TextField(
+                        controller: controller,
+                        obscureText: isPassword && !showPassword,
+                        onChanged: (value) {
+                          ref.read(provider.notifier).state = value;
+                          saveSetting(value);
+                        },
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          hintText: hint,
+                          hintStyle: TextStyle(
+                            color: Colors.grey[400],
+                            fontStyle: FontStyle.italic,
+                          ),
+                          suffixIcon: isPassword
+                              ? IconButton(
+                                  icon: MarkdownTooltip(
+                                    message: '''
                               
                               **${showPassword ? 'Hide' : 'Show'} Password:** Tap here to ${showPassword ? 'hide' : 'show'} the password text.
                               
                               ''',
-                              child: Icon(
-                                showPassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            onPressed: () {
-                              ref
-                                  .read(
-                                    isPasswordVisibleProvider(
-                                      label,
-                                    ).notifier,
-                                  )
-                                  .state = !showPassword;
-                            },
-                          )
-                        : null,
-                  ),
+                                    child: Icon(
+                                      showPassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    ref
+                                        .read(
+                                          isPasswordVisibleProvider(
+                                            label,
+                                          ).notifier,
+                                        )
+                                        .state = !showPassword;
+                                  },
+                                )
+                              : null,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

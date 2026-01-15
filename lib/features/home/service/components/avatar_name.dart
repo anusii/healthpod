@@ -30,6 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/constants/appointment.dart';
 import 'package:healthpod/theme/card_style.dart';
 import 'package:healthpod/utils/fetch_profile_data.dart';
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
 
 /// A widget that displays the user's avatar, name,
 /// and a notification bell with the number of notifications.
@@ -139,13 +140,16 @@ class _AvatarNameState extends State<AvatarName> {
                     widget.isEditing
                         ? SizedBox(
                             width: 200,
-                            child: TextField(
+                            child: MiddleClickPasteWrapper(
                               controller: _nameController,
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
+                              child: TextField(
+                                controller: _nameController,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
                                 ),
                               ),
                             ),

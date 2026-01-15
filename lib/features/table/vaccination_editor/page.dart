@@ -31,6 +31,7 @@ import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
 import 'package:healthpod/features/table/vaccination_editor/service.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
 
 /// The main editor page for vaccination observations.
 
@@ -244,42 +245,57 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                         ),
                       ),
                       DataCell(
-                        TextField(
+                        MiddleClickPasteWrapper(
                           controller: editorState.vaccineNameController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter vaccine name',
+                          child: TextField(
+                            controller: editorState.vaccineNameController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter vaccine name',
+                            ),
                           ),
                         ),
                       ),
                       DataCell(
-                        TextField(
+                        MiddleClickPasteWrapper(
                           controller: editorState.providerController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter provider',
+                          child: TextField(
+                            controller: editorState.providerController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter provider',
+                            ),
                           ),
                         ),
                       ),
                       DataCell(
-                        TextField(
+                        MiddleClickPasteWrapper(
                           controller: editorState.professionalController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter professional',
+                          child: TextField(
+                            controller: editorState.professionalController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter professional',
+                            ),
                           ),
                         ),
                       ),
                       DataCell(
-                        TextField(
+                        MiddleClickPasteWrapper(
                           controller: editorState.costController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter cost',
+                          child: TextField(
+                            controller: editorState.costController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter cost',
+                            ),
                           ),
                         ),
                       ),
                       DataCell(
-                        TextField(
+                        MiddleClickPasteWrapper(
                           controller: editorState.notesController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter notes',
+                          child: TextField(
+                            controller: editorState.notesController,
+                            decoration: const InputDecoration(
+                              hintText: 'Enter notes',
+                            ),
                           ),
                         ),
                       ),

@@ -25,6 +25,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
+
 /// Utility class for building consistent UI components in the medication editor.
 
 class MedicationUIComponents {
@@ -42,35 +44,38 @@ class MedicationUIComponents {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return TextField(
+    return MiddleClickPasteWrapper(
       controller: controller,
-      maxLines: maxLines,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        border: const OutlineInputBorder(),
-        filled: true,
-        fillColor: isDarkMode
-            ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
-            : null,
-        labelStyle: TextStyle(
-          color:
-              isDarkMode ? colorScheme.onSurface.withValues(alpha: 0.8) : null,
-        ),
-        hintStyle: TextStyle(
-          color:
-              isDarkMode ? colorScheme.onSurface.withValues(alpha: 0.5) : null,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: isDarkMode ? colorScheme.outline : colorScheme.outline,
+      child: TextField(
+        controller: controller,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          border: const OutlineInputBorder(),
+          filled: true,
+          fillColor: isDarkMode
+              ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
+              : null,
+          labelStyle: TextStyle(
+            color:
+                isDarkMode ? colorScheme.onSurface.withValues(alpha: 0.8) : null,
+          ),
+          hintStyle: TextStyle(
+            color:
+                isDarkMode ? colorScheme.onSurface.withValues(alpha: 0.5) : null,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(
+              color: isDarkMode ? colorScheme.outline : colorScheme.outline,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: colorScheme.primary, width: 2),
           ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colorScheme.primary, width: 2),
-        ),
+        style: TextStyle(color: colorScheme.onSurface),
       ),
-      style: TextStyle(color: colorScheme.onSurface),
     );
   }
 
@@ -83,26 +88,29 @@ class MedicationUIComponents {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return TextField(
+    return MiddleClickPasteWrapper(
       controller: controller,
-      decoration: InputDecoration(
-        isDense: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
-        filled: true,
-        fillColor: isDarkMode ? colorScheme.surface : null,
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(
-            color: isDarkMode ? colorScheme.outline : Colors.grey.shade400,
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          isDense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(4)),
+          filled: true,
+          fillColor: isDarkMode ? colorScheme.surface : null,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(4),
+            borderSide: BorderSide(
+              color: isDarkMode ? colorScheme.outline : Colors.grey.shade400,
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(4),
+            borderSide: BorderSide(color: colorScheme.primary, width: 2),
           ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(4),
-          borderSide: BorderSide(color: colorScheme.primary, width: 2),
-        ),
+        style: TextStyle(color: colorScheme.onSurface),
       ),
-      style: TextStyle(color: colorScheme.onSurface),
     );
   }
 

@@ -35,6 +35,7 @@ import 'package:healthpod/theme/card_style.dart';
 import 'package:healthpod/utils/fetch_health_plan_data.dart';
 import 'package:healthpod/utils/is_logged_in.dart';
 import 'package:healthpod/utils/save_health_plan_data.dart';
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
 
 /// A widget to display and edit a health management plan.
 ///
@@ -187,18 +188,21 @@ class _ManagePlanState extends State<ManagePlan> {
                             child: Card(
                               margin: const EdgeInsets.only(bottom: 8),
                               child: ListTile(
-                                title: TextField(
+                                title: MiddleClickPasteWrapper(
                                   controller: controllers[index],
-                                  decoration: const InputDecoration(
-                                    hintText:
-                                        'Enter plan item (markdown supported)',
-                                    border: InputBorder.none,
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 8,
+                                  child: TextField(
+                                    controller: controllers[index],
+                                    decoration: const InputDecoration(
+                                      hintText:
+                                          'Enter plan item (markdown supported)',
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
                                     ),
+                                    maxLines: null,
                                   ),
-                                  maxLines: null,
                                 ),
                                 trailing: MarkdownTooltip(
                                   message: '**Delete** this item',

@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/features/table/bp_editor/state.dart';
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
 
 /// Builds a [DataCell] containing a text field for editing notes.
 ///
@@ -39,12 +40,15 @@ DataCell notesCell(BPEditorState editorState, BPObservation currentEdit) {
   return DataCell(
     Container(
       constraints: const BoxConstraints(maxWidth: 200),
-      child: TextField(
+      child: MiddleClickPasteWrapper(
         controller: editorState.notesController,
-        maxLines: null,
-        decoration: const InputDecoration(
-          isDense: true,
-          contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+        child: TextField(
+          controller: editorState.notesController,
+          maxLines: null,
+          decoration: const InputDecoration(
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+          ),
         ),
       ),
     ),

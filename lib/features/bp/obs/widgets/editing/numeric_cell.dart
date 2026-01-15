@@ -27,6 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
+
 /// Builds a generic [DataCell] with a [TextField] for numeric input.
 ///
 /// This function is used by systolic, diastolic, and heart rate cells.
@@ -39,12 +41,15 @@ DataCell numericCell({
   required ValueChanged<double> onValueChange,
 }) {
   return DataCell(
-    TextField(
+    MiddleClickPasteWrapper(
       controller: controller,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-      decoration: const InputDecoration(
-        isDense: true,
-        contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        decoration: const InputDecoration(
+          isDense: true,
+          contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+        ),
       ),
     ),
   );

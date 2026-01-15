@@ -31,6 +31,7 @@ import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/features/bp/obs/service.dart';
 import 'package:healthpod/features/table/bp_editor/state.dart';
 import 'package:healthpod/features/table/bp_editor/widgets/utils.dart';
+import 'package:healthpod/widgets/middle_click_paste_wrapper.dart';
 
 /// Builds the mobile layout for the blood pressure editor.
 ///
@@ -191,14 +192,7 @@ class _MobileEditCard extends StatelessWidget {
               suffix: 'BPM',
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: editorState.notesController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Notes',
-                alignLabelWithHint: true,
-              ),
-            ),
+            _buildNotesField(),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -209,6 +203,22 @@ class _MobileEditCard extends StatelessWidget {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  /// Builds the notes text field with middle-click paste support.
+
+  Widget _buildNotesField() {
+    return MiddleClickPasteWrapper(
+      controller: editorState.notesController,
+      child: TextField(
+        controller: editorState.notesController,
+        maxLines: 3,
+        decoration: const InputDecoration(
+          labelText: 'Notes',
+          alignLabelWithHint: true,
         ),
       ),
     );
