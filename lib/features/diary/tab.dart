@@ -308,7 +308,6 @@ class _DiaryTabState extends State<DiaryTab> {
                     ],
                   ),
                 ),
-
                 // Today button.
                 TextButton.icon(
                   onPressed: _goToToday,
