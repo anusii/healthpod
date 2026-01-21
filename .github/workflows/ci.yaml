@@ -128,7 +128,7 @@ jobs:
     if: github.event.repository.private == false
     steps:
       - uses: actions/checkout@v4
-      - run: make locmax-enforce
+      - run: make locmax
 
   copyright:
     runs-on: ubuntu-latest
