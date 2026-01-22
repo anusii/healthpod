@@ -25,6 +25,8 @@ Coding documentation is
 
 ## 0.3 Test and Make Robust
 
++ Fix widget overflow when viewing appointments [0.2.9 20260123 tonypioneer]
++ Update to riverpod v3 [0.2.8 20260123 tonypioneer]
 + Solidpod read/wirte pod API updates [0.2.7 20260112 tonypioneer]
 + Migrate to flutter_markdown_plus [0.2.6 20251124 gjw]
 + Dark mode fix for DATA PATHOLOGY listing [0.2.5 20251123 tonypioneer]
