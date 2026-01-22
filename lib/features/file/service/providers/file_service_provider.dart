@@ -37,18 +37,16 @@ import 'package:healthpod/features/file/service/models/file_state.dart';
 
 /// A provider that manages the business logic for file operations.
 
-class FileServiceNotifier extends StateNotifier<FileState> {
-  final bool isVaccination;
-  final bool isDiary;
-  final bool isMedication;
-  final bool isBloodPressure;
+class FileServiceNotifier extends Notifier<FileState> {
+  bool isVaccination = false;
+  bool isDiary = false;
+  bool isMedication = false;
+  bool isBloodPressure = false;
 
-  FileServiceNotifier({
-    required this.isVaccination,
-    required this.isDiary,
-    required this.isMedication,
-    required this.isBloodPressure,
-  }) : super(const FileState(currentPath: '$basePath/diary'));
+  /// Builds the initial state.
+
+  @override
+  FileState build() => const FileState(currentPath: '$basePath/diary');
 
   // Add callback for browser refresh.
 
@@ -248,11 +246,4 @@ class FileServiceNotifier extends StateNotifier<FileState> {
 /// The provider instance for file service operations.
 
 final fileServiceProvider =
-    StateNotifierProvider<FileServiceNotifier, FileState>((ref) {
-  return FileServiceNotifier(
-    isVaccination: false,
-    isDiary: false,
-    isMedication: false,
-    isBloodPressure: false,
-  );
-});
+    NotifierProvider<FileServiceNotifier, FileState>(FileServiceNotifier.new);

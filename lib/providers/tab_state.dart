@@ -62,18 +62,17 @@ class TabState {
 
 /// Provider for the tab state.
 
-final tabStateProvider = StateNotifierProvider<TabStateNotifier, TabState>((
-  ref,
-) {
-  return TabStateNotifier();
-});
+final tabStateProvider = NotifierProvider<TabStateNotifier, TabState>(
+  TabStateNotifier.new,
+);
 
 /// Notifier class for managing tab state changes.
 
-class TabStateNotifier extends StateNotifier<TabState> {
-  /// Creates a new [TabStateNotifier] with initial state.
+class TabStateNotifier extends Notifier<TabState> {
+  /// Builds the initial state.
 
-  TabStateNotifier() : super(const TabState());
+  @override
+  TabState build() => const TabState();
 
   /// Updates the selected index for all features.
 

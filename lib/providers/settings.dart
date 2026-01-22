@@ -48,32 +48,95 @@ final settingsInitializerProvider = FutureProvider<void>((ref) async {
   final password = await _initSetting('password', 'SuperSecure123');
   final secretKey = await _initSetting('secret_key', 'YourSecretKey123');
 
-  ref.read(serverURLProvider.notifier).state = serverUrl;
-  ref.read(emailProvider.notifier).state = email;
-  ref.read(passwordProvider.notifier).state = password;
-  ref.read(secretKeyProvider.notifier).state = secretKey;
+  ref.read(serverURLProvider.notifier).setState(serverUrl);
+  ref.read(emailProvider.notifier).setState(email);
+  ref.read(passwordProvider.notifier).setState(password);
+  ref.read(secretKeyProvider.notifier).setState(secretKey);
 });
+
+/// Base class for string notifiers that provides setState functionality.
+
+abstract class StringSettingNotifier extends Notifier<String> {
+  void setState(String value) {
+    state = value;
+  }
+}
+
+/// Notifier for server URL state management.
+
+class ServerURLNotifier extends StringSettingNotifier {
+  @override
+  String build() => 'https://pods.solidcommunity.au';
+}
+
+/// Notifier for email state management.
+
+class EmailNotifier extends StringSettingNotifier {
+  @override
+  String build() => '';
+}
+
+/// Notifier for password state management.
+
+class PasswordNotifier extends StringSettingNotifier {
+  @override
+  String build() => '';
+}
+
+/// Notifier for secret key state management.
+
+class SecretKeyNotifier extends StringSettingNotifier {
+  @override
+  String build() => '';
+}
+
+/// Notifier for auto-dispose boolean state with family support.
+/// In Riverpod 3.0, family notifiers use constructor parameters for the arg.
+
+class PasswordVisibilityNotifier extends Notifier<bool> {
+  PasswordVisibilityNotifier(this.fieldId);
+  final String fieldId;
+
+  @override
+  bool build() => false;
+
+  void toggle() {
+    state = !state;
+  }
+
+  void setState(bool value) {
+    state = value;
+  }
+}
 
 // Default server URL for the Solid Pod server.
 
-final serverURLProvider = StateProvider<String>(
-  (ref) => 'https://pods.solidcommunity.au',
+final serverURLProvider = NotifierProvider<ServerURLNotifier, String>(
+  ServerURLNotifier.new,
 );
 
 // Stores the user's Solid Pod email.
 
-final emailProvider = StateProvider<String>((ref) => '');
+final emailProvider = NotifierProvider<EmailNotifier, String>(
+  EmailNotifier.new,
+);
 
 // Stores the user's Solid Pod password.
 
-final passwordProvider = StateProvider<String>((ref) => '');
+final passwordProvider = NotifierProvider<PasswordNotifier, String>(
+  PasswordNotifier.new,
+);
 
 // Stores the encryption secret key for secure data handling.
 
-final secretKeyProvider = StateProvider<String>((ref) => '');
+final secretKeyProvider = NotifierProvider<SecretKeyNotifier, String>(
+  SecretKeyNotifier.new,
+);
 
 // Controls password visibility for password fields in the UI.
 // Uses a family provider to manage visibility state for different fields.
 
-final isPasswordVisibleProvider =
-    StateProvider.autoDispose.family<bool, String>((ref, id) => false);
+final isPasswordVisibleProvider = NotifierProvider.autoDispose
+    .family<PasswordVisibilityNotifier, bool, String>(
+  PasswordVisibilityNotifier.new,
+);
