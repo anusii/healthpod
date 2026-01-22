@@ -35,10 +35,10 @@ import 'package:healthpod/providers/settings.dart';
 
 /// A reusable widget for displaying and editing settings with a label and tooltip.
 
-class SettingField extends ConsumerWidget {
+class SettingField<T extends StringSettingNotifier> extends ConsumerWidget {
   final String label;
   final String hint;
-  final StateProvider<String> provider;
+  final NotifierProvider<T, String> provider;
   final bool isPassword;
   final String tooltip;
 
@@ -63,7 +63,7 @@ class SettingField extends ConsumerWidget {
       SharedPreferences.getInstance().then((prefs) {
         final storedValue = prefs.getString(label) ?? '';
         if (storedValue.isNotEmpty) {
-          ref.read(provider.notifier).state = storedValue;
+          ref.read(provider.notifier).setState(storedValue);
         }
       });
     }
@@ -81,7 +81,7 @@ class SettingField extends ConsumerWidget {
       await prefs.setString(label.toLowerCase().replaceAll(' ', '_'), value);
       // Save to provider.
 
-      ref.read(provider.notifier).state = value;
+      ref.read(provider.notifier).setState(value);
     }
 
     // Creates a tooltip wrapper around the setting field for additional information.
@@ -109,7 +109,7 @@ class SettingField extends ConsumerWidget {
                     ..selection = TextSelection.collapsed(offset: value.length),
                   obscureText: isPassword && !showPassword,
                   onChanged: (value) {
-                    ref.read(provider.notifier).state = value;
+                    ref.read(provider.notifier).setState(value);
                     saveSetting(value);
                   },
                   decoration: InputDecoration(
@@ -137,11 +137,8 @@ class SettingField extends ConsumerWidget {
                             onPressed: () {
                               ref
                                   .read(
-                                    isPasswordVisibleProvider(
-                                      label,
-                                    ).notifier,
-                                  )
-                                  .state = !showPassword;
+                                      isPasswordVisibleProvider(label).notifier)
+                                  .setState(!showPassword);
                             },
                           )
                         : null,

@@ -80,14 +80,18 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
 
     // Set default values if no settings are found in shared preferences.
 
-    ref.read(serverURLProvider.notifier).state =
-        prefs.getString('server_url') ?? 'https://pods.solidcommunity.au';
-    ref.read(emailProvider.notifier).state =
-        prefs.getString('email') ?? 'test@anu.edu.au';
-    ref.read(passwordProvider.notifier).state =
-        prefs.getString('password') ?? 'SuperSecure123';
-    ref.read(secretKeyProvider.notifier).state =
-        prefs.getString('secret_key') ?? 'YourSecretKey123';
+    ref.read(serverURLProvider.notifier).setState(
+          prefs.getString('server_url') ?? 'https://pods.solidcommunity.au',
+        );
+    ref.read(emailProvider.notifier).setState(
+          prefs.getString('email') ?? 'test@anu.edu.au',
+        );
+    ref.read(passwordProvider.notifier).setState(
+          prefs.getString('password') ?? 'SuperSecure123',
+        );
+    ref.read(secretKeyProvider.notifier).setState(
+          prefs.getString('secret_key') ?? 'YourSecretKey123',
+        );
   }
 
   // Builds the settings dialog UI with a white container and drop shadow.
@@ -277,13 +281,18 @@ class SettingsDialogState extends ConsumerState<SettingsDialog> {
                                   onConfirm: () async {
                                     // Clear all providers.
 
-                                    ref.read(serverURLProvider.notifier).state =
-                                        '';
-                                    ref.read(emailProvider.notifier).state = '';
-                                    ref.read(passwordProvider.notifier).state =
-                                        '';
-                                    ref.read(secretKeyProvider.notifier).state =
-                                        '';
+                                    ref
+                                        .read(serverURLProvider.notifier)
+                                        .setState('');
+                                    ref
+                                        .read(emailProvider.notifier)
+                                        .setState('');
+                                    ref
+                                        .read(passwordProvider.notifier)
+                                        .setState('');
+                                    ref
+                                        .read(secretKeyProvider.notifier)
+                                        .setState('');
 
                                     // Save empty values to persist the clear.
 
