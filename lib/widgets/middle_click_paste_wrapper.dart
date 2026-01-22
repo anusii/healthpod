@@ -26,11 +26,59 @@ library;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:universal_io/io.dart' show Platform;
 
+/// Primary selection buffer for X11-style middle-click paste functionality.
+///
+/// This is a separate clipboard from the system clipboard (used by Ctrl+C/V).
+/// It stores the most recently selected text, which can be pasted with
+/// middle-click. This mimics the X11 primary selection behaviour.
+
+class PrimarySelectionBuffer {
+  PrimarySelectionBuffer._();
+
+  /// The singleton instance of the primary selection buffer.
+
+  static final PrimarySelectionBuffer _instance = PrimarySelectionBuffer._();
+
+  /// Gets the singleton instance.
+
+  static PrimarySelectionBuffer get instance => _instance;
+
+  /// The currently stored text in the primary selection buffer.
+
+  String? _text;
+
+  /// Gets the text currently in the primary selection buffer.
+
+  String? get text => _text;
+
+  /// Sets the text in the primary selection buffer.
+  ///
+  /// This is called when the user selects text in any text field.
+
+  void setText(String? value) {
+    if (value != null && value.isNotEmpty) {
+      _text = value;
+    }
+  }
+
+  /// Clears the primary selection buffer.
+
+  void clear() {
+    _text = null;
+  }
+}
+
 /// A wrapper widget that provides middle-click paste functionality on Linux.
+///
+/// This widget implements X11-style primary selection behaviour:
+/// - When users select text, it is automatically stored in the primary
+///   selection buffer (separate from the system clipboard).
+/// - When users press the middle mouse button, the text from the primary
+///   selection buffer is pasted at the cursor position.
+/// - Ctrl+C/Ctrl+V continue to use the system clipboard as normal.
 
 class MiddleClickPasteWrapper extends StatefulWidget {
   /// The child widget (typically a TextFormField or TextField).
@@ -96,7 +144,7 @@ class _MiddleClickPasteWrapperState extends State<MiddleClickPasteWrapper> {
     }
   }
 
-  /// Handles selection changes to copy selected text to clipboard.
+  /// Handles selection changes to copy selected text to primary selection.
   ///
   /// This simulates X11 primary selection behaviour where selecting text
   /// automatically copies it to the primary selection buffer.
@@ -108,7 +156,7 @@ class _MiddleClickPasteWrapperState extends State<MiddleClickPasteWrapper> {
     final selection = controller.selection;
     final text = controller.text;
 
-    // Only copy to clipboard when:
+    // Only copy to primary selection buffer when:
     // 1. There is a valid, non-collapsed selection (user has selected text)
     // 2. The selection has changed from the previous state
 
@@ -117,7 +165,10 @@ class _MiddleClickPasteWrapperState extends State<MiddleClickPasteWrapper> {
         selection != _previousSelection) {
       final selectedText = text.substring(selection.start, selection.end);
       if (selectedText.isNotEmpty) {
-        Clipboard.setData(ClipboardData(text: selectedText));
+        // Store in the primary selection buffer, not the system clipboard.
+        // This keeps it separate from Ctrl+C/Ctrl+V operations.
+
+        PrimarySelectionBuffer.instance.setText(selectedText);
       }
     }
 
@@ -126,10 +177,10 @@ class _MiddleClickPasteWrapperState extends State<MiddleClickPasteWrapper> {
 
   /// Handles the middle mouse button click event.
   ///
-  /// Pastes clipboard content at the current cursor position without
-  /// replacing any selected text.
+  /// Pastes text from the primary selection buffer at the current cursor
+  /// position without replacing any selected text.
 
-  Future<void> _handleMiddleClick() async {
+  void _handleMiddleClick() {
     final controller = widget.controller;
     if (controller == null) return;
 
@@ -137,10 +188,9 @@ class _MiddleClickPasteWrapperState extends State<MiddleClickPasteWrapper> {
 
     widget.focusNode?.requestFocus();
 
-    // Retrieve text from the clipboard.
+    // Retrieve text from the primary selection buffer.
 
-    final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-    final pasteText = clipboardData?.text;
+    final pasteText = PrimarySelectionBuffer.instance.text;
 
     if (pasteText == null || pasteText.isEmpty) return;
 
