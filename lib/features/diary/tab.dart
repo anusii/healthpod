@@ -253,7 +253,6 @@ class _DiaryTabState extends State<DiaryTab> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
                 // Year dropdown.
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -309,8 +308,6 @@ class _DiaryTabState extends State<DiaryTab> {
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
-
                 // Today button.
                 TextButton.icon(
                   onPressed: _goToToday,
@@ -339,7 +336,7 @@ class _DiaryTabState extends State<DiaryTab> {
           ),
           Center(
             child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
+              width: MediaQuery.of(context).size.width * 0.7,
               child: TableCalendar<Appointment>(
                 firstDay: DateTime.utc(2020, 1, 1),
                 lastDay: DateTime.utc(2030, 12, 31),
