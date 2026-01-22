@@ -70,8 +70,11 @@ class ProfileState {
 
 /// Profile notifier that manages profile state and operations.
 
-class ProfileNotifier extends StateNotifier<ProfileState> {
-  ProfileNotifier() : super(ProfileState.initial());
+class ProfileNotifier extends Notifier<ProfileState> {
+  /// Builds the initial state.
+
+  @override
+  ProfileState build() => ProfileState.initial();
 
   /// Refreshes profile data from the POD.
 
@@ -126,8 +129,6 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
 /// Global provider for profile state.
 
-final profileProvider = StateNotifierProvider<ProfileNotifier, ProfileState>((
-  ref,
-) {
-  return ProfileNotifier();
-});
+final profileProvider = NotifierProvider<ProfileNotifier, ProfileState>(
+  ProfileNotifier.new,
+);
