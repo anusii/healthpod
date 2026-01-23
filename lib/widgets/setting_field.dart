@@ -146,8 +146,9 @@ class SettingField<T extends StringSettingNotifier> extends ConsumerWidget {
                                   onPressed: () {
                                     ref
                                         .read(
-                                      isPasswordVisibleProvider(label).notifier,
-                                    )
+                                          isPasswordVisibleProvider(label)
+                                              .notifier,
+                                        )
                                         .setState(!showPassword);
                                   },
                                 )
