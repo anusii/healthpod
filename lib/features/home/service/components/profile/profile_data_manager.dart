@@ -123,6 +123,7 @@ class ProfileDataManager {
       await writePod(
         'profile/$filename',
         json.encode(profileData),
+        overwrite: true,
         encrypted: true,
       );
 
