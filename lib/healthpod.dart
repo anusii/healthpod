@@ -1,6 +1,6 @@
 /// HealthPod - Collect and analyse health data preserving privacy using PODs.
 ///
-// Time-stamp: <Saturday 2025-10-25 06:03:34 +1100 Graham Williams>
+// Time-stamp: <Saturday 2026-01-31 21:07:00 +1100 Graham Williams>
 ///
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -63,7 +63,7 @@ class _HealthPodState extends ConsumerState<HealthPod> {
         defaultServerUrl: 'https://pods.solidcommunity.au',
         appTitle: 'HEALTH POD',
         appDirectory: 'healthpod',
-        appImage: const AssetImage('assets/images/app_image.png'),
+        appImage: const AssetImage('assets/images/app_image.jpg'),
         appLogo: const AssetImage('assets/images/app_icon.png'),
         appLink: 'https://github.com/anusii/healthpod/blob/main/README.md',
         onSecurityKeyReset: () {

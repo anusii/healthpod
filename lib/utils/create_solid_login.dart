@@ -1,6 +1,6 @@
 /// Create Solid Login Widget.
 //
-// Time-stamp: <Saturday 2025-10-25 06:04:12 +1100 Graham Williams>
+// Time-stamp: <Saturday 2026-01-31 21:07:20 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -232,7 +232,7 @@ Widget _buildNormalLogin(String serverUrl) {
         appDirectory: 'healthpod',
         webID:
             serverUrl.isNotEmpty ? serverUrl : 'https://pods.solidcommunity.au',
-        image: const AssetImage('assets/images/app_image.png'),
+        image: const AssetImage('assets/images/app_image.jpg'),
         logo: const AssetImage('assets/images/app_icon.png'),
         link: 'https://github.com/anusii/healthpod/blob/main/README.md',
         child: const HealthPodHome(),
