@@ -309,12 +309,12 @@ jobs:
           #
           # 20260121 gjw These don't seem to be required?
           #
-          #printf '#%.0s' {1..72}; printf '\nninja-build\n'
-          #sudo apt-get install -y ninja-build
-          #printf '#%.0s' {1..72}; printf '\nlibgtk-3-dev\n'
-          #sudo apt-get install -y libgtk-3-dev
-          #printf '#%.0s' {1..72}; printf '\nclang cmake\n'
-          #sudo apt-get install -y clang cmake
+          # printf '#%.0s' {1..72}; printf '\nninja-build\n'
+          # sudo apt-get install -y ninja-build
+          # printf '#%.0s' {1..72}; printf '\nlibgtk-3-dev\n'
+          # sudo apt-get install -y libgtk-3-dev
+          # printf '#%.0s' {1..72}; printf '\nclang cmake\n'
+          # sudo apt-get install -y clang cmake
           #
           # 20260121 gjw Seems like a flutter 3.38.7 bug. I've tried
           # setting FLUTTER_VERSION above to 3.38.5 but it does not
