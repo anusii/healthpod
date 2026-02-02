@@ -333,12 +333,24 @@ jobs:
           # Target dart_build failed: Error: Failed to find any of
           # [ld.lld, ld] in LocalDirectory: '/usr/lib/llvm-14/bin'
           #
+          # Yet `ls` of the llvm-14.bin shows
+          #
+          # ...
+          # lrwxrwxrwx 1 root root        3 Apr  7  2024 lld-link -> lld
+          # -rwxr-xr-x 1 root root  4814520 Apr  7  2024 lld
+          # -rwxr-xr-x 1 root root   115120 Apr  7  2024 llc
+          # lrwxrwxrwx 1 root root        3 Apr  7  2024 ld64.lld -> lld
+          # lrwxrwxrwx 1 root root        3 Apr  7  2024 ld.lld -> lld
+          # ...
+          # No ld but there is a ld.lld?
+          #
+          #
           printf '#%.0s' {1..72}; printf '\nllvm lld FLUTTER 3.38.7 BUG\n'
           sudo apt-get install -y llvm-14 lld-14
-          #sudo cp /usr/lib/llvm-14/bin/lld /usr/lib/llvm-14/bin/ld
-          #sudo rm /usr/lib/llvm-14/bin/ld.lld
-          #sudo cp /usr/lib/llvm-14/bin/lld /usr/lib/llvm-14/bin/ld.lld
-          ls -lr /usr/lib/llvm-*/bin
+          # sudo cp /usr/lib/llvm-14/bin/lld /usr/lib/llvm-14/bin/ld
+          # sudo rm /usr/lib/llvm-14/bin/ld.lld
+          # sudo cp /usr/lib/llvm-14/bin/lld /usr/lib/llvm-14/bin/ld.lld
+          # ls -lr /usr/lib/llvm-*/bin
           ls -lr /usr/lib/llvm-14/bin
 
       - name: Install extra Linux packages
@@ -349,7 +361,8 @@ jobs:
 
       - name: Build snap
         if: hashFiles('snap/**') != ''
-        uses: snapcore/action-build@v1
+        uses: gjwgit/action-build@v1
+        # uses: snapcore/action-build@v1
         id: build
 
       - name: Upload snap artifact
