@@ -181,7 +181,7 @@ jobs:
           # Google libpdfium library we need to ensure the libpdfuim.so file is
           # found:
 
-          echo "#!/bin/sh" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo '#\!/bin/sh' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
           echo "set -e" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
           echo "# Update the library path for libpdfuim." >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
           echo 'echo "/usr/lib/healthpod/lib" >> /etc/ld.so.conf.d/healthpod.conf' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
