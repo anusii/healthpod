@@ -361,8 +361,8 @@ jobs:
 
       - name: Build snap
         if: hashFiles('snap/**') != ''
-        uses: gjwgit/action-build@dev
-        # uses: snapcore/action-build@v1
+        # uses: gjwgit/action-build@dev
+        uses: snapcore/action-build@v1
         id: build
 
       - name: Upload snap artifact
