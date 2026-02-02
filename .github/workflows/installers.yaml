@@ -338,7 +338,7 @@ jobs:
           #sudo cp /usr/lib/llvm-14/bin/lld /usr/lib/llvm-14/bin/ld
           #sudo rm /usr/lib/llvm-14/bin/ld.lld
           #sudo cp /usr/lib/llvm-14/bin/lld /usr/lib/llvm-14/bin/ld.lld
-          ls -lr /usr/lib/llvm-14/bin
+          ls -lr /usr/lib/llvm-*/bin
 
       - name: Install extra Linux packages
         if: env.LINUX_PKGS != ''
