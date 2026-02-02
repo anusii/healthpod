@@ -57,12 +57,30 @@ cp -r ../build/linux/x64/release/bundle/* ${APP}_${VER}_amd64/usr/lib/${APP}/
 
 cp app.png ${APP}_${VER}_amd64/usr/share/icons/hicolor/512x512/apps/${APP}.png
 
+# 20260202 gjw For packages using syncfusion pdf viewer which uses the
+# Google libpdfium library we need to ensure the libpdfuim.so file is
+# found:
+
+cat > ${APP}_${VER}_amd64/postinst <<EOF
+#!/bin/sh
+set -e
+
+# Update the library path for libpdfuim.
+
+echo "/usr/lib/healthpod/lib" >> /etc/ld.so.conf.d/healthpod.conf
+
+# Refresh the linker cache.
+
+ldconfig
+EOF
+
 # Set correct permissions.
 
 chmod -R 755 ${APP}_${VER}_amd64/DEBIAN
 find ${APP}_${VER}_amd64/usr -type d -exec chmod 755 {} \;
 find ${APP}_${VER}_amd64/usr -type f -exec chmod 644 {} \;
 chmod 755 ${APP}_${VER}_amd64/usr/lib/${APP}/${APP}
+chmod +x ${APP}_${VER}_amd64/postinst
 
 # Build the debian package.
 
