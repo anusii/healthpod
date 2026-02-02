@@ -177,12 +177,24 @@ jobs:
 
           cp assets/images/app_icon.png build/${{env.APP}}_${VERSION}_amd64/usr/share/icons/hicolor/512x512/apps/${{env.APP}}.png
 
+          # 20260202 gjw For packages using syncfusion pdf viewer which uses the
+          # Google libpdfium library we need to ensure the libpdfuim.so file is
+          # found:
+
+          echo "#!/bin/sh" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo "set -e" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo "# Update the library path for libpdfuim." >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo 'echo "/usr/lib/healthpod/lib" >> /etc/ld.so.conf.d/healthpod.conf' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo "# Refresh the linker cache." >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo "ldconfig" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+
           # Set correct permissions.
 
           chmod -R 755 build/${{env.APP}}_${VERSION}_amd64/DEBIAN
           find build/${{env.APP}}_${VERSION}_amd64/usr -type d -exec chmod 755 {} \;
           find build/${{env.APP}}_${VERSION}_amd64/usr -type f -exec chmod 644 {} \;
           chmod 755 build/${{env.APP}}_${VERSION}_amd64/usr/lib/${{env.APP}}/${{env.APP}}
+          chmod +x build/${env.APP}_${VERSION}_amd64/DEBIAN/postinst
 
           # Build the debian package.
 
