@@ -181,29 +181,29 @@ jobs:
           # Google libpdfium library we need to ensure the libpdfuim.so file is
           # found:
 
-          # echo '#!/bin/sh' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          # echo "set -e" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          # echo "# Update the library path for libpdfuim." >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          # echo 'echo "/usr/lib/healthpod/lib" >> /etc/ld.so.conf.d/healthpod.conf' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          # echo "# Refresh the linker cache." >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          # echo "ldconfig" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo '#!/bin/sh' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo "set -e" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo "# Update the library path for libpdfuim." >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo 'echo "/usr/lib/healthpod/lib" >> /etc/ld.so.conf.d/healthpod.conf' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo "# Refresh the linker cache." >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          echo "ldconfig" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
 
           # 20260202 gjw Also need a postrm!
 
-          # echo '#!/bin/sh' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo 'set -e' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo '# Remove the library if it exists' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo 'LIB_PATH="/usr/lib/healthpod/lib/libpdfium.so"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo 'if [ -f "$LIB_PATH" ]; then' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo '  rm "$LIB_PATH"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo '  echo "Removed $LIB_PATH"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo 'fi' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo '# Optionally, remove library cache entry' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo 'if [ -f /etc/ld.so.conf.d/healthpod.conf ]; then' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo '  rm /etc/ld.so.conf.d/healthpod.conf' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo '  echo "Removed library path configuration"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo '  ldconfig' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          # echo 'fi' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo '#!/bin/sh' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo 'set -e' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo '# Remove the library if it exists' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo 'LIB_PATH="/usr/lib/healthpod/lib/libpdfium.so"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo 'if [ -f "$LIB_PATH" ]; then' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo '  rm "$LIB_PATH"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo '  echo "Removed $LIB_PATH"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo 'fi' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo '# Optionally, remove library cache entry' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo 'if [ -f /etc/ld.so.conf.d/healthpod.conf ]; then' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo '  rm /etc/ld.so.conf.d/healthpod.conf' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo '  echo "Removed library path configuration"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo '  ldconfig' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          echo 'fi' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
 
           # Set correct permissions.
 
@@ -211,8 +211,8 @@ jobs:
           find build/${{env.APP}}_${VERSION}_amd64/usr -type d -exec chmod 755 {} \;
           find build/${{env.APP}}_${VERSION}_amd64/usr -type f -exec chmod 644 {} \;
           chmod 755 build/${{env.APP}}_${VERSION}_amd64/usr/lib/${{env.APP}}/${{env.APP}}
-          # chmod +x build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          # chmod +x build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          chmod +x build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          chmod +x build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
 
           # Build the debian package.
 
