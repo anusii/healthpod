@@ -1,6 +1,6 @@
 /// Create Solid Login Widget.
 //
-// Time-stamp: <Saturday 2026-01-31 21:07:20 +1100 Graham Williams>
+// Time-stamp: <Wednesday 2026-02-04 08:57:31 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -228,7 +228,7 @@ Widget _buildNormalLogin(String serverUrl) {
     builder: (context) {
       return SolidLogin(
         required: false,
-        title: 'HEALTH POD',
+        title: 'Health Pod\nManage and Query Health Docs',
         appDirectory: 'healthpod',
         webID:
             serverUrl.isNotEmpty ? serverUrl : 'https://pods.solidcommunity.au',
