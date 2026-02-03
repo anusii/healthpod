@@ -211,8 +211,8 @@ jobs:
           find build/${{env.APP}}_${VERSION}_amd64/usr -type d -exec chmod 755 {} \;
           find build/${{env.APP}}_${VERSION}_amd64/usr -type f -exec chmod 644 {} \;
           chmod 755 build/${{env.APP}}_${VERSION}_amd64/usr/lib/${{env.APP}}/${{env.APP}}
-#          chmod +x build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-#          chmod +x build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
+          # chmod +x build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
+          # chmod +x build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
 
           # Build the debian package.
 
