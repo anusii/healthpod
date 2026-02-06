@@ -68,7 +68,7 @@ Future<bool> deletePodFileWithFallback({
   if (resources.files.contains(filename)) {
     final filePath = constructPodPath(dataType, filename);
     try {
-      await deleteFile(filePath);
+      await deleteFile(fileUrl: filePath);
       // debugPrint('Deleted file: $filename');
       return true;
     } catch (e) {
@@ -99,7 +99,7 @@ Future<bool> deletePodFileWithFallback({
       filenameWithUnderscore,
     );
     try {
-      await deleteFile(filePathWithUnderscore);
+      await deleteFile(fileUrl: filePathWithUnderscore);
       // debugPrint('Deleted file with underscore: $filenameWithUnderscore');
       return true;
     } catch (e) {
@@ -136,7 +136,7 @@ Future<bool> deletePodFileWithFallback({
 
     final matchingFilePath = constructPodPath(dataType, matchingFiles.first);
     try {
-      await deleteFile(matchingFilePath);
+      await deleteFile(fileUrl: matchingFilePath);
       // debugPrint('Deleted alternative file: ${matchingFiles.first}');
       return true;
     } catch (e) {
@@ -166,7 +166,7 @@ Future<bool> deletePodFileWithFallback({
       moreFlexibleMatches.first,
     );
     try {
-      await deleteFile(flexibleMatchPath);
+      await deleteFile(fileUrl: flexibleMatchPath);
       // debugPrint(
       //     'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
       return true;

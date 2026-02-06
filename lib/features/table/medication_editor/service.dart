@@ -257,7 +257,7 @@ class MedicationEditorService {
               fileObs.startDate.year == observation.startDate.year) {
             // Delete the file.
 
-            await deleteFile(filePath);
+            await deleteFile(fileUrl: filePath);
             debugPrint('Successfully deleted old medication record: $fileName');
             return;
           }

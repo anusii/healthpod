@@ -99,12 +99,12 @@ class FileOperationHandler {
       try {
         // Delete the main file first.
 
-        await deleteFile(actualPath);
+        await deleteFile(fileUrl: actualPath);
 
         // Try to delete the ACL file.
 
         try {
-          await deleteFile('$actualPath.acl');
+          await deleteFile(fileUrl: '$actualPath.acl');
         } catch (e) {
           // ACL files are optional and may not exist.
         }

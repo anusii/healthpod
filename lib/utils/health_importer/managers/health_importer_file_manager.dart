@@ -208,7 +208,7 @@ class HealthImporterFileManager {
 
           try {
             if (context.mounted) {
-              await deleteFile(fullPath);
+              await deleteFile(fileUrl: fullPath);
             }
           } catch (deleteError) {
             throw Exception('Failed to delete file $fullPath: $deleteError');

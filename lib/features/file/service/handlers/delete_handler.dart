@@ -57,7 +57,7 @@ class FileDeleteHandler {
 
       bool mainFileDeleted = false;
       try {
-        await deleteFile(filePath);
+        await deleteFile(fileUrl: filePath);
         mainFileDeleted = true;
       } catch (e) {
         debugPrint('Error deleting main file: $e');
@@ -75,7 +75,7 @@ class FileDeleteHandler {
 
       if (mainFileDeleted) {
         try {
-          await deleteFile('$filePath.acl');
+          await deleteFile(fileUrl: '$filePath.acl');
         } catch (e) {
           // ACL files are optional and may not exist.
 

@@ -128,7 +128,7 @@ class ProfileFileManager {
           // Try to delete the file using SolidPod's deleteFile function.
 
           try {
-            await deleteFile(filePath);
+            await deleteFile(fileUrl: filePath);
           } catch (deleteError) {
             // Check if it's a "not found" error (404).
 
@@ -144,7 +144,7 @@ class ProfileFileManager {
 
               bool deleted = false;
               for (final altPath in alternativePaths) {
-                await deleteFile(altPath);
+                await deleteFile(fileUrl: altPath);
                 deleted = true;
                 break;
               }

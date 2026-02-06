@@ -227,7 +227,7 @@ class DiaryService {
 
               final fileDate = DateTime.parse(dateStr);
               if (fileDate.isAtSameMomentAs(appointment.date)) {
-                await deleteFile(filePath);
+                await deleteFile(fileUrl: filePath);
                 return true;
               }
             } catch (e) {

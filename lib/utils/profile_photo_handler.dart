@@ -273,7 +273,7 @@ class ProfilePhotoHandler {
         // For deleting, we need to use the full path.
 
         final filePath = '$_profileDirectoryFull/${photoFiles[i]}';
-        await deleteFile(filePath);
+        await deleteFile(fileUrl: filePath);
       }
 
       return true;
@@ -322,7 +322,7 @@ class ProfilePhotoHandler {
       // Delete the most recent photo using the full path.
 
       final filePath = '$_profileDirectoryFull/${photoFiles.first}';
-      await deleteFile(filePath);
+      await deleteFile(fileUrl: filePath);
 
       return true;
     } catch (e) {
