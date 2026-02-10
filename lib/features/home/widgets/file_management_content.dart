@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solidui/solidui.dart';
 
+import 'package:healthpod/constants/file_type_configs.dart';
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
 import 'package:healthpod/features/home/widgets/handlers/file_content_handler.dart';
@@ -169,10 +170,11 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
     }
 
     return SolidFile(
-      basePath: basePath,
       currentPath: currentPath,
       browserKey: _browserKey,
       autoConfig: true,
+      fileTypeResolver: healthFileTypeResolver,
+      folderNameOverrides: healthFolderNameOverrides,
       showBackButton: true,
       backButtonText: 'Back to Home Folder',
       onBackPressed: () {
