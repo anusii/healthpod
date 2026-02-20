@@ -45,7 +45,7 @@ env:
   APP: healthpod
   RELEASE: dev
   LINUX_PKGS: libsecret-1-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad
-  FLUTTER_VERSION: "3.38.9"
+  FLUTTER_VERSION: "3.41.1"
   MACOS_APP_RELEASE_UNSIGNED_PATH: build/macos/Build/Products/Release-unsigned
   MACOS_APP_RELEASE_STAGING_PATH: build/macos/Build/Products/Release-staging
   MACOS_APP_RELEASE_DEV_PATH: build/macos/Build/Products/Release-dev
@@ -177,42 +177,12 @@ jobs:
 
           cp assets/images/app_icon.png build/${{env.APP}}_${VERSION}_amd64/usr/share/icons/hicolor/512x512/apps/${{env.APP}}.png
 
-          # 20260202 gjw For packages using syncfusion pdf viewer which uses the
-          # Google libpdfium library we need to ensure the libpdfuim.so file is
-          # found:
-
-          echo '#!/bin/sh' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          echo "set -e" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          echo "# Update the library path for libpdfuim." >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          echo 'echo "/usr/lib/healthpod/lib" >> /etc/ld.so.conf.d/healthpod.conf' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          echo "# Refresh the linker cache." >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          echo "ldconfig" >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-
-          # 20260202 gjw Also need a postrm!
-
-          echo '#!/bin/sh' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo 'set -e' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo '# Remove the library if it exists' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo 'LIB_PATH="/usr/lib/healthpod/lib/libpdfium.so"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo 'if [ -f "$LIB_PATH" ]; then' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo '  rm "$LIB_PATH"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo '  echo "Removed $LIB_PATH"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo 'fi' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo '# Optionally, remove library cache entry' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo 'if [ -f /etc/ld.so.conf.d/healthpod.conf ]; then' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo '  rm /etc/ld.so.conf.d/healthpod.conf' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo '  echo "Removed library path configuration"' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo '  ldconfig' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-          echo 'fi' >> build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
-
           # Set correct permissions.
 
           chmod -R 755 build/${{env.APP}}_${VERSION}_amd64/DEBIAN
           find build/${{env.APP}}_${VERSION}_amd64/usr -type d -exec chmod 755 {} \;
           find build/${{env.APP}}_${VERSION}_amd64/usr -type f -exec chmod 644 {} \;
           chmod 755 build/${{env.APP}}_${VERSION}_amd64/usr/lib/${{env.APP}}/${{env.APP}}
-          chmod +x build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postinst
-          chmod +x build/${{env.APP}}_${VERSION}_amd64/DEBIAN/postrm
 
           # Build the debian package.
 
@@ -309,12 +279,12 @@ jobs:
           #
           # 20260121 gjw These don't seem to be required?
           #
-          # printf '#%.0s' {1..72}; printf '\nninja-build\n'
-          # sudo apt-get install -y ninja-build
-          # printf '#%.0s' {1..72}; printf '\nlibgtk-3-dev\n'
-          # sudo apt-get install -y libgtk-3-dev
-          # printf '#%.0s' {1..72}; printf '\nclang cmake\n'
-          # sudo apt-get install -y clang cmake
+          #printf '#%.0s' {1..72}; printf '\nninja-build\n'
+          #sudo apt-get install -y ninja-build
+          #printf '#%.0s' {1..72}; printf '\nlibgtk-3-dev\n'
+          #sudo apt-get install -y libgtk-3-dev
+          #printf '#%.0s' {1..72}; printf '\nclang cmake\n'
+          #sudo apt-get install -y clang cmake
           #
           # 20260121 gjw Seems like a flutter 3.38.7 bug. I've tried
           # setting FLUTTER_VERSION above to 3.38.5 but it does not
@@ -333,25 +303,12 @@ jobs:
           # Target dart_build failed: Error: Failed to find any of
           # [ld.lld, ld] in LocalDirectory: '/usr/lib/llvm-14/bin'
           #
-          # Yet `ls` of the llvm-14.bin shows
-          #
-          # ...
-          # lrwxrwxrwx 1 root root        3 Apr  7  2024 lld-link -> lld
-          # -rwxr-xr-x 1 root root  4814520 Apr  7  2024 lld
-          # -rwxr-xr-x 1 root root   115120 Apr  7  2024 llc
-          # lrwxrwxrwx 1 root root        3 Apr  7  2024 ld64.lld -> lld
-          # lrwxrwxrwx 1 root root        3 Apr  7  2024 ld.lld -> lld
-          # ...
-          # No ld but there is a ld.lld?
-          #
-          #
           printf '#%.0s' {1..72}; printf '\nllvm lld FLUTTER 3.38.7 BUG\n'
-          sudo apt-get install -y llvm-14 lld-14
-          # sudo cp /usr/lib/llvm-14/bin/lld /usr/lib/llvm-14/bin/ld
-          # sudo rm /usr/lib/llvm-14/bin/ld.lld
-          # sudo cp /usr/lib/llvm-14/bin/lld /usr/lib/llvm-14/bin/ld.lld
-          # ls -lr /usr/lib/llvm-*/bin
-          ls -lr /usr/lib/llvm-14/bin
+          sudo apt-get install -y llvm lld
+          #sudo cp /usr/lib/llvm-14/bin/lld /usr/lib/llvm-14/bin/ld
+          #sudo rm /usr/lib/llvm-14/bin/ld.lld
+          #sudo cp /usr/lib/llvm-14/bin/lld /usr/lib/llvm-14/bin/ld.lld
+          #ls -lr /usr/lib/llvm-14/bin
 
       - name: Install extra Linux packages
         if: env.LINUX_PKGS != ''
@@ -361,8 +318,7 @@ jobs:
 
       - name: Build snap
         if: hashFiles('snap/**') != ''
-        uses: gjwgit/action-build@dev
-        # uses: snapcore/action-build@v1
+        uses: snapcore/action-build@v1
         id: build
 
       - name: Upload snap artifact
