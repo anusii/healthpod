@@ -59,12 +59,12 @@ class HealthImporterDialogs {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'These observations need to be overridden. Are you sure you want to override?',
+                  'This import will overwrite some current observations. Continue?',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'The following existing files have the same dates as records in your import file:',
+                  'Current observations with the same date as observations to be imported:',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
                 ),
                 const SizedBox(height: 12),
@@ -114,7 +114,7 @@ class HealthImporterDialogs {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Proceeding will replace these files with your imported data.',
+                  'Proceeding will overwrite these observaations with imported observations.',
                   style: TextStyle(
                     fontSize: 14,
                     fontStyle: FontStyle.italic,
@@ -145,7 +145,7 @@ class HealthImporterDialogs {
                   ),
                 ),
                 child: const Text(
-                  'Override',
+                  'Overwrite',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
