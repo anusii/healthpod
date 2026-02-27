@@ -39,6 +39,7 @@ cleanse_lines() {
 	grep -v '^\s*(\?|:) \[' | # Remove lines that consist of '? [' or  ': ['
 	grep -v '\s*\w*: \[' | # Remove  parameter list lines like `   names: [`
 	grep -v "^\s*['][^']*[']" | # Remove lines that are only a string.
+	grep -v "^\s*\w*:\s*$" | # Remove lines that are only a parameter name.
 	cat
 }
 

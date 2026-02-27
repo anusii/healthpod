@@ -33,7 +33,7 @@ for ((i=0; i < length; i+=2)); do
 
     if [ -f "$f1" ] && [ -f "$f2" ]; then
 	# 20260217 gjw For license.dart do not consider the first line
-	# in the comparison not the 5th line which might be Copyright
+	# in the comparison nor the 5th line which might be Copyright
 	# SII or Togaware.
 
 	if [[ "$f1" == "license.dart" ]]; then
