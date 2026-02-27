@@ -1,24 +1,34 @@
 # Health Pod Change Log
 
-Recorded here are the high level changes for the app.  Each version
-update includes a short user-oriented description.  The next release
-is 0.3 following a 0.2.n series or updates.  The `[version timestamp
-user]` string is utilised by the flutter
-[version_widget](https://pub.dev/packages/version_widget) package.
+Noted here are the high level changes for the app.  Each update
+includes a short user-oriented description.  The next release is 0.3
+following incremental updates through the 0.2.n series.
 
-Run the app online: [**web**](https://healthpod.solidcommunity.au).
+You can run the app in your browser from the
+[**web**](https://healthpod.solidcommunity.au)or else download and
+install locally the latest version from the [Solid
+Community](https://solidcommunity.au) or directly: for **Android** as
+[apk](https://solidcommunity.au/installers/healthpod.apk); for
+**GNU/Linux** as
+[deb](https://solidcommunity.au/installers/healthpod_amd64.deb) or
+[zip](https://solidcommunity.au/installers/healthpod-dev-linux.zip);
+for
+**macOS** as
+[zip](https://solidcommunity.au/installers/healthpod-dev-macos.zip); for
+**Windows**
+[zip](https://solidcommunity.au/installers/healthpod-dev-windows.zip)
+or
+[inno](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
 
-Download the latest version:
-GNU/Linux
-  [**deb**](https://solidcommunity.au/installers/healthpod_amd64.deb) or
-  [**zip**](https://solidcommunity.au/installers/healthpod-dev-linux.zip) -
-Android
-  [**apk**](https://solidcommunity.au/installers/healthpod.apk) -
-macOS
-  [**zip**](https://solidcommunity.au/installers/healthpod-dev-macos.zip) -
-Windows
-  [**zip**](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
-  [**inno**](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
+Contributions are welcome. Visit
+[github](https://github.com/anusii/healthpod) to submit an issue or,
+even better, fork the repository yourself, update the code, and submit
+a Pull Request. Coding documentation is
+[available](https://solidcommunity.au/docs/healthpod).
+
+We make this project available for free so if you appreciate the app
+then please show some ❤️ and tap on the star at
+[GitHub](https://github.com/anusii/healthpod) to support our work.
 
 Coding documentation is
 [available](https://solidcommunity.au/docs/healthpod).
