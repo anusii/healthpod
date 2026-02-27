@@ -1,8 +1,8 @@
 /// Base class for health data importers.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Friday 2026-02-27 12:12:00 +1100 Graham Williams>
 //
-/// Copyright (C) 2025, Software Innovation Institute, ANU.
+/// Copyright (C) 2025-2026, Software Innovation Institute, ANU.
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License").
 ///
@@ -419,6 +419,7 @@ abstract class HealthDataImporterBase {
               savePath,
               json.encode(jsonData),
               encrypted: true,
+              overwrite: true,
             );
             successfulSaves++;
           } catch (writeError, writeStackTrace) {
