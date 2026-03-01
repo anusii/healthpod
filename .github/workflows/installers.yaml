@@ -39,7 +39,7 @@ on:
     branches:
       - dev
       - build
-      - jess/macos_installer
+      - installers
 
 env:
   APP: healthpod

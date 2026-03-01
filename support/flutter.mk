@@ -134,7 +134,7 @@ macos: $(BUILD_RUNNER) upgrade
 
 .PHONY: android
 android: $(BUILD_RUNNER) upgrade
-	flutter run --device-id $(shell flutter devices | grep android | tr '•' '|' | tr -s '|' | tr -s ' ' | cut -d'|' -f2 | tr -d ' ')
+	flutter run --device-id $(shell flutter devices | grep android | tr '•' '|' | tr -s '|' | tr -s ' ' | cut -d'|' -f2 | tr -d ' ') --release
 
 .PHONY: emu
 emu:
