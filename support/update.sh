@@ -10,6 +10,7 @@ FILES=(
     .pubignore ${SCRIPTS}/pubignore
     .github/workflows/ci.yaml ${SCRIPTS}/github/workflows/ci.yaml
     .github/workflows/installers.yaml ${SCRIPTS}/github/workflows/installers.yaml
+    .github/pull_request_template.md ${SCRIPTS}/github/pull_request_template.md
     support/flutter.mk  ${SCRIPTS}/../support/flutter.mk
     support/git.mk  ${SCRIPTS}/../support/git.mk
     support/loc.sh  ${SCRIPTS}/../support/loc.sh
