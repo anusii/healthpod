@@ -159,17 +159,9 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
 
     final currentTabState = ref.watch(tabStateProvider);
 
-    // On the first visit, just record the current tab index so that the
-    // coordination block below does not fire an unwanted navigation away from
-    // the root directory.
-
-    if (isFilesActive &&
-        _lastCoordinatedTabIndex == null &&
-        !isReturningToFiles) {
-      _lastCoordinatedTabIndex = currentTabState.selectedIndex;
-    }
-
-    // Coordinate folder navigation only when the Files page is active.
+    // When the Files page is active, coordinate with the current tab so the
+    // displayed folder matches View / Add / Data. Stay at root only when
+    // selectedIndex is -1 (user has never opened a feature tab).
 
     if (isFilesActive &&
         !_userHasManuallyNavigated &&
