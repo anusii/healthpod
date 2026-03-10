@@ -186,6 +186,7 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
 
     return SolidFile(
       currentPath: currentPath,
+      rootPath: basePath,
       browserKey: _browserKey,
       autoConfig: true,
       fileTypeResolver: healthFileTypeResolver,
