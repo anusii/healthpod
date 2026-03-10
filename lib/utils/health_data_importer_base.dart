@@ -251,35 +251,8 @@ abstract class HealthDataImporterBase {
             dirPath,
             allTimestamps,
           );
-
-          // If duplicate files exist, show confirmation dialog.
-
-          if (duplicateFiles.isNotEmpty && context.mounted) {
-            final shouldOverride =
-                await HealthImporterDialogs.showOverrideConfirmationDialog(
-              context,
-              duplicateFiles,
-            );
-
-            // If user cancels the override, abort the import.
-
-            if (!shouldOverride) {
-              return false;
-            }
-
-            if (!context.mounted) return false;
-
-            // Delete the existing files before proceeding with import.
-
-            await HealthImporterFileManager.deleteExistingFiles(
-              context,
-              dataType,
-              dirPath,
-              duplicateFiles,
-            );
-          }
         } catch (e) {
-          // Show warning that we can't check for duplicates.
+          // Duplicate check failed — show appropriate warning.
 
           if (context.mounted) {
             final shouldProceed =
@@ -289,6 +262,42 @@ abstract class HealthDataImporterBase {
             if (!shouldProceed) {
               return false;
             }
+          }
+        }
+
+        // If duplicate files exist, show confirmation dialog.
+
+        if (duplicateFiles.isNotEmpty && context.mounted) {
+          final shouldOverride =
+              await HealthImporterDialogs.showOverrideConfirmationDialog(
+            context,
+            duplicateFiles,
+          );
+
+          if (!shouldOverride) {
+            return false;
+          }
+
+          if (!context.mounted) return false;
+
+          // Delete the existing files before proceeding with import.
+
+          try {
+            await HealthImporterFileManager.deleteExistingFiles(
+              context,
+              dataType,
+              dirPath,
+              duplicateFiles,
+            );
+          } catch (e) {
+            // Deletion failed — log and continue.
+            // writePod(overwrite: true) will overwrite existing files during
+            // the import, so we can proceed.
+
+            debugPrint(
+              '[CSV Import] Pre-delete of existing files failed: $e. '
+              'WritePod will overwrite on save.',
+            );
           }
         }
       }
