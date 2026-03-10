@@ -73,6 +73,13 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
 
   int? _lastCoordinatedTabIndex;
 
+  /// Tri-state flag tracking the Files page visibility history:
+  ///   null  – the user has never visited Files yet
+  ///   true  – Files is currently the active page
+  ///   false – the user was on Files previously but has since navigated away
+
+  bool? _wasFilesPageActive;
+
   @override
   void initState() {
     super.initState();
@@ -143,13 +150,46 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
       onStateUpdate: () => setState(() {}),
     );
 
-    // Watch the tab state and trigger navigation when it changes.
+    final menuIndex = ref.watch(menuIndexProvider);
+    const filesPageIndex = 4;
+    final isFilesActive = (menuIndex == filesPageIndex);
+
+    // When RETURNING to Files (was here before, left, now back), clear the
+    // manual-navigation flag so that tab-based folder coordination re-engages.
+    // On the very first visit (_wasFilesPageActive == null) we intentionally
+    // skip this so the browser stays at the default root (healthpod/data).
+
+    final isReturningToFiles = isFilesActive && _wasFilesPageActive == false;
+
+    if (isReturningToFiles) {
+      _userHasManuallyNavigated = false;
+      _lastCoordinatedTabIndex = null;
+    }
+
+    // Update the tri-state visibility tracker.
+
+    if (isFilesActive) {
+      _wasFilesPageActive = true;
+    } else if (_wasFilesPageActive == true) {
+      _wasFilesPageActive = false;
+    }
 
     final currentTabState = ref.watch(tabStateProvider);
 
-    // Check if tab has changed and we need to coordinate navigation.
+    // On the first visit, just record the current tab index so that the
+    // coordination block below does not fire an unwanted navigation away from
+    // the root directory.
 
-    if (!_userHasManuallyNavigated &&
+    if (isFilesActive &&
+        _lastCoordinatedTabIndex == null &&
+        !isReturningToFiles) {
+      _lastCoordinatedTabIndex = currentTabState.selectedIndex;
+    }
+
+    // Coordinate folder navigation only when the Files page is active.
+
+    if (isFilesActive &&
+        !_userHasManuallyNavigated &&
         _lastCoordinatedTabIndex != currentTabState.selectedIndex) {
       // Update the last coordinated index.
 
@@ -179,27 +219,19 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
       backButtonText: 'Back to Home Folder',
       onBackPressed: () {
         const rootPath = basePath;
-        // Set manual navigation flag to prevent automatic coordination after
-        // back press.
+
+        // Block tab coordination while the user is browsing at root level.
+        // Coordination will be re-enabled automatically when the user leaves
+        // the Files page and returns (handled by _wasFilesPageActive logic).
 
         _userHasManuallyNavigated = true;
 
         // Reset coordinated index to allow future tab coordination if needed.
 
         _lastCoordinatedTabIndex = null;
+
         ref.read(fileServiceProvider.notifier).updateCurrentPath(rootPath);
         _browserKey.currentState?.navigateToPath(rootPath);
-
-        // Re-enable coordination after a short delay to allow tab coordination
-        // again.
-
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            _userHasManuallyNavigated = false;
-          }
-        });
-
-        // Force refresh the widget to ensure immediate update.
 
         setState(() {});
       },

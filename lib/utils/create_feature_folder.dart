@@ -47,32 +47,31 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
   try {
     onProgressChange.call(true);
 
-    // Check current resources.
+    // Check whether the folder already exists. The listing may fail when
+    // the parent container is empty or has not been fully created yet; in
+    // that case we proceed to create the folder regardless.
 
-    final dirUrl = await getDirUrl(basePath);
-    final resources = await getResourcesInContainer(dirUrl);
+    try {
+      final dirUrl = await getDirUrl(basePath);
+      final resources = await getResourcesInContainer(dirUrl);
 
-    // Check if exists as directory.
+      if (resources.subDirs.contains(featureName)) {
+        onSuccess.call();
+        return SolidFunctionCallStatus.success;
+      }
 
-    bool existsAsDir = resources.subDirs.contains(featureName);
-    if (existsAsDir) {
-      // debugPrint('Feature folder $featureName already exists as directory');
-      onSuccess.call();
-      return SolidFunctionCallStatus.success;
-    }
-
-    // Check if exists as file and delete if necessary.
-
-    bool existsAsFile = resources.files.contains(featureName);
-    if (existsAsFile) {
+      if (resources.files.contains(featureName)) {
+        debugPrint(
+          'Removing existing file $featureName before creating directory',
+        );
+        if (!context.mounted) return SolidFunctionCallStatus.fail;
+        await deleteFile(fileUrl: '$basePath/$featureName');
+      }
+    } catch (e) {
       debugPrint(
-        'Removing existing file $featureName before creating directory',
+        'Could not list $basePath while checking $featureName: $e – '
+        'will attempt to create the folder anyway.',
       );
-      if (!context.mounted) return SolidFunctionCallStatus.fail;
-
-      // Full path for deletion needs to include healthpod/data.
-
-      await deleteFile(fileUrl: '$basePath/$featureName');
     }
 
     if (!context.mounted) {
@@ -80,25 +79,15 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
       return SolidFunctionCallStatus.fail;
     }
 
-    // Create the feature folder structure.
-
-    await writePod(
-      '$featureName/.init',
-      '',
-      encrypted: false,
-    );
-
-    // If folder creation was successful and initialisation file is requested.
+    await createContainer(basePath, featureName);
 
     if (createInitFile) {
       final initContent = '''
-
           {
             "feature": "$featureName",
             "created": "${DateTime.now().toIso8601String()}",
             "version": "1.0"
           }
-
           ''';
 
       if (!context.mounted) return SolidFunctionCallStatus.success;
@@ -108,13 +97,12 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
         initContent,
         encrypted: true,
       );
-
-      onSuccess.call();
     }
 
+    onSuccess.call();
     return SolidFunctionCallStatus.success;
   } catch (e) {
-    debugPrint('Error creating feature folder: $e');
+    debugPrint('Error creating feature folder $featureName: $e');
     return SolidFunctionCallStatus.fail;
   } finally {
     onProgressChange.call(false);

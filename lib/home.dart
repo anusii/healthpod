@@ -124,7 +124,7 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
 
   void _onMenuSelected(int index) {
     setSelectedMenuIndex(index);
-    // Mark that the user has actively selected a feature tab.
+    ref.read(menuIndexProvider.notifier).setIndex(index);
 
     _hasUserSelectedFeatureTab = true;
 
