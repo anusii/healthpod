@@ -121,7 +121,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
     return [
       VaccinationRecord(
         date: DateTime(2024, 3, 1),
-        name: 'COVID-19 Booster',
+        name: 'Example: COVID-19 Booster',
         provider: 'City Medical Center',
         professional: 'Dr. Smith',
         cost: '\$45.00',
@@ -129,7 +129,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
       ),
       VaccinationRecord(
         date: DateTime(2023, 12, 1),
-        name: 'Flu Shot',
+        name: 'Example: Flu Shot',
         provider: 'Community Clinic',
         professional: 'Nurse Johnson',
         cost: '\$25.00',
@@ -137,7 +137,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
       ),
       VaccinationRecord(
         date: DateTime(2023, 6, 15),
-        name: 'Hepatitis B',
+        name: 'Example: Hepatitis B',
         provider: 'University Hospital',
         professional: 'Dr. Garcia',
         cost: '\$75.00',
@@ -145,7 +145,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
       ),
       VaccinationRecord(
         date: DateTime(2023, 3, 1),
-        name: 'Tetanus Booster',
+        name: 'Example: Tetanus Booster',
         provider: 'City Medical Center',
         professional: 'Dr. Smith',
         cost: '\$35.00',
@@ -153,7 +153,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
       ),
       VaccinationRecord(
         date: DateTime(2022, 12, 15),
-        name: 'MMR Vaccine',
+        name: 'Example: MMR Vaccine',
         provider: 'Community Clinic',
         professional: 'Nurse Johnson',
         cost: '\$30.00',
@@ -161,7 +161,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
       ),
       VaccinationRecord(
         date: DateTime(2022, 6, 1),
-        name: 'COVID-19 Second Dose',
+        name: 'Example: COVID-19 Second Dose',
         provider: 'University Hospital',
         professional: 'Dr. Garcia',
         cost: '\$0.00',
@@ -169,7 +169,7 @@ class _VaccinationVisualisationState extends State<VaccinationVisualisation> {
       ),
       VaccinationRecord(
         date: DateTime(2021, 3, 15),
-        name: 'COVID-19 First Dose',
+        name: 'Example: COVID-19 First Dose',
         provider: 'City Medical Center',
         professional: 'Dr. Smith',
         cost: '\$0.00',
