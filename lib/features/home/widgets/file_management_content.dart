@@ -147,7 +147,22 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
     if (isReturningToFiles) {
       _userHasManuallyNavigated = false;
       _lastCoordinatedTabIndex = null;
+
+      // Ensure the provider is at basePath so that if the SolidFileBrowser
+      // is recreated, it receives initialPath = basePath and sets _homePath
+      // correctly. The coordination below will then navigate to the tab’s
+      // folder. This prevents Home/Up from using a subfolder as the root.
+
+      ref.read(fileServiceProvider.notifier).updateCurrentPath(basePath);
     }
+
+    // When SolidFileBrowser may be (re)created, pass basePath so _homePath is
+    // correct: first visit (_wasFilesPageActive == null) or returning after
+    // being disposed (_wasFilesPageActive == false).
+
+    final browserMayBeRecreated = isFilesActive && _wasFilesPageActive != true;
+    final pathForSolidFile =
+        browserMayBeRecreated ? basePath : (state.currentPath ?? basePath);
 
     // Update the tri-state visibility tracker.
 
@@ -185,8 +200,7 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
     }
 
     return SolidFile(
-      currentPath: currentPath,
-      rootPath: basePath,
+      currentPath: pathForSolidFile,
       browserKey: _browserKey,
       autoConfig: true,
       fileTypeResolver: healthFileTypeResolver,
@@ -224,7 +238,7 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
         );
       },
       onClosePreview: fileOperationHandler.handleClosePreview,
-      uploadCallbacks: uploadHandler.createUploadCallbacks(currentPath),
+      uploadCallbacks: uploadHandler.createUploadCallbacks(pathForSolidFile),
       uploadState: SolidFileUploadState(
         uploadInProgress: state.uploadInProgress,
         importInProgress: state.importInProgress,
