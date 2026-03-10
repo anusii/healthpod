@@ -90,28 +90,11 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
         _browserKey.currentState?.refreshFiles();
       });
 
-      // Get initial path using TabCoordinator.
+      // Always start at the data root.  Folder coordination when returning
+      // to the Files page from another page is handled in build() via the
+      // _wasFilesPageActive tri-state logic.
 
-      final initialPath = TabCoordinator.getInitialPath(
-        ref,
-        _userHasManuallyNavigated,
-        widget.hasUserSelectedFeatureTab,
-      );
-
-      final currentTabIndex = ref.read(tabStateProvider).selectedIndex;
-
-      // Initialise to the appropriate folder.
-
-      Future(() {
-        ref.read(fileServiceProvider.notifier).updateCurrentPath(initialPath);
-        if (initialPath != basePath) {
-          _browserKey.currentState?.navigateToPath(initialPath);
-        }
-
-        // Update the coordinated tab index to avoid conflicts.
-
-        _lastCoordinatedTabIndex = currentTabIndex;
-      });
+      ref.read(fileServiceProvider.notifier).updateCurrentPath(basePath);
     });
   }
 

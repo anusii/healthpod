@@ -47,8 +47,7 @@ class TabCoordinator {
 
   static int? getTabIndexForPath(String path) {
     for (final entry in _dirToTabIndex.entries) {
-      if (path == '$basePath/${entry.key}' ||
-          path.endsWith('/${entry.key}')) {
+      if (path == '$basePath/${entry.key}' || path.endsWith('/${entry.key}')) {
         return entry.value;
       }
     }
