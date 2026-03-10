@@ -106,7 +106,6 @@ class _FileManagementContentState extends ConsumerState<FileManagementContent> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(fileServiceProvider);
-    final currentPath = state.currentPath ?? basePath;
 
     // Create handler instances.
 
