@@ -25,6 +25,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/features/home/service/components/profile/'
+    'profile_photo_crop_dialog.dart';
 import 'package:healthpod/utils/profile_photo_handler.dart';
 
 /// Manages profile photo operations including loading, uploading, and deleting.
@@ -38,6 +40,7 @@ class ProfilePhotoManager {
     String userName,
     Function(ImageProvider?) onPhotoChanged,
     Function() onDataChanged,
+    void Function(bool) onUploadingChange,
     bool isLoading,
     bool isSaving,
     bool isLoadingPhoto,
@@ -47,21 +50,24 @@ class ProfilePhotoManager {
       return;
     }
 
+    final parentContext = context;
+
     await showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Profile Photo'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Display current photo or avatar.
+                // Display current photo or avatar in circular frame.
+
                 SizedBox(
                   height: 100,
                   width: 100,
                   child: ProfilePhotoHandler.buildProfileAvatar(
-                    context: context,
+                    context: dialogContext,
                     photo: profilePhoto,
                     name: userName,
                     radius: 50,
@@ -69,17 +75,19 @@ class ProfilePhotoManager {
                 ),
                 const SizedBox(height: 20),
 
-                // Photo action buttons.
+                // Photo action buttons: upload (JPG/PNG, max 2 MB) or remove.
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.pop(dialogContext);
                         _handlePhotoUpload(
-                          context,
+                          parentContext,
                           onPhotoChanged,
                           onDataChanged,
+                          onUploadingChange,
                         );
                       },
                       icon: const Icon(Icons.photo_camera),
@@ -88,9 +96,9 @@ class ProfilePhotoManager {
                     if (profilePhoto != null)
                       ElevatedButton.icon(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.pop(dialogContext);
                           _handlePhotoDelete(
-                            context,
+                            parentContext,
                             onPhotoChanged,
                             onDataChanged,
                           );
@@ -98,9 +106,10 @@ class ProfilePhotoManager {
                         icon: const Icon(Icons.delete),
                         label: const Text('Remove'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.error,
+                          backgroundColor:
+                              Theme.of(dialogContext).colorScheme.error,
                           foregroundColor: Theme.of(
-                            context,
+                            dialogContext,
                           ).colorScheme.onError,
                         ),
                       ),
@@ -111,7 +120,7 @@ class ProfilePhotoManager {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('Close'),
             ),
           ],
@@ -126,43 +135,61 @@ class ProfilePhotoManager {
     BuildContext context,
     Function(ImageProvider?) onPhotoChanged,
     Function() onDataChanged,
+    void Function(bool) onUploadingChange,
   ) async {
     try {
-      final imageFile = await ProfilePhotoHandler.pickProfilePhoto();
+      // Pick image with validation.
 
-      if (imageFile != null && context.mounted) {
-        final success = await ProfilePhotoHandler.uploadProfilePhoto(
-          imageFile,
-          context,
+      final picked = await ProfilePhotoHandler.pickProfilePhoto(context);
+
+      if (picked == null || !context.mounted) {
+        return;
+      }
+
+      // Show crop dialog for user to select square region.
+
+      final croppedBytes = await ProfilePhotoCropDialog.show(
+        context,
+        picked.bytes,
+      );
+
+      if (croppedBytes == null || !context.mounted) {
+        return;
+      }
+
+      onUploadingChange(true);
+
+      // Upload cropped image to pod (stored in data/profile folder).
+
+      final success = await ProfilePhotoHandler.uploadProfilePhoto(
+        croppedBytes,
+        'png',
+        context,
+      );
+
+      onUploadingChange(false);
+
+      if (success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile photo uploaded successfully'),
+            backgroundColor: Colors.green,
+          ),
         );
 
-        if (success && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile photo uploaded successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
-
-          // Cleanup old photos.
-
-          if (context.mounted) {
-            await ProfilePhotoHandler.cleanupOldProfilePhotos(context);
-          }
-
-          // Reload the photo.
-
-          if (context.mounted) {
-            final newPhoto = await ProfilePhotoHandler.getProfilePhoto();
-            onPhotoChanged(newPhoto);
-          }
-
-          // Notify parent of data change.
-
-          onDataChanged();
+        if (context.mounted) {
+          await ProfilePhotoHandler.cleanupOldProfilePhotos(context);
         }
+
+        if (context.mounted) {
+          final newPhoto = await ProfilePhotoHandler.getProfilePhoto();
+          onPhotoChanged(newPhoto);
+        }
+
+        onDataChanged();
       }
     } catch (e) {
+      onUploadingChange(false);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

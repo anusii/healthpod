@@ -79,7 +79,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isLoadingPhoto = true;
-  final bool _isUploadingPhoto = false;
+  bool _isUploadingPhoto = false;
   ImageProvider? _profilePhoto;
 
   // Holds full profile data.
@@ -453,6 +453,13 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         }
       },
       widget.onDataChanged,
+      (isUploading) {
+        if (mounted) {
+          setState(() {
+            _isUploadingPhoto = isUploading;
+          });
+        }
+      },
       _isLoading,
       _isSaving,
       _isLoadingPhoto,
