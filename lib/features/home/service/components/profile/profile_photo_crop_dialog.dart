@@ -109,6 +109,7 @@ class _ProfilePhotoCropDialogState extends State<ProfilePhotoCropDialog> {
                     SnackBar(
                       content: Text('Crop failed: $cause'),
                       backgroundColor: Colors.red,
+                      duration: const Duration(seconds: 5),
                     ),
                   );
                   widget.onCropped(null);

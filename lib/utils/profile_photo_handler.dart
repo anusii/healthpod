@@ -105,6 +105,7 @@ class ProfilePhotoHandler {
                 'Please select a JPG or PNG image',
               ),
               backgroundColor: Colors.red,
+              duration: Duration(seconds: 5),
             ),
           );
         }
@@ -128,6 +129,7 @@ class ProfilePhotoHandler {
             const SnackBar(
               content: Text('Unable to read the selected file'),
               backgroundColor: Colors.red,
+              duration: Duration(seconds: 5),
             ),
           );
         }
@@ -145,6 +147,7 @@ class ProfilePhotoHandler {
                 'Please choose a smaller file.',
               ),
               backgroundColor: Colors.red,
+              duration: Duration(seconds: 5),
             ),
           );
         }
@@ -416,6 +419,7 @@ class ProfilePhotoHandler {
           SnackBar(
             content: Text('Error deleting profile photo: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }

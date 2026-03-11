@@ -93,7 +93,8 @@ class ProfilePhotoManager {
                       icon: const Icon(Icons.photo_camera),
                       label: const Text('Upload New'),
                     ),
-                    if (profilePhoto != null)
+                    if (profilePhoto != null) ...[
+                      const SizedBox(width: 12),
                       ElevatedButton.icon(
                         onPressed: () {
                           Navigator.pop(dialogContext);
@@ -113,6 +114,7 @@ class ProfilePhotoManager {
                           ).colorScheme.onError,
                         ),
                       ),
+                    ],
                   ],
                 ),
               ],
@@ -174,6 +176,7 @@ class ProfilePhotoManager {
           const SnackBar(
             content: Text('Profile photo uploaded successfully'),
             backgroundColor: Colors.green,
+            duration: Duration(seconds: 5),
           ),
         );
 
@@ -195,6 +198,7 @@ class ProfilePhotoManager {
           SnackBar(
             content: Text('Failed to upload photo: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
@@ -217,6 +221,7 @@ class ProfilePhotoManager {
             const SnackBar(
               content: Text('Profile photo removed'),
               backgroundColor: Colors.green,
+              duration: Duration(seconds: 5),
             ),
           );
 
@@ -235,6 +240,7 @@ class ProfilePhotoManager {
           SnackBar(
             content: Text('Failed to delete photo: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
