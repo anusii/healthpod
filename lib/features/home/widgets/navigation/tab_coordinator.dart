@@ -32,6 +32,28 @@ import 'package:healthpod/providers/tab_state.dart';
 /// Utility class for coordinating tab navigation with file browsing.
 
 class TabCoordinator {
+  /// Mapping from directory names to their corresponding tab indices.
+
+  static const Map<String, int> _dirToTabIndex = {
+    'diary': 0,
+    'blood_pressure': 1,
+    'medication': 2,
+    'vaccination': 3,
+    'pathology': 4,
+  };
+
+  /// Returns the tab index that corresponds to [path], or null if [path]
+  /// does not match any known feature folder.
+
+  static int? getTabIndexForPath(String path) {
+    for (final entry in _dirToTabIndex.entries) {
+      if (path == '$basePath/${entry.key}' || path.endsWith('/${entry.key}')) {
+        return entry.value;
+      }
+    }
+    return null;
+  }
+
   /// Gets the expected path for the current tab selection.
 
   static String getExpectedPathForCurrentTab(WidgetRef ref) {

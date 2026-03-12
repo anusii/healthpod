@@ -114,7 +114,8 @@ class HealthImporterDialogs {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Proceeding will overwrite these observaations with imported observations.',
+                  'Proceeding will overwrite these observations with imported '
+                  'observations.',
                   style: TextStyle(
                     fontSize: 14,
                     fontStyle: FontStyle.italic,

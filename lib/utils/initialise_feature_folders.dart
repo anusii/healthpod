@@ -53,6 +53,7 @@ Future<void> initialiseFeatureFolders({
     onProgress.call(true);
 
     // List of required feature folders.
+
     final requiredFolders = [
       'profile',
       'blood_pressure',
@@ -63,18 +64,28 @@ Future<void> initialiseFeatureFolders({
       'health_plan',
     ];
 
-    // Check current resources.
+    // Try to list existing sub-directories. If the data container does not
+    // yet exist or is empty the call may throw, in which case we treat every
+    // folder as missing and create them all.
 
-    final dirUrl = await getDirUrl(basePath);
-    final resources = await getResourcesInContainer(dirUrl);
-
-    // Create each missing folder.
+    Set<String> existingDirs = {};
+    try {
+      final dirUrl = await getDirUrl(basePath);
+      final resources = await getResourcesInContainer(dirUrl);
+      existingDirs = resources.subDirs.toSet();
+    } catch (e) {
+      debugPrint(
+        'Could not list $basePath (may not exist yet): $e – '
+        'will create all required folders.',
+      );
+    }
 
     for (final folder in requiredFolders) {
-      if (!resources.subDirs.contains(folder)) {
-        if (!context.mounted) return;
+      if (existingDirs.contains(folder)) continue;
+      if (!context.mounted) return;
 
-        final result = await createFeatureFolder(
+      try {
+        await createFeatureFolder(
           featureName: folder,
           context: context,
           onProgressChange: (inProgress) {
@@ -82,14 +93,10 @@ Future<void> initialiseFeatureFolders({
 
             onProgress.call(inProgress);
           },
-          onSuccess: () {
-            // Folder created successfully.
-          },
+          onSuccess: () {},
         );
-
-        if (result != SolidFunctionCallStatus.success) {
-          // Continue with other folders even if one fails.
-        }
+      } catch (e) {
+        debugPrint('Failed to create folder $folder: $e');
       }
     }
 

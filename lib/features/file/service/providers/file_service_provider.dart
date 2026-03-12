@@ -46,7 +46,7 @@ class FileServiceNotifier extends Notifier<FileState> {
   /// Builds the initial state.
 
   @override
-  FileState build() => const FileState(currentPath: '$basePath/diary');
+  FileState build() => const FileState(currentPath: basePath);
 
   // Add callback for browser refresh.
 
