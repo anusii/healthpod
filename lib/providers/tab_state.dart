@@ -60,6 +60,26 @@ class TabState {
   }
 }
 
+/// Tracks the currently selected sidebar menu index so that child widgets
+/// (e.g. FileManagementContent) can react to page switches.
+
+final menuIndexProvider = NotifierProvider<MenuIndexNotifier, int>(
+  MenuIndexNotifier.new,
+);
+
+/// Notifier for the sidebar menu index.
+
+class MenuIndexNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  /// Updates the selected menu index.
+
+  void setIndex(int index) {
+    state = index;
+  }
+}
+
 /// Provider for the tab state.
 
 final tabStateProvider = NotifierProvider<TabStateNotifier, TabState>(

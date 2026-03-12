@@ -31,6 +31,8 @@ import 'package:solidpod/solidpod.dart';
 import 'package:solidui/solidui.dart';
 
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
+import 'package:healthpod/features/home/widgets/navigation/tab_coordinator.dart';
+import 'package:healthpod/providers/tab_state.dart';
 
 /// Handles file operations like selection, download, and deletion for
 /// SolidFile.
@@ -159,7 +161,17 @@ class FileOperationHandler {
 
     if (!isTabCoordinatedNavigation) {
       setUserManuallyNavigated(true);
-      setLastCoordinatedTabIndex(null);
+
+      // Reverse-sync: update the shared tab index so that View / Add / Data
+      // will show the matching tab when the user switches away from Files.
+
+      final tabIndex = TabCoordinator.getTabIndexForPath(path);
+      if (tabIndex != null) {
+        ref.read(tabStateProvider.notifier).setSelectedIndex(tabIndex);
+        setLastCoordinatedTabIndex(tabIndex);
+      } else {
+        setLastCoordinatedTabIndex(null);
+      }
     }
 
     ref.read(fileServiceProvider.notifier).updateCurrentPath(path);
