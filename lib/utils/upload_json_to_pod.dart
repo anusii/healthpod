@@ -81,16 +81,18 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
       filePath,
       jsonString,
       encrypted: true,
+      overwrite: true,
     );
 
     onSuccess?.call();
 
     return SolidFunctionCallStatus.success;
-  } catch (e) {
+  } catch (e, stackTrace) {
     debugPrint('💥 uploadJsonToPod: ERROR during upload: $e');
     debugPrint('💥 uploadJsonToPod: Error type: ${e.runtimeType}');
+    debugPrint('💥 uploadJsonToPod: Stack trace: $stackTrace');
     debugPrint('Error uploading JSON to POD: $e');
-    return SolidFunctionCallStatus.fail;
+    rethrow;
   } finally {
     onProgressChange?.call(false);
   }

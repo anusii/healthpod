@@ -95,15 +95,29 @@ Future<void> initialiseProfileData({
       if (!context.mounted) return;
 
       // Create initial profile only if no profile exists.
-      // Use the structure expected by fetchProfileData - profile data is the responses.
+      // Skip save if security key is not available. Profile will be created
+      // when user enters key later.
 
-      await saveResponseToPod(
-        context: context,
-        responses: defaultProfileData['data'],
-        podPath: '/profile',
-        filePrefix: 'profile',
-        additionalData: {'timestamp': defaultProfileData['timestamp']},
-      );
+      final isKeySaved = await KeyManager.hasSecurityKey();
+      if (!isKeySaved) {
+        debugPrint(
+          'Skipping profile creation: security key not available. '
+          'Profile will be created when user enters key.',
+        );
+      } else {
+        if (!context.mounted) return;
+
+        // Use the structure expected by fetchProfileData - profile data is the
+        // responses.
+
+        await saveResponseToPod(
+          context: context,
+          responses: defaultProfileData['data'],
+          podPath: '/profile',
+          filePrefix: 'profile',
+          additionalData: {'timestamp': defaultProfileData['timestamp']},
+        );
+      }
     }
 
     onComplete.call();
@@ -146,21 +160,32 @@ Future<void> _ensureRequiredFields(BuildContext context) async {
     // Only save if we added missing fields.
 
     if (missingFields.isNotEmpty && context.mounted) {
-      // Ensure we don't include any photo data that might have gotten mixed in.
+      // Skip save if security key is not available. Will retry when user
+      // navigates to profile.
 
-      updatedData.remove('imageData');
-      updatedData.remove('format');
+      final isKeySaved = await KeyManager.hasSecurityKey();
+      if (!isKeySaved) {
+        debugPrint(
+          'Skipping profile field update: security key not available.',
+        );
+      } else if (context.mounted) {
+        // Ensure we don't include any photo data that might have gotten mixed
+        // in.
 
-      // When saving, make sure we use the correct structure.
-      // The data itself is the responses, not wrapped in a 'data' field.
+        updatedData.remove('imageData');
+        updatedData.remove('format');
 
-      await saveResponseToPod(
-        context: context,
-        responses: updatedData,
-        podPath: '/profile',
-        filePrefix: 'profile',
-        additionalData: {'timestamp': DateTime.now().toIso8601String()},
-      );
+        // When saving, make sure we use the correct structure.
+        // The data itself is the responses, not wrapped in a 'data' field.
+
+        await saveResponseToPod(
+          context: context,
+          responses: updatedData,
+          podPath: '/profile',
+          filePrefix: 'profile',
+          additionalData: {'timestamp': DateTime.now().toIso8601String()},
+        );
+      }
     }
   } catch (e) {
     // debugPrint('❌ Error validating profile data: $e');
