@@ -77,12 +77,10 @@ Future<void> saveResponseToPod({
     if (context.mounted) {
       String message = 'Error saving survey to POD: ${e.toString()}';
       if (e is SecurityKeyNotAvailableException) {
-        message =
-            'Please enter your security key to save data to POD. '
+        message = 'Please enter your security key to save data to POD. '
             'The key is required for encrypted storage.';
       } else if (e.toString().contains('NotLoggedIn')) {
-        message =
-            'Please log in to save data to your POD. '
+        message = 'Please log in to save data to your POD. '
             'Your session may have expired.';
       }
       ScaffoldMessenger.of(context).showSnackBar(
