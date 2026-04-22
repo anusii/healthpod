@@ -56,7 +56,7 @@ class FileContentHandler {
 
   Future<void> handleSelectLocalJson() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );

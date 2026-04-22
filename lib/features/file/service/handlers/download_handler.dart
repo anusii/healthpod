@@ -52,7 +52,7 @@ class FileDownloadHandler {
     try {
       // Let user choose where to save the file.
 
-      String? outputFile = await FilePicker.platform.saveFile(
+      String? outputFile = await FilePicker.saveFile(
         dialogTitle: 'Save file as:',
         fileName: cleanFileName ?? remoteFileName.replaceAll('.enc.ttl', ''),
       );

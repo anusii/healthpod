@@ -48,7 +48,7 @@ class ProfileHandler {
     required Function? refreshCallback,
   }) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
@@ -104,7 +104,7 @@ class ProfileHandler {
     required String? currentPath,
   }) async {
     try {
-      final String? outputFile = await FilePicker.platform.saveFile(
+      final String? outputFile = await FilePicker.saveFile(
         dialogTitle: 'Save Profile data as JSON:',
         fileName: 'profile_export.json',
       );

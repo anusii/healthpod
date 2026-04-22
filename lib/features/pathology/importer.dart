@@ -49,7 +49,7 @@ class _PathologySurveyState extends ConsumerState<PathologySurvey> {
     try {
       // Pick a PDF file.
 
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf'],
       );
