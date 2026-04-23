@@ -81,9 +81,8 @@ class ProfilePhotoHandler {
     BuildContext context,
   ) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: _allowedProfilePhotoExtensions,
+      final result = await FilePicker.pickFiles(
+        type: FileType.image,
         allowMultiple: false,
         withData: true,
       );
