@@ -1,6 +1,6 @@
 /// Test configuration file for Solid Pod integration tests.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Thursday 2026-04-23 14:35:48 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -38,7 +38,7 @@ import 'package:path/path.dart' as path;
 class TestConfig {
   /// The base URL of the Solid Pod server being tested.
 
-  static const podServer = 'https://pods.dev.solidcommunity.au';
+  static const podServer = 'https://pods.solidcommunity.au';
 
   /// Specific login path for authentication.
 

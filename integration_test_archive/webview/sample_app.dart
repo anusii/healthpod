@@ -1,6 +1,6 @@
 /// Sample app that demonstrates the usage of InAppWebView to display a web page within the app.
 //
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
+// Time-stamp: <Thursday 2026-04-23 14:36:06 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -92,7 +92,7 @@ class _WebViewSampleAppScreenState extends State<WebViewSampleAppScreen> {
       // Sets the initial URL to load in the web view.
 
       initialUrlRequest:
-          URLRequest(url: WebUri('https://pods.dev.solidcommunity.au')),
+          URLRequest(url: WebUri('https://pods.solidcommunity.au')),
 
       // Configure initial settings for the web view.
 
