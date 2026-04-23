@@ -97,7 +97,7 @@ class UploadCallbackHandler {
   /// Handles file upload.
 
   Future<void> handleFileUpload() async {
-    final result = await FilePicker.platform.pickFiles();
+    final result = await FilePicker.pickFiles();
     if (result != null && result.files.isNotEmpty) {
       final file = result.files.first;
       if (file.path != null && context.mounted) {

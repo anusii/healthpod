@@ -70,7 +70,7 @@ class ProfilePhotoHandler {
 
   static Future<File?> pickProfilePhoto() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.image,
         allowMultiple: false,
       );
