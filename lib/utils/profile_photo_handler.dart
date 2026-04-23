@@ -24,16 +24,24 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:solidpod/solidpod.dart';
+import 'package:universal_io/io.dart';
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+
+/// Maximum allowed file size for profile photo upload.
+
+const int _maxProfilePhotoSizeBytes = 2 * 1024 * 1024;
+
+/// Allowed file extensions for profile photos (JPG, PNG only).
+
+const List<String> _allowedProfilePhotoExtensions = ['jpg', 'jpeg', 'png'];
 
 /// Handles the uploading, retrieval, and management of profile photos.
 
@@ -66,23 +74,102 @@ class ProfilePhotoHandler {
 
   /// Opens a file picker to select an image file for profile photo.
   ///
-  /// Returns a File object representing the selected image file, or null if no file was selected.
+  /// Returns a record of (Uint8List bytes, String format) or null if no valid
+  /// file was selected.
 
-  static Future<File?> pickProfilePhoto() async {
+  static Future<({Uint8List bytes, String format})?> pickProfilePhoto(
+    BuildContext context,
+  ) async {
     try {
       final result = await FilePicker.pickFiles(
         type: FileType.image,
         allowMultiple: false,
+        withData: true,
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        if (result.files.first.path != null) {
-          return File(result.files.first.path!);
-        }
+      if (result == null || result.files.isEmpty) {
+        return null;
       }
-      return null;
+
+      final file = result.files.first;
+      final extension = file.extension?.toLowerCase() ?? '';
+
+      // Validate file extension.
+
+      if (!_allowedProfilePhotoExtensions.contains(extension)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Please select a JPG or PNG image',
+              ),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
+        return null;
+      }
+
+      // Get bytes: prefer in-memory bytes, else read from path.
+
+      Uint8List? bytes = file.bytes;
+      if (bytes == null && file.path != null) {
+        // Read from file path on platforms that provide it.
+
+        final data = await _readFileBytes(file.path!);
+        if (data == null) return null;
+        bytes = data;
+      }
+
+      if (bytes == null || bytes.isEmpty) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unable to read the selected file'),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
+        return null;
+      }
+
+      // Validate file size (max 2 MB).
+
+      if (bytes.length > _maxProfilePhotoSizeBytes) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Image must be smaller than 2 MB. '
+                'Please choose a smaller file.',
+              ),
+              backgroundColor: Colors.red,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
+        return null;
+      }
+
+      return (bytes: bytes, format: extension);
     } catch (e) {
-      //debugPrint('Error picking profile photo: $e');
+      debugPrint('Error picking profile photo: $e');
+      return null;
+    }
+  }
+
+  /// Reads file bytes from a path. Used when [withData] does not populate bytes
+  /// (e.g. on macOS). Returns null on failure.
+
+  static Future<Uint8List?> _readFileBytes(String path) async {
+    try {
+      final file = File(path);
+      final bytes = await file.readAsBytes();
+      return Uint8List.fromList(bytes);
+    } catch (e) {
+      debugPrint('Error reading file bytes: $e');
       return null;
     }
   }
@@ -90,13 +177,15 @@ class ProfilePhotoHandler {
   /// Uploads a profile photo to the user's Solid Pod.
   ///
   /// Parameters:
-  /// - [imageFile]: File object of the image to upload
+  /// - [imageBytes]: Cropped image bytes (typically PNG after cropping)
+  /// - [format]: Image format, e.g. 'png', 'jpg'
   /// - [context]: BuildContext for UI interactions and Pod operations
   ///
   /// Returns true if upload was successful, false otherwise.
 
   static Future<bool> uploadProfilePhoto(
-    File imageFile,
+    Uint8List imageBytes,
+    String format,
     BuildContext context,
   ) async {
     try {
@@ -105,23 +194,21 @@ class ProfilePhotoHandler {
       final timestamp = DateTime.now();
       final formattedTimestamp = formatTimestampForFilename(timestamp);
 
-      // Use a distinct prefix for photo files to differentiate from profile data.
+      // Use a distinct prefix for photo files to differentiate from profile
+      // data.
 
       final filename = 'profile_photo_$formattedTimestamp.photo.enc.ttl';
 
       // Convert image to base64 for storage.
 
-      final bytes = await imageFile.readAsBytes();
-      final base64Image = base64Encode(bytes);
+      final base64Image = base64Encode(imageBytes);
 
       // Create JSON data - only photo-related data, no profile fields.
 
       final jsonData = {
         'timestamp': timestamp.toIso8601String(),
         'imageData': base64Image,
-        'format': imageFile.path.split('.').last.toLowerCase(),
-
-        // Add a type marker to clearly identify this as a photo file.
+        'format': format,
         'type': 'profile_photo',
       };
 
@@ -141,11 +228,12 @@ class ProfilePhotoHandler {
         filePath,
         jsonString,
         encrypted: true,
+        overwrite: true,
       );
 
       return true;
     } catch (e) {
-      //debugPrint('Error uploading profile photo: $e');
+      debugPrint('Error uploading profile photo: $e');
       return false;
     }
   }
@@ -270,10 +358,9 @@ class ProfilePhotoHandler {
       // Keep the most recent, remove others.
 
       for (int i = 1; i < photoFiles.length; i++) {
-        // For deleting, we need to use the full path.
-
-        final filePath = '$_profileDirectoryFull/${photoFiles[i]}';
-        await deleteFile(fileUrl: filePath);
+        final path = '$_profileDirectoryFull/${photoFiles[i]}';
+        final fileUrl = await getFileUrl(path);
+        await deleteFile(fileUrl: fileUrl);
       }
 
       return true;
@@ -319,10 +406,9 @@ class ProfilePhotoHandler {
 
       photoFiles.sort((a, b) => b.compareTo(a));
 
-      // Delete the most recent photo using the full path.
-
-      final filePath = '$_profileDirectoryFull/${photoFiles.first}';
-      await deleteFile(fileUrl: filePath);
+      final path = '$_profileDirectoryFull/${photoFiles.first}';
+      final fileUrl = await getFileUrl(path);
+      await deleteFile(fileUrl: fileUrl);
 
       return true;
     } catch (e) {
@@ -332,6 +418,7 @@ class ProfilePhotoHandler {
           SnackBar(
             content: Text('Error deleting profile photo: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
           ),
         );
       }
