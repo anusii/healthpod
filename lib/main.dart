@@ -1,6 +1,6 @@
 /// HealthPod - Collect and analyse health data preserving privacy using PODs.
 ///
-// Time-stamp: <Wednesday 2025-07-23 16:34:25 +1000 Graham Williams>
+// Time-stamp: <Saturday 2026-05-09 06:53:57 +1000 Graham Williams>
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///
@@ -32,7 +32,6 @@ import 'package:solidui/solidui.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'package:healthpod/healthpod.dart';
-import 'package:healthpod/utils/is_desktop.dart';
 
 /// Main entry point for the [HealthPod] application.
 
@@ -56,7 +55,7 @@ void main() async {
 
   SolidSecurityKeyCentralManager.instance;
 
-  if (isDesktop(PlatformWrapper())) {
+  if (isDesktop) {
     // Support [windowManager] options for the desktop. We do this here before
     // running the app. If there is no [windowManager] options we probably don't
     // need this whole section.

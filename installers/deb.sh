@@ -35,7 +35,7 @@ EOL
 
 cat > ${APP}_${VER}_amd64/usr/share/applications/com.togaware.${APP}.desktop << EOL
 [Desktop Entry]
-Name=Healthpod
+Name=${APP}
 Comment=Healthpod data wallet
 Exec=/usr/bin/${APP}
 Icon=${APP}
@@ -55,7 +55,7 @@ cp -r ../build/linux/x64/release/bundle/* ${APP}_${VER}_amd64/usr/lib/${APP}/
 # Copy the app icon which is assumed to be named ${APP}.png in the
 # installers folder.
 
-cp app.png ${APP}_${VER}_amd64/usr/share/icons/hicolor/512x512/apps/${APP}.png
+cp ../assets/images/app_icon.png ${APP}_${VER}_amd64/usr/share/icons/hicolor/512x512/apps/${APP}.png
 
 # 20260202 gjw For packages using syncfusion pdf viewer which uses the
 # Google libpdfium library we need to ensure the libpdfuim.so file is

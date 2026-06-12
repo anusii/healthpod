@@ -45,10 +45,10 @@ env:
   APP: healthpod
   RELEASE: dev
   LINUX_PKGS: libsecret-1-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-good gstreamer1.0-plugins-bad
-  FLUTTER_VERSION: "3.41.5"
   MACOS_APP_RELEASE_UNSIGNED_PATH: build/macos/Build/Products/Release-unsigned
   MACOS_APP_RELEASE_STAGING_PATH: build/macos/Build/Products/Release-staging
   MACOS_APP_RELEASE_DEV_PATH: build/macos/Build/Products/Release-dev
+  FLUTTER_VERSION: "3.44.0"
 
 jobs:
 
@@ -260,9 +260,9 @@ jobs:
 
   package-linux-snap:
     if: |
-      contains(github.event.head_commit.message, 'bump version x') ||
-      contains(github.event.head_commit.message, 'build installers x') ||
-      contains(github.event.head_commit.message, 'build linux x') ||
+      contains(github.event.head_commit.message, 'bump version') ||
+      contains(github.event.head_commit.message, 'build installers') ||
+      contains(github.event.head_commit.message, 'build linux') ||
       contains(github.event.head_commit.message, 'build snap')
 
     runs-on: ubuntu-latest

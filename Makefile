@@ -2,7 +2,7 @@
 #
 # Generic Makefile
 #
-# Time-stamp: <Saturday 2026-01-03 16:58:59 +1100 Graham Williams>
+# Time-stamp: <Monday 2026-05-25 20:36:38 +1000 Graham Williams>
 #
 # Copyright (c) Graham.Williams@togaware.com
 #
@@ -29,7 +29,7 @@ DEST=/var/www/html/$(APP)
 # the download folder, and the URL to the downloads.
 
 REPO=solidcommunity.au
-RLOC=/var/www/html/installers/
+RLOC=/var/www/html/web/installers/
 DWLD=https://$(REPO)/installers/
 
 ########################################################################
@@ -130,7 +130,7 @@ deb:
 	(cd installers; make $@)
 	rsync -avzh installers/$(APP)_$(VER)_amd64.deb $(REPO):$(RLOC)$(APP)_amd64.deb
 	ssh $(REPO) chmod a+r $(RLOC)$(APP)_amd64.deb
-	wget $(DWLD)/$(APP)_amd64.deb -O $(APP)_amd64.deb
+	wget $(DWLD)$(APP)_amd64.deb -O $(APP)_amd64.deb
 	wajig install $(APP)_amd64.deb
 	rm -f $(APP)_amd64.deb
 	mv -f installers/$(APP)_*.deb installers/ARCHIVE/
@@ -174,7 +174,7 @@ debin:
 # it will hold up the oher non-interactive builds.
 
 .PHONY: ginstall
-ginstall: upload prod apk appbundle debin
+ginstall: upload prod apk appbundle
 
 .PHONY: ginfo
 ginfo:
@@ -188,3 +188,34 @@ ginfo:
 	else \
 		echo "No bump ID found."; \
 	fi
+
+ZFILES := lib test integration_test pubspec.yaml README.md
+
+.PHONY: zip
+zip:
+	@mkdir -p ignore
+	@rm -f ignore/$(APP)_lib.zip
+	@to_zip=""
+	@for f in $(ZFILES); do \
+		if [ -e "$$f" ]; then \
+			to_zip="$$to_zip $$f"; \
+		fi; \
+	done; \
+	zip -r ignore/$(APP)_lib.zip $$to_zip
+	open ignore/
+
+.PHONY: claude
+claude:
+	bash support/meld_zip_from_claude.sh
+
+.PHONY: bump
+bump:
+	@make prep
+	@MESSAGE=$$(grep '^+.*\[' CHANGELOG.md | head -n 1 | sed 's/^+ //; s/ \[.*//'); \
+	VERSION=$$(grep '^+.*\[' CHANGELOG.md | head -n 1 | sed 's/.*\[//; s/ .*//'); \
+	if [ -z "$$MESSAGE" ]; then \
+		echo "Error: Could not extract message from CHANGELOG.md"; \
+		exit 1; \
+	fi; \
+	git commit -am "Bump version $$VERSION $$MESSAGE"; \
+	git push

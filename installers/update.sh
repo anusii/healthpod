@@ -2,7 +2,9 @@
 
 # set -x
 
-# 20241024 gjw After a github action has built the bundles and stored
+# 20260216 gjw Compare files.
+#
+# After a github action has built the bundles and stored
 # them as artefacts on github, we can upload them to the ${HOST} for
 # distribution.
 
@@ -104,6 +106,8 @@ if [[ "${status}" == "completed" ]]; then
 	ssh ${HOST} "cd ${FLDR}; chmod 0644 ${TARGET}"
 	echo  "Archive as installers/ARCHIVE/${fname}"
 	mv -f ${fname} ARCHIVE/
+	echo  "Install locally from installers/ARCHIVE/${fname}"
+	wajig install ARCHIVE/${fname}
     fi
 
     echo ""
@@ -349,6 +353,9 @@ if [[ "${status}" == "completed" ]]; then
     fi
 
     echo ""
+
+    echo '******************** FINISHED.'
+
 
 else
 

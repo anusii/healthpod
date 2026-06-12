@@ -31,7 +31,6 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/home/service/components/profile/profile_data_manager.dart';
 import 'package:healthpod/features/home/service/components/profile/profile_edit_dialog.dart';
-import 'package:healthpod/features/home/service/components/profile/profile_photo_manager.dart';
 import 'package:healthpod/features/home/service/components/profile/profile_ui_components.dart';
 import 'package:healthpod/theme/card_style.dart';
 
@@ -78,9 +77,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = true;
   bool _isSaving = false;
-  bool _isLoadingPhoto = true;
-  bool _isUploadingPhoto = false;
-  ImageProvider? _profilePhoto;
 
   // Holds full profile data.
 
@@ -91,7 +87,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     super.initState();
     _initializeControllers();
     _loadProfileData();
-    _loadProfilePhoto();
   }
 
   /// Initialise all text controllers.
@@ -139,30 +134,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-      });
-    }
-  }
-
-  /// Load profile photo from pod.
-
-  Future<void> _loadProfilePhoto() async {
-    if (!mounted) return;
-    setState(() {
-      _isLoadingPhoto = true;
-    });
-
-    try {
-      final photoProvider = await ProfilePhotoManager.loadProfilePhoto(context);
-      if (!mounted) return;
-      setState(() {
-        _profilePhoto = photoProvider;
-        _isLoadingPhoto = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _profilePhoto = null;
-        _isLoadingPhoto = false;
       });
     }
   }
@@ -291,12 +262,6 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     if (oldWidget.isEditing && !widget.isEditing) {
       _saveProfileData();
     }
-
-    // Reload photo if widget is updated.
-
-    if (oldWidget != widget) {
-      _loadProfilePhoto();
-    }
   }
 
   /// Show dialog for editing profile details.
@@ -362,11 +327,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
               else
                 ProfileUIComponents.buildProfileHeader(
                   context,
-                  _profilePhoto,
                   nameController.text,
-                  _isLoadingPhoto,
-                  _isUploadingPhoto,
-                  () => _showPhotoOptionsDialog(),
                 ),
 
               const SizedBox(height: 16),
@@ -432,38 +393,5 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     }
 
     return rows;
-  }
-
-  /// Shows photo options dialog using ProfilePhotoManager.
-
-  Future<void> _showPhotoOptionsDialog() async {
-    final nameController = _controllers.keys.firstWhere(
-      (controller) => _controllers[controller] == 'name',
-    );
-
-    await ProfilePhotoManager.showPhotoOptionsDialog(
-      context,
-      _profilePhoto,
-      nameController.text,
-      (photo) {
-        if (mounted) {
-          setState(() {
-            _profilePhoto = photo;
-          });
-        }
-      },
-      widget.onDataChanged,
-      (isUploading) {
-        if (mounted) {
-          setState(() {
-            _isUploadingPhoto = isUploading;
-          });
-        }
-      },
-      _isLoading,
-      _isSaving,
-      _isLoadingPhoto,
-      _isUploadingPhoto,
-    );
   }
 }

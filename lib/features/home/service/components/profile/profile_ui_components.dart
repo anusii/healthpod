@@ -27,84 +27,20 @@ import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
-import 'package:healthpod/utils/profile_photo_handler.dart';
-
 /// Provides UI components for profile details display.
 
 class ProfileUIComponents {
-  /// Builds the profile header with avatar, name, and notifications.
+  /// Builds the profile header with name and notifications.
 
   static Widget buildProfileHeader(
     BuildContext context,
-    ImageProvider? profilePhoto,
     String userName,
-    bool isLoadingPhoto,
-    bool isUploadingPhoto,
-    VoidCallback onPhotoTap,
   ) {
     final theme = Theme.of(context);
     const int notificationCount = 2;
 
     return Row(
       children: [
-        // User avatar with lock icon.
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            // Profile photo with loading indicator or initials.
-            ProfilePhotoHandler.buildProfileAvatar(
-              context: context,
-              photo: profilePhoto,
-              name: userName,
-              radius: 24,
-              isLoading: isLoadingPhoto || isUploadingPhoto,
-              onTap: onPhotoTap,
-            ),
-
-            // Security lock indicator.
-            Positioned(
-              bottom: -2,
-              right: -2,
-              child: Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.tertiary,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.lock,
-                  color: theme.colorScheme.onTertiary,
-                  size: 16,
-                ),
-              ),
-            ),
-
-            // Edit photo indicator.
-            if (!isLoadingPhoto && !isUploadingPhoto)
-              Positioned(
-                top: -2,
-                left: -2,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: theme.colorScheme.primary,
-                      width: 1,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.edit,
-                    color: theme.colorScheme.primary,
-                    size: 12,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(width: 12),
-
         // Display user name.
         Expanded(
           child: Text(

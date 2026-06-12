@@ -1,11 +1,12 @@
 ## Pull Request Details
 
 ### Description
-<!--- Describe your changes in detail -->
-<!--- Why is this change required? What problem does it solve? -->
+<!--- Describe the problem this PR solves -->
+<!--- Describe what you have changed -->
+<!--- Describe why this change is required -->
 
 ### Related Issues
-<!--- If it fixes an open issue, please link to the issue here. -->
+<!--- If it fixes an open issue(s), please link to the issue here. -->
 
 ### Type of Change
 
@@ -20,7 +21,7 @@
 ### Checklist
 <!--- Go over all the following points, and put an `x` in all the boxes that apply. -->
 
-- [ ] Screenshots included in linked issue #
+- [ ] Screenshots included here/in linked issue #
 - [ ] Changes adhere to the [style and coding guidelines](https://survivor.togaware.com/gnulinux/flutter-style.html)
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly in hard-to-understand areas
