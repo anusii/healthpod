@@ -40,13 +40,13 @@ platform from the [Solid Community AU](https://solidcommunity.au):
 + **GNU/Linux**
   [snap](https://solidcommunity.au/installers/healthpod_amd64.snap) or
   [deb](https://solidcommunity.au/installers/healthpod_amd64.deb) or
-  [zip](https://solidcommunity.au/installers/healthpod-dev-linux.zip);
+  [zip](https://solidcommunity.au/installers/healthpod-linux.zip);
 + **macOS**
-  [zip](https://solidcommunity.au/installers/healthpod-dev-macos.zip);
+  [zip](https://solidcommunity.au/installers/healthpod-macos.zip);
 + **Windows**
-  [zip](https://solidcommunity.au/installers/healthpod-dev-windows.zip)
+  [zip](https://solidcommunity.au/installers/healthpod-windows.zip)
   or
-  [inno](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
+  [inno](https://solidcommunity.au/installers/healthpod-windows-inno.exe).
 
 Contributions are welcome. Visit
 [github](https://github.com/anusii/healthpod) to submit an issue or,
@@ -120,7 +120,7 @@ The grid items include:
   to interact with the data collection.
 
 <!-- markdownlint-disable MD036 -->
-*Time-stamp: <Monday 2026-01-12 17:08:39 +1100 Graham Williams>*
+*Time-stamp: <Saturday 2026-06-13 10:29:12 +1000 Graham Williams>*
 <!-- markdownlint-enable MD036 -->
 
 <!-- markdownlint-disable MD053 -->

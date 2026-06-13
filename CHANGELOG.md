@@ -10,13 +10,13 @@ Community](https://solidcommunity.au) or directly: for **Android** as
 [apk](https://solidcommunity.au/installers/healthpod.apk); for
 **GNU/Linux** as
 [deb](https://solidcommunity.au/installers/healthpod_amd64.deb) or
-[zip](https://solidcommunity.au/installers/healthpod-dev-linux.zip);
+[zip](https://solidcommunity.au/installers/healthpod-linux.zip);
 for **macOS** as
-[zip](https://solidcommunity.au/installers/healthpod-dev-macos.zip);
+[zip](https://solidcommunity.au/installers/healthpod-macos.zip);
 for **Windows**
-[zip](https://solidcommunity.au/installers/healthpod-dev-windows.zip)
+[zip](https://solidcommunity.au/installers/healthpod-windows.zip)
 or
-[inno](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
+[inno](https://solidcommunity.au/installers/healthpod-windows-inno.exe).
 
 Contributions are welcome. Visit
 [github](https://github.com/anusii/healthpod) to submit an issue or,

@@ -17,14 +17,14 @@ Run the app online: [**web**](https://healthpod.solidcommunity.au).
 Download the latest version:
 **GNU/Linux**
 [deb](https://solidcommunity.au/installers/healthpod_amd64.deb) or
-[zip](https://solidcommunity.au/installers/healthpod-dev-linux.zip);
+[zip](https://solidcommunity.au/installers/healthpod-linux.zip);
 **Android**
 [apk](https://solidcommunity.au/installers/healthpod.apk);
 **macOS**
-[zip](https://solidcommunity.au/installers/healthpod-dev-macos.zip);
+[zip](https://solidcommunity.au/installers/healthpod-macos.zip);
 **Windows**
-[zip](https://solidcommunity.au/installers/healthpod-dev-windows.zip) or
-[inno](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe).
+[zip](https://solidcommunity.au/installers/healthpod-windows.zip) or
+[inno](https://solidcommunity.au/installers/healthpod-windows-inno.exe).
 
 ## Prerequisite
 
@@ -53,13 +53,13 @@ sudo dpkg --install healthpod_amd64.deb
 
 ### Zip Install
 
-Download [healthpod-dev-linux.zip](https://solidcommunity.au/installers/healthpod-dev-linux.zip)
+Download [healthpod-linux.zip](https://solidcommunity.au/installers/healthpod-linux.zip)
 
 To try it out:
 
 ```bash
-wget https://solidcommunity.au/installers/healthpod-dev-linux.zip -O healthpod-dev-linux.zip
-unzip healthpod-dev-linux.zip -d healthpod
+wget https://solidcommunity.au/installers/healthpod-linux.zip -O healthpod-linux.zip
+unzip healthpod-linux.zip -d healthpod
 ./healthpod/healthpod
 ```
 
@@ -68,7 +68,7 @@ with a desktop icon for their desktop, begin by downloading the **zip** and
 installing that into a local folder:
 
 ```bash
-unzip healthpod-dev-linux.zip -d ${HOME}/.local/share/healthpod
+unzip healthpod-linux.zip -d ${HOME}/.local/share/healthpod
 ```
 
 Then set up your local installation (only required once):
@@ -84,7 +84,7 @@ wget https://github.com/anusii/healthpod/raw/dev/installers/app.png -O ${HOME}/.
 To install for any user on the computer:
 
 ```bash
-sudo unzip healthpod-dev-linux.zip -d /opt/healthpod
+sudo unzip healthpod-linux.zip -d /opt/healthpod
 sudo ln -s /opt/healthpod/healthpod /usr/local/bin/
 wget https://raw.githubusercontent.com/anusii/healthpod/dev/installers/app.desktop -O ${HOME}/usr/local/share/applications/healthpod.desktop
 wget https://github.com/anusii/healthpod/raw/dev/installers/app.png -O ${HOME}/use/local/share/icons/healthpod.png
@@ -96,7 +96,7 @@ Alt-F2 and type `healthpod` then Enter.
 ## MacOS
 
 The zip file
-[healthpod-dev-macos.zip](https://solidcommunity.au/installers/healthpod-dev-macos.zip)
+[healthpod-macos.zip](https://solidcommunity.au/installers/healthpod-macos.zip)
 can be installed on MacOS. Download the file and open it on your
 Mac. Then, holding the Control key click on the app icon to display a
 menu. Choose `Open`. Then accept the warning to then run the app. The
@@ -115,5 +115,5 @@ the web-based app directly.
 ## Windows Installer
 
 Download and run the self extracting archive
-[healthpod-dev-windows-inno.exe](https://solidcommunity.au/installers/healthpod-dev-windows-inno.exe)
+[healthpod-windows-inno.exe](https://solidcommunity.au/installers/healthpod-windows-inno.exe)
 to self install the app on Windows.
