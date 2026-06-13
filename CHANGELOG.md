@@ -1,8 +1,7 @@
 # Health Pod Change Log
 
 Noted here are the high level changes for the app.  Each update
-includes a short user-oriented description.  The next release is 0.3
-following incremental updates through the 0.2.n series.
+includes a short user-oriented description.
 
 You can run the app in your browser from the
 [**web**](https://healthpod.solidcommunity.au) or else download and
@@ -29,7 +28,11 @@ We make this project available for free so if you appreciate the app
 then please show some ❤️ and tap on the star at
 [GitHub](https://github.com/anusii/healthpod) to support our work.
 
-## 0.3 Test and Make Robust
+## 1.0 Migrating to new more secure secret key handling
+
++ Migrate to solid_auth v1 series [1.0.0 20260613 gjw]
+
+## 0.2 Test and Make Robust
 
 + Fix widget overflow when viewing appointments [0.2.9 20260123 tonypioneer]
 + Update to riverpod v3 [0.2.8 20260123 tonypioneer]
@@ -42,7 +45,7 @@ then please show some ❤️ and tap on the star at
 + Lychee checks and template updates [0.2.1 20250929 gjw]
 + Begin new series to test and make robust [0.2.0 20250918 gjw]
 
-## 0.2 First stable release with SolidScaffold
+## 0.1 First stable release with SolidScaffold
 
 + LINT: Remove unused code and split long files [0.1.23 20250918 tonypioneer]
 + Get installer builds working [0.1.22 20250917 gjw]
@@ -68,7 +71,7 @@ then please show some ❤️ and tap on the star at
 + Resync [0.1.2 20250423 gjw]
 + HOME: Concept dashboard and vaccinations [0.1.1 20250402 misc]
 
-## 0.1 Initial beta release
+## 0.0 Initial beta release
 
 + Ready for beta release [0.1.0 20250326 gjw]
 + Deploy navigator [0.0.9 20250218 kev]

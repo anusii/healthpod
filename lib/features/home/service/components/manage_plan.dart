@@ -171,11 +171,8 @@ class _ManagePlanState extends State<ManagePlan> {
                       child: ReorderableListView.builder(
                         shrinkWrap: true,
                         itemCount: controllers.length,
-                        onReorder: (oldIndex, newIndex) {
+                        onReorderItem: (oldIndex, newIndex) {
                           setState(() {
-                            if (oldIndex < newIndex) {
-                              newIndex -= 1;
-                            }
                             final item = controllers.removeAt(oldIndex);
                             controllers.insert(newIndex, item);
                           });
