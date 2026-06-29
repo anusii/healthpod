@@ -40,6 +40,7 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/diary/models/appointment.dart';
+import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
 import 'package:healthpod/utils/save_response_pod.dart';
 
@@ -110,8 +111,15 @@ class DiaryService {
                 continue;
               }
 
+              // Read the id if present; legacy files without one fall back to
+              // a generated id (handled by the model's default constructor).
+              final rootId = data['id']?.toString();
+              final responseId = appointmentData['id']?.toString();
+              final idStr = rootId ?? responseId;
+
               appointments.add(
                 Appointment(
+                  id: idStr,
                   date: DateTime.parse(dateStr),
                   title: appointmentData['title'],
                   description: appointmentData['description'],
@@ -147,6 +155,7 @@ class DiaryService {
       // Prepare the appointment data for saving.
 
       final data = {
+        'id': appointment.id,
         'date': appointment.date.toIso8601String(),
         'title': appointment.title,
         'description': appointment.description,
@@ -191,14 +200,16 @@ class DiaryService {
 
       for (final file in resources.files) {
         if (file.endsWith('.enc.ttl')) {
-          final filePath = getFeaturePath(feature, file);
+          // Read with the same relative path style as loadAppointments
+          // ('<feature>/<file>'); the previous absolute/relativeToPod form
+          // produced a malformed URI. Use constructPodPath only for the
+          // actual deleteFile call (matching the working bp/vaccination flow).
+          final readPath = '$feature/$file';
+          final deletePath = constructPodPath(feature, file);
 
           String content;
           try {
-            content = await readPod(
-              filePath,
-              pathType: PathType.relativeToPod,
-            );
+            content = await readPod(readPath);
           } catch (e) {
             // File might not exist anymore (deleted, moved, or corrupted).
 
@@ -214,8 +225,24 @@ class DiaryService {
               final data = jsonDecode(content.toString());
               final appointmentData = data['responses'] ?? data;
 
-              // Try to get date from both root level and responses.
+              // Prefer matching by stable id. Fall back to date matching for
+              // legacy files saved before ids were introduced.
+              final rootId = data['id']?.toString();
+              final responseId = appointmentData['id']?.toString();
+              final fileId = rootId ?? responseId;
 
+              if (fileId != null && appointment.id.isNotEmpty) {
+                if (fileId == appointment.id) {
+                  await deleteFile(fileUrl: deletePath);
+                  return true;
+                }
+                // This file has an id but it doesn't match — skip it.
+                continue;
+              }
+
+              // Legacy file (no id): match by date/time AND title AND
+              // description, so two near-identical appointments (same time,
+              // slightly different text) are not confused with each other.
               final rootDateStr = data['date']?.toString();
               final responseDateStr = appointmentData['date']?.toString();
               final dateStr = rootDateStr ?? responseDateStr;
@@ -226,8 +253,13 @@ class DiaryService {
               }
 
               final fileDate = DateTime.parse(dateStr);
-              if (fileDate.isAtSameMomentAs(appointment.date)) {
-                await deleteFile(fileUrl: filePath);
+              final fileTitle = appointmentData['title']?.toString() ?? '';
+              final fileDesc = appointmentData['description']?.toString() ?? '';
+
+              if (fileDate.isAtSameMomentAs(appointment.date) &&
+                  fileTitle == appointment.title &&
+                  fileDesc == appointment.description) {
+                await deleteFile(fileUrl: deletePath);
                 return true;
               }
             } catch (e) {

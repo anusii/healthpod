@@ -25,12 +25,19 @@
 
 library;
 
+import 'dart:math';
+
 /// A model class representing a medical appointment.
 ///
 /// This class contains information about an appointment including its date,
 /// title, description, and whether it's in the past or future.
 
 class Appointment {
+  /// A stable unique identifier for this appointment, used to match it for
+  /// editing and deletion independently of its date/time.
+
+  final String id;
+
   /// The date and time of the appointment.
 
   final DateTime date;
@@ -53,11 +60,23 @@ class Appointment {
   /// [title] is the title or name of the appointment.
   /// [description] is a detailed description of the appointment.
   /// [isPast] indicates whether the appointment is in the past.
+  /// [id] uniquely identifies the appointment; when omitted a new one is
+  /// generated.
 
   Appointment({
     required this.date,
     required this.title,
     required this.description,
     required this.isPast,
-  });
+    String? id,
+  }) : id = id ?? _generateId();
+
+  /// Generate a reasonably unique id without external dependencies:
+  /// a timestamp combined with a random suffix.
+
+  static String _generateId() {
+    final ts = DateTime.now().microsecondsSinceEpoch;
+    final rand = Random().nextInt(1 << 32);
+    return '$ts-$rand';
+  }
 }

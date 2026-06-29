@@ -31,13 +31,14 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'models/appointment.dart';
 import 'service.dart';
 import 'widgets/appointment_dialog.dart';
+import 'widgets/appointment_list.dart';
+import 'widgets/month_year_selector.dart';
 
 class DiaryTab extends StatefulWidget {
   const DiaryTab({super.key});
@@ -53,21 +54,28 @@ class _DiaryTabState extends State<DiaryTab> {
   Map<DateTime, List<Appointment>> _events = {};
   final List<Appointment> _appointments = [];
 
+  // True while appointments are being loaded from the Pod.
+  bool _loading = true;
+
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay;
+    // Default to no day selected so the whole month is listed; tapping a day
+    // filters to that day, tapping it again clears back to the month.
+    _selectedDay = null;
     _loadAppointments();
   }
 
   Future<void> _loadAppointments() async {
     if (!mounted) return;
+    setState(() => _loading = true);
     final appointments = await DiaryService.loadAppointments();
     if (!mounted) return;
     setState(() {
       _appointments.clear();
       _appointments.addAll(appointments);
       _updateEvents();
+      _loading = false;
     });
   }
 
@@ -90,9 +98,28 @@ class _DiaryTabState extends State<DiaryTab> {
     return _events[DateTime(day.year, day.month, day.day)] ?? [];
   }
 
+  // All appointments in the focused month, sorted by date.
+  List<Appointment> _getAppointmentsForMonth() {
+    final list = _appointments
+        .where(
+          (a) =>
+              a.date.year == _focusedDay.year &&
+              a.date.month == _focusedDay.month,
+        )
+        .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+    return list;
+  }
+
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
     setState(() {
-      _selectedDay = selectedDay;
+      // Toggle: tapping the already-selected day clears the filter so the
+      // whole month is listed again.
+      if (_selectedDay != null && isSameDay(_selectedDay, selectedDay)) {
+        _selectedDay = null;
+      } else {
+        _selectedDay = selectedDay;
+      }
       _focusedDay = focusedDay;
     });
   }
@@ -127,6 +154,43 @@ class _DiaryTabState extends State<DiaryTab> {
     );
   }
 
+  void _editAppointment(Appointment original) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AppointmentDialog(
+        initial: original,
+        onSave: (title, description, date) async {
+          final updated = Appointment(
+            id: original.id,
+            date: date,
+            title: title,
+            description: description,
+            isPast: date.isBefore(DateTime.now()),
+          );
+
+          // Delete the original first (matched by its stable id), then save
+          // the updated version under the same id. Keep the dialog open while
+          // saving so its context stays valid for the Pod call.
+          await DiaryService.deleteAppointment(original);
+          final saved = await DiaryService.saveAppointment(
+            dialogContext,
+            updated,
+          );
+
+          if (mounted) Navigator.pop(dialogContext);
+          if (mounted) setState(() => _loading = true);
+
+          // Reload from the Pod so the list reflects the saved state.
+          if (saved) {
+            await _loadAppointments();
+          } else if (mounted) {
+            setState(() => _loading = false);
+          }
+        },
+      ),
+    );
+  }
+
   void _deleteAppointment(Appointment appointment) {
     if (!appointment.isPast) {
       showDialog(
@@ -143,17 +207,17 @@ class _DiaryTabState extends State<DiaryTab> {
             ),
             TextButton(
               onPressed: () async {
+                Navigator.pop(dialogContext);
+                if (mounted) setState(() => _loading = true);
                 final success = await DiaryService.deleteAppointment(
                   appointment,
                 );
-                if (success && mounted) {
-                  setState(() {
-                    _appointments.remove(appointment);
-                    _updateEvents();
-                  });
-                }
-                if (mounted) {
-                  Navigator.pop(dialogContext);
+                // Reload from the Pod so the list matches what was actually
+                // deleted (more reliable than removing by object identity).
+                if (success) {
+                  await _loadAppointments();
+                } else if (mounted) {
+                  setState(() => _loading = false);
                 }
               },
               child: const Text('Delete'),
@@ -167,7 +231,7 @@ class _DiaryTabState extends State<DiaryTab> {
   void _goToToday() {
     setState(() {
       _focusedDay = DateTime.now();
-      _selectedDay = DateTime.now();
+      _selectedDay = null;
     });
   }
 
@@ -177,174 +241,33 @@ class _DiaryTabState extends State<DiaryTab> {
       body: Column(
         children: [
           // Add month and year selector.
-          Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 8.0,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(13),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Month dropdown.
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withAlpha(51),
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_month,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      DropdownButton<int>(
-                        value: _focusedDay.month,
-                        underline: const SizedBox(),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 16,
-                        ),
-                        items: List.generate(12, (index) => index + 1)
-                            .map(
-                              (month) => DropdownMenuItem<int>(
-                                value: month,
-                                child: Text(
-                                  DateFormat(
-                                    'MMMM',
-                                  ).format(DateTime(_focusedDay.year, month)),
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (int? newMonth) {
-                          if (newMonth != null) {
-                            setState(() {
-                              _focusedDay = DateTime(
-                                _focusedDay.year,
-                                newMonth,
-                                _focusedDay.day,
-                              );
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                // Year dropdown.
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.outline.withAlpha(51),
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      DropdownButton<int>(
-                        value: _focusedDay.year,
-                        underline: const SizedBox(),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface,
-                          fontSize: 16,
-                        ),
-                        items: List.generate(11, (index) => 2020 + index)
-                            .map(
-                              (year) => DropdownMenuItem<int>(
-                                value: year,
-                                child: Text(
-                                  year.toString(),
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (int? newYear) {
-                          if (newYear != null) {
-                            setState(() {
-                              _focusedDay = DateTime(
-                                newYear,
-                                _focusedDay.month,
-                                _focusedDay.day,
-                              );
-                            });
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                // Today button.
-                TextButton.icon(
-                  onPressed: _goToToday,
-                  icon: Icon(
-                    Icons.today,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  label: const Text('Today'),
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outline.withAlpha(51),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          MonthYearSelector(
+            focusedDay: _focusedDay,
+            onMonthChanged: (m) => setState(() {
+              _focusedDay = DateTime(_focusedDay.year, m, _focusedDay.day);
+            }),
+            onYearChanged: (y) => setState(() {
+              _focusedDay = DateTime(y, _focusedDay.month, _focusedDay.day);
+            }),
+            onToday: _goToToday,
           ),
           Center(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.7,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
               child: TableCalendar<Appointment>(
                 firstDay: DateTime.utc(2020, 1, 1),
                 lastDay: DateTime.utc(2030, 12, 31),
                 focusedDay: _focusedDay,
                 calendarFormat: _calendarFormat,
+                rowHeight: 38,
+                daysOfWeekHeight: 20,
+                headerVisible: false,
                 selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
                 eventLoader: _getAppointmentsForDay,
                 onDaySelected: _onDaySelected,
+                onPageChanged: (focusedDay) {
+                  setState(() => _focusedDay = focusedDay);
+                },
                 onFormatChanged: (format) {
                   setState(() {
                     _calendarFormat = format;
@@ -352,7 +275,8 @@ class _DiaryTabState extends State<DiaryTab> {
                 },
                 calendarStyle: const CalendarStyle(
                   markersMaxCount: 3,
-                  markerSize: 8,
+                  markerSize: 6,
+                  cellMargin: EdgeInsets.all(4),
                 ),
                 calendarBuilders: CalendarBuilders(
                   markerBuilder: (context, date, events) {
@@ -379,30 +303,17 @@ class _DiaryTabState extends State<DiaryTab> {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: ListView.builder(
-              itemCount: _getAppointmentsForDay(_selectedDay!).length,
-              itemBuilder: (context, index) {
-                final appointment = _getAppointmentsForDay(
-                  _selectedDay!,
-                )[index];
-                return Card(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 4,
-                  ),
-                  child: ListTile(
-                    title: Text(appointment.title),
-                    subtitle: Text(appointment.description),
-                    trailing: !appointment.isPast
-                        ? IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () => _deleteAppointment(appointment),
-                          )
-                        : null,
-                    onTap: () => _showAppointmentDetails(appointment),
-                  ),
-                );
-              },
+            child: AppointmentList(
+              loading: _loading,
+              filtering: _selectedDay != null,
+              monthName: DateFormat('MMMM').format(_focusedDay),
+              selectedDay: _selectedDay,
+              items: _selectedDay != null
+                  ? _getAppointmentsForDay(_selectedDay!)
+                  : _getAppointmentsForMonth(),
+              onShowMonth: () => setState(() => _selectedDay = null),
+              onDelete: _deleteAppointment,
+              onEdit: _editAppointment,
             ),
           ),
         ],
@@ -414,57 +325,7 @@ class _DiaryTabState extends State<DiaryTab> {
     );
   }
 
-  void _showAppointmentDetails(Appointment appointment) {
-    final markdownContent = '''
-
-**Date:** ${DateFormat('dd MMM, yyyy').format(appointment.date)}
-**Time:** ${DateFormat('hh:mm a').format(appointment.date)}
-
-## Description
-${appointment.description}
-
-## Status
-${appointment.isPast ? 'Past' : 'Upcoming'}
-
-''';
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(
-              Icons.vaccines,
-              color: Theme.of(dialogContext).colorScheme.primary,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(appointment.title, overflow: TextOverflow.ellipsis),
-            ),
-          ],
-        ),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 400),
-          child: SizedBox(
-            width: double.maxFinite,
-            child: MarkdownBody(
-              data: markdownContent,
-              styleSheet: MarkdownStyleSheet(
-                h1: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                h2: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                p: const TextStyle(fontSize: 15),
-                strong: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
+  // The list below the calendar. Shows a busy indicator while loading; then,
+  // when a day is selected, only that day's appointments; otherwise every
+  // appointment in the focused month.
 }

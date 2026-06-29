@@ -30,6 +30,7 @@ then please show some ❤️ and tap on the star at
 
 ## 1.0 Migrating to new more secure secret key handling
 
++ Clean and bug fix appointment handling [1.0.4 20260629 gjw]
 + Remove settings - webid now handled by solidui [1.0.3 20260629 gjw]
 + Remove attempt to auto login with ChromeDriver [1.0.2 20260629 gjw]
 + Migrate clientid to github [1.0.1 20260629 gjw]

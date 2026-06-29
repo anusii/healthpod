@@ -29,6 +29,8 @@ import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 
+import '../models/appointment.dart';
+
 /// A dialog widget for adding or editing appointments.
 ///
 /// This widget provides a form for entering appointment details including
@@ -39,12 +41,18 @@ class AppointmentDialog extends StatefulWidget {
 
   final Function(String title, String description, DateTime date) onSave;
 
+  /// Optional existing appointment to edit. When provided, the form is
+  /// pre-filled and the dialog acts as an edit rather than an add.
+
+  final Appointment? initial;
+
   /// Creates a new [AppointmentDialog] instance.
   ///
   /// [onSave] is the callback function that will be called when the user
-  /// taps the save button with valid input.
+  /// taps the save button with valid input. Pass [initial] to edit an
+  /// existing appointment.
 
-  const AppointmentDialog({super.key, required this.onSave});
+  const AppointmentDialog({super.key, required this.onSave, this.initial});
 
   @override
   State<AppointmentDialog> createState() => _AppointmentDialogState();
@@ -55,6 +63,18 @@ class _AppointmentDialogState extends State<AppointmentDialog> {
   final _descriptionController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   TimeOfDay _selectedTime = TimeOfDay.now();
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initial;
+    if (initial != null) {
+      _titleController.text = initial.title;
+      _descriptionController.text = initial.description;
+      _selectedDate = initial.date;
+      _selectedTime = TimeOfDay.fromDateTime(initial.date);
+    }
+  }
 
   @override
   void dispose() {
@@ -109,7 +129,9 @@ class _AppointmentDialogState extends State<AppointmentDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add Appointment'),
+      title: Text(
+        widget.initial == null ? 'Add Appointment' : 'Edit Appointment',
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
