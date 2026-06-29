@@ -49,8 +49,6 @@ class HealthPod extends ConsumerStatefulWidget {
 }
 
 class _HealthPodState extends ConsumerState<HealthPod> {
-  Widget? _loginWidget;
-
   @override
   void initState() {
     super.initState();
@@ -71,12 +69,6 @@ class _HealthPodState extends ConsumerState<HealthPod> {
         },
       ),
     );
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      setState(() {
-        _loginWidget = createSolidLogin(context);
-      });
-    });
   }
 
   @override
@@ -89,7 +81,7 @@ class _HealthPodState extends ConsumerState<HealthPod> {
       title: 'Solid Health Pod',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: SelectionArea(child: _loginWidget ?? createSolidLogin(context)),
+      home: SelectionArea(child: createSolidLogin(context)),
     );
   }
 }
