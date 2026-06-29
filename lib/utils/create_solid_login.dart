@@ -27,40 +27,30 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:solidui/solidui.dart';
 
 import 'package:healthpod/home.dart';
-import 'package:healthpod/providers/settings.dart';
 
 /// Solid POD Authentication Widget Creator.
 ///
 /// Returns the standard [SolidLogin] widget, which authenticates against the
-/// user's Solid server using an external browser. The configured server URL
-/// (from settings) seeds the default WebID server and updates reactively when
-/// the user changes it.
+/// user's Solid server using an external browser. solidui handles server URL
+/// and security-key entry as part of the login flow.
 
 Widget createSolidLogin(BuildContext context) {
-  return Consumer(
-    builder: (context, ref, child) {
-      final serverUrl = ref.watch(serverURLProvider);
-      return SolidLogin(
-        required: false,
-        title: 'Health Pod\nManage and Query Health Docs',
-        appDirectory: 'healthpod',
-        webID:
-            serverUrl.isNotEmpty ? serverUrl : 'https://pods.solidcommunity.au',
-        image: const AssetImage('assets/images/app_image.jpg'),
-        logo: const AssetImage('assets/images/app_icon.png'),
-        link: 'https://github.com/anusii/healthpod/blob/main/README.md',
-        clientId: 'https://anusii.github.io/healthpod/client-profile.jsonld',
-        redirectUris: const [
-          'https://anusii.github.io/healthpod/redirect.html',
-          'com.togaware.healthpod://redirect',
-          'http://localhost:4400/redirect',
-        ],
-        child: const HealthPodHome(),
-      );
-    },
+  return const SolidLogin(
+    required: false,
+    title: 'Health Pod\nManage and Query Health Docs',
+    appDirectory: 'healthpod',
+    image: AssetImage('assets/images/app_image.jpg'),
+    logo: AssetImage('assets/images/app_icon.png'),
+    link: 'https://github.com/anusii/healthpod/blob/main/README.md',
+    clientId: 'https://anusii.github.io/healthpod/client-profile.jsonld',
+    redirectUris: [
+      'https://anusii.github.io/healthpod/redirect.html',
+      'com.togaware.healthpod://redirect',
+      'http://localhost:4400/redirect',
+    ],
+    child: HealthPodHome(),
   );
 }

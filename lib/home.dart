@@ -32,7 +32,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:solidui/solidui.dart'
     show
         SolidAboutConfig,
-        SolidAppBarAction,
         SolidAppBarConfig,
         SolidAuthHandler,
         SolidLoginStatus,
@@ -48,7 +47,6 @@ import 'package:solidui/solidui.dart'
 import 'package:healthpod/features/home/managers/home_state_manager.dart';
 import 'package:healthpod/features/home/widgets/menu_builder.dart';
 import 'package:healthpod/providers/tab_state.dart';
-import 'package:healthpod/settings/dialog.dart';
 
 /// The home screen for the HealthPod app.
 ///
@@ -176,9 +174,9 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
       menu: _buildHealthPodMenu(),
       selectedIndex: _selectedMenuIndex,
       onMenuSelected: _onMenuSelected,
-      appBar: SolidAppBarConfig(
+      appBar: const SolidAppBarConfig(
         title: 'HealthPod',
-        versionConfig: const SolidVersionConfig(
+        versionConfig: SolidVersionConfig(
           showDate: true,
           changelogUrl:
               'https://github.com/anusii/healthpod/blob/dev/CHANGELOG.md',
@@ -188,21 +186,7 @@ Version information for HealthPod
 Tap to view the complete changelog on GitHub with release notes, bug fixes, and new features.
 ''',
         ),
-        actions: [
-          SolidAppBarAction(
-            icon: Icons.settings,
-            tooltip: '''
-
-            **Settings:** Tap here to view and manage your HealthPod account
-              settings.
-
-            ''',
-            onPressed: () => showDialog(
-              context: context,
-              builder: (context) => const SettingsDialog(),
-            ),
-          ),
-        ],
+        actions: [],
         overflowItems: [],
       ),
       themeToggle: const SolidThemeToggleConfig(),
