@@ -1,6 +1,6 @@
 /// Create Solid Login Widget.
 //
-// Time-stamp: <Monday 2026-06-29 16:08:00 +1000 Graham Williams>
+// Time-stamp: <Tuesday 2026-06-30 07:53:04 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -40,11 +40,11 @@ import 'package:healthpod/home.dart';
 Widget createSolidLogin(BuildContext context) {
   return const SolidLogin(
     required: false,
-    title: 'Health Pod\nManage and Query Health Docs',
     appDirectory: 'healthpod',
+    title: 'Health Pod\nManage and Query Health Docs',
     image: AssetImage('assets/images/app_image.jpg'),
     logo: AssetImage('assets/images/app_icon.png'),
-    link: 'https://github.com/anusii/healthpod/blob/main/README.md',
+    link: 'https://anusii.github.io/healthpod',
     clientId: 'https://anusii.github.io/healthpod/client-profile.jsonld',
     redirectUris: [
       'https://anusii.github.io/healthpod/redirect.html',
