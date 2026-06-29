@@ -1,6 +1,6 @@
 /// Create Solid Login Widget.
 //
-// Time-stamp: <Saturday 2026-06-13 09:03:47 +1000 Graham Williams>
+// Time-stamp: <Monday 2026-06-29 16:08:00 +1000 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -235,10 +235,9 @@ Widget _buildNormalLogin(String serverUrl) {
         image: const AssetImage('assets/images/app_image.jpg'),
         logo: const AssetImage('assets/images/app_icon.png'),
         link: 'https://github.com/anusii/healthpod/blob/main/README.md',
-        clientId:
-            'https://solidcommunity.au/apps/healthpod/client-profile.jsonld',
+        clientId: 'https://anusii.github.io/healthpod/client-profile.jsonld',
         redirectUris: [
-          'https://solidcommunity.au/apps/healthpod/redirect.html',
+          'https://anusii.github.io/healthpod/redirect.html',
           'com.togaware.healthpod://redirect',
           'http://localhost:4400/redirect',
         ],

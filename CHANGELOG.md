@@ -30,6 +30,7 @@ then please show some ❤️ and tap on the star at
 
 ## 1.0 Migrating to new more secure secret key handling
 
++ Migrate clientid to github [1.0.1 20260629 gjw]
 + Migrate to solid_auth v1 series [1.0.0 20260613 gjw]
 
 ## 0.2 Test and Make Robust
@@ -70,10 +71,10 @@ then please show some ❤️ and tap on the star at
 + General cleanup [0.1.3 20250424 gjw]
 + Resync [0.1.2 20250423 gjw]
 + HOME: Concept dashboard and vaccinations [0.1.1 20250402 misc]
++ Ready for beta release [0.1.0 20250326 gjw]
 
 ## 0.0 Initial beta release
 
-+ Ready for beta release [0.1.0 20250326 gjw]
 + Deploy navigator [0.0.9 20250218 kev]
 + Refine and add import order lint [0.0.8 20250207 atangster]
 + Refine SURVEY and FILES features [0.0.7 20250120 atangster]
