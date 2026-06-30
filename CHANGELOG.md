@@ -30,6 +30,7 @@ then please show some ❤️ and tap on the star at
 
 ## 1.0 Migrating to new more secure secret key handling
 
++ Restore app to where it left off [1.0.7 20260630 gjw]
 + Allow past appointments to be editted to add notes [1.0.6 20260630 gjw]
 + ANDROID deployment setup [1.0.5 20260630 gjw]
 + Clean and bug fix appointment handling [1.0.4 20260629 gjw]

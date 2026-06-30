@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:solidui/solidui.dart'
     show
         SolidAboutConfig,
@@ -68,11 +69,40 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
   int _selectedMenuIndex = 0;
   bool _hasUserSelectedFeatureTab = false;
 
+  // SharedPreferences key for remembering the feature (top) tab. The sidebar
+  // menu index itself is persisted by solidui (SolidScaffold.rememberLastIndex
+  // is true by default); we read its key only to keep our providers in sync.
+  static const _prefsTabIndexKey = 'healthpod_last_tab_index';
+  static const _soliduiMenuIndexKey = 'solidui_last_menu_index';
+
   @override
   void initState() {
     super.initState();
     _loadAppInfo();
     _initialiseData();
+    _restoreLastScreen();
+  }
+
+  /// Sync our providers with the screen solidui will restore, and restore the
+  /// feature (top) tab. solidui handles the visible sidebar page itself.
+
+  Future<void> _restoreLastScreen() async {
+    final prefs = await SharedPreferences.getInstance();
+    final menuIndex = prefs.getInt(_soliduiMenuIndexKey);
+    final tabIndex = prefs.getInt(_prefsTabIndexKey);
+    if (!mounted) return;
+    if (menuIndex != null && menuIndex >= 0) {
+      setState(() => _selectedMenuIndex = menuIndex);
+      ref.read(menuIndexProvider.notifier).setIndex(menuIndex);
+      // Restoring a feature screen counts as a deliberate selection so the
+      // feature tabs initialise correctly.
+      if (menuIndex == 1 || menuIndex == 2 || menuIndex == 3) {
+        _hasUserSelectedFeatureTab = true;
+      }
+    }
+    if (tabIndex != null && tabIndex >= 0) {
+      ref.read(tabStateProvider.notifier).setSelectedIndex(tabIndex);
+    }
   }
 
   /// Loads the app name and version from package_info_plus.
@@ -138,6 +168,18 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
         ref.read(tabStateProvider.notifier).setSelectedIndex(0);
       }
     }
+
+    // Remember the active feature tab so it is restored on the next launch.
+    // (solidui persists the sidebar menu index itself.)
+    _persistSelectedTab();
+  }
+
+  /// Persist the current feature-tab index for the next launch.
+
+  Future<void> _persistSelectedTab() async {
+    final tabIndex = ref.read(tabStateProvider).selectedIndex;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_prefsTabIndexKey, tabIndex);
   }
 
   /// Handles successful CSV import.
@@ -170,6 +212,17 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
 
   @override
   Widget build(BuildContext context) {
+    // Remember the active feature tab whenever it changes so it is restored
+    // on the next launch (the top tabs are switched from several feature
+    // widgets, so listen centrally rather than hooking each one).
+    ref.listen<TabState>(tabStateProvider, (previous, next) {
+      if (next.selectedIndex >= 0) {
+        SharedPreferences.getInstance().then(
+          (prefs) => prefs.setInt(_prefsTabIndexKey, next.selectedIndex),
+        );
+      }
+    });
+
     return SolidScaffold(
       menu: _buildHealthPodMenu(),
       selectedIndex: _selectedMenuIndex,
