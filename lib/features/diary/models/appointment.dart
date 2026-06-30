@@ -54,6 +54,11 @@ class Appointment {
 
   final bool isPast;
 
+  /// The exact filename this appointment was loaded from on the Pod, if known.
+  /// Used to delete/replace precisely without relying on field matching.
+
+  final String? sourceFile;
+
   /// Creates a new [Appointment] instance.
   ///
   /// [date] is the date and time of the appointment.
@@ -62,6 +67,7 @@ class Appointment {
   /// [isPast] indicates whether the appointment is in the past.
   /// [id] uniquely identifies the appointment; when omitted a new one is
   /// generated.
+  /// [sourceFile] is the Pod filename it was loaded from, if any.
 
   Appointment({
     required this.date,
@@ -69,6 +75,7 @@ class Appointment {
     required this.description,
     required this.isPast,
     String? id,
+    this.sourceFile,
   }) : id = id ?? _generateId();
 
   /// Generate a reasonably unique id without external dependencies:

@@ -168,9 +168,9 @@ class _DiaryTabState extends State<DiaryTab> {
             isPast: date.isBefore(DateTime.now()),
           );
 
-          // Delete the original first (matched by its stable id), then save
-          // the updated version under the same id. Keep the dialog open while
-          // saving so its context stays valid for the Pod call.
+          // Delete the original file first (matched by its exact source file
+          // on the Pod), then save the updated version. Keep the dialog open
+          // while saving so its context stays valid for the Pod call.
           await DiaryService.deleteAppointment(original);
           final saved = await DiaryService.saveAppointment(
             dialogContext,

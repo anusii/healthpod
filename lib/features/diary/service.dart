@@ -40,7 +40,6 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/diary/models/appointment.dart';
-import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
 import 'package:healthpod/utils/save_response_pod.dart';
 
@@ -124,6 +123,7 @@ class DiaryService {
                   title: appointmentData['title'],
                   description: appointmentData['description'],
                   isPast: DateTime.parse(dateStr).isBefore(DateTime.now()),
+                  sourceFile: file,
                 ),
               );
             } catch (e) {
@@ -196,16 +196,40 @@ class DiaryService {
       final dirUrl = await getDirUrl(podDirPath);
       final resources = await getResourcesInContainer(dirUrl);
 
+      // Normalise the container URL so we can build absolute file URLs.
+      // deleteFile requires a full URL (with host) on desktop; a relative
+      // path triggers "No host specified in URI".
+      final containerUrl = dirUrl.endsWith('/') ? dirUrl : '$dirUrl/';
+
+      // Fast path: if we know the exact file this appointment was loaded from,
+      // delete it directly by its absolute URL.
+      final src = appointment.sourceFile;
+      if (src != null && src.isNotEmpty && resources.files.contains(src)) {
+        try {
+          await deleteFile(fileUrl: '$containerUrl$src');
+          return true;
+        } catch (e) {
+          // On some platforms a successful delete still throws a not-found
+          // style error; treat those as success.
+          final msg = e.toString();
+          if (msg.contains('404') ||
+              msg.contains('NotFound') ||
+              msg.contains('not found')) {
+            return true;
+          }
+          debugPrint('Error deleting by sourceFile $src: $e');
+          // Fall through to the scan as a backstop.
+        }
+      }
+
       // Find and delete the matching appointment file.
 
       for (final file in resources.files) {
         if (file.endsWith('.enc.ttl')) {
-          // Read with the same relative path style as loadAppointments
-          // ('<feature>/<file>'); the previous absolute/relativeToPod form
-          // produced a malformed URI. Use constructPodPath only for the
-          // actual deleteFile call (matching the working bp/vaccination flow).
+          // Read with loadAppointments' relative style ('<feature>/<file>'),
+          // but delete by the file's absolute URL (deleteFile needs a host).
           final readPath = '$feature/$file';
-          final deletePath = constructPodPath(feature, file);
+          final deletePath = '$containerUrl$file';
 
           String content;
           try {

@@ -10,6 +10,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
 
 import '../models/appointment.dart';
@@ -105,28 +106,46 @@ class AppointmentList extends StatelessWidget {
                       ),
                       child: ListTile(
                         title: Text(appointment.title),
-                        subtitle: Text(
-                          '${DateFormat('d MMM, h:mm a').format(appointment.date)}'
-                          '${appointment.description.isEmpty ? '' : '\n${appointment.description}'}',
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              DateFormat(
+                                'd MMM, h:mm a',
+                              ).format(appointment.date),
+                            ),
+                            if (appointment.description.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: MarkdownBody(
+                                  data: appointment.description,
+                                  shrinkWrap: true,
+                                  styleSheet: MarkdownStyleSheet(
+                                    p: Theme.of(context).textTheme.bodyMedium,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         isThreeLine: appointment.description.isNotEmpty,
-                        trailing: !appointment.isPast
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit),
-                                    tooltip: 'Edit',
-                                    onPressed: () => onEdit(appointment),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete),
-                                    tooltip: 'Delete',
-                                    onPressed: () => onDelete(appointment),
-                                  ),
-                                ],
-                              )
-                            : null,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Editing the note/description is allowed for any
+                            // appointment, including past ones.
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              tooltip: 'Edit',
+                              onPressed: () => onEdit(appointment),
+                            ),
+                            if (!appointment.isPast)
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                tooltip: 'Delete',
+                                onPressed: () => onDelete(appointment),
+                              ),
+                          ],
+                        ),
                         onTap: () =>
                             showAppointmentDetails(context, appointment),
                       ),
