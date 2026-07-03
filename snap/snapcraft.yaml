@@ -1,5 +1,5 @@
 name: healthpod
-version: 1.0.7
+version: 1.0.8
 summary: Privacy preserving health document management and analsysis using PODs.
 description: |
   HealthPod supports the collection of health related data and its
