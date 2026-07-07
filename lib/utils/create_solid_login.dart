@@ -45,11 +45,11 @@ Widget createSolidLogin(BuildContext context) {
     image: AssetImage('assets/images/app_image.jpg'),
     logo: AssetImage('assets/images/app_icon.png'),
     link: 'https://anusii.github.io/healthpod',
-    clientId: 'https://anusii.github.io/healthpod/client-profile.jsonld',
+    clientId: 'https://healthpod.solidcommunity.au/client-profile.jsonld',
     redirectUris: [
       'https://healthpod.solidcommunity.au/redirect.html',
       'com.togaware.healthpod://redirect',
-      'http://localhost:4400/redirect',
+      'http://localhost:4400/redirect.html',
     ],
     child: HealthPodHome(),
   );
