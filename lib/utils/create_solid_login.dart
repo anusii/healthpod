@@ -47,7 +47,7 @@ Widget createSolidLogin(BuildContext context) {
     link: 'https://anusii.github.io/healthpod',
     clientId: 'https://anusii.github.io/healthpod/client-profile.jsonld',
     redirectUris: [
-      'https://anusii.github.io/healthpod/redirect.html',
+      'https://healthpod.solidcommunity.au/redirect.html',
       'com.togaware.healthpod://redirect',
       'http://localhost:4400/redirect',
     ],
