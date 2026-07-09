@@ -25,6 +25,7 @@
 
 library;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'package:solidui/solidui.dart';
@@ -38,19 +39,20 @@ import 'package:healthpod/home.dart';
 /// and security-key entry as part of the login flow.
 
 Widget createSolidLogin(BuildContext context) {
-  return const SolidLogin(
+  return SolidLogin(
     required: false,
     appDirectory: 'healthpod',
     title: 'Health Pod\nManage and Query Health Docs',
-    image: AssetImage('assets/images/app_image.jpg'),
-    logo: AssetImage('assets/images/app_icon.png'),
+    image: const AssetImage('assets/images/app_image.jpg'),
+    logo: const AssetImage('assets/images/app_icon.png'),
     link: 'https://anusii.github.io/healthpod',
-    clientId: 'https://healthpod.solidcommunity.au/client-profile.jsonld',
-    redirectUris: [
-      'https://healthpod.solidcommunity.au/redirect.html',
-      'com.togaware.healthpod://redirect',
-      'http://localhost:4400/redirect.html',
-    ],
-    child: HealthPodHome(),
+    clientId: 'https://anusii.github.io/healthpod/client-profile.jsonld',
+    redirectUris: kIsWeb
+        ? ['${Uri.base.origin}/redirect.html']
+        : const [
+            'com.togaware.healthpod://redirect',
+            'http://localhost:4400/redirect.html',
+          ],
+    child: const HealthPodHome(),
   );
 }
