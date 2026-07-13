@@ -24,7 +24,7 @@ Download the latest version:
 [zip](https://solidcommunity.au/installers/healthpod-macos.zip);
 **Windows**
 [zip](https://solidcommunity.au/installers/healthpod-windows.zip) or
-[inno](https://solidcommunity.au/installers/healthpod-windows-inno.exe).
+[exe](https://solidcommunity.au/installers/healthpod-windows-inno.exe).
 
 ## Prerequisite
 

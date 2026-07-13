@@ -46,7 +46,7 @@ platform from the [Solid Community AU](https://solidcommunity.au):
 + **Windows**
   [zip](https://solidcommunity.au/installers/healthpod-windows.zip)
   or
-  [inno](https://solidcommunity.au/installers/healthpod-windows-inno.exe).
+  [exe](https://solidcommunity.au/installers/healthpod-windows-inno.exe).
 
 Contributions are welcome. Visit
 [github](https://github.com/anusii/healthpod) to submit an issue or,
