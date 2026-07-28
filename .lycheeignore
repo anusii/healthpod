@@ -3,6 +3,7 @@
 
 # Localhost OAuth callbacks used in integration tests
 
+http://localhost:3000/
 http://localhost:4400/
 http://localhost:8000/
 http://localhost/
@@ -11,11 +12,6 @@ http://localhost/
 
 http://localhost:4400/redirect
 https://your-domain/redirect.html
-
-# Localhost used in comments
-
-http://localhost:3000/
-http://localhost:4400/
 
 # POD OAuth endpoints that require authentication parameters
 
