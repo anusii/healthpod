@@ -48,7 +48,7 @@ env:
   MACOS_APP_RELEASE_UNSIGNED_PATH: build/macos/Build/Products/Release-unsigned
   MACOS_APP_RELEASE_STAGING_PATH: build/macos/Build/Products/Release-staging
   MACOS_APP_RELEASE_DEV_PATH: build/macos/Build/Products/Release-dev
-  FLUTTER_VERSION: "3.44.8"
+  FLUTTER_VERSION: "3.47.0"
 
 jobs:
 
@@ -91,7 +91,6 @@ jobs:
       - name: Install OS Dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get upgrade -y
           printf '#%.0s' {1..72}; printf '\nninja-build\n'
           sudo apt-get install -y ninja-build
           printf '#%.0s' {1..72}; printf '\nlibgtk-3-dev\n'
@@ -210,7 +209,6 @@ jobs:
       - name: Install OS Dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get upgrade -y
           printf '#%.0s' {1..72}; printf '\nninja-build\n'
           sudo apt-get install -y ninja-build
           printf '#%.0s' {1..72}; printf '\nlibgtk-3-dev\n'
@@ -275,7 +273,6 @@ jobs:
       - name: Install OS Dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get upgrade -y
 
       # 20260311 gjw be sure to add dependencies into the snapcraft
       # file rather than here, including llvm, lld, libsecret-1-dev,
@@ -338,7 +335,7 @@ jobs:
     if: |
       contains(github.event.head_commit.message, 'bump version') ||
       contains(github.event.head_commit.message, 'build installers') ||
-      contains(github.event.head_commit.message, 'build macos basic')
+      contains(github.event.head_commit.message, 'build macos original')
 
     # Later versions of macos (macos-15 and macos-latest) complain:
     # Error: Xcode failed to resolve Swift Package Manager dependencies
@@ -349,6 +346,19 @@ jobs:
       - name: Display OS Information
         run: |
           system_profiler SPSoftwareDataType
+
+      - name: Select the newest Xcode
+        # flutter_gemma's manifest needs Swift 6.1 (Xcode 16.3 or later).
+        # Chosen by sort order so this does not break when the image's Xcode
+        # versions change; the versions are logged to make any future
+        # toolchain failure diagnosable from the run alone.
+        run: |
+          ls -d /Applications/Xcode*.app
+          newest=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          echo "Selecting $newest"
+          sudo xcode-select -s "$newest"
+          xcodebuild -version
+          swift --version
 
       - name: Clone Repository
         uses: actions/checkout@v6
@@ -388,14 +398,14 @@ jobs:
       # signed build keeps the entitlement and hence no "press twice"
       # problem.
 
-      # - name: Strip restricted entitlements (invalid with ad-hoc signing)
-      #   run: |
-      #     for f in macos/Runner/Release.entitlements macos/Runner/DebugProfile.entitlements; do
-      #       if /usr/libexec/PlistBuddy -c "Print :keychain-access-groups" "$f" >/dev/null 2>&1; then
-      #         /usr/libexec/PlistBuddy -c "Delete :keychain-access-groups" "$f"
-      #        echo "Removed keychain-access-groups from $f"
-      #       fi
-      #     done
+      - name: Strip restricted entitlements (invalid with ad-hoc signing)
+        run: |
+          for f in macos/Runner/Release.entitlements macos/Runner/DebugProfile.entitlements; do
+            if /usr/libexec/PlistBuddy -c "Print :keychain-access-groups" "$f" >/dev/null 2>&1; then
+              /usr/libexec/PlistBuddy -c "Delete :keychain-access-groups" "$f"
+              echo "Removed keychain-access-groups from $f"
+            fi
+          done
 
       - name: Build Flutter macOS app
         run: flutter build macos --release
