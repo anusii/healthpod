@@ -61,42 +61,32 @@ class SurveyData {
       allData.addAll(podData);
     }
 
-    // Sort all data by timestamp.
+    return sortAndDeduplicate(allData);
+  }
 
-    allData.sort(
-      (a, b) => DateTime.parse(
-        a['timestamp'],
-      ).compareTo(DateTime.parse(b['timestamp'])),
-    );
+  /// Sorts entries by timestamp and drops entries sharing a timestamp.
+  ///
+  /// Every observation is kept, including several on the same day - only an
+  /// exact repeat of a timestamp (the same observation read twice) is dropped.
 
-    // Remove duplicate date entries - keeping only the latest entry for each day.
+  static List<Map<String, dynamic>> sortAndDeduplicate(
+    List<Map<String, dynamic>> data,
+  ) {
+    final Map<String, Map<String, dynamic>> uniqueEntries = {};
 
-    final Map<String, Map<String, dynamic>> uniqueDayEntries = {};
-
-    for (var entry in allData) {
-      final dateTime = DateTime.parse(entry['timestamp']);
-      final dateKey = '${dateTime.year}-${dateTime.month}-${dateTime.day}';
-
-      // Only overwrite if it's a later time on the same day.
-
-      if (!uniqueDayEntries.containsKey(dateKey) ||
-          DateTime.parse(
-            uniqueDayEntries[dateKey]!['timestamp'],
-          ).isBefore(dateTime)) {
-        uniqueDayEntries[dateKey] = entry;
-      }
+    for (var entry in data) {
+      uniqueEntries[DateTime.parse(entry['timestamp']).toIso8601String()] =
+          entry;
     }
 
-    // Convert back to list and re-sort.
-
-    allData = uniqueDayEntries.values.toList();
-    allData.sort(
+    final entries = uniqueEntries.values.toList();
+    entries.sort(
       (a, b) => DateTime.parse(
         a['timestamp'],
       ).compareTo(DateTime.parse(b['timestamp'])),
     );
 
-    return allData;
+    return entries;
   }
 
   /// Fetches survey data from POD storage.
