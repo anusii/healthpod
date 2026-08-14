@@ -407,8 +407,26 @@ jobs:
             fi
           done
 
+      # 20260814 gjw macos/Runner.xcodeproj is committed with my own
+      # signing settings - automatic signing against team G7843T3SD3
+      # with an "Apple Development" identity - which the runner cannot
+      # satisfy since it holds no certificates:
+      #
+      #   error: No signing certificate "Mac Development" found
+      #
+      # flutter passes any FLUTTER_XCODE_<SETTING> environment
+      # variable through to xcodebuild as a build setting, and
+      # command-line build settings override the project, so we ask
+      # for ad-hoc signing ("-") here without touching the project
+      # file that Xcode uses on my mac.
+
       - name: Build Flutter macOS app
         run: flutter build macos --release
+        env:
+          FLUTTER_XCODE_CODE_SIGN_STYLE: Manual
+          FLUTTER_XCODE_CODE_SIGN_IDENTITY: "-"
+          FLUTTER_XCODE_DEVELOPMENT_TEAM: ""
+          FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER: ""
 
       - name: Note the build location
         run: |
@@ -533,8 +551,20 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
+      # 20260814 gjw Build ad-hoc signed for the same reason as the
+      # original job above - the committed project file asks for
+      # automatic signing with an "Apple Development" identity, which
+      # the keychain here does not hold. The real signature is applied
+      # by the Developer ID codesign step below, which replaces this
+      # one, so the build only needs to get as far as a valid app.
+
       - name: Build Flutter macOS app
         run: flutter build macos --release
+        env:
+          FLUTTER_XCODE_CODE_SIGN_STYLE: Manual
+          FLUTTER_XCODE_CODE_SIGN_IDENTITY: "-"
+          FLUTTER_XCODE_DEVELOPMENT_TEAM: ""
+          FLUTTER_XCODE_PROVISIONING_PROFILE_SPECIFIER: ""
 
       # Sign with Developer ID and enable the hardened runtime (--options runtime).
       # The hardened runtime is a mandatory requirement for notarisation.
