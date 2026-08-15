@@ -30,6 +30,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/features/bp/survey.dart';
 import 'package:healthpod/features/diary/survey.dart';
+import 'package:healthpod/features/health_profile/survey.dart';
 import 'package:healthpod/features/medication/survey.dart';
 import 'package:healthpod/features/pathology/importer.dart';
 import 'package:healthpod/features/vaccination/survey.dart';
@@ -37,6 +38,7 @@ import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> surveyPanels = [
   {'title': 'Appointments', 'widget': AppointmentSurvey()},
+  {'title': 'Health Profile', 'widget': HealthProfileSurvey()},
   {'title': 'Blood Pressure', 'widget': BPSurvey()},
   {'title': 'Medications', 'widget': MedicationSurvey()},
   {'title': 'Vaccinations', 'widget': VaccinationSurvey()},

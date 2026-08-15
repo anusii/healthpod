@@ -30,7 +30,8 @@ then please show some ❤️ and tap on the star at
 
 ## 1.0 Migrating to new more secure secret key handling
 
-+ View all blood pressure observations, scrolling through them [1.0.10 20260814 gjw]
++ HEALTH PROFILE with BMI and waist/hip ratio [1.0.11 20260815 gjw]
++ View all blood pressure observations [1.0.10 20260814 gjw]
 + OIDC update for chrome/web [1.0.9 20260711 tonypioneer]
 + Update solidui/solidpod dependencies [1.0.8 20260703 gjw]
 + Restore app to where it left off [1.0.7 20260630 gjw]

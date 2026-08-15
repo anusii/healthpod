@@ -32,57 +32,42 @@ import 'package:healthpod/providers/tab_state.dart';
 /// Utility class for coordinating tab navigation with file browsing.
 
 class TabCoordinator {
-  /// Mapping from directory names to their corresponding tab indices.
+  /// The feature folders, in the order of the tabs that show them.
+  ///
+  /// The View, Add and Data tabs share a selected index, so this is the one
+  /// place the tab order and the pod folders are tied together.
 
-  static const Map<String, int> _dirToTabIndex = {
-    'diary': 0,
-    'blood_pressure': 1,
-    'medication': 2,
-    'vaccination': 3,
-    'pathology': 4,
-  };
+  static const List<String> _tabDirs = [
+    'diary', // Appointments.
+    'health_profile', // Health Profile.
+    'blood_pressure', // Blood Pressure.
+    'medication', // Medications.
+    'vaccination', // Vaccinations.
+    'pathology', // Pathology.
+  ];
 
   /// Returns the tab index that corresponds to [path], or null if [path]
   /// does not match any known feature folder.
 
   static int? getTabIndexForPath(String path) {
-    for (final entry in _dirToTabIndex.entries) {
-      if (path == '$basePath/${entry.key}' || path.endsWith('/${entry.key}')) {
-        return entry.value;
-      }
+    for (var index = 0; index < _tabDirs.length; index++) {
+      final dir = _tabDirs[index];
+      if (path == '$basePath/$dir' || path.endsWith('/$dir')) return index;
     }
     return null;
   }
 
+  /// The pod folder shown by tab [index], or the data root for anything that
+  /// is not a feature tab.
+
+  static String _pathForTab(int index) => index >= 0 && index < _tabDirs.length
+      ? '$basePath/${_tabDirs[index]}'
+      : basePath;
+
   /// Gets the expected path for the current tab selection.
 
-  static String getExpectedPathForCurrentTab(WidgetRef ref) {
-    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
-
-    String featureDir;
-    switch (selectedIndex) {
-      case 0:
-        featureDir = 'diary'; // Appointments
-        break;
-      case 1:
-        featureDir = 'blood_pressure'; // Blood Pressure
-        break;
-      case 2:
-        featureDir = 'medication'; // Medications
-        break;
-      case 3:
-        featureDir = 'vaccination'; // Vaccinations
-        break;
-      case 4:
-        featureDir = 'pathology'; // Pathology
-        break;
-      default:
-        featureDir = ''; // Default to home
-        break;
-    }
-
-    return featureDir.isNotEmpty ? '$basePath/$featureDir' : basePath;
-  }
+  static String getExpectedPathForCurrentTab(WidgetRef ref) =>
+      _pathForTab(ref.read(tabStateProvider).selectedIndex);
 
   /// Navigates to the feature-specific folder based on the current tab
   /// selection.
@@ -101,39 +86,7 @@ class TabCoordinator {
     // Read the selected tab index from the provider to coordinate with other
     // tabs.
 
-    final selectedIndex = ref.read(tabStateProvider).selectedIndex;
-
-    // Map the tab index to the corresponding directory name.
-    // Index 0: Appointments → diary
-    // Index 1: Blood Pressure → blood_pressure
-    // Index 2: Medications → medication
-    // Index 3: Vaccinations → vaccination
-    // Index 4: Pathology → pathology
-
-    String featureDir;
-    switch (selectedIndex) {
-      case 0:
-        featureDir = 'diary'; // Appointments
-        break;
-      case 1:
-        featureDir = 'blood_pressure'; // Blood Pressure
-        break;
-      case 2:
-        featureDir = 'medication'; // Medications
-        break;
-      case 3:
-        featureDir = 'vaccination'; // Vaccinations
-        break;
-      case 4:
-        featureDir = 'pathology'; // Pathology
-        break;
-      default:
-        featureDir = ''; // Default to home
-        break;
-    }
-
-    final targetPath =
-        featureDir.isNotEmpty ? '$basePath/$featureDir' : basePath;
+    final targetPath = _pathForTab(ref.read(tabStateProvider).selectedIndex);
     final currentPath = ref.read(fileServiceProvider).currentPath ?? basePath;
     if (currentPath != targetPath) {
       ref.read(fileServiceProvider.notifier).updateCurrentPath(targetPath);
@@ -156,26 +109,7 @@ class TabCoordinator {
     // and the user has actually selected a feature tab.
 
     if (!userHasManuallyNavigated && hasUserSelectedFeatureTab) {
-      switch (currentTabIndex) {
-        case 0:
-          initialPath = '$basePath/diary'; // Appointments
-          break;
-        case 1:
-          initialPath = '$basePath/blood_pressure'; // Blood Pressure
-          break;
-        case 2:
-          initialPath = '$basePath/medication'; // Medications
-          break;
-        case 3:
-          initialPath = '$basePath/vaccination'; // Vaccinations
-          break;
-        case 4:
-          initialPath = '$basePath/pathology'; // Pathology
-          break;
-        default:
-          initialPath = basePath; // Default to home
-          break;
-      }
+      initialPath = _pathForTab(currentTabIndex);
     }
 
     return initialPath;

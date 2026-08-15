@@ -147,6 +147,7 @@ FileTypeConfig? healthFileTypeResolver(
 
 const Map<String, String> healthFolderNameOverrides = {
   'diary': 'Appointments Data',
+  'health_profile': 'Health Profile Data',
   'blood_pressure': 'Blood Pressure Data',
   'medication': 'Medication Data',
   'vaccination': 'Vaccination Data',

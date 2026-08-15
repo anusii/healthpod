@@ -29,6 +29,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:healthpod/features/diary/editor_page.dart';
+import 'package:healthpod/features/health_profile/history_page.dart';
 import 'package:healthpod/features/pathology/editor.dart';
 import 'package:healthpod/features/table/bp_editor/page.dart';
 import 'package:healthpod/features/table/medication_editor/page.dart';
@@ -37,6 +38,7 @@ import 'package:healthpod/providers/tab_state.dart';
 
 final List<Map<String, dynamic>> tablePanels = [
   {'title': 'Appointments', 'widget': const AppointmentEditorPage()},
+  {'title': 'Health Profile', 'widget': const HealthProfileHistoryPage()},
   {'title': 'Blood Pressure', 'widget': const BPEditorPage()},
   {'title': 'Medications', 'widget': const MedicationEditorPage()},
   {'title': 'Vaccinations', 'widget': const VaccinationEditorPage()},

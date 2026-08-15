@@ -35,8 +35,9 @@ import 'package:healthpod/utils/initialise_profile_data.dart';
 /// Initialises required feature folders in the user's POD.
 ///
 /// This function checks for the existence of essential feature folders and creates
-/// them if they don't exist. Currently handles 'profile', 'blood_pressure', 'pathology',
-/// 'vaccination', 'medication', 'diary', and 'health_plan' folders.
+/// them if they don't exist. Currently handles 'profile', 'health_profile',
+/// 'blood_pressure', 'pathology', 'vaccination', 'medication', 'diary', and
+/// 'health_plan' folders.
 /// Returns a [Future<void>] that completes when all folders are verified/created.
 ///
 /// Parameters:
@@ -56,6 +57,7 @@ Future<void> initialiseFeatureFolders({
 
     final requiredFolders = [
       'profile',
+      'health_profile',
       'blood_pressure',
       'pathology',
       'vaccination',
