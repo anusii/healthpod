@@ -1,0 +1,80 @@
+# Continuous blood pressure analysis for Pods shared with the Analyser Pod.
+#
+# The deployment root holds one folder per analyser, and this analyser's
+# project root is `bp_analyser` inside it:
+#
+#   /opt/solid/analyser/                     the deployment root
+#   /opt/solid/analyser/bp_analyser/         this project (config, venv, var)
+#   /opt/solid/analyser/bp_analyser/bp_analyser/   the Python package
+#
+# The project root is the working directory, which is all `python -m
+# bp_analyser` needs to resolve the package.
+#
+# The root sits outside /opt/solid/server, the Community Solid Server's storage
+# root, so nothing here is reachable over HTTP. The secrets still live in
+# /etc/healthpod-analyser.env rather than in config.yaml, which keeps them out
+# of backups of the deployment and out of any copy of the directory.
+#
+# Install:
+#   sudo cp systemd/healthpod-analyser.service /etc/systemd/system/
+#   sudo cp systemd/healthpod-analyser.env /etc/healthpod-analyser.env
+#   sudo chmod 600 /etc/healthpod-analyser.env
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now healthpod-analyser
+#
+# Watch it work:
+#   journalctl -u healthpod-analyser -f
+
+[Unit]
+Description=HealthPod blood pressure analyser (watcher)
+Documentation=file:/opt/solid/analyser/bp_analyser/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+# An unprivileged account of its own: the analyser holds the Analyser Pod's
+# security key and needs nothing the Solid server has. Create it with
+#   useradd --system --home /opt/solid/analyser --shell /usr/sbin/nologin healthpod
+User=healthpod
+Group=healthpod
+
+WorkingDirectory=/opt/solid/analyser/bp_analyser
+# The leading '-' makes the file optional: without it a deployment
+# that keeps its secrets in config.yaml fails to start with a
+# system error rather than a readable message.
+EnvironmentFile=-/etc/healthpod-analyser.env
+ExecStart=/opt/solid/analyser/bp_analyser/.venv/bin/python -m bp_analyser \
+    --config /opt/solid/analyser/bp_analyser/config.yaml watch
+
+# Restart on any exit, including a crash, and keep trying.
+Restart=always
+RestartSec=15s
+
+# Exit status 2 is a configuration error: a missing credential, an unreadable
+# config.yaml. Restarting cannot fix it, so stop and let the operator look.
+RestartPreventExitStatus=2
+
+# The watcher finishes its current cycle when asked to stop.
+KillSignal=SIGTERM
+TimeoutStopSec=120
+
+# Hardening: the service only needs to read its own directory and write to
+# var/ inside it. That directory must exist before the service starts —
+# setup.sh creates it — because systemd builds the mount namespace first.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/solid/analyser/bp_analyser/var
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

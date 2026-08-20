@@ -1,0 +1,179 @@
+# Configuration for the HealthPod blood pressure analyser.
+#
+# Copy this file to config.yaml and edit it:
+#
+#     cp config.example.yaml config.yaml
+#     chmod 600 config.yaml
+#
+# Every secret can be supplied through the environment instead, which is what
+# the systemd unit does:
+#
+#     HEALTHPOD_ANALYSER_SECURITY_KEY
+#     HEALTHPOD_ANALYSER_CLIENT_ID
+#     HEALTHPOD_ANALYSER_CLIENT_SECRET
+#     HEALTHPOD_ANALYSER_API_TOKEN
+
+# ---------------------------------------------------------------------------
+# The Analyser Pod: who the analyser is, and how it logs in.
+# ---------------------------------------------------------------------------
+
+analyser:
+
+  # The WebID of the Analyser Pod. This is the address users share their blood
+  # pressure data with, and the Pod the results are published from.
+
+  web_id: https://solid.dev.empwr.au/Analyser/profile/card#me
+
+  # The Solid server. Derived from web_id when left blank.
+
+  server_url: https://solid.dev.empwr.au
+
+  # The application folder inside every Pod. HealthPod uses "healthpod"; the
+  # analyser reads the Analyser Pod's keys from, and writes results into, this
+  # folder, and looks for the same folder in each contributing Pod.
+
+  app_dir_name: healthpod
+
+  # The security key the Analyser Pod was initialised with. Prefer the
+  # environment variable in production and leave this blank.
+
+  security_key: ''
+
+  # Client credentials issued by the server for the Analyser account. See
+  # README.md, section "Preparing the Analyser Pod".
+
+  credentials:
+    client_id: ''
+    client_secret: ''
+
+  request_timeout: 30.0
+
+# ---------------------------------------------------------------------------
+# Which shared resources count as blood pressure data.
+# ---------------------------------------------------------------------------
+
+data:
+
+  # A shared file or folder is analysed when its URL contains one of these
+  # fragments. HealthPod stores readings in <pod>/healthpod/data/blood_pressure.
+
+  path_fragments:
+    - /data/blood_pressure/
+
+  # Field names inside the JSON HealthPod writes.
+
+  timestamp_field: timestamp
+  responses_field: responses
+  systolic_field: systolic
+  diastolic_field: diastolic
+  heart_rate_field: heart_rate
+
+  # Readings outside these bounds are treated as data entry errors and ignored.
+
+  systolic_range: [40, 300]
+  diastolic_range: [20, 200]
+  heart_rate_range: [20, 250]
+
+# ---------------------------------------------------------------------------
+# How the averages are computed.
+# ---------------------------------------------------------------------------
+
+analysis:
+
+  # Pods with fewer readings than this are still reported, but are left out of
+  # the cohort average so that a single reading cannot skew it.
+
+  minimum_observations: 1
+
+  # Only consider readings from the last N days. Leave blank for all history.
+
+  window_days:
+
+  decimal_places: 1
+
+# ---------------------------------------------------------------------------
+# How results are shared back to the contributing Pods.
+# ---------------------------------------------------------------------------
+
+sharing:
+
+  enabled: true
+
+  # Folder inside the Analyser Pod's data directory holding the results:
+  # <analyser>/healthpod/data/analyser/<pod-id>/bp-average.json.enc.ttl
+
+  results_dir: analyser
+
+  # Also give every contributing Pod the cohort average of averages.
+
+  share_cohort_average: true
+
+  # Append a line to each recipient's permission log so the result appears in
+  # HealthPod's list of resources shared with them.
+
+  write_permission_log: true
+
+  # Encrypt the published results, as HealthPod does for its own files. Set to
+  # false only for debugging: the results are then readable by anyone who is
+  # granted access to the file.
+
+  encrypt_results: true
+
+# ---------------------------------------------------------------------------
+# How the watcher polls for new shares.
+# ---------------------------------------------------------------------------
+
+watch:
+
+  # How often the Analyser Pod's shared-keys file is checked for changes. A new
+  # share triggers an analysis at the next poll.
+
+  poll_seconds: 60
+
+  # Run a full analysis at least this often, even when nothing has changed, so
+  # readings added to an already-shared folder are picked up.
+
+  full_rescan_seconds: 3600
+
+  run_on_start: true
+  error_backoff_seconds: 120
+
+# ---------------------------------------------------------------------------
+# Where results are written locally. Relative paths resolve against this file.
+# ---------------------------------------------------------------------------
+
+output:
+
+  state_dir: var/state
+  results_dir: var/results
+  charts_dir: var/charts
+  render_charts: true
+  keep_runs: 50
+
+# ---------------------------------------------------------------------------
+# The read-only HTTP interface for the front end.
+# ---------------------------------------------------------------------------
+
+api:
+
+  enabled: false
+  host: 127.0.0.1
+  port: 8088
+
+  # Origins allowed to call the API from a browser, for example
+  #   - https://healthpod.example.org
+
+  cors_origins: []
+
+  # When set, POST /api/refresh requires "Authorization: Bearer <token>".
+
+  token: ''
+
+# ---------------------------------------------------------------------------
+# Logging. Under systemd the journal captures stderr, so a file is optional.
+# ---------------------------------------------------------------------------
+
+logging:
+
+  level: INFO
+  file: var/analyser.log

@@ -1,0 +1,22 @@
+# Dependencies for the HealthPod blood pressure analyser.
+#
+# httpx         - HTTP client for the Solid server (DPoP-authenticated).
+# cryptography  - AES, RSA and HKDF, matching solidpod's on-Pod formats.
+# argon2-cffi   - Argon2id, the first half of solidpod's key derivation.
+# rdflib        - parsing the turtle documents a Pod is made of.
+# PyYAML        - the configuration file.
+
+httpx>=0.27
+cryptography>=42.0
+argon2-cffi>=23.1
+rdflib>=7.0
+PyYAML>=6.0
+
+# Optional, and only needed for the parts that use them:
+#
+# fastapi/uvicorn - the read-only front-end API (`serve`).
+# matplotlib      - PNG charts.
+
+fastapi>=0.115
+uvicorn>=0.32
+matplotlib>=3.8

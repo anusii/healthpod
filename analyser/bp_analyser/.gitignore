@@ -1,0 +1,8 @@
+# Local configuration holds credentials; never commit it.
+config.yaml
+
+# Generated at run time.
+var/
+.venv/
+__pycache__/
+*.pyc

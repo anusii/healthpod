@@ -1,0 +1,60 @@
+# The read-only HTTP interface the front end reads.
+#
+# Optional: the analysis itself runs in healthpod-analyser.service. This unit
+# only serves the JSON and PNG files that run has already written, so it needs
+# no Pod credentials.
+#
+# Paths follow the same layout as healthpod-analyser.service: the project root
+# is the working directory, and the package sits inside it.
+#
+# Bind the API to 127.0.0.1 (the default) and reverse-proxy it; it must not
+# compete with the Solid server for a public port.
+#
+# Install:
+#   sudo cp systemd/healthpod-analyser-api.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now healthpod-analyser-api
+
+[Unit]
+Description=HealthPod blood pressure analyser (front-end API)
+After=network-online.target healthpod-analyser.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+# An unprivileged account of its own: the analyser holds the Analyser Pod's
+# security key and needs nothing the Solid server has. Create it with
+#   useradd --system --home /opt/solid/analyser --shell /usr/sbin/nologin healthpod
+User=healthpod
+Group=healthpod
+
+WorkingDirectory=/opt/solid/analyser/bp_analyser
+# The leading '-' makes the file optional: without it a deployment
+# that keeps its secrets in config.yaml fails to start with a
+# system error rather than a readable message.
+EnvironmentFile=-/etc/healthpod-analyser.env
+ExecStart=/opt/solid/analyser/bp_analyser/.venv/bin/python -m bp_analyser \
+    --config /opt/solid/analyser/bp_analyser/config.yaml serve
+
+Restart=always
+RestartSec=15s
+
+# Exit status 2 is a configuration error: a missing credential, an unreadable
+# config.yaml. Restarting cannot fix it, so stop and let the operator look.
+RestartPreventExitStatus=2
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+# var/ must exist before start; setup.sh creates it.
+ReadWritePaths=/opt/solid/analyser/bp_analyser/var
+RestrictSUIDSGID=true
+LockPersonality=true
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
