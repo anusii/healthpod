@@ -694,6 +694,74 @@ class KeyDeliveryTests(PipelineHarness):
         )
 
 
+class CoverageTests(PipelineHarness):
+    """The result says how much of the Pod it covers.
+
+    An app cannot otherwise tell a run that included its newest readings from
+    one that another Pod's share set going a moment earlier, since both carry
+    a fresh timestamp. The count of files the analyser had in view is what
+    settles it, so it has to be reported accurately — including the files it
+    could see but not read, or an app waiting for full coverage would wait
+    for ever.
+    """
+
+    def _pod_payload(self, document: dict, pod_id: str, pod: FakePod) -> dict:
+        url = next(
+            entry['resource_url']
+            for entry in document['sharing']['published']
+            if entry['pod_id'] == pod_id
+        )
+
+        return self._open_as_recipient(pod, url)
+
+    def test_the_result_counts_the_files_it_read(self) -> None:
+        document = self.service.run_cycle().document
+        payload = self._pod_payload(document, 'server-alice', self.alice)
+
+        # Alice shared two readings, each as its own file.
+        self.assertEqual(payload['pod']['files_read'], 2)
+        self.assertEqual(payload['pod']['files_skipped'], 0)
+
+    def test_a_file_it_cannot_read_is_still_counted_as_seen(self) -> None:
+        # Share a third reading but hand over the wrong key. The analyser can
+        # see the file and not open it; the count of files seen must still
+        # match what the Pod shared.
+
+        folder = paths.data_url(self.alice.web_id, APP, 'blood_pressure') + '/'
+        url = f'{folder}bp_2026-08-19.json.enc.ttl'
+        self.client.resources[url] = encrypted_resource(
+            url,
+            reading('2026-08-19T09:00:00.000', 118, 74, 58),
+            crypto.random_key(),
+        )
+        self._share_with_analyser(url, crypto.random_key())
+
+        document = self.service.run_cycle().document
+        payload = self._pod_payload(document, 'server-alice', self.alice)
+
+        self.assertEqual(payload['pod']['files_read'], 2)
+        self.assertEqual(payload['pod']['files_skipped'], 1)
+        self.assertEqual(
+            payload['pod']['files_read'] + payload['pod']['files_skipped'], 3)
+
+    def test_a_pod_that_shares_more_raises_its_own_count_only(self) -> None:
+        folder = paths.data_url(self.alice.web_id, APP, 'blood_pressure') + '/'
+        url = f'{folder}bp_2026-08-18.json.enc.ttl'
+        key = crypto.random_key()
+        self.client.resources[url] = encrypted_resource(
+            url, reading('2026-08-18T09:00:00.000', 127, 83, 66), key)
+        self._share_with_analyser(url, key)
+
+        document = self.service.run_cycle().document
+
+        self.assertEqual(
+            self._pod_payload(document, 'server-alice', self.alice)['pod'][
+                'files_read'], 3)
+        self.assertEqual(
+            self._pod_payload(document, 'server-bob', self.bob)['pod'][
+                'files_read'], 2)
+
+
 class WatchGuardTests(unittest.TestCase):
     """The watcher must not loop on a problem that retrying cannot fix."""
 

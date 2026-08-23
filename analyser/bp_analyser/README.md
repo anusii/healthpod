@@ -448,6 +448,12 @@ published there; it then waits for one carrying a different timestamp. Testing
 for a change rather than for "later than now" keeps the check correct when the
 device's clock and the server's disagree, which they routinely do.
 
+A new timestamp alone is not enough, because another Pod's share can set a run
+going that finishes after this user pressed **Analyse** but before their
+readings were all granted. So the app also checks that the result saw at least
+as many files as it shared — `pod.files_read` plus `pod.files_skipped` — and
+keeps waiting when it saw fewer.
+
 Readings recorded after an analysis are not included automatically: each is a
 new resource with a new key, so the user presses **Analyse** again to bring
 them in. The tooltip on the button says so.
@@ -505,6 +511,16 @@ gets both from a single read:
   "chart": {"format": "png", "encoding": "base64", "data": "iVBORw0KGgo..."}
 }
 ```
+
+`files_read` and `files_skipped` inside `pod` are not only diagnostics: they
+are how a reader knows whether the result covers what it just shared. Every
+shared file the analyser found was either read or skipped, so their sum is the
+number of files it had in view. A run set going by another Pod's share can
+finish moments after this Pod pressed **Analyse** but before all its readings
+were granted — a result that is genuinely new and genuinely incomplete — and
+comparing that sum against the number of readings shared is what tells the two
+apart. HealthPod waits for a result whose sum reaches its own count, and says
+`covered 9 of your 12 readings` if it runs out of patience first.
 
 `chart` holds that Pod's own chart: its readings over time as three lines —
 systolic, diastolic and heart rate — with its own averages dashed across them
@@ -816,6 +832,11 @@ values across.
   case (files written with `inheritKeyFrom`) and falls back to the folder key,
   but where a file has its own key it must be shared itself. Files that cannot
   be opened are listed in `warnings` rather than silently dropped.
+- **A result can arrive that predates the last few readings.** Handled rather
+  than merely noted: the app compares the number of files the analyser had in
+  view against the number it shared, and waits for a run that covers them all.
+  The window is small in any case — a run has to complete between the first
+  and last grant of a single press.
 - **The trigger is polling, not notification.** The Solid server has no
   callback for "somebody shared with you", so the analyser watches the
   shared-keys file. With the default settings a new share is picked up within a

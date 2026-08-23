@@ -36,6 +36,34 @@ import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/features/bp/analyser/model.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
+/// How a wait for the analysis ended.
+///
+/// Exactly one of these applies: a result arrived that was both new and
+/// complete; nothing arrived in time; something arrived that could not be
+/// decrypted; or what arrived covered only part of what was shared.
+
+class AnalyserWait {
+  const AnalyserWait({this.result, this.staleKey = false, this.bestCoverage});
+
+  /// The analysis, when one arrived that passed every check.
+
+  final AnalyserResult? result;
+
+  /// Whether the content could be fetched but not decrypted, which means the
+  /// key held here no longer matches and waiting will not help.
+
+  final bool staleKey;
+
+  /// The most readings any new-but-incomplete result covered, if there was
+  /// one. Null when nothing new arrived at all.
+
+  final int? bestCoverage;
+
+  /// Whether the wait produced a usable analysis.
+
+  bool get succeeded => result != null;
+}
+
 /// Reads the result the analyser publishes for this Pod.
 ///
 /// The analyser writes each Pod's result to a predictable place in its own
@@ -112,16 +140,19 @@ class BPAnalyserResultService {
   /// and the server's disagree, which they routinely do by a few seconds and
   /// occasionally by much more.
   ///
-  /// The outcome of waiting: the result, or why it never came.
+  /// Waits for a result that is both new and complete, then returns it.
   ///
-  /// [staleKey] separates the two failures worth telling apart. Not arriving
-  /// means the analyser has not finished, and waiting longer would help;
-  /// arriving in a form this app cannot decrypt means it holds a key that no
-  /// longer matches the content, and waiting will not help at all.
+  /// [previous] is the timestamp from [lastResultTime], taken before the
+  /// readings were shared; a document still carrying it belongs to the
+  /// earlier run. [minimumSources] is how many readings were shared, and a
+  /// result that saw fewer is set aside: a run triggered by another Pod's
+  /// share can finish after this one started and before these readings were
+  /// all granted, which makes it new but incomplete.
 
-  static Future<({AnalyserResult? result, bool staleKey})> waitForResult({
+  static Future<AnalyserWait> waitForResult({
     required String webId,
     DateTime? previous,
+    int minimumSources = 0,
     Duration timeout = defaultTimeout,
     Duration interval = pollInterval,
     void Function(Duration elapsed)? onWaiting,
@@ -130,20 +161,26 @@ class BPAnalyserResultService {
     final startedAt = DateTime.now();
     final deadline = startedAt.add(timeout);
     var staleKey = false;
+    int? bestCoverage;
 
     while (DateTime.now().isBefore(deadline)) {
       final attempt = await _tryRead(url);
       final result = attempt.result;
-      if (result != null && result.isFresherThan(previous)) {
-        return (result: result, staleKey: false);
-      }
       staleKey = attempt.staleKey;
+
+      if (result != null && result.isFresherThan(previous)) {
+        if (result.sourcesSeen >= minimumSources) {
+          return AnalyserWait(result: result);
+        }
+
+        bestCoverage = result.sourcesSeen;
+      }
 
       onWaiting?.call(DateTime.now().difference(startedAt));
       await Future<void>.delayed(interval);
     }
 
-    return (result: null, staleKey: staleKey);
+    return AnalyserWait(staleKey: staleKey, bestCoverage: bestCoverage);
   }
 
   /// Reads the result once, reporting why it could not be used.

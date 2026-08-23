@@ -21,3 +21,12 @@ this program.  If not, see https://opensource.org/license/gpl-3-0.
 
 Authors: Tony Chen
 """
+
+import logging
+
+# Several cases provoke failures on purpose — a key that never arrives, a file
+# that cannot be decrypted — and the service reports each of them at error
+# level. Silencing the log keeps a passing run quiet, so anything that does
+# appear is worth reading.
+
+logging.disable(logging.CRITICAL)

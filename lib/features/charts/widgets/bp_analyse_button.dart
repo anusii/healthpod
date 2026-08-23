@@ -234,6 +234,10 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     final outcome = await BPAnalyserResultService.waitForResult(
       webId: webId,
       previous: previous,
+      // Only accept a result that had every shared reading in view. Another
+      // Pod's share can set a run going that finishes before these readings
+      // are all granted, and that result would be new but incomplete.
+      minimumSources: shared.shared,
     );
 
     if (!mounted) return;
@@ -241,15 +245,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     final result = outcome.result;
     if (result == null) {
       setState(() => _phase = _Phase.idle);
-      _report(
-        outcome.staleKey
-            ? 'The ${Analyser.displayName} sent a result, but this app is '
-                'holding an out-of-date key for it. Restart the app and '
-                'analyse again.'
-            : 'Your readings were shared, but the ${Analyser.displayName} has '
-                'not sent a result back yet. Please try again in a moment.',
-        isError: true,
-      );
+      _report(_waitFailureMessage(outcome, shared.shared), isError: true);
 
       return;
     }
@@ -267,6 +263,26 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       result: result,
       savedPath: savedPath,
     );
+  }
+
+  /// Explains why the wait produced nothing, in terms the user can act on.
+
+  String _waitFailureMessage(AnalyserWait outcome, int shared) {
+    if (outcome.staleKey) {
+      return 'The ${Analyser.displayName} sent a result, but this app is '
+          'holding an out-of-date key for it. Restart the app and analyse '
+          'again.';
+    }
+
+    final covered = outcome.bestCoverage;
+    if (covered != null) {
+      return 'The ${Analyser.displayName} has answered, but that analysis '
+          'covered $covered of your $shared readings — it was already running '
+          'when you shared. Analyse again in a moment to include them all.';
+    }
+
+    return 'Your readings were shared, but the ${Analyser.displayName} has '
+        'not sent a result back yet. Please try again in a moment.';
   }
 
   /// Asks before any data leaves the Pod.

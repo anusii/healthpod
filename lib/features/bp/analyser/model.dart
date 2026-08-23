@@ -68,6 +68,8 @@ class AnalyserResult {
     required this.everyone,
     required this.observationCount,
     required this.podCount,
+    this.filesRead = 0,
+    this.filesSkipped = 0,
     this.chart,
   });
 
@@ -99,6 +101,8 @@ class AnalyserResult {
       ),
       observationCount: (pod?['observation_count'] as num?)?.toInt() ?? 0,
       podCount: (cohort?['pod_count'] as num?)?.toInt() ?? 0,
+      filesRead: (pod?['files_read'] as num?)?.toInt() ?? 0,
+      filesSkipped: (pod?['files_skipped'] as num?)?.toInt() ?? 0,
       chart: _decodeChart(json['chart']),
     );
   }
@@ -122,6 +126,24 @@ class AnalyserResult {
   /// How many Pods contributed to the cohort figure.
 
   final int podCount;
+
+  /// How many of this Pod's shared files the analyser managed to read.
+
+  final int filesRead;
+
+  /// How many it found but could not read, usually for want of a key.
+
+  final int filesSkipped;
+
+  /// How many shared files the analyser had in view when it computed this.
+  ///
+  /// Every file it discovered was either read or skipped, so the total says
+  /// how much of the Pod the result covers. A run triggered by somebody
+  /// else's share can complete before this Pod's newest readings have
+  /// finished being granted; such a result is genuinely new, and genuinely
+  /// incomplete, and this is how the two are told apart.
+
+  int get sourcesSeen => filesRead + filesSkipped;
 
   /// The chart as PNG bytes, when the analyser produced one.
 

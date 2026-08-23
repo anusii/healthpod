@@ -37,6 +37,8 @@ final List<int> _png = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2];
 
 Map<String, dynamic> resultJson({
   String generatedAt = '2026-08-21T09:15:00+00:00',
+  int filesRead = 12,
+  int filesSkipped = 0,
   Object? chart,
 }) =>
     {
@@ -44,7 +46,11 @@ Map<String, dynamic> resultJson({
       'kind': 'pod-average',
       'generated_at': generatedAt,
       'average': {'systolic': 125.0, 'diastolic': 82.5, 'heart_rate': 67.0},
-      'pod': {'observation_count': 12},
+      'pod': {
+        'observation_count': 12,
+        'files_read': filesRead,
+        'files_skipped': filesSkipped,
+      },
       'cohort': {
         'pod_count': 3,
         'average_of_averages': {
@@ -87,6 +93,41 @@ void main() {
       expect(url, endsWith(Analyser.podAverageFileName));
       // A single slash between every segment.
       expect(url.substring('https://'.length), isNot(contains('//')));
+    });
+  });
+
+  group('How much of the Pod a result covers', () {
+    // A run set going by another Pod's share can finish before these readings
+    // have all been granted: new, but not covering everything.
+
+    test('counts every file the analyser had in view', () {
+      final result = AnalyserResult.fromJson(
+        resultJson(filesRead: 9, filesSkipped: 3),
+      );
+
+      expect(result.filesRead, 9);
+      expect(result.filesSkipped, 3);
+      expect(result.sourcesSeen, 12);
+    });
+
+    test('counts a file it could not read as still seen', () {
+      // The file was shared and found; only its key was missing, and waiting
+      // for it to become readable would wait for ever.
+
+      final result = AnalyserResult.fromJson(
+        resultJson(filesRead: 11, filesSkipped: 1),
+      );
+
+      expect(result.sourcesSeen, 12);
+    });
+
+    test('treats a result without the coverage fields as covering none', () {
+      final json = resultJson();
+      (json['pod'] as Map<String, dynamic>)
+        ..remove('files_read')
+        ..remove('files_skipped');
+
+      expect(AnalyserResult.fromJson(json).sourcesSeen, 0);
     });
   });
 
