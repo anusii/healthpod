@@ -300,9 +300,18 @@ class SolidClient:
             return None
 
     def exists(self, url: str) -> bool:
-        """Whether a resource is present and readable."""
+        """Whether a resource is there at all.
+
+        A 403 counts as present: the server is saying the resource exists but
+        is not ours to look at, which is the normal answer for another Pod's
+        private containers. Treating it as absent would have us try to create
+        a container that is already there, and fail.
+        """
 
         response = self.request('HEAD', url)
+        if response.status_code == 403:
+            return True
+
         return 200 <= response.status_code < 300
 
     def etag(self, url: str) -> str | None:

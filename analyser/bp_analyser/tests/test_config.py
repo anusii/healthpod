@@ -138,6 +138,33 @@ class ChartCacheDirectoryTests(unittest.TestCase):
         self.assertNotIn('MPLCONFIGDIR', os.environ)
 
 
+class WatchDefaultTests(unittest.TestCase):
+    """The analysis runs on a share, not on a timer."""
+
+    def _load(self, body: str) -> object:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'config.yaml'
+            path.write_text(body)
+            return config_module.load(path)
+
+    def test_polling_is_half_a_minute_by_default(self) -> None:
+        self.assertEqual(self._load(WITHOUT_SECRETS).watch.poll_seconds, 30)
+
+    def test_the_periodic_rescan_is_off_by_default(self) -> None:
+        self.assertEqual(
+            self._load(WITHOUT_SECRETS).watch.full_rescan_seconds, 0)
+
+    def test_a_blank_rescan_interval_means_off(self) -> None:
+        loaded = self._load(
+            WITHOUT_SECRETS + '\nwatch:\n  full_rescan_seconds:\n')
+        self.assertEqual(loaded.watch.full_rescan_seconds, 0)
+
+    def test_a_rescan_interval_can_still_be_asked_for(self) -> None:
+        loaded = self._load(
+            WITHOUT_SECRETS + '\nwatch:\n  full_rescan_seconds: 900\n')
+        self.assertEqual(loaded.watch.full_rescan_seconds, 900)
+
+
 class LoadingTests(unittest.TestCase):
     """The basics of reading the file."""
 

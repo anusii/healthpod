@@ -29,7 +29,7 @@ from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
-# Common unit mappings and variations (British English).
+# Common unit mappings and variations.
 UNIT_MAPPINGS = {
     # Concentration units.
     "mmol/L": ["mmol/L", "mmol/l", "mmol/litre", "mmol/liter", "mM"],

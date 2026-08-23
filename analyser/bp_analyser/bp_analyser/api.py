@@ -29,7 +29,6 @@ Authors: Tony Chen
 #     GET  /health                      liveness, and when the last run happened
 #     GET  /api/summary                 the whole latest results document
 #     GET  /api/cohort                  the cohort figures only
-#     GET  /api/cohort/chart.png        the cohort chart
 #     GET  /api/pods                    one entry per contributing Pod
 #     GET  /api/pods/{pod_id}           one Pod's averages
 #     GET  /api/pods/{pod_id}/chart.png that Pod's chart
@@ -143,7 +142,12 @@ def create_app(config: Config) -> FastAPI:
 
     @app.get('/api/pods/{pod_id}/chart.png')
     def pod_chart(pod_id: str) -> FileResponse:
-        """The PNG chart for one Pod."""
+        """That Pod's readings over time, with the reference averages.
+
+        The same image reaches the Pod itself inside the shared result, so
+        this endpoint is for an operator or a front end that would rather
+        fetch it directly than read it out of the Pod.
+        """
 
         document = latest()
         find_pod(document, pod_id)
@@ -152,18 +156,6 @@ def create_app(config: Config) -> FastAPI:
             raise HTTPException(
                 status_code=404,
                 detail='no chart for this Pod; is matplotlib installed and '
-                       'output.render_charts enabled?')
-        return FileResponse(path, media_type='image/png')
-
-    @app.get('/api/cohort/chart.png')
-    def cohort_chart() -> FileResponse:
-        """The PNG chart comparing every contributing Pod."""
-
-        path = store.chart_path('cohort')
-        if not path.is_file():
-            raise HTTPException(
-                status_code=404,
-                detail='no cohort chart; is matplotlib installed and '
                        'output.render_charts enabled?')
         return FileResponse(path, media_type='image/png')
 

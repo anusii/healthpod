@@ -126,14 +126,17 @@ sharing:
 watch:
 
   # How often the Analyser Pod's shared-keys file is checked for changes. A new
-  # share triggers an analysis at the next poll.
+  # share triggers an analysis at the next poll, so this is also the longest a
+  # user waits for their result. One HEAD request per poll, so 30 seconds costs
+  # the server almost nothing.
 
-  poll_seconds: 60
+  poll_seconds: 30
 
-  # Run a full analysis at least this often, even when nothing has changed, so
-  # readings added to an already-shared folder are picked up.
+  # Run a full analysis at least this often even when nothing has changed.
+  # Zero switches it off, which is the default: the analysis then runs only
+  # when a Pod has actually shared something.
 
-  full_rescan_seconds: 3600
+  full_rescan_seconds: 0
 
   run_on_start: true
   error_backoff_seconds: 120

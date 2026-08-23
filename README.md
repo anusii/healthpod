@@ -80,6 +80,20 @@ option:
 
 ![Pathology View](assets/screenshots/sample_pathology_view.png)
 
+### Comparing with others
+
+The **Analyse** button in the top right of the blood pressure chart shares
+your readings with the Analyser Pod, a service that works out your own
+averages and the averages across everyone who has contributed, and returns a
+chart of your readings with both marked on it. The Analyser is granted read
+access to those readings and nothing else, no other participant ever sees your
+individual readings, and you can withdraw the access at any time from the file
+browser.
+
+The service behind it is a Python program that watches the Analyser Pod's
+sharing inbox; it lives in [`analyser/bp_analyser`](analyser/bp_analyser),
+which documents how to deploy and operate it.
+
 ## Milestones
 
 + [X] Basic Icon-Based GUI with Solid Pod login

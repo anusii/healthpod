@@ -1,4 +1,4 @@
-"""Optional PNG charts of the analysis, for the front end to display.
+"""The chart the analyser draws and sends back to each contributing Pod.
 
 Copyright (C) 2026, Software Innovation Institute, ANU.
 
@@ -22,35 +22,36 @@ this program.  If not, see https://opensource.org/license/gpl-3-0.
 Authors: Tony Chen
 """
 
-# Charts are a convenience, not a requirement: if matplotlib is not installed
-# the analyser logs the fact once and carries on, and the JSON results are
-# unaffected. Each chart keeps to one unit per axis (millimetres of mercury on
-# the pressure charts, beats per minute on the pulse chart) and labels every bar
-# directly, so the figures stay readable in print and for colour-blind readers.
-
 from __future__ import annotations
 
+import base64
 import logging
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 log = logging.getLogger(__name__)
 
 # Categorical colours, validated for colour-vision deficiency against a light
-# surface. Slot order is fixed: systolic, diastolic, then the comparison series.
+# surface. One hue per measure, used for the readings and for both of that
+# measure's reference lines.
 
-_SERIES_1 = '#2a78d6'
-_SERIES_2 = '#eb6834'
-_SERIES_3 = '#1baf7a'
+_SYSTOLIC = '#2a78d6'
+_DIASTOLIC = '#eb6834'
+_HEART_RATE = '#1baf7a'
 _INK = '#1a1a19'
 _MUTED = '#6b6a63'
 _GRID = '#e4e3de'
 _SURFACE = '#fcfcfb'
 
-# A hair of surface between adjacent bars, so a pair reads as two marks.
+# The measures drawn, in a fixed order: (key, label, colour).
 
-_GAP = 0.012
+_MEASURES = (
+    ('systolic', 'Systolic', _SYSTOLIC),
+    ('diastolic', 'Diastolic', _DIASTOLIC),
+    ('heart_rate', 'Heart rate', _HEART_RATE),
+)
 
 _matplotlib_warned = False
 
@@ -89,8 +90,24 @@ def available() -> bool:
     return True
 
 
-def _figure(width: float = 7.0, height: float = 4.0):
-    """A figure and axes with the recessive styling used by every chart."""
+def encode(path: Path) -> str | None:
+    """Base64-encode a rendered chart so it can travel inside the results.
+
+    The result document is shared with the Pod through the ordinary Solid
+    sharing mechanism, which carries text. Embedding the image means the app
+    receives the chart with the numbers, in one read, with no second channel
+    to authenticate.
+    """
+
+    try:
+        return base64.b64encode(path.read_bytes()).decode('ascii')
+    except OSError as exc:
+        log.warning('cannot read the rendered chart %s: %s', path, exc)
+        return None
+
+
+def _figure(width: float, height: float):
+    """A figure and axes with the recessive styling the chart uses."""
 
     import matplotlib
     matplotlib.use('Agg')
@@ -109,39 +126,134 @@ def _figure(width: float = 7.0, height: float = 4.0):
     return figure, axes
 
 
-def _label_bars(axes, bars, places: int = 0) -> None:
-    """Print each bar's value above it, in ink rather than the series colour."""
+def _series(observations: list, key: str) -> tuple[list[datetime], list[float]]:
+    """The (time, value) pairs for one measure, in chronological order."""
 
-    for bar in bars:
-        height = bar.get_height()
-        if height is None:
+    points = []
+    for index, item in enumerate(observations):
+        value = getattr(item, key, None)
+        if value is None:
             continue
-        axes.annotate(
-            f'{height:.{places}f}',
-            xy=(bar.get_x() + bar.get_width() / 2, height),
-            xytext=(0, 3),
-            textcoords='offset points',
-            ha='center', va='bottom',
-            fontsize=9, color=_INK,
+        # A reading without a timestamp still counts; place it in sequence so
+        # the line stays complete rather than silently losing points.
+        moment = item.timestamp or datetime.fromtimestamp(index)
+        points.append((moment, float(value)))
+
+    points.sort(key=lambda pair: pair[0])
+    return [pair[0] for pair in points], [pair[1] for pair in points]
+
+
+def render_pod_chart(
+    *,
+    observations: list,
+    pod: dict[str, Any],
+    cohort: dict[str, Any],
+    path: Path,
+) -> Path | None:
+    """Draw one Pod's readings with its own and the cohort's averages.
+
+    [observations] are that Pod's readings, [pod] its section of the results
+    document and [cohort] the cohort section. Returns the path written, or
+    None when there is nothing to draw.
+    """
+
+    if not available() or not observations:
+        return None
+
+    import matplotlib.dates as mdates
+    from matplotlib.lines import Line2D
+
+    figure, axes = _figure(width=9.0, height=5.0)
+
+    measures = pod.get('measures') or {}
+    cohort_averages = cohort.get('average_of_averages') or {}
+
+    drawn = False
+    own_labels: list[tuple[float, str, str]] = []
+    cohort_labels: list[tuple[float, str, str]] = []
+
+    for key, label, colour in _MEASURES:
+        times, values = _series(observations, key)
+        if not values:
+            continue
+        drawn = True
+
+        # The readings themselves: a thin line with a marker per reading, so a
+        # single reading is still visible.
+        axes.plot(
+            times, values,
+            color=colour, linewidth=2, marker='o', markersize=4,
+            markerfacecolor=colour, markeredgecolor=_SURFACE,
+            markeredgewidth=1, label=label, zorder=3,
         )
 
+        own = (measures.get(key) or {}).get('average')
+        if own is not None:
+            axes.axhline(
+                float(own), color=colour, linewidth=1.5, linestyle='--',
+                alpha=0.75, zorder=2)
+            own_labels.append((float(own), f'{float(own):.0f}', colour))
 
-def _headroom(axes, values: list[float]) -> None:
-    """Leave room above the tallest bar for its label and the legend."""
+        everyone = cohort_averages.get(key)
+        if everyone is not None:
+            axes.axhline(
+                float(everyone), color=colour, linewidth=1.5, linestyle=':',
+                alpha=0.6, zorder=2)
+            cohort_labels.append(
+                (float(everyone), f'{float(everyone):.0f}', colour))
 
-    tallest = max(values) if values else 0.0
-    if tallest > 0:
-        axes.set_ylim(0, tallest * 1.18)
+    if not drawn:
+        import matplotlib.pyplot as plt
+        plt.close(figure)
+        return None
 
+    # Label the reference lines at opposite edges: the Pod's own averages on
+    # the right, everybody's on the left. Two values that sit close together
+    # then cannot collide with each other.
 
-def _legend(axes) -> None:
-    """Place the legend above the plot, where it cannot cover a bar."""
+    for value, text, colour in own_labels:
+        axes.annotate(
+            text, xy=(1.0, value), xycoords=('axes fraction', 'data'),
+            xytext=(4, 0), textcoords='offset points',
+            va='center', ha='left', fontsize=8, color=colour,
+        )
+    for value, text, colour in cohort_labels:
+        axes.annotate(
+            text, xy=(0.0, value), xycoords=('axes fraction', 'data'),
+            xytext=(-4, 0), textcoords='offset points',
+            va='center', ha='right', fontsize=8, color=colour,
+        )
 
+    axes.set_ylabel('mm Hg (pressure) · bpm (pulse)', color=_MUTED, fontsize=9)
+    axes.xaxis.set_major_formatter(mdates.DateFormatter('%d %b'))
+    figure.autofmt_xdate(rotation=20, ha='right')
+
+    count = pod.get('observation_count', len(observations))
+    axes.set_title(
+        f'Blood pressure over {count} reading{"" if count == 1 else "s"}',
+        color=_INK, fontsize=12, loc='left', pad=28,
+    )
+
+    # Identity comes from the three coloured series; the two dashed and dotted
+    # entries explain what the reference lines mean without repeating a colour.
+
+    style_handles = [
+        Line2D([], [], color=_MUTED, linewidth=1.5, linestyle='--',
+               label='Your average'),
+        Line2D([], [], color=_MUTED, linewidth=1.5, linestyle=':',
+               label="Everyone's average"),
+    ]
+    handles, labels = axes.get_legend_handles_labels()
     legend = axes.legend(
-        frameon=False, fontsize=9, ncol=2,
-        loc='lower right', bbox_to_anchor=(1.0, 1.0))
+        handles=handles + style_handles,
+        labels=labels + [handle.get_label() for handle in style_handles],
+        frameon=False, fontsize=9, ncol=5,
+        loc='lower right', bbox_to_anchor=(1.0, 1.0),
+    )
     for text in legend.get_texts():
         text.set_color(_INK)
+
+    return _save(figure, path)
 
 
 def _save(figure, path: Path) -> Path:
@@ -152,105 +264,3 @@ def _save(figure, path: Path) -> Path:
     figure.savefig(path, facecolor=_SURFACE)
     plt.close(figure)
     return path
-
-
-def render_pod_chart(
-    pod: dict[str, Any], cohort: dict[str, Any], path: Path,
-) -> Path | None:
-    """One Pod's averages beside the cohort average of averages."""
-
-    if not available():
-        return None
-
-    measures = pod.get('measures') or {}
-    cohort_averages = cohort.get('average_of_averages') or {}
-
-    labels, mine, theirs = [], [], []
-    for key, label in (('systolic', 'Systolic'), ('diastolic', 'Diastolic')):
-        measure = measures.get(key)
-        if not measure:
-            continue
-        labels.append(label)
-        mine.append(float(measure['average']))
-        theirs.append(float(cohort_averages.get(key) or 0.0))
-
-    if not labels:
-        return None
-
-    figure, axes = _figure(width=6.0, height=3.8)
-    positions = range(len(labels))
-    width = 0.3
-    bars_mine = axes.bar(
-        [p - width / 2 - _GAP for p in positions], mine, width,
-        label='This Pod', color=_SERIES_1)
-    bars_theirs = axes.bar(
-        [p + width / 2 + _GAP for p in positions], theirs, width,
-        label='Cohort average', color=_SERIES_3)
-
-    _label_bars(axes, bars_mine)
-    _label_bars(axes, bars_theirs)
-    _headroom(axes, mine + theirs)
-    axes.set_xticks(list(positions))
-    axes.set_xticklabels(labels)
-    axes.set_ylabel('mm Hg', color=_MUTED, fontsize=9)
-    axes.set_title(
-        f'Blood pressure average over {pod.get("observation_count", 0)} reading(s)',
-        color=_INK, fontsize=11, loc='left', pad=24)
-    _legend(axes)
-
-    return _save(figure, path)
-
-
-def render_cohort_chart(
-    pods: list[dict[str, Any]], cohort: dict[str, Any], path: Path,
-) -> Path | None:
-    """Every contributing Pod's average, with the cohort figure marked."""
-
-    if not available():
-        return None
-
-    included = [pod for pod in pods if pod.get('included_in_cohort')]
-    if not included:
-        return None
-
-    labels = [pod['pod_id'] for pod in included]
-    systolic = [
-        float((pod['measures'].get('systolic') or {}).get('average') or 0.0)
-        for pod in included
-    ]
-    diastolic = [
-        float((pod['measures'].get('diastolic') or {}).get('average') or 0.0)
-        for pod in included
-    ]
-
-    figure, axes = _figure(width=max(6.0, 1.6 * len(labels)), height=4.2)
-    positions = range(len(labels))
-    width = 0.3
-    bars_systolic = axes.bar(
-        [p - width / 2 - _GAP for p in positions], systolic, width,
-        label='Systolic', color=_SERIES_1)
-    bars_diastolic = axes.bar(
-        [p + width / 2 + _GAP for p in positions], diastolic, width,
-        label='Diastolic', color=_SERIES_2)
-
-    _label_bars(axes, bars_systolic)
-    _label_bars(axes, bars_diastolic)
-    _headroom(axes, systolic + diastolic)
-
-    averages = cohort.get('average_of_averages') or {}
-    for key, colour in (('systolic', _SERIES_1), ('diastolic', _SERIES_2)):
-        value = averages.get(key)
-        if value:
-            axes.axhline(
-                float(value), color=colour, linewidth=2, linestyle='--',
-                alpha=0.5)
-
-    axes.set_xticks(list(positions))
-    axes.set_xticklabels(labels, rotation=20, ha='right', fontsize=8)
-    axes.set_ylabel('mm Hg', color=_MUTED, fontsize=9)
-    axes.set_title(
-        'Average per Pod, dashed lines show the cohort average of averages',
-        color=_INK, fontsize=11, loc='left', pad=24)
-    _legend(axes)
-
-    return _save(figure, path)

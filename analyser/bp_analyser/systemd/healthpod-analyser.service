@@ -45,6 +45,13 @@ WorkingDirectory=/opt/solid/analyser/bp_analyser
 # that keeps its secrets in config.yaml fails to start with a
 # system error rather than a readable message.
 EnvironmentFile=-/etc/healthpod-analyser.env
+# The sandbox below can only bind a directory that already exists, and the
+# service cannot create it once the sandbox is up: a deployment copied without
+# var/ would fail with 226/NAMESPACE before the process ever ran. The '+'
+# prefix runs this line outside the sandbox and as root, so it can create the
+# directory and hand it to the service account. Change the owner here too if
+# the User= above is changed.
+ExecStartPre=+/usr/bin/install -d -o healthpod -g healthpod /opt/solid/analyser/bp_analyser/var
 ExecStart=/opt/solid/analyser/bp_analyser/.venv/bin/python -m bp_analyser \
     --config /opt/solid/analyser/bp_analyser/config.yaml watch
 

@@ -146,8 +146,12 @@ class SharingConfig:
 class WatchConfig:
     """How the service watches for new shares."""
 
-    poll_seconds: int = 60
-    full_rescan_seconds: int = 3600
+    poll_seconds: int = 30
+
+    # Zero (or less) switches the periodic run off, so the analysis happens
+    # only when a Pod has shared something.
+
+    full_rescan_seconds: int = 0
     run_on_start: bool = True
     error_backoff_seconds: int = 120
 
@@ -296,8 +300,8 @@ def load(path: str | Path) -> Config:
 
     watch_raw = raw.get('watch') or {}
     watch = WatchConfig(
-        poll_seconds=int(watch_raw.get('poll_seconds', 60)),
-        full_rescan_seconds=int(watch_raw.get('full_rescan_seconds', 3600)),
+        poll_seconds=int(watch_raw.get('poll_seconds', 30)),
+        full_rescan_seconds=int(watch_raw.get('full_rescan_seconds') or 0),
         run_on_start=bool(watch_raw.get('run_on_start', True)),
         error_backoff_seconds=int(watch_raw.get('error_backoff_seconds', 120)),
     )

@@ -128,6 +128,7 @@ class AnalyserService:
 
         places = self._config.analysis.decimal_places
         summaries = []
+        readings: dict[str, list] = {}
         warnings: list[str] = []
 
         for dataset in datasets:
@@ -145,6 +146,8 @@ class AnalyserService:
             for file_url, reason in report.skipped_reasons.items():
                 warnings.append(f'{file_url}: {reason}')
             summaries.append(summary)
+            readings[summary.pod_id] = statistics.within_window(
+                report.observations, self._config)
             log.info('%s: %d reading(s) from %d file(s)',
                      dataset.slug, summary.observation_count, report.files_read)
 
@@ -165,14 +168,14 @@ class AnalyserService:
             },
             'cohort': cohort.to_dict(places),
             'pods': [summary.to_dict(places) for summary in summaries],
-            'charts': {'cohort': None, 'pods': {}},
+            'charts': {'pods': {}},
             'sharing': {'enabled': self._config.sharing.enabled, 'published': []},
             'warnings': warnings,
         }
 
-        self._render_charts(document)
+        chart_images = self._render_charts(document, readings)
         if self._config.sharing.enabled:
-            self._share_results(document, summaries, cohort)
+            self._share_results(document, summaries, cohort, chart_images)
 
         results_path = self._store.write_results(document)
         log.info('run %s complete: %d Pod(s), %d reading(s)',
@@ -188,26 +191,42 @@ class AnalyserService:
 
     # -- Charts ------------------------------------------------------------
 
-    def _render_charts(self, document: dict[str, Any]) -> None:
+    def _render_charts(
+        self, document: dict[str, Any], readings: dict[str, list],
+    ) -> dict[str, str]:
+        """Draw one chart per Pod and return them base64-encoded, by Pod.
+
+        The file under `var/charts/` is for the operator; the encoded copy
+        travels inside the result the Pod receives, so the app gets the
+        picture and the numbers in a single read.
+        """
+
+        images: dict[str, str] = {}
         if not self._config.output.render_charts:
-            return
+            return images
 
         # Must happen before matplotlib is imported, which `available()` does.
         charts.set_cache_dir(self._store.charts_dir / '.mplconfig')
         if not charts.available():
-            return
+            return images
 
         cohort = document['cohort']
-        cohort_path = charts.render_cohort_chart(
-            document['pods'], cohort, self._store.chart_path('cohort'))
-        if cohort_path is not None:
-            document['charts']['cohort'] = cohort_path.name
-
         for pod in document['pods']:
+            pod_id = pod['pod_id']
             path = charts.render_pod_chart(
-                pod, cohort, self._store.chart_path(pod['pod_id']))
-            if path is not None:
-                document['charts']['pods'][pod['pod_id']] = path.name
+                observations=readings.get(pod_id, []),
+                pod=pod,
+                cohort=cohort,
+                path=self._store.chart_path(pod_id),
+            )
+            if path is None:
+                continue
+            document['charts']['pods'][pod_id] = path.name
+            encoded = charts.encode(path)
+            if encoded is not None:
+                images[pod_id] = encoded
+
+        return images
 
     # -- Sharing -----------------------------------------------------------
 
@@ -216,6 +235,7 @@ class AnalyserService:
         document: dict[str, Any],
         summaries: list[statistics.PodSummary],
         cohort: statistics.CohortSummary,
+        chart_images: dict[str, str],
     ) -> None:
         client, keys = self.connect()
         publisher = Publisher(client, keys, self._config)
@@ -243,6 +263,19 @@ class AnalyserService:
                     'heart_rate': 'bpm',
                 },
             }
+
+            # The chart of this Pod's own readings, ready for the app to
+            # decode and show. Absent when charts are switched off or
+            # matplotlib is not installed, which the app must tolerate.
+
+            image = chart_images.get(summary.pod_id)
+            if image is not None:
+                payload['chart'] = {
+                    'format': 'png',
+                    'encoding': 'base64',
+                    'data': image,
+                }
+
             try:
                 outcome = publisher.publish(
                     payload=payload,
@@ -262,6 +295,16 @@ class AnalyserService:
                 'recipients': outcome.recipients,
                 'failures': outcome.failures,
             })
+            for recipient, reason in outcome.failures.items():
+                # A Pod that did not receive its key can fetch the result but
+                # not read it, which looks like an app fault from the outside.
+                # Say so plainly, in the log and in the run document.
+
+                document['warnings'].append(
+                    f'{recipient} did not receive the key for '
+                    f'{outcome.resource_url}: {reason}')
+                log.error('%s did not receive the key for %s: %s',
+                          recipient, outcome.resource_url, reason)
 
         # The cohort average of averages goes to every contributing Pod.
 
@@ -305,6 +348,12 @@ class AnalyserService:
             'recipients': outcome.recipients,
             'failures': outcome.failures,
         })
+        for recipient, reason in outcome.failures.items():
+            document['warnings'].append(
+                f'{recipient} did not receive the key for the cohort '
+                f'average: {reason}')
+            log.error('%s did not receive the cohort average key: %s',
+                      recipient, reason)
 
     # -- Watching ----------------------------------------------------------
 
@@ -339,12 +388,23 @@ class AnalyserService:
         self._install_signal_handlers()
         state = self._store.read_state()
         poll = max(5, self._config.watch.poll_seconds)
-        rescan = max(poll, self._config.watch.full_rescan_seconds)
+
+        # A rescan interval of zero (or less) switches the periodic run off:
+        # the analysis then happens only when something has actually been
+        # shared, which is the usual arrangement.
+
+        configured_rescan = self._config.watch.full_rescan_seconds
+        rescan = max(poll, configured_rescan) if configured_rescan > 0 else 0
         last_full_run = 0.0
         pending = self._config.watch.run_on_start
 
-        log.info('watching %s every %ss (full rescan every %ss)',
-                 self._config.analyser.web_id, poll, rescan)
+        log.info(
+            'watching %s every %ss (%s)',
+            self._config.analyser.web_id,
+            poll,
+            f'full rescan every {rescan}s' if rescan
+            else 'analysing only when something is shared',
+        )
 
         while not self._stopping:
             reason = None
@@ -365,7 +425,8 @@ class AnalyserService:
                         reason = 'the set of shared resources has changed'
                         state['share_ids'] = share_ids
 
-                if reason is None and time.monotonic() - last_full_run >= rescan:
+                if (reason is None and rescan
+                        and time.monotonic() - last_full_run >= rescan):
                     reason = 'periodic rescan'
 
                 if reason is not None:

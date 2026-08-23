@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
+import 'package:healthpod/features/charts/widgets/bp_analyse_button.dart';
 import 'package:healthpod/utils/url_launcher_util.dart';
 
 /// App bar widget with educational tooltips about blood pressure.
@@ -136,6 +137,10 @@ class BPChartAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ),
         ),
+
+        // Analyse: share the readings with the Analyser Pod and show the
+        // chart it returns, marked with this user's averages and everyone's.
+        const BPAnalyseButton(),
 
         // AHA Link Button.
         Padding(

@@ -9,15 +9,16 @@ service reads it, averages it, and shares the results back:
 3. it computes the average of those averages and shares it with every
    contributing Pod.
 
-Results are also written to local disk as JSON (and optionally PNG charts), and
-a small read-only HTTP API serves them to a front end.
+Each contributing Pod also receives a chart: its own readings over time with
+both sets of averages drawn across them. Results are written to local disk as
+JSON and PNG as well, and a small read-only HTTP API serves them to a front
+end.
 
 - Lives at `healthpod/analyser/bp_analyser`, a self-contained project under
   `healthpod/analyser/`, which holds one such project per analyser
 - Analyser Pod address: configured in `config.yaml`, default
   `https://solid.dev.empwr.au/Analyser/profile/card#me`
 - Runs continuously under systemd, watching for new shares
-- British English throughout, GPL-3.0, matching the rest of HealthPod
 
 ## Contents
 
@@ -26,7 +27,7 @@ a small read-only HTTP API serves them to a front end.
 - [Installing on the Solid server](#installing-on-the-solid-server)
 - [Configuration](#configuration)
 - [Running it](#running-it)
-- [How a user shares their data](#how-a-user-shares-their-data)
+- [How a user asks for an analysis](#how-a-user-asks-for-an-analysis)
 - [What the Pods receive back](#what-the-pods-receive-back)
 - [The results document](#the-results-document)
 - [The front-end API](#the-front-end-api)
@@ -75,8 +76,8 @@ One cycle:
 | 3 | `discovery.py` | Keep the entries that look like blood pressure data, expand shared folders, and group everything by owner Pod. |
 | 4 | `bp_data.py` | Fetch and decrypt each file, and parse the readings. |
 | 5 | `statistics.py` | Average per Pod, then average those averages across the cohort. |
-| 6 | `store.py`, `charts.py` | Write `var/results/latest.json` and render the charts. |
-| 7 | `publisher.py` | Encrypt each result, write it into the Analyser Pod, grant the recipient read access, hand over the key, and log the grant. |
+| 6 | `store.py`, `charts.py` | Write `var/results/latest.json` and draw one chart per Pod. |
+| 7 | `publisher.py` | Encrypt each result with that resource's own key — the same one every run — write it into the Analyser Pod, grant the recipient read access, hand over the key (replacing any earlier one, then reading it back to confirm), and log the grant. |
 
 The cryptography in `crypto.py` matches `solidpod` exactly — Argon2id + HKDF
 for the master key, AES counter mode with PKCS7 for content, AES-CBC for the
@@ -205,6 +206,25 @@ nothing is shared between them but the root directory.
 
 Requirements: Python 3.10 or newer, and outbound HTTPS to the Solid server.
 
+### Updating a deployment
+
+Copying a new version over an existing one leaves out two things that are not
+part of the source: the virtual environment and `var/`. Re-running `setup.sh`
+restores both, along with the execute bits that some transfers drop:
+
+```bash
+sudo systemctl stop healthpod-analyser
+sudo cp -r bp_analyser/. /opt/solid/analyser/bp_analyser/
+sudo chown -R healthpod:healthpod /opt/solid/analyser
+sudo -u healthpod bash /opt/solid/analyser/bp_analyser/setup.sh
+sudo systemctl start healthpod-analyser
+```
+
+`config.yaml` is never overwritten by `setup.sh`, so local settings and
+secrets survive an update; compare it against `config.example.yaml` after a
+version that adds settings. The service unit also creates `var/` before its
+sandbox is built, so a deployment that has lost it starts anyway.
+
 ### Why not inside the Pod's storage
 
 `/opt/solid/server` is the Community Solid Server's storage root: whatever sits
@@ -273,8 +293,8 @@ analyser:
 | | `results_dir` | Folder in the Analyser Pod holding published results. |
 | | `share_cohort_average` | Also give every Pod the average of averages. |
 | | `encrypt_results` | Encrypt published results, as HealthPod does. |
-| `watch` | `poll_seconds` | How often the shared-keys file is checked (default 60). |
-| | `full_rescan_seconds` | Re-analyse at least this often (default 3600). |
+| `watch` | `poll_seconds` | How often the shared-keys file is checked, and so the longest a user waits (default 30). |
+| | `full_rescan_seconds` | Re-analyse on a timer as well. `0`, the default, means never: the analysis runs only when something is shared. |
 | `output` | `state_dir`, `results_dir`, `charts_dir` | Local paths, relative to `config.yaml`. |
 | `api` | `enabled`, `host`, `port`, `cors_origins`, `token` | The front-end interface. |
 
@@ -367,10 +387,12 @@ reason `./run.sh check` would.
 
 The watcher:
 
-- polls `shared/shared-keys.ttl` every `poll_seconds` and runs a cycle as soon
-  as its entity tag changes — that is, the moment a new Pod shares something;
-- runs a full cycle every `full_rescan_seconds` regardless, so new readings
-  added to an already-shared folder are picked up;
+- polls `shared/shared-keys.ttl` every `poll_seconds` (30 by default) and runs
+  a cycle as soon as its entity tag changes — that is, the moment a Pod shares
+  something. Nothing is shared, nothing is computed;
+- does **not** run on a timer unless asked to: `full_rescan_seconds` defaults
+  to `0`, which switches the periodic run off. Set it to, say, `3600` if you
+  want an hourly recompute regardless of activity;
 - runs when `POST /api/refresh` leaves a marker in the state directory;
 - rides out transient errors: it logs, backs off for `error_backoff_seconds`,
   drops its access token and reconnects;
@@ -400,18 +422,46 @@ If a daemon is unwelcome, `run-once` is idempotent and safe to schedule:
 */15 * * * * /opt/solid/analyser/bp_analyser/run.sh run-once >> /opt/solid/analyser/bp_analyser/var/cron.log 2>&1
 ```
 
-## How a user shares their data
+## How a user asks for an analysis
 
-In HealthPod, on the user's own device:
+HealthPod has an **Analyse** button in the top right of the blood pressure
+chart (`Icons.analytics_outlined`, beside the information tooltips). One press
+covers the whole round trip:
+
+1. the app counts the readings and asks the user to confirm, naming the
+   Analyser's WebID and what it will be allowed to do — read, nothing else;
+2. it grants read access to each reading in turn;
+3. the analyser notices within `poll_seconds` and computes;
+4. the app collects the result the analyser shares back, saves the chart to
+   the device, and shows it in a dialog.
+
+The button is disabled for the whole of that round trip and comes back to life
+when the chart appears, so a second press cannot start a competing run.
+
+The app reads the result straight from its address rather than searching for
+it, because the analyser publishes to a predictable place:
+
+    <analyser>/healthpod/data/analyser/<pod-id>/bp-average.json.enc.ttl
+
+Before sharing, the app notes the timestamp of whatever result is already
+published there; it then waits for one carrying a different timestamp. Testing
+for a change rather than for "later than now" keeps the check correct when the
+device's clock and the server's disagree, which they routinely do.
+
+Readings recorded after an analysis are not included automatically: each is a
+new resource with a new key, so the user presses **Analyse** again to bring
+them in. The tooltip on the button says so.
+
+### Sharing by hand
+
+The same thing can be done through the ordinary sharing dialogue, which is
+useful for testing without the app's button:
 
 1. open the file browser and go to `healthpod/data/blood_pressure`;
 2. select the readings to contribute (or the folder itself);
 3. choose **Share**, pick **Individual** as the recipient type, and enter
    `https://solid.dev.empwr.au/Analyser/profile/card#me`;
 4. tick **Read**, and confirm.
-
-Within a minute the analyser notices, and the user's own average appears back
-in their Pod under **shared with me**.
 
 Sharing individual files is the reliable choice. Sharing the folder works only
 when the readings inherit the folder's encryption key; see
@@ -435,7 +485,8 @@ and the key is handed to the recipient through their `shared-keys.ttl`. A line
 in the recipient's permission log makes it appear in HealthPod's list of
 resources shared with them.
 
-The per-Pod document:
+The per-Pod document carries the figures and the chart together, so an app
+gets both from a single read:
 
 ```json
 {
@@ -450,12 +501,20 @@ The per-Pod document:
     "average_of_averages": {"systolic": 135.0, "diastolic": 91.2, "heart_rate": 72.5},
     "pooled_average": {"systolic": 135.0, "diastolic": 91.2, "heart_rate": 72.5}
   },
-  "units": {"systolic": "mm Hg", "diastolic": "mm Hg", "heart_rate": "bpm"}
+  "units": {"systolic": "mm Hg", "diastolic": "mm Hg", "heart_rate": "bpm"},
+  "chart": {"format": "png", "encoding": "base64", "data": "iVBORw0KGgo..."}
 }
 ```
 
-The cohort document is the same without the `pod` and `average` sections. No
-Pod ever receives another Pod's readings, averages or WebID.
+`chart` holds that Pod's own chart: its readings over time as three lines —
+systolic, diastolic and heart rate — with its own averages dashed across them
+and the cohort averages dotted. It is base64-encoded PNG because Solid sharing
+carries text, which means the app needs no second channel and no extra
+credentials to fetch the picture. The field is absent when charts are switched
+off or matplotlib is missing, so a reader must tolerate that.
+
+The cohort document is the same without the `pod`, `average` and `chart`
+sections. No Pod ever receives another Pod's readings, averages or WebID.
 
 ## The results document
 
@@ -497,7 +556,7 @@ that displays its output. Every run also lands in `var/results/run-<id>.json`.
       "notes": []
     }
   ],
-  "charts": {"cohort": "cohort.png", "pods": {"solid.dev.empwr.au-alice": "solid.dev.empwr.au-alice.png"}},
+  "charts": {"pods": {"solid.dev.empwr.au-alice": "solid.dev.empwr.au-alice.png"}},
   "sharing": {"enabled": true, "published": [
     {"kind": "pod-average", "pod_id": "solid.dev.empwr.au-alice",
      "resource_url": "https://.../bp-average.json.enc.ttl",
@@ -529,26 +588,35 @@ only reads local files, so it can face a front end without any Pod access.
 | GET | `/health` | Liveness and a summary of the last run. |
 | GET | `/api/summary` | The whole latest results document. |
 | GET | `/api/cohort` | The cohort figures only. |
-| GET | `/api/cohort/chart.png` | Every Pod's average, with the cohort marked. |
 | GET | `/api/pods` | One entry per contributing Pod. |
 | GET | `/api/pods/{pod_id}` | One Pod's averages plus the cohort figures. |
-| GET | `/api/pods/{pod_id}/chart.png` | That Pod against the cohort. |
+| GET | `/api/pods/{pod_id}/chart.png` | That Pod's readings over time, with both sets of averages. |
 | GET | `/api/runs` | Stored run identifiers, newest first. |
 | GET | `/api/runs/{run_id}` | One stored run in full. |
 | POST | `/api/refresh` | Ask the watcher for a cycle. Guarded by `api.token`. |
 
 ```bash
 curl -s http://127.0.0.1:8088/api/cohort | python3 -m json.tool
-curl -s -o cohort.png http://127.0.0.1:8088/api/cohort/chart.png
+curl -s -o chart.png http://127.0.0.1:8088/api/pods/solid.dev.empwr.au-alice/chart.png
 curl -s -X POST http://127.0.0.1:8088/api/refresh -H "Authorization: Bearer $TOKEN"
 ```
 
 Interactive documentation is at `/docs`, generated by FastAPI.
 
-Charts are PNG files rendered with matplotlib into `var/charts/`. Set
+Charts are PNG files rendered with matplotlib into `var/charts/`, one per Pod,
+and the same image is embedded in the result that Pod receives. Set
 `output.render_charts: false` to skip them; the JSON is unaffected. A front end
 that would rather draw its own charts has everything it needs in
 `/api/summary`.
+
+**What the chart shows.** One picture per Pod: that Pod's systolic, diastolic
+and heart rate readings plotted over time, with six reference lines across
+them — the Pod's own average for each measure (dashed, labelled on the right)
+and the average across every contributing Pod (dotted, labelled on the left).
+The three measures share one axis: pressure is in millimetres of mercury and
+pulse in beats per minute, but the ranges overlap closely enough for a single
+scale, and the axis says so. A second y-axis would invite the reader to
+compare two scales as though they were one.
 
 **Extending it.** The reserved shape is: the cycle writes a field into the
 results document, and a route in `bp_analyser/api.py` serves it. Adding a
@@ -600,6 +668,8 @@ adding `/api/pods/{pod_id}/series`; nothing else changes.
 | `Contributing Pods: 0` although resources are listed | The shared paths do not match `data.path_fragments`. Widen it, or set it to `[]` to accept everything shared. |
 | `no key has been shared for this resource` in the warnings | A folder was shared but its files carry their own keys. Ask the owner to share the files, not the folder. See [Known limitations](#known-limitations). |
 | Nobody can share with the Analyser any more, and HealthPod reports the recipient Pod as not initialised | Something has tightened the Analyser Pod's ACLs: `healthpod/sharing/public-key.ttl` must stay publicly readable and `healthpod/shared/` publicly writable, or no Pod can hand over a key. Check with `curl -sI https://solid.dev.empwr.au/Analyser/healthpod/sharing/public-key.ttl`, which must answer 200. |
+| The app reports `Invalid or corrupted pad block` for a result it can fetch | The content was decrypted with the wrong key. A resource keeps one key for its whole life precisely so this cannot happen — readers cache the key they were handed and only ask again when they hold none — so suspect a reader holding a key from before that rule existed: restart the app. |
+| The app reports `No encryption key found` for a result it can fetch | The resource key never reached that Pod's `healthpod/shared/shared-keys.ttl`. Every delivery is now read back and confirmed, so the reason appears as `did not receive the key` in `warnings` and in the journal. Re-running the analysis delivers it again. |
 | Results computed, `failures` non-empty | The recipient Pod has no `public-key.ttl`, or the analyser cannot write to their `shared/`. That Pod has not been initialised for the `healthpod` application. |
 | Charts missing | matplotlib is not installed, or `output.render_charts` is false. |
 | `403` writing into the Analyser Pod | The client credentials are bound to a different WebID than `analyser.web_id`. |
@@ -621,7 +691,7 @@ journalctl -xeu healthpod-analyser.service | tail -30
 
 | Status | Cause | Remedy |
 |--------|-------|--------|
-| `226/NAMESPACE` | `ReadWritePaths` points at `var/`, which does not exist yet — systemd builds the mount namespace before the process starts. | `sudo -u healthpod mkdir -p /opt/solid/analyser/bp_analyser/var/{state,results,charts}`, or just run `setup.sh`, which creates them. |
+| `226/NAMESPACE` | `ReadWritePaths` points at `var/`, which does not exist — systemd builds the mount namespace before the process starts, and a deployment copied from source has no `var/`. Current units create it first, so this means an older unit is installed. | Copy the unit again from `systemd/`, `systemctl daemon-reload`, or create the directory by hand: `sudo -u healthpod mkdir -p /opt/solid/analyser/bp_analyser/var`. |
 | `217/USER` | The `healthpod` account does not exist. | `sudo useradd --system --home /opt/solid/analyser --shell /usr/sbin/nologin healthpod`, or point `User=`/`Group=` at an account that does. |
 | `203/EXEC` | `.venv/bin/python` is missing or not executable by the service account. | Run `setup.sh`, then `sudo chown -R healthpod:healthpod /opt/solid/analyser`. |
 | `200/CHDIR` | `WorkingDirectory` does not exist, or the account cannot traverse into it. | Check `namei -l /opt/solid/analyser/bp_analyser`; every directory on the path needs `x`. |

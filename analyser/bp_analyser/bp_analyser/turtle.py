@@ -235,17 +235,31 @@ def shared_key_insert_query(
 
 
 def shared_key_delete_query(
-    unique_id: str, path: str, access: str, key: str,
-) -> str:
-    """SPARQL to remove one entry from an existing `shared-keys.ttl`."""
+    unique_id: str, values: dict[str, list[str]],
+) -> str | None:
+    """SPARQL to remove everything recorded for one share.
+
+    [values] maps `path`, `accessList` and `sharedKey` to the values currently
+    stored. Each is deleted as its own triple, so a Pod that accumulated
+    several values for the same share — which an earlier version of this
+    service could cause — is cleaned up rather than left ambiguous. A reader
+    expects exactly one value per predicate and fails on a list.
+
+    Returns None when there is nothing to delete.
+    """
+
+    triples = [
+        f'resourceId:{unique_id} data:{predicate} "{escape_literal(value)}".'
+        for predicate in ('path', 'accessList', 'sharedKey')
+        for value in values.get(predicate, [])
+    ]
+    if not triples:
+        return None
 
     return (
         f'PREFIX resourceId: <{paths.APPS_RES_ID}> '
         f'PREFIX data: <{paths.APPS_DATA}> '
-        f'DELETE DATA {{resourceId:{unique_id} '
-        f'data:path "{escape_literal(path)}"; '
-        f'data:accessList "{escape_literal(access)}"; '
-        f'data:sharedKey "{escape_literal(key)}".}};'
+        f'DELETE DATA {{{" ".join(triples)}}};'
     )
 
 

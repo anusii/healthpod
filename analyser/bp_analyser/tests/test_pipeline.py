@@ -44,7 +44,7 @@ from pathlib import Path
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-from bp_analyser import crypto, pod_paths as paths, turtle
+from bp_analyser import charts, crypto, pod_paths as paths, turtle
 from bp_analyser.config import AnalyserConfig, Config, ConfigError
 from bp_analyser.keys import PodKeys
 from bp_analyser.service import AnalyserService
@@ -90,12 +90,16 @@ class FakeSolidClient:
     def __init__(self) -> None:
         self.resources: dict[str, str] = {}
         self.patched: list[tuple[str, str]] = []
+        self.containers_created: list[str] = []
+        self.private_urls: set[str] = set()
 
     # -- Reading -----------------------------------------------------------
 
     def get_text(self, url: str, *, accept: str = 'text/turtle') -> str:
-        from bp_analyser.solid_client import NotFoundError
+        from bp_analyser.solid_client import ForbiddenError, NotFoundError
 
+        if self._is_private(url):
+            raise ForbiddenError(f'read {url}: access denied', 403)
         if url.endswith('/'):
             return self._container_document(url)
         if url not in self.resources:
@@ -110,7 +114,17 @@ class FakeSolidClient:
         except NotFoundError:
             return None
 
+    # URLs the Analyser may neither read nor write, as a Pod's own containers
+    # normally are. The server answers 403: the resource is there, but not for
+    # us.
+
+    def _is_private(self, url: str) -> bool:
+        return url in self.private_urls
+
     def exists(self, url: str) -> bool:
+        # A private resource still exists; the server just will not show it.
+        if self._is_private(url):
+            return True
         if url.endswith('/'):
             return any(key.startswith(url) for key in self.resources)
         return url in self.resources
@@ -143,28 +157,80 @@ class FakeSolidClient:
     # -- Writing -----------------------------------------------------------
 
     def put_text(self, url: str, content: str, *, content_type: str = 'text/turtle') -> None:
+        from bp_analyser.solid_client import ForbiddenError
+
+        if self._is_private(url):
+            raise ForbiddenError(f'write {url}: access denied', 403)
         self.resources[url] = content
 
     def ensure_container(self, url: str) -> None:
-        return None
+        from bp_analyser.solid_client import ForbiddenError
+
+        self.containers_created.append(url)
+        # Walking up a path in somebody else's Pod runs into containers that
+        # are theirs alone; the real client cannot create those.
+        if self._is_private(url):
+            raise ForbiddenError(f'create {url}: access denied', 403)
 
     def patch_sparql(self, url: str, query: str) -> None:
-        """Apply an INSERT DATA query by merging its triples into the document."""
+        """Apply the DELETE DATA and INSERT DATA blocks of a SPARQL update."""
+
+        from bp_analyser.solid_client import NotFoundError
 
         self.patched.append((url, query))
-        body = query[query.index('{') + 1:query.rindex('}')]
-        prefixes = []
+        if url not in self.resources:
+            # A real server will not patch a resource that is not there.
+            raise NotFoundError(f'patch {url}: not found', 404)
+
+        graph = turtle.parse(self.resources[url])
+        prefixes = '\n'.join(
+            f'@prefix {declaration} .'
+            for declaration in self._prefix_declarations(query)
+        )
+
+        for keyword, apply in (('DELETE DATA', graph.remove),
+                               ('INSERT DATA', graph.add)):
+            for block in self._blocks(query, keyword):
+                # The final full stop is optional inside a SPARQL data block
+                # but required by the turtle parser used here.
+                body = block.strip()
+                if not body.endswith('.'):
+                    body += ' .'
+                patch = turtle.parse(f'{prefixes}\n{body}')
+                for triple in patch:
+                    apply(triple)
+
+        self.resources[url] = graph.serialize(format='turtle')
+
+    @staticmethod
+    def _prefix_declarations(query: str) -> list[str]:
+        declarations = []
         for chunk in query.split('PREFIX ')[1:]:
-            declaration = chunk.split('INSERT')[0].strip()
-            if declaration:
-                prefixes.append('@prefix ' + declaration.rstrip() + ' .')
-        addition = '\n'.join(prefixes) + '\n' + body.strip()
-        if not addition.rstrip().endswith('.'):
-            addition += ' .'
-        existing = self.resources.get(url, '')
-        merged = turtle.parse(existing) if existing else turtle.parse('')
-        merged.parse(data=addition, format='turtle')
-        self.resources[url] = merged.serialize(format='turtle')
+            head = chunk.split('DELETE')[0].split('INSERT')[0].strip()
+            if head:
+                declarations.append(head)
+        return declarations
+
+    @staticmethod
+    def _blocks(query: str, keyword: str) -> list[str]:
+        """The braced bodies following each occurrence of [keyword]."""
+
+        blocks = []
+        position = query.find(keyword)
+        while position != -1:
+            start = query.index('{', position)
+            depth, index = 0, start
+            while index < len(query):
+                if query[index] == '{':
+                    depth += 1
+                elif query[index] == '}':
+                    depth -= 1
+                    if depth == 0:
+                        break
+                index += 1
+            blocks.append(query[start + 1:index])
+            position = query.find(keyword, index)
+        return blocks
 
     def close(self) -> None:
         return None
@@ -205,8 +271,11 @@ def reading(timestamp: str, systolic: float, diastolic: float,
     }
 
 
-class PipelineTests(unittest.TestCase):
-    """One full cycle: read, average, publish, share."""
+class PipelineHarness(unittest.TestCase):
+    """An Analyser Pod, two contributors and a service wired to them.
+
+    Holds no tests of its own: the cases below share this set-up.
+    """
 
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
@@ -320,7 +389,35 @@ class PipelineTests(unittest.TestCase):
             )
         self._share_with_analyser(folder, folder_key)
 
-    # -- Tests -------------------------------------------------------------
+    # -- Helpers -----------------------------------------------------------
+
+    def _open_as_recipient(self, pod: FakePod, resource_url: str) -> dict:
+        """Open a published result the way HealthPod would, on the Pod side."""
+
+        shared_url = paths.shared_key_url(pod.web_id, APP)
+        document = self.client.resources[shared_url]
+        unique_id = crypto.unique_resource_id(resource_url, pod.web_id)
+        subject = paths.APPS_RES_ID + unique_id
+
+        record = turtle.triple_map(document, base=shared_url)[subject]
+        sealed_key = turtle.single(record[paths.APPS_DATA + 'sharedKey'])
+        sealed_path = turtle.single(record[paths.APPS_DATA + 'path'])
+        self.assertEqual(
+            crypto.rsa_decrypt(pod.private_key, sealed_path), resource_url)
+
+        key = base64.b64decode(crypto.rsa_decrypt(pod.private_key, sealed_key))
+        content = self.client.resources[resource_url]
+        fields = turtle.triple_map(content, base=resource_url)[resource_url]
+        plaintext = crypto.aes_ctr_decrypt(
+            turtle.single(fields[paths.APPS_TERMS + 'encData']),
+            key,
+            base64.b64decode(turtle.single(fields[paths.APPS_TERMS + 'iv'])),
+        )
+        return json.loads(plaintext)
+
+
+class PipelineTests(PipelineHarness):
+    """One full cycle: read, average, publish, share."""
 
     def test_cycle_averages_every_pod(self) -> None:
         outcome = self.service.run_cycle()
@@ -404,31 +501,197 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(second['cohort']['pod_count'],
                          first['cohort']['pod_count'])
 
-    # -- Helpers -----------------------------------------------------------
+class ChartDeliveryTests(PipelineHarness):
+    """The chart travels inside the result the Pod receives."""
 
-    def _open_as_recipient(self, pod: FakePod, resource_url: str) -> dict:
-        """Open a published result the way HealthPod would, on the Pod side."""
+    def setUp(self) -> None:
+        super().setUp()
+        self.config.output.render_charts = True
+
+    def test_result_carries_a_png_of_the_pods_own_readings(self) -> None:
+        if not charts.available():
+            self.skipTest('matplotlib is not installed')
+
+        document = self.service.run_cycle().document
+        published = {
+            entry['pod_id']: entry
+            for entry in document['sharing']['published']
+            if entry['kind'] == 'pod-average'
+        }
+
+        payload = self._open_as_recipient(
+            self.alice, published['server-alice']['resource_url'])
+        chart = payload['chart']
+        self.assertEqual(chart['format'], 'png')
+        self.assertEqual(chart['encoding'], 'base64')
+
+        image = base64.b64decode(chart['data'])
+        # The PNG signature, so this is an image rather than an error page.
+        self.assertEqual(image[:8], b'\x89PNG\r\n\x1a\n')
+        self.assertGreater(len(image), 1000)
+
+    def test_a_chart_file_is_kept_for_the_operator(self) -> None:
+        if not charts.available():
+            self.skipTest('matplotlib is not installed')
+
+        document = self.service.run_cycle().document
+        self.assertIn('server-alice', document['charts']['pods'])
+        self.assertTrue(
+            self.service.store.chart_path('server-alice').is_file())
+
+    def test_there_is_no_separate_cohort_chart(self) -> None:
+        document = self.service.run_cycle().document
+        self.assertNotIn('cohort', document['charts'])
+
+
+class KeyDeliveryTests(PipelineHarness):
+    """Handing the resource key to the recipient, the part that must not fail
+    quietly: a Pod that has the result but not its key can fetch a document it
+    cannot read, which looks like a fault in the app."""
+
+    def _entry(self, pod: FakePod, resource_url: str) -> dict:
+        """What the recipient's sharing inbox holds for one shared resource."""
 
         shared_url = paths.shared_key_url(pod.web_id, APP)
-        document = self.client.resources[shared_url]
-        unique_id = crypto.unique_resource_id(resource_url, pod.web_id)
-        subject = paths.APPS_RES_ID + unique_id
+        subject = paths.APPS_RES_ID + crypto.unique_resource_id(
+            resource_url, pod.web_id)
 
-        record = turtle.triple_map(document, base=shared_url)[subject]
-        sealed_key = turtle.single(record[paths.APPS_DATA + 'sharedKey'])
-        sealed_path = turtle.single(record[paths.APPS_DATA + 'path'])
-        self.assertEqual(
-            crypto.rsa_decrypt(pod.private_key, sealed_path), resource_url)
+        return turtle.triple_map(
+            self.client.resources[shared_url], base=shared_url)[subject]
 
-        key = base64.b64decode(crypto.rsa_decrypt(pod.private_key, sealed_key))
-        content = self.client.resources[resource_url]
-        fields = turtle.triple_map(content, base=resource_url)[resource_url]
-        plaintext = crypto.aes_ctr_decrypt(
+    def _delivered_key(self, pod: FakePod, resource_url: str) -> bytes:
+        """The resource key currently sitting in the recipient's inbox."""
+
+        entry = self._entry(pod, resource_url)
+        sealed = turtle.single(entry[paths.APPS_DATA + 'sharedKey'])
+
+        return base64.b64decode(crypto.rsa_decrypt(pod.private_key, sealed))
+
+    def _decrypt_resource(self, resource_url: str, key: bytes) -> str:
+        """Open a published resource with a key held by the reader."""
+
+        fields = turtle.triple_map(
+            self.client.resources[resource_url], base=resource_url,
+        )[resource_url]
+
+        return crypto.aes_ctr_decrypt(
             turtle.single(fields[paths.APPS_TERMS + 'encData']),
             key,
             base64.b64decode(turtle.single(fields[paths.APPS_TERMS + 'iv'])),
         )
-        return json.loads(plaintext)
+
+    def _pod_average_url(self, document: dict, pod_id: str) -> str:
+        return next(
+            entry['resource_url']
+            for entry in document['sharing']['published']
+            if entry['pod_id'] == pod_id
+        )
+
+    def test_a_second_run_replaces_the_key_rather_than_adding_one(self) -> None:
+        # solidpod reads one value per predicate and fails on a list, so an
+        # accumulated second value locks the recipient out of every result.
+
+        first = self.service.run_cycle().document
+        second = self.service.run_cycle().document
+        self.assertEqual(
+            self._pod_average_url(first, 'server-alice'),
+            self._pod_average_url(second, 'server-alice'),
+        )
+
+        entry = self._entry(
+            self.alice, self._pod_average_url(second, 'server-alice'))
+        for predicate in ('sharedKey', 'path', 'accessList'):
+            value = entry[paths.APPS_DATA + predicate]
+            self.assertIsInstance(
+                value, str, f'{predicate} accumulated more than one value')
+
+    def test_the_key_from_the_latest_run_opens_the_latest_result(self) -> None:
+        self.service.run_cycle()
+        document = self.service.run_cycle().document
+
+        payload = self._open_as_recipient(
+            self.alice, self._pod_average_url(document, 'server-alice'))
+        self.assertEqual(payload['generated_at'], document['generated_at'])
+
+    def test_the_key_of_a_resource_does_not_change_between_runs(self) -> None:
+        # A reader caches the key it was handed and only asks for another when
+        # it holds none, so rotating the key silently breaks every reader.
+
+        first = self.service.run_cycle().document
+        url = self._pod_average_url(first, 'server-alice')
+        key_after_first = self._delivered_key(self.alice, url)
+
+        self.service.run_cycle()
+        self.assertEqual(self._delivered_key(self.alice, url),
+                         key_after_first)
+
+    def test_a_cached_key_still_opens_a_later_result(self) -> None:
+        # The app's position exactly: it holds the key from an earlier run and
+        # reads content written by a later one.
+
+        first = self.service.run_cycle().document
+        url = self._pod_average_url(first, 'server-alice')
+        cached = self._delivered_key(self.alice, url)
+
+        second = self.service.run_cycle().document
+        payload = json.loads(self._decrypt_resource(url, cached))
+
+        self.assertEqual(payload['generated_at'], second['generated_at'])
+
+    def test_a_private_container_on_the_way_does_not_stop_delivery(self) -> None:
+        # The recipient's application folder is theirs alone; only the sharing
+        # inbox inside it is open to others. Walking the path would fail.
+
+        # Alice has never received a shared key, so her inbox does not exist
+        # yet and has to be created inside a folder that is closed to us.
+        self.client.private_urls.add(f'{SERVER}/alice/healthpod/')
+        self.assertNotIn(
+            paths.shared_key_url(self.alice.web_id, APP),
+            self.client.resources,
+        )
+
+        document = self.service.run_cycle().document
+
+        entry = next(
+            item for item in document['sharing']['published']
+            if item['pod_id'] == 'server-alice'
+        )
+        self.assertEqual(entry['failures'], {})
+        self.assertEqual(entry['recipients'], [self.alice.web_id])
+
+    def test_a_key_that_does_not_arrive_is_reported(self) -> None:
+        # A server that accepts the write without storing it would otherwise
+        # leave the app waiting for a result it can never open.
+
+        shared_url = paths.shared_key_url(self.alice.web_id, APP)
+        real_patch = self.client.patch_sparql
+        real_put = self.client.put_text
+
+        def swallow_patch(url: str, query: str) -> None:
+            if url == shared_url:
+                return
+            real_patch(url, query)
+
+        def swallow_put(url: str, content: str, **kwargs: object) -> None:
+            if url == shared_url:
+                return
+            real_put(url, content, **kwargs)  # type: ignore[arg-type]
+
+        self.client.patch_sparql = swallow_patch  # type: ignore[method-assign]
+        self.client.put_text = swallow_put  # type: ignore[method-assign]
+
+        document = self.service.run_cycle().document
+
+        entry = next(
+            item for item in document['sharing']['published']
+            if item['pod_id'] == 'server-alice'
+        )
+        self.assertIn(self.alice.web_id, entry['failures'])
+        self.assertTrue(
+            any('did not receive the key' in warning
+                for warning in document['warnings']),
+            document['warnings'],
+        )
 
 
 class WatchGuardTests(unittest.TestCase):
