@@ -24,7 +24,6 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:solidpod/solidpod.dart' show AccessMode, getAccessMode;
 
 import 'package:healthpod/constants/analyser.dart';

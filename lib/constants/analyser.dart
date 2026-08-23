@@ -56,6 +56,5 @@ class Analyser {
 
   /// File name of the cohort summary shared with every contributing Pod.
 
-  static const String cohortAverageFileName =
-      'bp-cohort-average.json.enc.ttl';
+  static const String cohortAverageFileName = 'bp-cohort-average.json.enc.ttl';
 }
