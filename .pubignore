@@ -10,6 +10,7 @@ support/
 *~
 *.bak
 coverage
+/.metadata
 
 ARCHIVE
 ignore
