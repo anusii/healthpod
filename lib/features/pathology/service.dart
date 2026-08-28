@@ -31,6 +31,7 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/features/pathology/model.dart';
+import 'package:healthpod/utils/resolve_pod_file_url.dart';
 
 /// Service for loading and managing pathology report data.
 
@@ -80,6 +81,7 @@ class PathologyService {
           fileName: pdfName,
           date: date,
           tests: [],
+          podFiles: [fileName],
         );
       }
     }
@@ -145,10 +147,13 @@ class PathologyService {
           if (matchedPdfName != null) {
             // Add tests to the matched report.
 
+            final matched = reportsMap[matchedPdfName]!;
+
             reportsMap[matchedPdfName] = ReportData(
-              fileName: reportsMap[matchedPdfName]!.fileName,
-              date: reportsMap[matchedPdfName]!.date,
+              fileName: matched.fileName,
+              date: matched.date,
               tests: tests,
+              podFiles: [...matched.podFiles, fileName],
             );
             debugPrint(
               'Matched JSON data to PDF: $jsonName -> $matchedPdfName',
@@ -196,6 +201,55 @@ class PathologyService {
     // Use current date if no date in filename.
 
     return DateTime.now();
+  }
+
+  /// Removes a report from the POD.
+  ///
+  /// Deletes every file the report is made up of, which is the uploaded PDF
+  /// and, where the results have been read, the JSON file holding them.
+  ///
+  /// Returns true when all of the report's files are gone from the pod. A file
+  /// the server reports as missing counts as gone, since on the web a delete
+  /// can succeed and still raise a not-found error.
+
+  static Future<bool> deleteReport(ReportData report) async {
+    if (report.podFiles.isEmpty) {
+      debugPrint('No pod files recorded for report: ${report.fileName}');
+
+      return false;
+    }
+
+    final pathologyPath = '$basePath/pathology';
+
+    var allDeleted = true;
+
+    for (final fileName in report.podFiles) {
+      // deleteFile parses its argument as a URI, so the relative pod path has
+      // to be resolved to a full URL first. A listing that already gives full
+      // URLs is passed through unchanged.
+
+      final fileUrl = await resolvePodFileUrl('$pathologyPath/$fileName');
+
+      try {
+        await deleteFile(fileUrl: fileUrl);
+      } catch (e) {
+        final message = e.toString();
+
+        if (message.contains('404') ||
+            message.contains('NotFoundHttpError') ||
+            message.contains('not found')) {
+          debugPrint('Report file already removed from the pod: $fileName');
+
+          continue;
+        }
+
+        debugPrint('Error deleting report file $fileName: $e');
+
+        allDeleted = false;
+      }
+    }
+
+    return allDeleted;
   }
 
   /// Finds a matching PDF filename for the given JSON filename.

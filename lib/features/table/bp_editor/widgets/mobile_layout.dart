@@ -31,6 +31,7 @@ import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/features/bp/obs/service.dart';
 import 'package:healthpod/features/table/bp_editor/state.dart';
 import 'package:healthpod/features/table/bp_editor/widgets/utils.dart';
+import 'package:healthpod/widgets/action_buttons.dart';
 
 /// Builds the mobile layout for the blood pressure editor.
 ///
@@ -106,13 +107,14 @@ class BPEditorMobileLayout extends StatelessWidget {
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
+                      spacing: actionButtonSpacing,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
+                        EditButton(
+                          record: 'reading',
                           onPressed: onEdit(index),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
+                        DeleteButton(
+                          record: 'reading',
                           onPressed: () => onDelete(obs, index),
                         ),
                       ],

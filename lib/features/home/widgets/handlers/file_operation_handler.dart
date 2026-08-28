@@ -33,6 +33,7 @@ import 'package:solidui/solidui.dart';
 import 'package:healthpod/features/file/service/providers/file_service_provider.dart';
 import 'package:healthpod/features/home/widgets/navigation/tab_coordinator.dart';
 import 'package:healthpod/providers/tab_state.dart';
+import 'package:healthpod/utils/resolve_pod_file_url.dart';
 
 /// Handles file operations like selection, download, and deletion for
 /// SolidFile.
@@ -98,15 +99,22 @@ class FileOperationHandler {
     if (confirm == true) {
       String actualPath = '$filePath/$fileName';
 
+      // deleteFile parses its argument as a URI, so the relative pod path has
+      // to be resolved to a full URL first.
+
+      final fileUrl = await resolvePodFileUrl(actualPath);
+
+      if (!context.mounted) return;
+
       try {
         // Delete the main file first.
 
-        await deleteFile(fileUrl: actualPath);
+        await deleteFile(fileUrl: fileUrl);
 
         // Try to delete the ACL file.
 
         try {
-          await deleteFile(fileUrl: '$actualPath.acl');
+          await deleteFile(fileUrl: '$fileUrl.acl');
         } catch (e) {
           // ACL files are optional and may not exist.
         }

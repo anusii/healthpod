@@ -33,6 +33,7 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/features/medication/obs/model.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
+import 'package:healthpod/utils/resolve_pod_file_url.dart';
 
 /// Service for loading, saving, and deleting medication observations from POD storage.
 ///
@@ -212,14 +213,13 @@ class MedicationEditorService {
   /// Iterates through files in the medication directory to find a matching observation,
   /// then deletes the corresponding file.
   ///
-  /// @param context The build context for POD operations.
   /// @param observation The observation to find and delete.
-  /// @param resources Container resources with the list of files.
-  /// @returns A Future that completes when the delete operation is done.
+  /// @param resources Container listing with the list of files.
+  /// @returns True if a matching file was found and deleted.
 
-  Future<void> _findAndDeleteObservation(
+  Future<bool> _findAndDeleteObservation(
     MedicationObservation observation,
-    dynamic resources,
+    ({List<String> subDirs, List<String> files}) resources,
   ) async {
     for (final fileName in resources.files) {
       if (!fileName.endsWith('.enc.ttl')) continue;
@@ -243,31 +243,62 @@ class MedicationEditorService {
 
       if (result != SolidFunctionCallStatus.fail.toString() &&
           result != SolidFunctionCallStatus.notLoggedIn.toString()) {
+        bool isMatch = false;
+
         try {
           final data = json.decode(result.toString());
           final fileObs = MedicationObservation.fromJson(data);
 
           // Check if this is the observation we want to delete.
 
-          if (fileObs.name == observation.name &&
+          isMatch = fileObs.name == observation.name &&
               fileObs.dosage == observation.dosage &&
               fileObs.frequency == observation.frequency &&
               fileObs.startDate.day == observation.startDate.day &&
               fileObs.startDate.month == observation.startDate.month &&
-              fileObs.startDate.year == observation.startDate.year) {
-            // Delete the file.
-
-            await deleteFile(fileUrl: filePath);
-            debugPrint('Successfully deleted old medication record: $fileName');
-            return;
-          }
+              fileObs.startDate.year == observation.startDate.year;
         } catch (e) {
           debugPrint('Error parsing file $fileName for deletion: $e');
+        }
+
+        // The delete is kept out of the parse block so that a failure to
+        // remove the file is reported as such rather than as a parse error.
+
+        if (isMatch) {
+          // deleteFile parses its argument as a URI, so the relative Pod path
+          // has to be resolved to a full URL first.
+
+          final fileUrl = await resolvePodFileUrl(filePath);
+
+          try {
+            await deleteFile(fileUrl: fileUrl);
+            debugPrint('Successfully deleted medication record: $fileName');
+
+            return true;
+          } catch (e) {
+            final message = e.toString();
+
+            // On the web a delete can succeed and still report the resource
+            // as missing, so a not-found error is taken as the file having
+            // gone.
+
+            if (message.contains('404') ||
+                message.contains('NotFoundHttpError') ||
+                message.contains('not found')) {
+              return true;
+            }
+
+            debugPrint('Error deleting medication file $fileName: $e');
+
+            rethrow;
+          }
         }
       }
     }
 
-    debugPrint('No matching file found for old medication record');
+    debugPrint('No matching file found for medication record');
+
+    return false;
   }
 
   /// Deletes a medication observation from POD storage.
@@ -294,27 +325,17 @@ class MedicationEditorService {
 
       // Try to find and delete the observation.
 
-      await _findAndDeleteObservation(observation, resources);
+      final deleted = await _findAndDeleteObservation(observation, resources);
 
-      // Show success feedback.
-
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Medication deleted successfully'),
-            backgroundColor: Colors.green,
-          ),
+      if (!deleted) {
+        throw Exception(
+          'No matching medication record was found on your pod.',
         );
       }
     } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error deleting medication: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      // The page reports the outcome, so only note the detail here.
+
+      debugPrint('Error deleting medication observation: $e');
 
       rethrow;
     }

@@ -29,8 +29,12 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
+import 'package:healthpod/dialogs/confirm_delete.dart';
+import 'package:healthpod/features/table/vaccination_editor/model.dart';
 import 'package:healthpod/features/table/vaccination_editor/service.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
+import 'package:healthpod/utils/show_delete_result.dart';
+import 'package:healthpod/widgets/action_buttons.dart';
 
 /// The main editor page for vaccination observations.
 
@@ -90,6 +94,37 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
     setState(() {
       editorState.addNewObservation();
     });
+  }
+
+  /// Confirms and then deletes an observation.
+
+  Future<void> _handleDelete(VaccinationObservation obs) async {
+    if (!mounted) return;
+
+    final confirmed = await confirmDelete(
+      context,
+      title: 'Delete vaccination',
+      message: 'Remove "${obs.vaccineName}" from your pod? '
+          'The record cannot be recovered.',
+    );
+
+    if (!confirmed || !mounted) return;
+
+    try {
+      await editorState.deleteObservation(context, editorService, obs);
+
+      if (!mounted) return;
+
+      showDeleteSuccess(context, 'Vaccination record deleted successfully.');
+    } catch (e) {
+      if (!mounted) return;
+
+      showDeleteFailure(context, 'Error deleting vaccination: $e');
+    } finally {
+      // Always reload data to reflect current state.
+
+      if (mounted) _loadData();
+    }
   }
 
   /// Handles canceling the current edit.
@@ -285,9 +320,10 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                       ),
                       DataCell(
                         Row(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: actionButtonSpacing,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.save),
+                            SaveButton(
                               onPressed: () async {
                                 await editorState.saveObservation(
                                   context,
@@ -297,10 +333,7 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                                 _loadData();
                               },
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.cancel),
-                              onPressed: _handleCancelEdit,
-                            ),
+                            CancelButton(onPressed: _handleCancelEdit),
                           ],
                         ),
                       ),
@@ -324,50 +357,18 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
                     DataCell(Text(obs.notes)),
                     DataCell(
                       Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: actionButtonSpacing,
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit),
+                          EditButton(
+                            record: 'vaccination',
                             onPressed: () => setState(() {
                               editorState.enterEditMode(index);
                             }),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () async {
-                              try {
-                                await editorState.deleteObservation(
-                                  context,
-                                  editorService,
-                                  obs,
-                                );
-
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Vaccination record deleted successfully.',
-                                      ),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  );
-                                }
-                              } catch (e) {
-                                if (context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        'Error deleting vaccination: ${e.toString()}',
-                                      ),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              } finally {
-                                // Always reload data to reflect current state.
-
-                                _loadData();
-                              }
-                            },
+                          DeleteButton(
+                            record: 'vaccination',
+                            onPressed: () => _handleDelete(obs),
                           ),
                         ],
                       ),

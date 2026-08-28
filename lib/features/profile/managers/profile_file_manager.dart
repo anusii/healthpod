@@ -29,6 +29,7 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/resolve_pod_file_url.dart';
 
 /// Utility class for managing profile files.
 
@@ -126,9 +127,11 @@ class ProfileFileManager {
           final filePath = '$normalizedPath/$filename';
 
           // Try to delete the file using SolidPod's deleteFile function.
+          // deleteFile parses its argument as a URI, so the relative pod path
+          // has to be resolved to a full URL first.
 
           try {
-            await deleteFile(fileUrl: filePath);
+            await deleteFile(fileUrl: await resolvePodFileUrl(filePath));
           } catch (deleteError) {
             // Check if it's a "not found" error (404).
 
@@ -144,7 +147,7 @@ class ProfileFileManager {
 
               bool deleted = false;
               for (final altPath in alternativePaths) {
-                await deleteFile(fileUrl: altPath);
+                await deleteFile(fileUrl: await resolvePodFileUrl(altPath));
                 deleted = true;
                 break;
               }

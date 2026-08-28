@@ -13,6 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:intl/intl.dart';
 
+import 'package:healthpod/widgets/action_buttons.dart';
+
 import '../models/appointment.dart';
 import 'appointment_details_dialog.dart';
 
@@ -130,18 +132,17 @@ class AppointmentList extends StatelessWidget {
                         isThreeLine: appointment.description.isNotEmpty,
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
+                          spacing: actionButtonSpacing,
                           children: [
                             // Editing the note/description is allowed for any
                             // appointment, including past ones.
-                            IconButton(
-                              icon: const Icon(Icons.edit),
-                              tooltip: 'Edit',
+                            EditButton(
+                              record: 'appointment',
                               onPressed: () => onEdit(appointment),
                             ),
                             if (!appointment.isPast)
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                tooltip: 'Delete',
+                              DeleteButton(
+                                record: 'appointment',
                                 onPressed: () => onDelete(appointment),
                               ),
                           ],

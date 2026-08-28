@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
+import 'package:healthpod/utils/resolve_pod_file_url.dart';
 
 /// Creates or verifies a feature folder in POD.
 
@@ -65,7 +66,12 @@ Future<SolidFunctionCallStatus> createFeatureFolder({
           'Removing existing file $featureName before creating directory',
         );
         if (!context.mounted) return SolidFunctionCallStatus.fail;
-        await deleteFile(fileUrl: '$basePath/$featureName');
+        // deleteFile parses its argument as a URI, so the relative pod
+        // path has to be resolved to a full URL first.
+
+        await deleteFile(
+          fileUrl: await resolvePodFileUrl('$basePath/$featureName'),
+        );
       }
     } catch (e) {
       debugPrint(

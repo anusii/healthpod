@@ -31,6 +31,7 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:healthpod/constants/health_profile.dart';
 import 'package:healthpod/features/health_profile/model.dart';
 import 'package:healthpod/utils/format_measure.dart';
+import 'package:healthpod/widgets/action_buttons.dart';
 
 /// One row per recorded entry, one column per measurement.
 ///
@@ -104,11 +105,9 @@ class HealthProfileHistoryTable extends StatelessWidget {
               measurements they hold, are left as they are.
 
             ''',
-            child: IconButton(
-              icon: Icon(
-                Icons.delete_outline,
-                color: Theme.of(context).colorScheme.error,
-              ),
+            child: DeleteButton(
+              record: 'record',
+              showTooltip: false,
               onPressed: () => onDelete(entry),
             ),
           ),

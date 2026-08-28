@@ -162,9 +162,14 @@ class ReportData {
 
   final List<PathologyTest> tests;
 
+  /// The names of the files held on the pod for this report.
+
+  final List<String> podFiles;
+
   ReportData({
     required this.fileName,
     required this.date,
     required this.tests,
+    this.podFiles = const [],
   });
 }

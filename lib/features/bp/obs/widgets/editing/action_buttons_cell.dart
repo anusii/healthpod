@@ -27,6 +27,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/widgets/action_buttons.dart';
+
 /// Builds a [DataCell] containing action buttons for saving or canceling the edit.
 
 DataCell actionButtonsCell({
@@ -36,9 +38,10 @@ DataCell actionButtonsCell({
   return DataCell(
     Row(
       mainAxisSize: MainAxisSize.min,
+      spacing: actionButtonSpacing,
       children: [
-        IconButton(icon: const Icon(Icons.save), onPressed: onSave),
-        IconButton(icon: const Icon(Icons.cancel), onPressed: onCancel),
+        SaveButton(onPressed: onSave),
+        CancelButton(onPressed: onCancel),
       ],
     ),
   );

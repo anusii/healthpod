@@ -30,6 +30,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:healthpod/features/bp/obs/model.dart';
+import 'package:healthpod/widgets/action_buttons.dart';
 
 /// Creates a read-only [DataRow] for displaying a single [BPObservation].
 ///
@@ -79,9 +80,10 @@ DataRow buildDisplayRow({
     DataCell(
       Row(
         mainAxisSize: MainAxisSize.min,
+        spacing: actionButtonSpacing,
         children: [
-          IconButton(icon: const Icon(Icons.edit), onPressed: onEdit),
-          IconButton(icon: const Icon(Icons.delete), onPressed: onDelete),
+          EditButton(record: 'reading', onPressed: onEdit),
+          DeleteButton(record: 'reading', onPressed: onDelete),
         ],
       ),
     ),
