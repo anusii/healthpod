@@ -33,13 +33,16 @@ import 'package:solidpod/solidpod.dart'
         getDirUrl,
         getResourcesInContainer,
         getWebId,
-        grantPermission;
+        grantPermission,
+        permStr,
+        readPermission,
+        revokePermission;
 import 'package:solidui/solidui.dart' show getKeyFromUserIfRequired;
 
 import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
 
-/// Why a share attempt could not even begin.
+/// Why a share or revoke attempt could not even begin.
 
 enum ShareFailure {
   /// The user is not logged in to a Pod.
@@ -100,6 +103,51 @@ class AnalyserShareResult {
   bool get isPartial => failure == null && shared > 0 && shared < total;
 }
 
+/// The outcome of revoking the Analyser's access to every reading.
+
+class AnalyserRevokeResult {
+  const AnalyserRevokeResult({
+    required this.revoked,
+    required this.shared,
+    this.failure,
+    this.message,
+    this.failedFiles = const [],
+  });
+
+  /// How many readings had the Analyser's access revoked successfully.
+
+  final int revoked;
+
+  /// How many readings the Analyser held access to when the run began.
+
+  final int shared;
+
+  /// Set when the revoke could not be carried out at all.
+
+  final ShareFailure? failure;
+
+  /// A message suitable for showing to the user.
+
+  final String? message;
+
+  /// Readings whose access could not be revoked, if any.
+
+  final List<String> failedFiles;
+
+  /// Whether the Analyser held no access to revoke in the first place.
+
+  bool get hadNothingShared => failure == null && shared == 0;
+
+  /// Whether every share the Analyser held was revoked.
+
+  bool get isCompleteSuccess =>
+      failure == null && shared > 0 && revoked == shared;
+
+  /// Whether some shares were revoked and others were not.
+
+  bool get isPartial => failure == null && revoked > 0 && revoked < shared;
+}
+
 /// Grants the Analyser Pod read access to the user's blood pressure readings.
 ///
 /// HealthPod encrypts each reading with its own key, so sharing the folder
@@ -111,6 +159,10 @@ class AnalyserShareResult {
 /// new resources with new keys, and the user has to share again. That is a
 /// property of the Solid sharing model rather than a limitation here, and the
 /// interface says so before asking the user to confirm.
+///
+/// [revokeAll] is the counterpart: it revokes the Analyser's access to
+/// every reading it still holds, reading each reading's ACL to find out what
+/// was actually granted rather than assuming a previous share succeeded.
 
 class BPAnalyserShareService {
   /// The feature folder holding the readings, under `healthpod/data`.
@@ -250,6 +302,130 @@ class BPAnalyserShareService {
         total: 0,
         failure: ShareFailure.error,
         message: 'Could not share the data: $e',
+      );
+    }
+  }
+
+  /// The permissions the Analyser currently holds over [filePath], or null
+  /// when it holds none.
+  ///
+  /// A reading that has never been shared has no ACL file of its own, and
+  /// reading its permissions throws. That is not an error worth surfacing:
+  /// there is simply nothing to revoke, so it is reported the same way as
+  /// an ACL that names no Analyser.
+
+  static Future<List<dynamic>?> _analyserPermissions(String filePath) async {
+    try {
+      final permissions = await readPermission(
+        fileName: filePath,
+        isFile: true,
+      );
+
+      final entry = permissions[Analyser.webId];
+      if (entry == null) return null;
+
+      final granted = (entry as Map)[permStr] as List?;
+      return (granted == null || granted.isEmpty) ? null : granted;
+    } catch (e) {
+      debugPrint('Could not read the permissions on $filePath: $e');
+      return null;
+    }
+  }
+
+  /// Revokes the Analyser Pod's access to every blood pressure reading.
+  ///
+  /// Each reading is revoked individually, mirroring [shareAll]: the shares
+  /// were granted one resource at a time, so they have to come back the same
+  /// way. Revoking also removes the Analyser's copy of each reading's key
+  /// from its Pod, so the readings it was shown are no longer readable there.
+  ///
+  /// Results the Analyser has already shared back are left alone: they belong
+  /// to the Analyser's Pod, not the user's, and hold no individual readings.
+  ///
+  /// [onProgress] is called after each reading is examined with the number
+  /// examined and the total, so the caller can show progress on a long run.
+  /// Progress counts every reading in the folder, not just the shared ones,
+  /// because whether a reading is shared is only known once its ACL is read.
+
+  static Future<AnalyserRevokeResult> revokeAll({
+    void Function(int examined, int total)? onProgress,
+  }) async {
+    try {
+      final ownerWebId = await getWebId();
+      if (ownerWebId == null || ownerWebId.isEmpty) {
+        return const AnalyserRevokeResult(
+          revoked: 0,
+          shared: 0,
+          failure: ShareFailure.notLoggedIn,
+          message: 'Please log in to your Pod before revoking access.',
+        );
+      }
+
+      final files = await listShareableFiles();
+      if (files.isEmpty) {
+        return const AnalyserRevokeResult(revoked: 0, shared: 0);
+      }
+
+      var examined = 0;
+      var shared = 0;
+      var revoked = 0;
+      final failed = <String>[];
+
+      for (final file in files) {
+        final filePath = '$feature/$file';
+        final granted = await _analyserPermissions(filePath);
+
+        if (granted != null) {
+          shared++;
+
+          try {
+            // Revoke exactly what the ACL says was granted, so the entry
+            // written to the permission logs records the access that was
+            // really revoked.
+
+            final status = await revokePermission(
+              fileName: filePath,
+              permissionList: granted,
+              recipientIndOrGroupWebId: Analyser.webId,
+              ownerWebId: ownerWebId,
+              granterWebId: ownerWebId,
+              recipientType: RecipientType.individual,
+            );
+
+            if (status == SolidFunctionCallStatus.success) {
+              revoked++;
+            } else {
+              failed.add(file);
+              debugPrint(
+                'Could not revoke the Analyser\'s access to $file: $status',
+              );
+            }
+          } catch (e) {
+            // One stubborn reading must not stop the rest coming back.
+
+            failed.add(file);
+            debugPrint(
+              'Error revoking the Analyser\'s access to $file: $e',
+            );
+          }
+        }
+
+        examined++;
+        onProgress?.call(examined, files.length);
+      }
+
+      return AnalyserRevokeResult(
+        revoked: revoked,
+        shared: shared,
+        failedFiles: failed,
+      );
+    } catch (e) {
+      debugPrint('Error revoking the Analyser\'s access: $e');
+      return AnalyserRevokeResult(
+        revoked: 0,
+        shared: 0,
+        failure: ShareFailure.error,
+        message: 'Could not revoke access: $e',
       );
     }
   }
