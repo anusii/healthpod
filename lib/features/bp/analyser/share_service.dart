@@ -69,6 +69,7 @@ class AnalyserShareResult {
     this.failure,
     this.message,
     this.failedFiles = const [],
+    this.cancelled = false,
   });
 
   /// How many readings were shared successfully.
@@ -91,13 +92,23 @@ class AnalyserShareResult {
 
   final List<String> failedFiles;
 
+  /// Whether the user stopped the sharing part way through.
+  ///
+  /// The readings already granted stay granted: withdrawing them is a
+  /// separate decision, made in the file browser, and undoing it silently
+  /// would be a surprise. [shared] says how many went out.
+
+  final bool cancelled;
+
   /// Whether every reading was shared.
 
-  bool get isCompleteSuccess => failure == null && total > 0 && shared == total;
+  bool get isCompleteSuccess =>
+      failure == null && !cancelled && total > 0 && shared == total;
 
   /// Whether some readings were shared and others were not.
 
-  bool get isPartial => failure == null && shared > 0 && shared < total;
+  bool get isPartial =>
+      failure == null && !cancelled && shared > 0 && shared < total;
 }
 
 /// Grants the Analyser Pod read access to the user's blood pressure readings.
@@ -155,10 +166,17 @@ class BPAnalyserShareService {
   ///
   /// [onProgress] is called after each reading with the number completed and
   /// the total, so the caller can show progress on a long run.
+  ///
+  /// [isCancelled] is consulted before each grant, so a user who changes
+  /// their mind part way through a long folder is not made to wait for the
+  /// end of it. A grant already under way is left to finish: it writes an
+  /// access rule on the server, and abandoning it half done would be worse
+  /// than letting one more reading through.
 
   static Future<AnalyserShareResult> shareAll(
     BuildContext context, {
     void Function(int completed, int total)? onProgress,
+    bool Function()? isCancelled,
   }) async {
     try {
       final ownerWebId = await getWebId();
@@ -197,8 +215,14 @@ class BPAnalyserShareService {
       var shared = 0;
       final failed = <String>[];
       var analyserNotInitialised = false;
+      var cancelled = false;
 
       for (final file in files) {
+        if (isCancelled?.call() ?? false) {
+          cancelled = true;
+          break;
+        }
+
         final status = await grantPermission(
           fileName: '$feature/$file',
           permissionList: permissions,
@@ -242,6 +266,7 @@ class BPAnalyserShareService {
         shared: shared,
         total: files.length,
         failedFiles: failed,
+        cancelled: cancelled,
       );
     } catch (e) {
       debugPrint('Error sharing blood pressure data with the Analyser: $e');

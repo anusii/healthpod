@@ -26,6 +26,7 @@ Authors: Tony Chen
 # python3 -m bp_analyser --config config.yaml run-once   one analysis cycle
 # python3 -m bp_analyser --config config.yaml watch      run continuously
 # python3 -m bp_analyser --config config.yaml serve      the front-end API
+# python3 -m bp_analyser --config config.yaml cancel     stop the run in hand
 # python3 -m bp_analyser --config config.yaml show-config
 
 from __future__ import annotations
@@ -63,6 +64,8 @@ def _parser() -> argparse.ArgumentParser:
     commands.add_parser('run-once', help='run one analysis cycle and exit')
     commands.add_parser('watch', help='run cycles continuously')
     commands.add_parser('serve', help='serve the read-only front-end API')
+    commands.add_parser(
+        'cancel', help='ask a running watcher to abandon the current cycle')
     commands.add_parser(
         'show-config', help='print the effective configuration')
     return parser
@@ -121,6 +124,11 @@ def _command_check(config: Config) -> int:
 
 def _command_run_once(config: Config) -> int:
     service = AnalyserService(config)
+
+    # A marker left behind by a process that was killed mid-cycle would
+    # otherwise stop this run before it began.
+
+    service.store.clear_cancel()
     try:
         outcome = service.run_cycle()
     finally:
@@ -157,6 +165,28 @@ def _command_serve(config: Config) -> int:
         port=config.api.port,
         log_level='info',
     )
+    return 0
+
+
+def _command_cancel(config: Config) -> int:
+    """Leave a cancellation marker for a watcher in another process.
+
+    The same mechanism `POST /api/cancel` uses, for an operator who has a
+    shell on the machine but no API. Reports what was running when the marker
+    was written; whether that run then stops is the watcher's business, and it
+    happens at its next checkpoint.
+    """
+
+    store = ResultStore(config)
+    active = store.read_active_run()
+    store.request_cancel('cli')
+    if active:
+        print(f'Cancellation requested; run {active.get("run_id")} '
+              f'started at {active.get("started_at")} will stop at its next '
+              f'checkpoint.')
+    else:
+        print('Cancellation requested; nothing is running, so any pending '
+              'refresh will be withdrawn instead.')
     return 0
 
 
@@ -219,6 +249,7 @@ def main(argv: list[str] | None = None) -> int:
         'run-once': _command_run_once,
         'watch': _command_watch,
         'serve': _command_serve,
+        'cancel': _command_cancel,
         'show-config': _command_show_config,
     }
 

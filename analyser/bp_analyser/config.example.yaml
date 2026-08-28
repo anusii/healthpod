@@ -168,7 +168,11 @@ api:
 
   cors_origins: []
 
-  # When set, POST /api/refresh requires "Authorization: Bearer <token>".
+  # When set, the routes that ask the watcher to do something --
+  # POST /api/refresh and POST /api/cancel -- require
+  # "Authorization: Bearer <token>". Neither discloses anything, but an
+  # unguarded /api/cancel on a reachable address is a way to keep the analysis
+  # from ever finishing, so set this whenever the API is not on 127.0.0.1.
 
   token: ''
 

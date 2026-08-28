@@ -57,4 +57,41 @@ class Analyser {
   /// File name of the cohort summary shared with every contributing Pod.
 
   static const String cohortAverageFileName = 'bp-cohort-average.json.enc.ttl';
+
+  /// Where the analyser's control API answers, without a trailing slash.
+  ///
+  /// The analysis itself travels through the Pod, so the app needs this only
+  /// to tell the analyser to stop: there is nothing in the Solid model that
+  /// withdraws work already in hand. The service binds to the loopback
+  /// address unless it is deliberately moved (`api.host` in its
+  /// `config.yaml`), so the default suits an analyser running alongside the
+  /// app; a deployment elsewhere overrides it at build time with
+  ///
+  ///     flutter run --dart-define=HEALTHPOD_ANALYSER_API=https://host:8088
+  ///
+  /// Setting it to the empty string switches the call off, and cancelling
+  /// then only stops this app waiting — see [apiConfigured].
+
+  static const String apiBaseUrl = String.fromEnvironment(
+    'HEALTHPOD_ANALYSER_API',
+    defaultValue: 'http://localhost:8088',
+  );
+
+  /// Token for the analyser's guarded endpoints, when it requires one.
+  ///
+  /// Matches `api.token` in the analyser's configuration. Empty by default,
+  /// which is right for a loopback API; a shared one should be given a token
+  /// through `--dart-define=HEALTHPOD_ANALYSER_API_TOKEN=...`.
+
+  static const String apiToken = String.fromEnvironment(
+    'HEALTHPOD_ANALYSER_API_TOKEN',
+  );
+
+  /// Whether an analyser API address is configured at all.
+
+  static bool get apiConfigured => apiBaseUrl.isNotEmpty;
+
+  /// Endpoint that asks the analyser to abandon the run in progress.
+
+  static String get cancelUrl => '$apiBaseUrl/api/cancel';
 }
