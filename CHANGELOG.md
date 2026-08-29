@@ -30,6 +30,7 @@ then please show some ❤️ and tap on the star at
 
 ## 1.0 Migrating to new more secure secret key handling
 
++ Fix deleting data points on the DATA page [1.0.14 20260829 tonypioneer]
 + Add button to view previous ANALYSIS [1.0.13 20260829 gjw]
 + Add option to remove permissions to ANALYSIS [1.0.12 20260829 tonypioneer]
 + HEALTH PROFILE with BMI and waist/hip ratio [1.0.11 20260815 gjw]
