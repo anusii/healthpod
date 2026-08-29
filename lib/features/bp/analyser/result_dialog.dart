@@ -27,6 +27,7 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/features/bp/analyser/model.dart';
+import 'package:healthpod/features/bp/analyser/saved_analysis_service.dart';
 
 /// Shows the chart and the figures the analyser sent back.
 ///
@@ -37,13 +38,13 @@ import 'package:healthpod/features/bp/analyser/model.dart';
 Future<void> showAnalyserResultDialog(
   BuildContext context, {
   required AnalyserResult result,
-  String? savedPath,
+  bool savedInPod = true,
 }) {
   return showDialog<void>(
     context: context,
     builder: (context) => AnalyserResultDialog(
       result: result,
-      savedPath: savedPath,
+      savedInPod: savedInPod,
     ),
   );
 }
@@ -54,16 +55,16 @@ class AnalyserResultDialog extends StatelessWidget {
   const AnalyserResultDialog({
     super.key,
     required this.result,
-    this.savedPath,
+    this.savedInPod = true,
   });
 
   /// The analysis to present.
 
   final AnalyserResult result;
 
-  /// Where the chart was written on this device, when it was written.
+  /// Whether this analysis is the one now kept in the user's Pod.
 
-  final String? savedPath;
+  final bool savedInPod;
 
   @override
   Widget build(BuildContext context) {
@@ -74,51 +75,70 @@ class AnalyserResultDialog extends StatelessWidget {
       title: const Text('Blood pressure analysis'),
       content: SizedBox(
         width: 820,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Your ${result.observationCount} reading'
-                '${result.observationCount == 1 ? '' : 's'}, compared with '
-                '${result.podCount} contributing Pod'
-                '${result.podCount == 1 ? '' : 's'}.',
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Your ${result.observationCount} observation'
+                      '${result.observationCount == 1 ? '' : 's'}, compared '
+                      'with ${result.podCount} contributing Pod'
+                      '${result.podCount == 1 ? '' : 's'}.',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 16),
 
-              // The chart, at its natural aspect ratio.
+                    // The chart, at its natural aspect ratio.
 
-              if (chart != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.memory(chart, fit: BoxFit.contain),
-                )
-              else
-                Text(
-                  'The ${Analyser.displayName} did not return a chart this '
-                  'time. The figures below are still current.',
-                  style: TextStyle(color: theme.colorScheme.error),
+                    if (chart != null)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.memory(chart, fit: BoxFit.contain),
+                      )
+                    else
+                      Text(
+                        'The ${Analyser.displayName} did not return a chart '
+                        'this time. The figures below are still current.',
+                        style: TextStyle(color: theme.colorScheme.error),
+                      ),
+
+                    const SizedBox(height: 20),
+                    _ComparisonTable(result: result),
+
+                    const SizedBox(height: 16),
+                    Text(
+                      'Analysed ${_formatted(result.generatedAt.toLocal())}.',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
                 ),
-
-              const SizedBox(height: 20),
-              _ComparisonTable(result: result),
-
-              const SizedBox(height: 16),
-              Text(
-                'Analysed ${_formatted(result.generatedAt.toLocal())}.',
-                style: theme.textTheme.bodySmall,
               ),
-              if (savedPath != null) ...[
-                const SizedBox(height: 4),
-                SelectableText(
-                  'Chart saved to $savedPath',
-                  style: theme.textTheme.bodySmall,
-                ),
-              ],
-            ],
-          ),
+            ),
+
+            // Where the analysis went stays outside the scrolling area:
+            // below a tall chart it is the first thing to fall off the
+            // bottom, and it is the only place the user is told where it is
+            // kept.
+
+            const Divider(height: 24),
+            SelectableText(
+              savedInPod
+                  ? 'Kept in your Pod at ${BPAnalysisStore.podPath}, and '
+                      'reopened with the history button above the chart.'
+                  : 'This analysis could not be saved to your Pod, so it is '
+                      'gone once this window is closed.',
+              style: savedInPod
+                  ? theme.textTheme.bodySmall
+                  : theme.textTheme.bodySmall
+                      ?.copyWith(color: theme.colorScheme.error),
+            ),
+          ],
         ),
       ),
       actions: [
