@@ -27,22 +27,17 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:healthpod/features/bp/analyser/model.dart';
+import 'package:healthpod/features/bp/analyser/saved_analysis_service.dart';
 import 'package:healthpod/features/charts/widgets/bp_analyse_dialog.dart';
 
-final AnalyserResult _analysis = AnalyserResult(
-  generatedAt: DateTime.utc(2026, 8, 21, 9, 15),
-  own: const AnalyserAverages(systolic: 125),
-  everyone: const AnalyserAverages(systolic: 134.2),
-  observationCount: 12,
-  podCount: 3,
-);
+final String _analysis =
+    BPAnalysisStore.fileNameFor(DateTime(2026, 8, 21, 9, 15));
 
 Future<void> _pump(
   WidgetTester tester, {
   int observationCount = 12,
   bool anyShared = false,
-  AnalyserResult? saved,
+  List<String> saved = const [],
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -50,7 +45,7 @@ Future<void> _pump(
         body: BPAnalyseDialog(
           observationCount: observationCount,
           anyShared: Future<bool>.value(anyShared),
-          saved: Future<AnalyserResult?>.value(saved),
+          saved: Future<List<String>>.value(saved),
         ),
       ),
     ),
@@ -93,12 +88,12 @@ void main() {
       expect(_enabled(tester, 'Revoke Permissions'), isTrue);
     });
 
-    testWidgets('offers Last Analysis only when one is saved', (tester) async {
+    testWidgets('offers Past Analyses only when one is saved', (tester) async {
       await _pump(tester);
-      expect(_enabled(tester, 'Last Analysis'), isFalse);
+      expect(_enabled(tester, 'Past Analyses'), isFalse);
 
-      await _pump(tester, saved: _analysis);
-      expect(_enabled(tester, 'Last Analysis'), isTrue);
+      await _pump(tester, saved: [_analysis]);
+      expect(_enabled(tester, 'Past Analyses'), isTrue);
     });
 
     testWidgets('always offers Cancel and Analyse', (tester) async {

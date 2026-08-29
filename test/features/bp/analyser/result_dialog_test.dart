@@ -45,11 +45,15 @@ final AnalyserResult _result = AnalyserResult(
   podCount: 3,
 );
 
-Future<void> _pump(WidgetTester tester, {required bool savedInPod}) =>
-    tester.pumpWidget(
+/// Where an analysis of this vintage is kept.
+
+final String _savedAt =
+    BPAnalysisStore.podPath(BPAnalysisStore.fileNameFor(_result.generatedAt));
+
+Future<void> _pump(WidgetTester tester, {String? savedAt}) => tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
-          body: AnalyserResultDialog(result: _result, savedInPod: savedInPod),
+          body: AnalyserResultDialog(result: _result, savedAt: savedAt),
         ),
       ),
     );
@@ -57,16 +61,16 @@ Future<void> _pump(WidgetTester tester, {required bool savedInPod}) =>
 void main() {
   group('Where the analysis is kept', () {
     testWidgets('says where in the Pod it was saved', (tester) async {
-      await _pump(tester, savedInPod: true);
+      await _pump(tester, savedAt: _savedAt);
 
       expect(
-        find.textContaining('Kept in your Pod at ${BPAnalysisStore.podPath}'),
+        find.textContaining('Kept in your Pod at $_savedAt'),
         findsOneWidget,
       );
     });
 
     testWidgets('says so when it could not be saved', (tester) async {
-      await _pump(tester, savedInPod: false);
+      await _pump(tester);
 
       expect(
         find.textContaining('could not be saved to your Pod'),
@@ -76,7 +80,7 @@ void main() {
     });
 
     testWidgets('compares the figures against everyone', (tester) async {
-      await _pump(tester, savedInPod: true);
+      await _pump(tester, savedAt: _savedAt);
 
       const summary =
           'Your 12 observations, compared with 3 contributing Pods.';

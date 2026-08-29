@@ -28,7 +28,6 @@ import 'package:flutter/material.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/constants/analyser.dart';
-import 'package:healthpod/features/bp/analyser/model.dart';
 
 /// What the user chose in the confirmation dialogue.
 
@@ -45,24 +44,24 @@ enum AnalyseChoice {
 
   revoke,
 
-  /// Show the analysis already kept in the Pod, without analysing.
+  /// Show the analyses already kept in the Pod, without analysing.
 
-  showLast,
+  showSaved,
 }
 
 /// Asks before any data leaves the Pod, and returns what the user chose.
 ///
 /// [anyShared] and [saved] are started by the caller before the dialogue
 /// opens, so neither Pod read holds it up: each one only decides whether its
-/// button is live. [saved] is also how the caller shows the analysis without
-/// reading it a second time, which is why the dialogue takes the future
-/// rather than reading it itself.
+/// button is live. [saved] is also the listing the caller hands to the list
+/// of past analyses, which is why the dialogue takes the future rather than
+/// reading it itself.
 
 Future<AnalyseChoice> showAnalyseDialog(
   BuildContext context, {
   required int observationCount,
   required Future<bool> anyShared,
-  required Future<AnalyserResult?> saved,
+  required Future<List<String>> saved,
 }) async {
   final choice = await showDialog<AnalyseChoice>(
     context: context,
@@ -99,9 +98,9 @@ class BPAnalyseDialog extends StatelessWidget {
 
   final Future<bool> anyShared;
 
-  /// The analysis kept in the Pod, when there is one.
+  /// The analyses kept in the Pod, newest first.
 
-  final Future<AnalyserResult?> saved;
+  final Future<List<String>> saved;
 
   @override
   Widget build(BuildContext context) {
@@ -136,9 +135,8 @@ class BPAnalyseDialog extends StatelessWidget {
               'Revoke Permissions takes that access away again: the '
               '${Analyser.displayName} can no longer read any of your '
               'observations, and analysing later will ask you to grant '
-              'access afresh. Charts the ${Analyser.displayName} has '
-              'already sent you are kept, along with any saved on this '
-              'device.',
+              'access afresh. The analyses already kept in your Pod stay '
+              'there.',
             ),
             const SizedBox(height: 12),
             SelectableText(
@@ -153,7 +151,7 @@ class BPAnalyseDialog extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(AnalyseChoice.cancel),
           child: const Text('Cancel'),
         ),
-        _lastAnalysisAction(),
+        _pastAnalysesAction(),
         _revokeAction(),
         TextButton(
           onPressed: () => Navigator.of(context).pop(AnalyseChoice.analyse),
@@ -163,25 +161,25 @@ class BPAnalyseDialog extends StatelessWidget {
     );
   }
 
-  /// The analysis already in the Pod, offered once it has been read.
+  /// The analyses already in the Pod, offered once they have been listed.
 
-  Widget _lastAnalysisAction() => FutureBuilder<AnalyserResult?>(
+  Widget _pastAnalysesAction() => FutureBuilder<List<String>>(
         future: saved,
         builder: (context, snapshot) {
           final ready = snapshot.connectionState == ConnectionState.done;
-          final hasSaved = snapshot.data != null;
+          final hasSaved = snapshot.data?.isNotEmpty ?? false;
 
           return MarkdownTooltip(
             message: !ready
                 ? _readingSavedTooltip
                 : hasSaved
-                    ? _lastAnalysisTooltip
+                    ? _pastAnalysesTooltip
                     : _noSavedAnalysisTooltip,
             child: TextButton(
               onPressed: hasSaved
-                  ? () => Navigator.of(context).pop(AnalyseChoice.showLast)
+                  ? () => Navigator.of(context).pop(AnalyseChoice.showSaved)
                   : null,
-              child: const Text('Last Analysis'),
+              child: const Text('Past Analyses'),
             ),
           );
         },
@@ -262,30 +260,31 @@ class BPAnalyseDialog extends StatelessWidget {
     return confirmed ?? false;
   }
 
-  String get _lastAnalysisTooltip => '''
+  String get _pastAnalysesTooltip => '''
 
-      **Last Analysis**
+      **Past Analyses**
 
-      Show the analysis kept in your Pod, with its chart and figures, as it
-      was when the ${Analyser.displayName} returned it. Nothing is shared and
-      no new analysis is run.
+      List every analysis kept in your Pod, newest first. Open one to see its
+      chart and figures as the ${Analyser.displayName} returned them, or
+      delete the ones you no longer want. Nothing is shared and no new
+      analysis is run.
 
     ''';
 
   String get _readingSavedTooltip => '''
 
-      **Last Analysis**
+      **Past Analyses**
 
-      Reading the analysis kept in your Pod.
+      Looking for the analyses kept in your Pod.
 
     ''';
 
   String get _noSavedAnalysisTooltip => '''
 
-      **No saved analysis**
+      **No saved analyses**
 
-      Your Pod does not hold an analysis yet. Run one and it will be kept
-      there for next time.
+      Your Pod holds no analysis yet. Run one and it will be kept there for
+      next time.
 
     ''';
 

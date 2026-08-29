@@ -27,7 +27,7 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/features/bp/analyser/model.dart';
-import 'package:healthpod/features/bp/analyser/saved_analysis_service.dart';
+import 'package:healthpod/utils/format_moment.dart';
 
 /// Shows the chart and the figures the analyser sent back.
 ///
@@ -38,13 +38,13 @@ import 'package:healthpod/features/bp/analyser/saved_analysis_service.dart';
 Future<void> showAnalyserResultDialog(
   BuildContext context, {
   required AnalyserResult result,
-  bool savedInPod = true,
+  String? savedAt,
 }) {
   return showDialog<void>(
     context: context,
     builder: (context) => AnalyserResultDialog(
       result: result,
-      savedInPod: savedInPod,
+      savedAt: savedAt,
     ),
   );
 }
@@ -55,16 +55,17 @@ class AnalyserResultDialog extends StatelessWidget {
   const AnalyserResultDialog({
     super.key,
     required this.result,
-    this.savedInPod = true,
+    this.savedAt,
   });
 
   /// The analysis to present.
 
   final AnalyserResult result;
 
-  /// Whether this analysis is the one now kept in the user's Pod.
+  /// Where this analysis is kept in the Pod, or null when it could not be
+  /// saved there.
 
-  final bool savedInPod;
+  final String? savedAt;
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +114,7 @@ class AnalyserResultDialog extends StatelessWidget {
 
                     const SizedBox(height: 16),
                     Text(
-                      'Analysed ${_formatted(result.generatedAt.toLocal())}.',
+                      'Analysed ${formatMoment(result.generatedAt.toLocal())}.',
                       style: theme.textTheme.bodySmall,
                     ),
                   ],
@@ -128,12 +129,13 @@ class AnalyserResultDialog extends StatelessWidget {
 
             const Divider(height: 24),
             SelectableText(
-              savedInPod
-                  ? 'Kept in your Pod at ${BPAnalysisStore.podPath}, and '
-                      'reopened with the history button above the chart.'
+              savedAt != null
+                  ? 'Kept in your Pod at $savedAt, with every earlier '
+                      'analysis. Past Analyses in the Analyse dialogue lists '
+                      'them all.'
                   : 'This analysis could not be saved to your Pod, so it is '
                       'gone once this window is closed.',
-              style: savedInPod
+              style: savedAt != null
                   ? theme.textTheme.bodySmall
                   : theme.textTheme.bodySmall
                       ?.copyWith(color: theme.colorScheme.error),
@@ -148,29 +150,6 @@ class AnalyserResultDialog extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  /// A short, unambiguous local timestamp: `21 Aug 2026 at 09:15`.
-
-  static String _formatted(DateTime moment) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    final minute = moment.minute.toString().padLeft(2, '0');
-
-    return '${moment.day} ${months[moment.month - 1]} ${moment.year} '
-        'at ${moment.hour}:$minute';
   }
 }
 

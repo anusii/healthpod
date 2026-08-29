@@ -31,6 +31,7 @@ import 'package:solidpod/solidpod.dart' show getWebId;
 import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/features/bp/analyser/result_dialog.dart';
 import 'package:healthpod/features/bp/analyser/result_service.dart';
+import 'package:healthpod/features/bp/analyser/saved_analysis_dialog.dart';
 import 'package:healthpod/features/bp/analyser/saved_analysis_service.dart';
 import 'package:healthpod/features/bp/analyser/share_service.dart';
 import 'package:healthpod/features/charts/widgets/bp_analyse_dialog.dart';
@@ -108,8 +109,8 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       * Observations you record afterwards are **not** included automatically —
         analyse again to bring them in.
 
-      * Each analysis is kept in your own Pod, replacing the one before it.
-        Reopen it with **Last Analysis** in the dialogue this opens.
+      * Every analysis is kept in your own Pod. **Past Analyses**, in the
+        dialogue this opens, lists them and reopens or deletes any of them.
 
       * You can revoke access at any time with **Revoke Permissions** in
         the dialogue this opens, or from the file browser.
@@ -203,10 +204,10 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
     // Both reads start before the dialogue opens, so neither holds it up:
     // one decides whether Revoke Permissions is live, the other whether
-    // Last Analysis is, and the analysis it reads is the one shown.
+    // Past Analyses is, and the listing it reads is the one shown.
 
     final anyShared = BPAnalyserShareService.isAnyShared(files);
-    final saved = BPAnalysisStore.load();
+    final saved = BPAnalysisStore.list();
 
     final choice = await showAnalyseDialog(
       context,
@@ -223,11 +224,11 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       return;
     }
 
-    if (choice == AnalyseChoice.showLast) {
-      final analysis = await saved;
-      if (!mounted || analysis == null) return;
+    if (choice == AnalyseChoice.showSaved) {
+      final analyses = await saved;
+      if (!mounted) return;
 
-      await showAnalyserResultDialog(context, result: analysis);
+      await showSavedAnalysesDialog(context, analyses: analyses);
 
       return;
     }
@@ -302,7 +303,9 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     // convenience: a failure there must not hide the result.
 
     final document = outcome.document;
-    final savedInPod = document != null && await BPAnalysisStore.save(document);
+    final savedAt = document == null
+        ? null
+        : await BPAnalysisStore.save(document, result.generatedAt);
     if (!mounted) return;
 
     setState(() => _phase = _Phase.idle);
@@ -310,7 +313,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     await showAnalyserResultDialog(
       context,
       result: result,
-      savedInPod: savedInPod,
+      savedAt: savedAt,
     );
   }
 
