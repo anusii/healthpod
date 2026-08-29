@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
+import 'package:healthpod/utils/resolve_pod_file_url.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
 /// Handles file deletion operations for the file service.
@@ -51,13 +52,18 @@ class FileDeleteHandler {
           ? '$baseDir/$remoteFileName'
           : '$currentPath/$remoteFileName';
 
+      // deleteFile parses its argument as a URI, so the relative pod path
+      // has to be resolved to a full URL first.
+
+      final fileUrl = await resolvePodFileUrl(filePath);
+
       if (!context.mounted) return false;
 
       // First try to delete the main file.
 
       bool mainFileDeleted = false;
       try {
-        await deleteFile(fileUrl: filePath);
+        await deleteFile(fileUrl: fileUrl);
         mainFileDeleted = true;
       } catch (e) {
         debugPrint('Error deleting main file: $e');
@@ -75,7 +81,7 @@ class FileDeleteHandler {
 
       if (mainFileDeleted) {
         try {
-          await deleteFile(fileUrl: '$filePath.acl');
+          await deleteFile(fileUrl: '$fileUrl.acl');
         } catch (e) {
           // ACL files are optional and may not exist.
 

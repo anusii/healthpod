@@ -32,6 +32,7 @@ import 'package:healthpod/features/table/medication_editor/service.dart';
 import 'package:healthpod/features/table/medication_editor/state.dart';
 import 'package:healthpod/features/table/medication_editor/widgets/table_columns.dart';
 import 'package:healthpod/features/table/medication_editor/widgets/ui_components.dart';
+import 'package:healthpod/widgets/action_buttons.dart';
 
 /// Desktop layout for the medication editor.
 ///
@@ -151,25 +152,10 @@ class MedicationDataRowBuilder {
       DataCell(
         Row(
           mainAxisSize: MainAxisSize.min,
+          spacing: actionButtonSpacing,
           children: [
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: onEdit,
-              tooltip: 'Edit',
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () async {
-                try {
-                  await onDelete();
-                } catch (e) {
-                  debugPrint('Error in medication deletion UI: $e');
-                }
-              },
-              tooltip: 'Delete',
-              color: Colors.red.shade300,
-            ),
+            EditButton(record: 'medication', onPressed: onEdit),
+            DeleteButton(record: 'medication', onPressed: onDelete),
           ],
         ),
       ),
@@ -229,23 +215,10 @@ class MedicationDataRowBuilder {
         DataCell(
           Row(
             mainAxisSize: MainAxisSize.min,
+            spacing: actionButtonSpacing,
             children: [
-              IconButton(
-                icon: const Icon(Icons.cancel),
-                onPressed: onCancel,
-                tooltip: 'Cancel',
-                color: isDarkMode ? Colors.red.shade300 : Colors.red,
-              ),
-              IconButton(
-                icon: const Icon(Icons.save),
-                onPressed: () async {
-                  await onSave();
-                },
-                tooltip: 'Save',
-                color: isDarkMode
-                    ? colorScheme.primaryContainer
-                    : colorScheme.primary,
-              ),
+              SaveButton(onPressed: () async => onSave()),
+              CancelButton(onPressed: onCancel),
             ],
           ),
         ),

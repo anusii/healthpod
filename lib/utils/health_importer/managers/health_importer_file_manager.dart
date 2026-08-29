@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
+import 'package:healthpod/utils/resolve_pod_file_url.dart';
 
 /// Utility class for managing health data importer files.
 
@@ -206,9 +207,14 @@ class HealthImporterFileManager {
 
           final fullPath = '$dataPath/$fileName';
 
+          // deleteFile parses its argument as a URI, so the relative pod path
+          // has to be resolved to a full URL first.
+
+          final fileUrl = await resolvePodFileUrl(fullPath);
+
           try {
             if (context.mounted) {
-              await deleteFile(fileUrl: fullPath);
+              await deleteFile(fileUrl: fileUrl);
             }
           } catch (deleteError) {
             throw Exception('Failed to delete file $fullPath: $deleteError');

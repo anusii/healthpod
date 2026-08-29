@@ -28,8 +28,11 @@ import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
 
+import 'package:healthpod/dialogs/confirm_delete.dart';
 import 'package:healthpod/features/diary/models/appointment.dart';
 import 'package:healthpod/features/diary/service.dart';
+import 'package:healthpod/utils/show_delete_result.dart';
+import 'package:healthpod/widgets/action_buttons.dart';
 
 /// A page that displays and manages appointments in a data table format.
 /// Allows users to view, edit, and delete appointments.
@@ -155,33 +158,36 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
   /// Shows a confirmation dialog and deletes the appointment if confirmed.
 
   Future<void> _deleteAppointment(Appointment appointment) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Appointment'),
-        content: Text(
-          'Are you sure you want to delete "${appointment.title}"?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+    final confirmed = await confirmDelete(
+      context,
+      title: 'Delete appointment',
+      message: 'Remove "${appointment.title}" from your pod? '
+          'The appointment cannot be recovered.',
     );
 
-    if (confirmed == true && mounted) {
-      final success = await DiaryService.deleteAppointment(
-        appointment,
-      );
-      if (success && mounted) {
-        _loadAppointments();
+    if (!confirmed || !mounted) return;
+
+    try {
+      final deleted = await DiaryService.deleteAppointment(appointment);
+
+      if (!mounted) return;
+
+      if (deleted) {
+        showDeleteSuccess(context, 'Appointment deleted successfully.');
+      } else {
+        showDeleteFailure(
+          context,
+          'The appointment could not be removed from your pod.',
+        );
       }
+    } catch (e) {
+      if (!mounted) return;
+
+      showDeleteFailure(context, 'Error deleting appointment: $e');
+    } finally {
+      // Always reload so that the table reflects what is now on the pod.
+
+      if (mounted) _loadAppointments();
     }
   }
 
@@ -290,20 +296,12 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                           DataCell(
                             Row(
                               mainAxisSize: MainAxisSize.min,
+                              spacing: actionButtonSpacing,
                               children: [
-                                // Save button.
-                                IconButton(
-                                  icon: const Icon(Icons.save),
+                                SaveButton(
                                   onPressed: () => _saveEditing(appointment),
-                                  color: Colors.green,
                                 ),
-
-                                // Cancel button.
-                                IconButton(
-                                  icon: const Icon(Icons.cancel),
-                                  onPressed: _cancelEditing,
-                                  color: Colors.red,
-                                ),
+                                CancelButton(onPressed: _cancelEditing),
                               ],
                             ),
                           ),
@@ -331,21 +329,17 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
                         DataCell(
                           Row(
                             mainAxisSize: MainAxisSize.min,
+                            spacing: actionButtonSpacing,
                             children: [
-                              // Edit button.
-                              IconButton(
-                                icon: const Icon(Icons.edit),
+                              EditButton(
+                                record: 'appointment',
                                 onPressed: () =>
                                     _startEditing(index, appointment),
-                                color: Colors.blue,
                               ),
-
-                              // Delete button.
-                              IconButton(
-                                icon: const Icon(Icons.delete),
+                              DeleteButton(
+                                record: 'appointment',
                                 onPressed: () =>
                                     _deleteAppointment(appointment),
-                                color: Colors.red,
                               ),
                             ],
                           ),

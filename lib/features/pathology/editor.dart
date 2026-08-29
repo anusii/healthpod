@@ -27,9 +27,11 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 
+import 'package:healthpod/dialogs/confirm_delete.dart';
 import 'package:healthpod/features/pathology/model.dart';
 import 'package:healthpod/features/pathology/service.dart';
 import 'package:healthpod/features/pathology/widgets/report_card.dart';
+import 'package:healthpod/utils/show_delete_result.dart';
 
 /// Editor page for pathology reports.
 
@@ -80,6 +82,42 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
     }
   }
 
+  /// Confirms and then removes one report from the pod.
+
+  Future<void> _deleteReport(ReportData report) async {
+    final confirmed = await confirmDelete(
+      context,
+      title: 'Delete report',
+      message: 'Remove "${report.fileName}" from your pod? The report and any '
+          'results read from it cannot be recovered.',
+    );
+
+    if (!confirmed || !mounted) return;
+
+    try {
+      final deleted = await PathologyService.deleteReport(report);
+
+      if (!mounted) return;
+
+      if (deleted) {
+        showDeleteSuccess(context, 'Report deleted successfully.');
+      } else {
+        showDeleteFailure(
+          context,
+          'The report could not be removed from your pod.',
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      showDeleteFailure(context, 'Error deleting report: $e');
+    } finally {
+      // Always reload so that the list reflects what is now on the pod.
+
+      if (mounted) await _loadReports();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,7 +147,12 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
       padding: const EdgeInsets.all(16.0),
       itemCount: _reports.length,
       itemBuilder: (context, index) {
-        return PathologyReportCard(report: _reports[index]);
+        final report = _reports[index];
+
+        return PathologyReportCard(
+          report: report,
+          onDelete: () => _deleteReport(report),
+        );
       },
     );
   }

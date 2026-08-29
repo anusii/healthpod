@@ -31,6 +31,7 @@ import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/utils/construct_pod_path.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/resolve_pod_file_url.dart';
 
 /// Deletes a file from the Pod with fallback options for finding similar files.
 ///
@@ -44,7 +45,7 @@ import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 /// - [dataType]: The type of data (e.g., 'blood_pressure', 'vaccination')
 /// - [filename]: The primary filename to delete
 /// - [timestamp]: The DateTime associated with the file, used for fallback searches
-/// - [resources]: The container resources with a 'files' list property
+/// - [resources]: The container listing returned by [getResourcesInContainer]
 ///
 /// Returns a boolean indicating whether any file was successfully deleted.
 ///
@@ -57,138 +58,114 @@ import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 ///   resources: resources,
 /// );
 /// ```
+
 Future<bool> deletePodFileWithFallback({
   required String dataType,
   required String filename,
   required DateTime timestamp,
-  required dynamic resources,
+  required ({List<String> subDirs, List<String> files}) resources,
 }) async {
-  // Try with the exact filename first.
+  final files = resources.files;
 
-  if (resources.files.contains(filename)) {
-    final filePath = constructPodPath(dataType, filename);
-    try {
-      await deleteFile(fileUrl: filePath);
-      // debugPrint('Deleted file: $filename');
-      return true;
-    } catch (e) {
-      // On Web/Chrome, deletion might succeed but still throw an exception.
-      // Check if it's a 404 or similar "not found" error, which means deletion worked.
+  // The candidates are collected in the order they should be tried, from the
+  // exact filename through to the loosest date match, so that the first
+  // successful delete is always the closest match to the record asked for.
 
-      if (e.toString().contains('404') ||
-          e.toString().contains('NotFoundHttpError') ||
-          e.toString().contains('not found')) {
-        debugPrint(
-          'File deletion succeeded (404 indicates file was deleted): $filename',
-        );
-        return true;
-      }
-      // For other errors, try fallback methods below.
+  final candidates = <String>[];
 
-      debugPrint('Error deleting exact file $filename: $e');
+  void addCandidate(String? name) {
+    if (name != null && name.isNotEmpty && !candidates.contains(name)) {
+      candidates.add(name);
     }
   }
 
-  // Try with the underscore format.
+  // The exact filename.
+
+  if (files.contains(filename)) {
+    addCandidate(filename);
+  }
+
+  // The older underscore format, kept for backward compatibility.
+
   final filenameWithUnderscore =
-      '${dataType}_${formatTimestampForFilenameWithUnderscore(timestamp)}.json.enc.ttl';
+      '${dataType}_${formatTimestampForFilenameWithUnderscore(timestamp)}'
+      '.json.enc.ttl';
 
-  if (resources.files.contains(filenameWithUnderscore)) {
-    final filePathWithUnderscore = constructPodPath(
-      dataType,
-      filenameWithUnderscore,
-    );
-    try {
-      await deleteFile(fileUrl: filePathWithUnderscore);
-      // debugPrint('Deleted file with underscore: $filenameWithUnderscore');
-      return true;
-    } catch (e) {
-      // On Web/Chrome, deletion might succeed but still throw an exception.
-
-      if (e.toString().contains('404') ||
-          e.toString().contains('NotFoundHttpError') ||
-          e.toString().contains('not found')) {
-        debugPrint(
-          'File deletion succeeded (404 indicates file was deleted): $filenameWithUnderscore',
-        );
-        return true;
-      }
-      debugPrint('Error deleting underscore file $filenameWithUnderscore: $e');
-    }
+  if (files.contains(filenameWithUnderscore)) {
+    addCandidate(filenameWithUnderscore);
   }
 
-  // If neither exact match is found, try to find a file with a similar date part.
-
-  debugPrint('File not found for deletion: $filename');
-
-  // Extract just the date part (YYYY-MM-DD) from the timestamp.
+  // Failing an exact match, any file recorded on the same date. The date part
+  // (YYYY-MM-DD) is all that is compared, so a file written with a different
+  // time format is still found.
 
   final datePart = formatTimestampForFilename(timestamp).split('T')[0];
   final baseFilename = '${dataType}_$datePart';
 
-  // Find any files that start with this date part.
-
   final matchingFiles =
-      resources.files.where((file) => file.startsWith(baseFilename)).toList();
+      files.where((file) => file.startsWith(baseFilename)).toList();
 
   if (matchingFiles.isNotEmpty) {
-    // Delete the first matching file.
-
-    final matchingFilePath = constructPodPath(dataType, matchingFiles.first);
-    try {
-      await deleteFile(fileUrl: matchingFilePath);
-      // debugPrint('Deleted alternative file: ${matchingFiles.first}');
-      return true;
-    } catch (e) {
-      // On Web/Chrome, deletion might succeed but still throw an exception.
-
-      if (e.toString().contains('404') ||
-          e.toString().contains('NotFoundHttpError') ||
-          e.toString().contains('not found')) {
-        debugPrint(
-          'File deletion succeeded (404 indicates file was deleted): ${matchingFiles.first}',
-        );
-        return true;
-      }
-      debugPrint('Error deleting matching file ${matchingFiles.first}: $e');
-    }
+    addCandidate(matchingFiles.first);
   }
 
-  // No matching files found, try a more flexible approach.
-  // Look for any file that contains the date (without the time).
+  // Looser still: any file in this container carrying the date.
 
-  final moreFlexibleMatches =
-      resources.files.where((file) => file.contains(datePart)).toList();
+  final flexibleMatches =
+      files.where((file) => file.contains(datePart)).toList();
 
-  if (moreFlexibleMatches.isNotEmpty) {
-    final flexibleMatchPath = constructPodPath(
-      dataType,
-      moreFlexibleMatches.first,
-    );
-    try {
-      await deleteFile(fileUrl: flexibleMatchPath);
-      // debugPrint(
-      //     'Deleted file with flexible matching: ${moreFlexibleMatches.first}');
+  if (flexibleMatches.isNotEmpty) {
+    addCandidate(flexibleMatches.first);
+  }
+
+  if (candidates.isEmpty) {
+    debugPrint('File not found for deletion: $filename');
+  }
+
+  for (final candidate in candidates) {
+    if (await _deletePodFile(dataType, candidate)) {
       return true;
-    } catch (e) {
-      // On Web/Chrome, deletion might succeed but still throw an exception.
-
-      if (e.toString().contains('404') ||
-          e.toString().contains('NotFoundHttpError') ||
-          e.toString().contains('not found')) {
-        debugPrint(
-          'File deletion succeeded (404 indicates file was deleted): ${moreFlexibleMatches.first}',
-        );
-        return true;
-      }
-      debugPrint(
-        'Error deleting flexible match ${moreFlexibleMatches.first}: $e',
-      );
     }
   }
 
   // No matching files found.
 
   debugPrint('No matching files found for deletion with base: $baseFilename');
+
   return false;
+}
+
+/// Deletes a single file from the [dataType] container.
+///
+/// Returns true when the file is gone from the Pod, which includes the case of
+/// the server reporting it as missing: on the web a delete can succeed and
+/// still raise a not-found error.
+
+Future<bool> _deletePodFile(String dataType, String filename) async {
+  // deleteFile parses its argument as a URI, so the relative Pod path has to
+  // be resolved to a full URL first.
+
+  final fileUrl = await resolvePodFileUrl(constructPodPath(dataType, filename));
+
+  try {
+    await deleteFile(fileUrl: fileUrl);
+
+    return true;
+  } catch (e) {
+    final message = e.toString();
+
+    if (message.contains('404') ||
+        message.contains('NotFoundHttpError') ||
+        message.contains('not found')) {
+      debugPrint(
+        'File deletion succeeded (404 indicates file was deleted): $filename',
+      );
+
+      return true;
+    }
+
+    debugPrint('Error deleting file $filename: $e');
+
+    return false;
+  }
 }

@@ -33,6 +33,7 @@ import 'package:healthpod/features/medication/obs/model.dart';
 import 'package:healthpod/features/table/medication_editor/service.dart';
 import 'package:healthpod/features/table/medication_editor/state.dart';
 import 'package:healthpod/features/table/medication_editor/widgets/ui_components.dart';
+import 'package:healthpod/widgets/action_buttons.dart';
 
 /// Mobile layout for the medication editor.
 ///
@@ -107,13 +108,14 @@ class MedicationMobileLayout extends StatelessWidget {
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
+                      spacing: actionButtonSpacing,
                       children: [
-                        IconButton(
-                          icon: const Icon(Icons.edit),
+                        EditButton(
+                          record: 'medication',
                           onPressed: onEdit(index),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.delete),
+                        DeleteButton(
+                          record: 'medication',
                           onPressed: () => onDelete(obs),
                         ),
                       ],
