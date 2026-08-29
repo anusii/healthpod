@@ -30,6 +30,8 @@ then please show some ❤️ and tap on the star at
 
 ## 1.0 Migrating to new more secure secret key handling
 
++ Add button to view previous ANALYSIS [1.0.13 20260829 gjw]
++ Add option to remove permissions to ANALYSIS [1.0.12 20260829 tonypioneer]
 + HEALTH PROFILE with BMI and waist/hip ratio [1.0.11 20260815 gjw]
 + View all blood pressure observations [1.0.10 20260814 gjw]
 + OIDC update for chrome/web [1.0.9 20260711 tonypioneer]

@@ -57,4 +57,12 @@ class Analyser {
   /// File name of the cohort summary shared with every contributing Pod.
 
   static const String cohortAverageFileName = 'bp-cohort-average.json.enc.ttl';
+
+  /// Width of the Analyser's text dialogues.
+  ///
+  /// A dialogue left to size itself stretches to the window, and prose that
+  /// runs the full width of a desktop window is tiring to read. This holds a
+  /// line to roughly 80 characters at the body text size.
+
+  static const double dialogWidth = 560;
 }

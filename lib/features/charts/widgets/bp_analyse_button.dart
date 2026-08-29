@@ -31,7 +31,9 @@ import 'package:solidpod/solidpod.dart' show getWebId;
 import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/features/bp/analyser/result_dialog.dart';
 import 'package:healthpod/features/bp/analyser/result_service.dart';
+import 'package:healthpod/features/bp/analyser/saved_analysis_service.dart';
 import 'package:healthpod/features/bp/analyser/share_service.dart';
+import 'package:healthpod/features/charts/widgets/bp_analyse_dialog.dart';
 
 /// What the analysis is doing at the moment, which decides what the button
 /// shows and what it says.
@@ -52,22 +54,6 @@ enum _Phase {
   /// Revoking the Analyser's access to each reading, one at a time.
 
   revoking,
-}
-
-/// What the user chose in the confirmation dialogue.
-
-enum _Choice {
-  /// Leave everything as it is.
-
-  cancel,
-
-  /// Share the readings and run the analysis.
-
-  analyse,
-
-  /// Revoke the Analyser's access to every reading, without analysing.
-
-  revoke,
 }
 
 /// Runs an analysis of the user's blood pressure and shows the result.
@@ -111,15 +97,19 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
       **Analyse**
 
-      Send your blood pressure readings to the ${Analyser.displayName} Pod and
-      get back a chart of your readings marked with your own averages and the
-      averages across everyone who has contributed.
+      Send your blood pressure observations to the ${Analyser.displayName} Pod
+      and get back a chart of your observations marked with your own averages
+      and the averages across everyone who has contributed.
 
       * The ${Analyser.displayName} is granted **read** access only, one
-        reading at a time, and never gains access to anything else in your Pod.
+        observation at a time, and never gains access to anything else in your
+        Pod.
 
-      * Readings you record afterwards are **not** included automatically —
+      * Observations you record afterwards are **not** included automatically —
         analyse again to bring them in.
+
+      * Each analysis is kept in your own Pod, replacing the one before it.
+        Reopen it with **Last Analysis** in the dialogue this opens.
 
       * You can revoke access at any time with **Revoke Permissions** in
         the dialogue this opens, or from the file browser.
@@ -129,7 +119,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
   String get _busyTooltip => switch (_phase) {
         _Phase.sharing => '''
 
-      **Sharing your readings**
+      **Sharing your observations**
 
       $_completed of $_total sent to the ${Analyser.displayName}.
 
@@ -138,7 +128,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
       **Revoking access**
 
-      $_completed of $_total readings checked.
+      $_completed of $_total observations checked.
 
     ''',
         _ => '''
@@ -206,16 +196,38 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (!mounted) return;
 
     if (files.isEmpty) {
-      _report('There are no blood pressure readings to analyse yet.');
+      _report('There are no blood pressure observations to analyse yet.');
 
       return;
     }
 
-    final choice = await _confirm(files.length);
-    if (!mounted || choice == _Choice.cancel) return;
+    // Both reads start before the dialogue opens, so neither holds it up:
+    // one decides whether Revoke Permissions is live, the other whether
+    // Last Analysis is, and the analysis it reads is the one shown.
 
-    if (choice == _Choice.revoke) {
+    final anyShared = BPAnalyserShareService.isAnyShared(files);
+    final saved = BPAnalysisStore.load();
+
+    final choice = await showAnalyseDialog(
+      context,
+      observationCount: files.length,
+      anyShared: anyShared,
+      saved: saved,
+    );
+
+    if (!mounted || choice == AnalyseChoice.cancel) return;
+
+    if (choice == AnalyseChoice.revoke) {
       await _runRevoke();
+
+      return;
+    }
+
+    if (choice == AnalyseChoice.showLast) {
+      final analysis = await saved;
+      if (!mounted || analysis == null) return;
+
+      await showAnalyserResultDialog(context, result: analysis);
 
       return;
     }
@@ -251,7 +263,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (shared.failure != null || shared.shared == 0) {
       setState(() => _phase = _Phase.idle);
       _report(
-        shared.message ?? 'None of the readings could be shared.',
+        shared.message ?? 'None of the observations could be shared.',
         isError: true,
       );
 
@@ -260,8 +272,8 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
     if (shared.isPartial) {
       _report(
-        'Shared ${shared.shared} of ${shared.total} readings; the analysis '
-        'covers the ones that were shared.',
+        'Shared ${shared.shared} of ${shared.total} observations; the '
+        'analysis covers the ones that were shared.',
       );
     }
 
@@ -286,10 +298,11 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       return;
     }
 
-    // Keep a copy on this device, then hand the chart to the user. Saving is
-    // a convenience: a failure there must not hide the result.
+    // Keep it in the Pod, then hand the chart to the user. Saving is a
+    // convenience: a failure there must not hide the result.
 
-    final savedPath = await BPAnalyserResultService.saveChart(result);
+    final document = outcome.document;
+    final savedInPod = document != null && await BPAnalysisStore.save(document);
     if (!mounted) return;
 
     setState(() => _phase = _Phase.idle);
@@ -297,7 +310,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     await showAnalyserResultDialog(
       context,
       result: result,
-      savedPath: savedPath,
+      savedInPod: savedInPod,
     );
   }
 
@@ -313,110 +326,13 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     final covered = outcome.bestCoverage;
     if (covered != null) {
       return 'The ${Analyser.displayName} has answered, but that analysis '
-          'covered $covered of your $shared readings — it was already running '
-          'when you shared. Analyse again in a moment to include them all.';
+          'covered $covered of your $shared observations — it was already '
+          'running when you shared. Analyse again in a moment to include them '
+          'all.';
     }
 
-    return 'Your readings were shared, but the ${Analyser.displayName} has '
-        'not sent a result back yet. Please try again in a moment.';
-  }
-
-  /// Asks before any data leaves the Pod.
-  ///
-  /// The same dialogue is where access is given back: granting and revoking
-  /// belong together, so the user never has to hunt through the file browser
-  /// to undo a share.
-
-  Future<_Choice> _confirm(int readingCount) async {
-    final choice = await showDialog<_Choice>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Analyse your blood pressure'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Grant ${Analyser.displayName} read access to $readingCount '
-              'reading${readingCount == 1 ? '' : 's'} so it can analyse them?',
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'It works out your averages and the averages across everyone '
-              'who has contributed, and returns a chart. Nobody else sees '
-              'your individual readings.',
-            ),
-            const SizedBox(height: 12),
-            SelectableText(
-              Analyser.webId,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(_Choice.cancel),
-            child: const Text('Cancel'),
-          ),
-          // Revoking asks again on its own, and only closes this dialogue
-          // once the user has said yes to that second question.
-          TextButton(
-            onPressed: () async {
-              if (!await _confirmRevoke(context)) return;
-              if (!context.mounted) return;
-              Navigator.of(context).pop(_Choice.revoke);
-            },
-            child: const Text('Revoke Permissions'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(_Choice.analyse),
-            child: const Text('Analyse'),
-          ),
-        ],
-      ),
-    );
-
-    return choice ?? _Choice.cancel;
-  }
-
-  /// Asks again before access is taken away, since the next analysis will have
-  /// to share everything afresh.
-
-  Future<bool> _confirmRevoke(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Revoke permissions'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Revoke ${Analyser.displayName} access to all of your blood '
-              'pressure readings?',
-            ),
-            SizedBox(height: 12),
-            Text(
-              'The ${Analyser.displayName} will no longer be able to read any '
-              'of them, and analysing again will ask you to share them afresh. '
-              'Charts it has already sent you are kept.',
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Revoke'),
-          ),
-        ],
-      ),
-    );
-
-    return confirmed ?? false;
+    return 'Your observations were shared, but the ${Analyser.displayName} '
+        'has not sent a result back yet. Please try again in a moment.';
   }
 
   /// Revokes the Analyser's access to every reading and says what happened.
@@ -454,7 +370,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (result.hadNothingShared) {
       _report(
         'The ${Analyser.displayName} does not have access to any of your '
-        'blood pressure readings.',
+        'blood pressure observations.',
       );
 
       return;
@@ -463,15 +379,16 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (result.isCompleteSuccess) {
       _report(
         'Revoked ${Analyser.displayName} access to ${result.revoked} '
-        'reading${result.revoked == 1 ? '' : 's'}.',
+        'observation${result.revoked == 1 ? '' : 's'}.',
       );
 
       return;
     }
 
     _report(
-      'Revoked access to ${result.revoked} of ${result.shared} readings; the '
-      'rest could not be changed. Please try again in a moment.',
+      'Revoked access to ${result.revoked} of ${result.shared} '
+      'observations; the rest could not be changed. Please try again in a '
+      'moment.',
       isError: true,
     );
   }

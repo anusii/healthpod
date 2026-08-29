@@ -30,6 +30,8 @@ import 'package:solidpod/solidpod.dart'
         AccessMode,
         RecipientType,
         SolidFunctionCallStatus,
+        WebIdStatus,
+        checkWebIdProfile,
         getDirUrl,
         getResourcesInContainer,
         getWebId,
@@ -57,6 +59,10 @@ enum ShareFailure {
   /// structure, so it cannot be given a key.
 
   analyserNotInitialised,
+
+  /// The Analyser Pod did not answer, so whether it is set up is unknown.
+
+  analyserUnreachable,
 
   /// Anything else, with the message carried alongside.
 
@@ -229,7 +235,7 @@ class BPAnalyserShareService {
           shared: 0,
           total: 0,
           failure: ShareFailure.noData,
-          message: 'There are no blood pressure readings to share yet.',
+          message: 'There are no blood pressure observations to share yet.',
         );
       }
 
@@ -280,13 +286,24 @@ class BPAnalyserShareService {
       }
 
       if (analyserNotInitialised) {
+        // solidpod reports a Pod it could not look at as uninitialised, so
+        // ask whether the Pod is answering at all before telling the user
+        // that nobody has set it up.
+
+        final reachable = await _analyserIsReachable();
+
         return AnalyserShareResult(
           shared: shared,
           total: files.length,
-          failure: ShareFailure.analyserNotInitialised,
-          message:
-              'The ${Analyser.displayName} Pod is not set up to receive data '
-              'yet. Please ask the administrator to initialise it.',
+          failure: reachable
+              ? ShareFailure.analyserNotInitialised
+              : ShareFailure.analyserUnreachable,
+          message: reachable
+              ? 'The ${Analyser.displayName} Pod is not set up to receive '
+                  'data yet. Please ask the administrator to initialise it.'
+              : 'The ${Analyser.displayName} Pod could not be reached at '
+                  '${Analyser.webId} — its server did not return a profile. '
+                  'It may be down; please try again shortly.',
         );
       }
 
@@ -303,6 +320,22 @@ class BPAnalyserShareService {
         failure: ShareFailure.error,
         message: 'Could not share the data: $e',
       );
+    }
+  }
+
+  /// Whether the Analyser Pod is answering for its own WebID.
+  ///
+  /// Its profile document is public, so this needs no permissions and says
+  /// what a failed grant cannot: a Pod that is down, or refusing requests,
+  /// looks exactly like a Pod nobody has set up.
+
+  static Future<bool> _analyserIsReachable() async {
+    try {
+      return await checkWebIdProfile(Analyser.webId) == WebIdStatus.valid;
+    } catch (e) {
+      debugPrint('Could not reach the Analyser Pod: $e');
+
+      return false;
     }
   }
 
@@ -330,6 +363,21 @@ class BPAnalyserShareService {
       debugPrint('Could not read the permissions on $filePath: $e');
       return null;
     }
+  }
+
+  /// Whether the Analyser currently holds access to any of [files].
+  ///
+  /// Used to decide whether there is anything for Revoke Permissions to do.
+  /// The scan stops at the first shared observation, so a Pod that has been
+  /// analysed costs a single ACL read; only a Pod with nothing shared pays
+  /// for a look at the whole folder.
+
+  static Future<bool> isAnyShared(List<String> files) async {
+    for (final file in files) {
+      if (await _analyserPermissions('$feature/$file') != null) return true;
+    }
+
+    return false;
   }
 
   /// Revokes the Analyser Pod's access to every blood pressure reading.
