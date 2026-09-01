@@ -81,4 +81,12 @@ class Analyser {
 
   static String cancelUrl(String slug) =>
       '$podRoot${sharedPathFragment}cancel-$slug.json';
+
+  /// Width of the Analyser's text dialogues.
+  ///
+  /// A dialogue left to size itself stretches to the window, and prose that
+  /// runs the full width of a desktop window is tiring to read. This holds a
+  /// line to roughly 80 characters at the body text size.
+
+  static const double dialogWidth = 560;
 }

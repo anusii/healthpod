@@ -27,11 +27,13 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/dialogs/confirm_delete.dart';
 import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/features/bp/obs/service.dart';
 import 'package:healthpod/features/table/bp_editor/state.dart';
 import 'package:healthpod/features/table/bp_editor/widgets/desktop_layout.dart';
 import 'package:healthpod/features/table/bp_editor/widgets/mobile_layout.dart';
+import 'package:healthpod/utils/show_delete_result.dart';
 
 /// The main editor page for blood pressure observations.
 
@@ -136,30 +138,32 @@ class _BPEditorPageState extends State<BPEditorPage> {
   Future<void> _handleDelete(BPObservation obs, int index) async {
     if (!mounted) return;
 
+    final confirmed = await confirmDelete(
+      context,
+      title: 'Delete blood pressure reading',
+      message: 'Remove this blood pressure reading from your pod? '
+          'It cannot be recovered.',
+    );
+
+    if (!confirmed || !mounted) return;
+
     try {
       await editorState.deleteObservation(context, editorService, obs);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Blood pressure reading deleted successfully.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      if (!mounted) return;
+
+      showDeleteSuccess(
+        context,
+        'Blood pressure reading deleted successfully.',
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error deleting reading: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      if (!mounted) return;
+
+      showDeleteFailure(context, 'Error deleting reading: $e');
     } finally {
       // Always reload data to reflect current state.
 
-      _loadData();
+      if (mounted) _loadData();
     }
   }
 

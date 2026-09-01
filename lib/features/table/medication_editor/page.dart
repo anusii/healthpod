@@ -27,11 +27,13 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:healthpod/dialogs/confirm_delete.dart';
 import 'package:healthpod/features/medication/obs/model.dart';
 import 'package:healthpod/features/table/medication_editor/service.dart';
 import 'package:healthpod/features/table/medication_editor/state.dart';
 import 'package:healthpod/features/table/medication_editor/widgets/desktop_layout.dart';
 import 'package:healthpod/features/table/medication_editor/widgets/mobile_layout.dart';
+import 'package:healthpod/utils/show_delete_result.dart';
 
 /// A page for viewing and editing medication observations.
 ///
@@ -112,12 +114,31 @@ class _MedicationEditorPageState extends State<MedicationEditorPage> {
   /// Handles deleting a medication observation.
 
   Future<void> _handleDelete(MedicationObservation obs) async {
+    if (!mounted) return;
+
+    final confirmed = await confirmDelete(
+      context,
+      title: 'Delete medication',
+      message: 'Remove "${obs.name}" from your pod? '
+          'The record cannot be recovered.',
+    );
+
+    if (!confirmed || !mounted) return;
+
     try {
       await editorState.deleteObservation(context, editorService, obs);
+
+      if (!mounted) return;
+
+      showDeleteSuccess(context, 'Medication deleted successfully.');
     } catch (e) {
-      debugPrint('Error in medication deletion UI: $e');
+      if (!mounted) return;
+
+      showDeleteFailure(context, 'Error deleting medication: $e');
     } finally {
-      _loadData();
+      // Always reload data to reflect current state.
+
+      if (mounted) _loadData();
     }
   }
 

@@ -32,7 +32,10 @@ import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/features/bp/analyser/cancel_service.dart';
 import 'package:healthpod/features/bp/analyser/result_dialog.dart';
 import 'package:healthpod/features/bp/analyser/result_service.dart';
+import 'package:healthpod/features/bp/analyser/saved_analysis_dialog.dart';
+import 'package:healthpod/features/bp/analyser/saved_analysis_service.dart';
 import 'package:healthpod/features/bp/analyser/share_service.dart';
+import 'package:healthpod/features/charts/widgets/bp_analyse_dialog.dart';
 
 /// What the analysis is doing at the moment, which decides what the button
 /// shows and what it says.
@@ -49,6 +52,10 @@ enum _Phase {
   /// Waiting for the Analyser to return the result it has computed.
 
   analysing,
+
+  /// Revoking the Analyser's access to each observation, one at a time.
+
+  revoking,
 
   /// The user has asked to stop, and the Analyser is being told so.
 
@@ -77,19 +84,22 @@ enum _Tone {
 
 /// What a progress ring should show, or null for one that simply turns.
 ///
-/// Sharing knows how many readings there are and so can report real progress,
-/// but only once one has actually gone out: a determinate ring at zero draws
-/// no arc at all, which made the button look as though it had vanished for
-/// the first moments of every analysis. Until there is something to report
-/// the ring turns instead.
+/// Sharing and revoking both know how many observations there are and so can
+/// report real progress, but only once one has actually been dealt with: a
+/// determinate ring at zero draws no arc at all, which made the button look
+/// as though it had vanished for the first moments of every run. Until there
+/// is something to report the ring turns instead.
+///
+/// [stepped] is whether the work in hand counts its steps. Waiting for the
+/// analyser does not, and neither does waiting for it to stop.
 
 @visibleForTesting
 double? analyseRingValue({
-  required bool sharing,
+  required bool stepped,
   required int completed,
   required int total,
 }) =>
-    sharing && completed > 0 && total > 0 ? completed / total : null;
+    stepped && completed > 0 && total > 0 ? completed / total : null;
 
 /// Runs an analysis of the user's blood pressure and shows the result.
 ///
@@ -262,23 +272,34 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
       **Analyse**
 
-      Send your blood pressure readings to the ${Analyser.displayName} Pod and
-      get back a chart of your readings marked with your own averages and the
-      averages across everyone who has contributed.
+      Send your blood pressure observations to the ${Analyser.displayName} Pod
+      and get back a chart of your observations marked with your own averages
+      and the averages across everyone who has contributed.
 
       * The ${Analyser.displayName} is granted **read** access only, one
-        reading at a time, and never gains access to anything else in your Pod.
+        observation at a time, and never gains access to anything else in your
+        Pod.
 
-      * Readings you record afterwards are **not** included automatically —
+      * Observations you record afterwards are **not** included automatically —
         analyse again to bring them in.
 
-      * You can withdraw access at any time from the file browser.
+      * Every analysis is kept in your own Pod. **Past Analyses**, in the
+        dialogue this opens, lists them and reopens or deletes any of them.
+
+      * You can revoke access at any time with **Revoke Permissions** in
+        the dialogue this opens, or from the file browser.
 
     ''';
 
+  /// What the button says while it is busy.
+  ///
+  /// The phase describes the work; the note after it is added only while
+  /// there is something to call off, so revoking — which is not an analysis —
+  /// does not offer to cancel one.
+
   String get _busyTooltip {
-    if (_phase == _Phase.cancelling) {
-      return '''
+    final work = switch (_phase) {
+      _Phase.cancelling => '''
 
       **Stopping**
 
@@ -289,30 +310,37 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       * One that has not started yet takes until the ${Analyser.displayName}
         next looks, which can be half a minute.
 
-    ''';
-    }
+    ''',
+      _Phase.sharing => '''
 
-    final work = _phase == _Phase.sharing
-        ? '''
-
-      **Sharing your readings**
+      **Sharing your observations**
 
       $_completed of $_total sent to the ${Analyser.displayName}.
 
-    '''
-        : '''
+    ''',
+      _Phase.revoking => '''
+
+      **Revoking access**
+
+      $_completed of $_total observations checked.
+
+    ''',
+      _ => '''
 
       **Analysing**
 
       Waiting for the ${Analyser.displayName} to return your chart. This
       usually takes under a minute.
 
-    ''';
+    ''',
+    };
+
+    if (!_cancellable) return work;
 
     return '''$work
       Press to **cancel**. The ${Analyser.displayName} is asked to stop, and
-      readings already shared stay shared — withdraw them from the file
-      browser if you would rather they did not.
+      observations already shared stay shared — revoke them from the dialogue
+      or the file browser if you would rather they did not.
 
     ''';
   }
@@ -324,25 +352,27 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
         onPressed: _runAnalysis,
       );
 
-  /// The progress ring shown while the analysis runs, which doubles as the
+  /// The progress ring shown while the button is busy, which doubles as the
   /// cancel button.
   ///
-  /// Sharing has a known number of steps and so shows real progress; the wait
-  /// that follows does not. Pointing at the ring puts a cross inside it and
-  /// colours it as an action, which is the only change: the ring stays, so
-  /// what is being cancelled remains visible while the pointer is over it.
+  /// Sharing and revoking both work through a known number of observations
+  /// and so show real progress; the wait for the analyser does not. Pointing
+  /// at the ring puts a cross inside it and colours it as an action, which is
+  /// the only change: the ring stays, so what is being cancelled remains
+  /// visible while the pointer is over it.
   ///
   /// The ring is pressable whether or not it is hovered, because a touch
   /// screen never reports a hover. Cancelling loses nothing that cannot be
   /// had again by analysing a second time, so an accidental press is a
-  /// nuisance rather than a loss.
+  /// nuisance rather than a loss. Revoking is not an analysis and cannot be
+  /// called off, so the ring is inert for the whole of it.
 
   Widget _progress(ThemeData theme) {
     final active = _cancellable && _hovering;
     final colour = active ? theme.colorScheme.error : theme.disabledColor;
 
     final value = analyseRingValue(
-      sharing: _phase == _Phase.sharing,
+      stepped: _phase == _Phase.sharing || _phase == _Phase.revoking,
       completed: _completed,
       total: _total,
     );
@@ -427,12 +457,41 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (!mounted) return;
 
     if (files.isEmpty) {
-      _report('There are no blood pressure readings to analyse yet.');
+      _report('There are no blood pressure observations to analyse yet.');
 
       return;
     }
 
-    if (!await _confirm(files.length) || !mounted) return;
+    // Both reads start before the dialogue opens, so neither holds it up:
+    // one decides whether Revoke Permissions is live, the other whether
+    // Past Analyses is, and the listing it reads is the one shown.
+
+    final anyShared = BPAnalyserShareService.isAnyShared(files);
+    final saved = BPAnalysisStore.list();
+
+    final choice = await showAnalyseDialog(
+      context,
+      observationCount: files.length,
+      anyShared: anyShared,
+      saved: saved,
+    );
+
+    if (!mounted || choice == AnalyseChoice.cancel) return;
+
+    if (choice == AnalyseChoice.revoke) {
+      await _runRevoke();
+
+      return;
+    }
+
+    if (choice == AnalyseChoice.showSaved) {
+      final analyses = await saved;
+      if (!mounted) return;
+
+      await showSavedAnalysesDialog(context, analyses: analyses);
+
+      return;
+    }
 
     // From here the button is a progress ring until the chart is on screen,
     // or until the user points at the ring and cancels.
@@ -468,7 +527,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (shared.failure != null || shared.shared == 0) {
       setState(() => _phase = _Phase.idle);
       _report(
-        shared.message ?? 'None of the readings could be shared.',
+        shared.message ?? 'None of the observations could be shared.',
         tone: _Tone.failure,
       );
 
@@ -477,8 +536,8 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
     if (shared.isPartial) {
       _report(
-        'Shared ${shared.shared} of ${shared.total} readings; the analysis '
-        'covers the ones that were shared.',
+        'Shared ${shared.shared} of ${shared.total} observations; the '
+        'analysis covers the ones that were shared.',
       );
     }
 
@@ -504,10 +563,13 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       return;
     }
 
-    // Keep a copy on this device, then hand the chart to the user. Saving is
-    // a convenience: a failure there must not hide the result.
+    // Keep it in the Pod, then hand the chart to the user. Saving is a
+    // convenience: a failure there must not hide the result.
 
-    final savedPath = await BPAnalyserResultService.saveChart(result);
+    final document = outcome.document;
+    final savedAt = document == null
+        ? null
+        : await BPAnalysisStore.save(document, result.generatedAt);
     if (await _abandoned() || !mounted) return;
 
     setState(() => _phase = _Phase.idle);
@@ -515,7 +577,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     await showAnalyserResultDialog(
       context,
       result: result,
-      savedPath: savedPath,
+      savedAt: savedAt,
     );
   }
 
@@ -531,56 +593,71 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     final covered = outcome.bestCoverage;
     if (covered != null) {
       return 'The ${Analyser.displayName} has answered, but that analysis '
-          'covered $covered of your $shared readings — it was already running '
-          'when you shared. Analyse again in a moment to include them all.';
+          'covered $covered of your $shared observations — it was already '
+          'running when you shared. Analyse again in a moment to include them '
+          'all.';
     }
 
-    return 'Your readings were shared, but the ${Analyser.displayName} has '
-        'not sent a result back yet. Please try again in a moment.';
+    return 'Your observations were shared, but the ${Analyser.displayName} '
+        'has not sent a result back yet. Please try again in a moment.';
   }
 
-  /// Asks before any data leaves the Pod.
+  /// Revokes the Analyser's access to every reading and says what happened.
 
-  Future<bool> _confirm(int readingCount) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Analyse your blood pressure'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Grant ${Analyser.displayName} read access to $readingCount '
-              'reading${readingCount == 1 ? '' : 's'} so it can analyse them?',
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'It works out your averages and the averages across everyone '
-              'who has contributed, and returns a chart. Nobody else sees '
-              'your individual readings.',
-            ),
-            const SizedBox(height: 12),
-            SelectableText(
-              Analyser.webId,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Analyse'),
-          ),
-        ],
-      ),
+  Future<void> _runRevoke() async {
+    setState(() {
+      _phase = _Phase.revoking;
+      _completed = 0;
+      _total = 0;
+    });
+
+    final result = await BPAnalyserShareService.revokeAll(
+      onProgress: (examined, total) {
+        if (!mounted) return;
+        setState(() {
+          _completed = examined;
+          _total = total;
+        });
+      },
     );
 
-    return confirmed ?? false;
+    if (!mounted) return;
+
+    setState(() => _phase = _Phase.idle);
+
+    if (result.failure != null) {
+      _report(
+        result.message ?? 'Access could not be revoked.',
+        tone: _Tone.failure,
+      );
+
+      return;
+    }
+
+    if (result.hadNothingShared) {
+      _report(
+        'The ${Analyser.displayName} does not have access to any of your '
+        'blood pressure observations.',
+      );
+
+      return;
+    }
+
+    if (result.isCompleteSuccess) {
+      _report(
+        'Revoked ${Analyser.displayName} access to ${result.revoked} '
+        'observation${result.revoked == 1 ? '' : 's'}.',
+      );
+
+      return;
+    }
+
+    _report(
+      'Revoked access to ${result.revoked} of ${result.shared} '
+      'observations; the rest could not be changed. Please try again in a '
+      'moment.',
+      tone: _Tone.failure,
+    );
   }
 
   /// Shows a message, coloured by what it is reporting.

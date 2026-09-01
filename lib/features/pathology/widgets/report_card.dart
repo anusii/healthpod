@@ -26,6 +26,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/features/pathology/model.dart';
+import 'package:healthpod/widgets/action_buttons.dart';
 
 /// A card widget that displays a pathology report and its test results.
 
@@ -34,8 +35,15 @@ class PathologyReportCard extends StatelessWidget {
 
   final ReportData report;
 
+  /// Called when the report is to be removed from the pod.
+  ///
+  /// The delete button is only shown when a callback is given.
+
+  final VoidCallback? onDelete;
+
   const PathologyReportCard({
     required this.report,
+    this.onDelete,
     super.key,
   });
 
@@ -105,6 +113,8 @@ class PathologyReportCard extends StatelessWidget {
               ],
             ),
           ),
+          if (onDelete != null)
+            DeleteButton(record: 'report', onPressed: onDelete),
         ],
       ),
     );

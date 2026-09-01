@@ -91,6 +91,57 @@ void main() {
     });
   });
 
+  group('The outcome of revoking access', () {
+    test('says nothing was shared when the Analyser held no access', () {
+      const result = AnalyserRevokeResult(revoked: 0, shared: 0);
+
+      expect(result.hadNothingShared, isTrue);
+      expect(result.isCompleteSuccess, isFalse);
+      expect(result.isPartial, isFalse);
+    });
+
+    test('is a complete success when every share came back', () {
+      const result = AnalyserRevokeResult(revoked: 3, shared: 3);
+
+      expect(result.isCompleteSuccess, isTrue);
+      expect(result.isPartial, isFalse);
+      expect(result.hadNothingShared, isFalse);
+    });
+
+    test('is partial when some shares would not come back', () {
+      const result = AnalyserRevokeResult(
+        revoked: 2,
+        shared: 3,
+        failedFiles: ['blood_pressure_2026-08-21.json.enc.ttl'],
+      );
+
+      expect(result.isPartial, isTrue);
+      expect(result.isCompleteSuccess, isFalse);
+    });
+
+    test('is neither complete nor partial when nothing came back', () {
+      const result = AnalyserRevokeResult(revoked: 0, shared: 3);
+
+      expect(result.isCompleteSuccess, isFalse);
+      expect(result.isPartial, isFalse);
+      expect(result.hadNothingShared, isFalse);
+    });
+
+    test('reports no success at all when the run could not begin', () {
+      const result = AnalyserRevokeResult(
+        revoked: 0,
+        shared: 0,
+        failure: ShareFailure.notLoggedIn,
+        message: 'Please log in to your Pod before revoking access.',
+      );
+
+      expect(result.failure, ShareFailure.notLoggedIn);
+      expect(result.hadNothingShared, isFalse);
+      expect(result.isCompleteSuccess, isFalse);
+      expect(result.isPartial, isFalse);
+    });
+  });
+
   group('The Analyser address', () {
     test('is a WebID pointing at a profile document', () {
       expect(Analyser.webId, startsWith('https://'));

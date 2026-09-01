@@ -116,25 +116,29 @@ void main() {
       // though it had vanished the moment it was pressed.
 
       expect(
-        analyseRingValue(sharing: true, completed: 0, total: 12),
+        analyseRingValue(stepped: true, completed: 0, total: 12),
         isNull,
       );
     });
 
     test('reports real progress once a reading has gone out', () {
-      expect(analyseRingValue(sharing: true, completed: 3, total: 12), 0.25);
-      expect(analyseRingValue(sharing: true, completed: 12, total: 12), 1.0);
+      expect(analyseRingValue(stepped: true, completed: 3, total: 12), 0.25);
+      expect(analyseRingValue(stepped: true, completed: 12, total: 12), 1.0);
     });
 
     test('turns while waiting for the analyser, which reports no steps', () {
       expect(
-        analyseRingValue(sharing: false, completed: 12, total: 12),
+        analyseRingValue(stepped: false, completed: 12, total: 12),
         isNull,
       );
     });
 
+    test('reports progress while revoking, which counts its steps too', () {
+      expect(analyseRingValue(stepped: true, completed: 6, total: 12), 0.5);
+    });
+
     test('turns rather than dividing by a total nobody has counted', () {
-      expect(analyseRingValue(sharing: true, completed: 0, total: 0), isNull);
+      expect(analyseRingValue(stepped: true, completed: 0, total: 0), isNull);
     });
   });
 

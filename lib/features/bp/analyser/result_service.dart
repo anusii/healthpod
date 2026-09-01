@@ -24,17 +24,13 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
-import 'package:path_provider/path_provider.dart';
 import 'package:solidpod/solidpod.dart' show readExternalPod;
 
 import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/features/bp/analyser/model.dart';
-import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 
 /// How a wait for the analysis ended.
 ///
@@ -46,6 +42,7 @@ import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 class AnalyserWait {
   const AnalyserWait({
     this.result,
+    this.document,
     this.staleKey = false,
     this.bestCoverage,
     this.cancelled = false,
@@ -54,6 +51,11 @@ class AnalyserWait {
   /// The analysis, when one arrived that passed every check.
 
   final AnalyserResult? result;
+
+  /// The document [result] was parsed from, kept so it can be saved to the
+  /// user's Pod in the form the analyser wrote it.
+
+  final Map<String, dynamic>? document;
 
   /// Whether the content could be fetched but not decrypted, which means the
   /// key held here no longer matches and waiting will not help.
@@ -201,7 +203,7 @@ class BPAnalyserResultService {
 
       if (result != null && result.isFresherThan(previous)) {
         if (result.sourcesSeen >= minimumSources) {
-          return AnalyserWait(result: result);
+          return AnalyserWait(result: result, document: attempt.document);
         }
 
         bestCoverage = result.sourcesSeen;
@@ -246,17 +248,24 @@ class BPAnalyserResultService {
 
   /// Reads the result once, reporting why it could not be used.
 
-  static Future<({AnalyserResult? result, bool staleKey})> _tryRead(
-    String url,
-  ) async {
+  static Future<
+      ({
+        AnalyserResult? result,
+        Map<String, dynamic>? document,
+        bool staleKey,
+      })> _tryRead(String url) async {
     try {
       final content = await readExternalPod(url);
       final decoded = jsonDecode(content);
       if (decoded is! Map<String, dynamic>) {
-        return (result: null, staleKey: false);
+        return (result: null, document: null, staleKey: false);
       }
 
-      return (result: AnalyserResult.fromJson(decoded), staleKey: false);
+      return (
+        result: AnalyserResult.fromJson(decoded),
+        document: decoded,
+        staleKey: false,
+      );
     } catch (e) {
       // Not there yet, not shared yet, or not readable yet: all expected
       // while waiting, and worth a line in the log but nothing more. A
@@ -265,7 +274,7 @@ class BPAnalyserResultService {
 
       debugPrint('Waiting for the analysis at $url: $e');
 
-      return (result: null, staleKey: isDecryptionFailure(e));
+      return (result: null, document: null, staleKey: isDecryptionFailure(e));
     }
   }
 
@@ -276,32 +285,4 @@ class BPAnalyserResultService {
 
   static bool isDecryptionFailure(Object error) =>
       error is ArgumentError || '$error'.contains('pad block');
-
-  /// Writes the chart to a file on this device and returns its path.
-  ///
-  /// Returns null on the web, where there is no local filesystem to write to,
-  /// and when saving fails for any other reason: the chart is still shown, so
-  /// a failed save is a missing convenience rather than a failed analysis.
-
-  static Future<String?> saveChart(AnalyserResult result) async {
-    final chart = result.chart;
-    if (chart == null || kIsWeb) return null;
-
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final folder = Directory('${directory.path}/healthpod/analysis');
-      await folder.create(recursive: true);
-
-      final name =
-          'bp-analysis-${formatTimestampForFilename(result.generatedAt)}.png';
-      final file = File('${folder.path}/$name');
-      await file.writeAsBytes(chart);
-
-      return file.path;
-    } catch (e) {
-      debugPrint('Could not save the chart locally: $e');
-
-      return null;
-    }
-  }
 }

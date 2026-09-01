@@ -1,8 +1,6 @@
-/// Action buttons cell for the edit screen.
-//
-// Time-stamp: <Thursday 2024-12-19 13:33:06 +1100 Graham Williams>
-//
-/// Copyright (C) 2025, Software Innovation Institute, ANU
+/// Formats a moment in time for showing to the user.
+///
+/// Copyright (C) 2026, Software Innovation Institute, ANU
 ///
 /// Licensed under the GNU General Public License, Version 3 (the "License");
 ///
@@ -21,28 +19,29 @@
 // You should have received a copy of the GNU General Public License along with
 // this program.  If not, see <https://opensource.org/license/gpl-3-0>.
 ///
-/// Authors: Ashley Tang
+/// Authors: Tony Chen
 
 library;
 
-import 'package:flutter/material.dart';
+/// A short, unambiguous local timestamp: `21 Aug 2026 at 09:15`.
 
-import 'package:healthpod/widgets/action_buttons.dart';
+String formatMoment(DateTime moment) {
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+  final minute = moment.minute.toString().padLeft(2, '0');
 
-/// Builds a [DataCell] containing action buttons for saving or canceling the edit.
-
-DataCell actionButtonsCell({
-  required VoidCallback onSave,
-  required VoidCallback onCancel,
-}) {
-  return DataCell(
-    Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: actionButtonSpacing,
-      children: [
-        SaveButton(onPressed: onSave),
-        CancelButton(onPressed: onCancel),
-      ],
-    ),
-  );
+  return '${moment.day} ${months[moment.month - 1]} ${moment.year} '
+      'at ${moment.hour}:$minute';
 }

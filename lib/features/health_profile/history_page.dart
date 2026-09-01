@@ -27,9 +27,11 @@ import 'package:flutter/material.dart';
 
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
+import 'package:healthpod/dialogs/confirm_delete.dart';
 import 'package:healthpod/features/health_profile/model.dart';
 import 'package:healthpod/features/health_profile/service.dart';
 import 'package:healthpod/features/health_profile/widgets/history_table.dart';
+import 'package:healthpod/utils/show_delete_result.dart';
 
 /// Every set of measurements recorded, most recent first.
 ///
@@ -83,64 +85,37 @@ class _HealthProfileHistoryPageState extends State<HealthProfileHistoryPage> {
   /// Confirms and then removes one record from the pod.
 
   Future<void> _delete(HealthProfileEntry entry) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete measurements'),
-        content: const Text(
-          'Remove this record from your pod? The measurements it holds '
+    final confirmed = await confirmDelete(
+      context,
+      title: 'Delete measurements',
+      message: 'Remove this record from your pod? The measurements it holds '
           'cannot be recovered.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
     );
 
-    if (confirmed != true) return;
+    if (!confirmed || !mounted) return;
 
     try {
       final deleted = await HealthProfileService.delete(entry);
+
       if (!mounted) return;
 
-      if (!deleted) {
-        await _reportFailure('The record could not be found on your pod.');
-        return;
+      if (deleted) {
+        showDeleteSuccess(context, 'Measurements deleted successfully.');
+      } else {
+        showDeleteFailure(
+          context,
+          'The record could not be found on your pod.',
+        );
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Measurements deleted.')),
-      );
-      await _load();
     } catch (e) {
       if (!mounted) return;
-      await _reportFailure(e.toString());
+
+      showDeleteFailure(context, 'Error deleting measurements: $e');
+    } finally {
+      // Always reload so that the table reflects what is now on the pod.
+
+      if (mounted) await _load();
     }
-  }
-
-  /// A failed delete needs acknowledging, so it is reported in a dialog.
-
-  Future<void> _reportFailure(String message) async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete failed'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override

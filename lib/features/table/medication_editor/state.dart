@@ -235,7 +235,10 @@ class MedicationEditorState with ChangeNotifier {
 
   /// Deletes an observation from storage.
   ///
-  /// @param context The build context for showing feedback.
+  /// The user is asked to confirm, and the outcome reported, by the page, so
+  /// that every tab asks and reports in the same way.
+  ///
+  /// @param context The build context for POD operations.
   /// @param editorService The service for deleting observations.
   /// @param observation The observation to delete.
   /// @returns A Future that completes when the delete operation is done.
@@ -245,32 +248,6 @@ class MedicationEditorState with ChangeNotifier {
     dynamic editorService,
     MedicationObservation observation,
   ) async {
-    // Show confirmation dialog.
-
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Medication'),
-        content: const Text(
-          'Are you sure you want to delete this medication record? This cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true) return;
-
-    if (!context.mounted) return;
-
     await editorService.deleteObservationFromPod(context, observation);
 
     // Remove from local list if it exists.
