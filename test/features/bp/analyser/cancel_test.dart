@@ -118,8 +118,7 @@ void main() {
     test('is named after the Pod asking, so two requests cannot collide', () {
       const bob = 'https://solid.dev.empwr.au/bob/profile/card#me';
 
-      final forAlice =
-          Analyser.cancelUrl(BPAnalyserResultService.podId(alice));
+      final forAlice = Analyser.cancelUrl(BPAnalyserResultService.podId(alice));
       final forBob = Analyser.cancelUrl(BPAnalyserResultService.podId(bob));
 
       expect(forAlice, endsWith('cancel-solid.dev.empwr.au-alice.json'));
@@ -179,8 +178,8 @@ void main() {
       // The folder is publicly writable, so a request nobody collected must
       // not stop an unrelated run hours later.
 
-      final stamp = BPAnalyserCancelService.request(alice, at)['requested_at']
-          as String;
+      final stamp =
+          BPAnalyserCancelService.request(alice, at)['requested_at'] as String;
 
       expect(DateTime.parse(stamp).isUtc, isTrue);
       expect(DateTime.parse(stamp), at);
