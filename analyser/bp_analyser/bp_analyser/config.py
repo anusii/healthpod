@@ -155,6 +155,20 @@ class WatchConfig:
     run_on_start: bool = True
     error_backoff_seconds: int = 120
 
+    # A user cancels an analysis by leaving a marker in the Analyser Pod's
+    # `shared/` container, which is the one place an app can write to without
+    # being granted anything first. Reading it costs one request, so a cycle
+    # looks no more often than this.
+
+    cancel_poll_seconds: float = 3.0
+
+    # How long a cancellation stays honourable. The container is publicly
+    # writable, so a marker nobody collected must not sit there waiting to
+    # stop an unrelated run hours later. Zero switches the Pod channel off,
+    # leaving only `POST /api/cancel`.
+
+    cancel_max_age_seconds: int = 600
+
 
 @dataclass
 class OutputConfig:
@@ -304,6 +318,9 @@ def load(path: str | Path) -> Config:
         full_rescan_seconds=int(watch_raw.get('full_rescan_seconds') or 0),
         run_on_start=bool(watch_raw.get('run_on_start', True)),
         error_backoff_seconds=int(watch_raw.get('error_backoff_seconds', 120)),
+        cancel_poll_seconds=float(watch_raw.get('cancel_poll_seconds', 3.0)),
+        cancel_max_age_seconds=int(
+            watch_raw.get('cancel_max_age_seconds', 600)),
     )
 
     output_raw = raw.get('output') or {}

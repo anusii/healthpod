@@ -55,6 +55,42 @@ enum _Phase {
   cancelling,
 }
 
+/// How a message reads: as a plain note, or as an outcome worth colouring.
+///
+/// Only the two ends of a cancellation are coloured. Everything else the
+/// button says is a remark in passing, and a wall of coloured snack bars
+/// would leave the two that matter no louder than the rest.
+
+enum _Tone {
+  /// An aside. Takes the theme's own snack bar colour.
+
+  plain,
+
+  /// Something the user asked for has happened.
+
+  success,
+
+  /// Something the user asked for has not happened.
+
+  failure,
+}
+
+/// What a progress ring should show, or null for one that simply turns.
+///
+/// Sharing knows how many readings there are and so can report real progress,
+/// but only once one has actually gone out: a determinate ring at zero draws
+/// no arc at all, which made the button look as though it had vanished for
+/// the first moments of every analysis. Until there is something to report
+/// the ring turns instead.
+
+@visibleForTesting
+double? analyseRingValue({
+  required bool sharing,
+  required int completed,
+  required int total,
+}) =>
+    sharing && completed > 0 && total > 0 ? completed / total : null;
+
 /// Runs an analysis of the user's blood pressure and shows the result.
 ///
 /// One press covers the whole round trip: share the readings with the
@@ -88,8 +124,11 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
   bool _cancelRequested = false;
 
-  /// Whether the pointer is over the progress ring, which is what turns it
-  /// into a cancel button.
+  /// Whether the pointer is over the control, which is what turns the
+  /// progress ring into a cancel button.
+  ///
+  /// Written only by the MouseRegion in [build], which outlives every phase
+  /// change, so it stays in step with where the pointer actually is.
 
   bool _hovering = false;
 
@@ -137,35 +176,50 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
   /// and says what became of it.
 
   Future<void> _finishCancelled() async {
-    final outcome = await (_cancelInFlight ??
-        Future.value(const AnalyserCancel(CancelOutcome.accepted)));
+    // Null only if the round trip decided to stop without anybody pressing
+    // cancel, which nothing currently does. There is then no request to
+    // report on, and inventing an outcome would mean claiming something
+    // about a server that was never asked anything.
+
+    final outcome = await _cancelInFlight;
     if (!mounted) return;
+
+    // `_hovering` is left alone: the MouseRegion owns it, and the pointer may
+    // well still be sitting on the button. Clearing it here would leave the
+    // two disagreeing until the pointer wandered off and came back.
 
     setState(() {
       _phase = _Phase.idle;
       _cancelRequested = false;
-      _hovering = false;
       _completed = 0;
       _total = 0;
       _cancelInFlight = null;
     });
 
-    if (outcome.delivered) {
+    if (outcome == null) {
+      _report('Analysis cancelled.');
+
+      return;
+    }
+
+    if (outcome.stopped) {
       _report(
-        outcome.wasRunning
-            ? 'The ${Analyser.displayName} has been asked to stop the '
-                'analysis it was running.'
-            : 'Analysis cancelled.',
+        'The ${Analyser.displayName} has stopped the analysis.',
+        tone: _Tone.success,
       );
 
       return;
     }
 
-    // Not being able to reach the Analyser is not an error the user caused,
-    // and the thing they asked for — an end to the waiting — has happened.
-    // Say what did not, without dressing it as a failure.
+    // The app stopped waiting either way, so the user is not stuck. What
+    // failed is the half they cannot see, and saying so plainly is the point
+    // of colouring this: the analysis may still be running on the server.
 
-    _report(outcome.message ?? 'Analysis cancelled.');
+    _report(
+      outcome.message ??
+          'Could not confirm that the ${Analyser.displayName} stopped.',
+      tone: _Tone.failure,
+    );
   }
 
   @override
@@ -174,11 +228,34 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4.0),
-      child: MarkdownTooltip(
-        message: _busy ? _busyTooltip : _idleTooltip,
-        child: _busy ? _progress(theme) : _button(theme),
+
+      // Above the tooltip rather than inside it. Flutter's Tooltip wraps its
+      // child in a RawTooltip only while the tooltip is showing, so the whole
+      // subtree below it is thrown away and rebuilt each time one appears or
+      // fades. A MouseRegion down there is a fresh render object every time,
+      // and a pointer that has not moved since sends it no enter event — so
+      // the cross showed up only when something else generated a pointer
+      // event, such as pressing the button. Up here the region is built once
+      // and keeps its hover state.
+
+      child: MouseRegion(
+        onEnter: (_) => _setHovering(true),
+        onExit: (_) => _setHovering(false),
+        child: MarkdownTooltip(
+          message: _busy ? _busyTooltip : _idleTooltip,
+          child: _busy ? _progress(theme) : _button(theme),
+        ),
       ),
     );
+  }
+
+  /// Records whether the pointer is over the control, rebuilding only on a
+  /// change: enter and exit can both arrive repeatedly as the tooltip comes
+  /// and goes underneath.
+
+  void _setHovering(bool hovering) {
+    if (_hovering == hovering) return;
+    setState(() => _hovering = hovering);
   }
 
   String get _idleTooltip => '''
@@ -205,7 +282,12 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
       **Stopping**
 
-      Asking the ${Analyser.displayName} to abandon the analysis.
+      Waiting for the ${Analyser.displayName} to take the request and stop.
+
+      * An analysis already running is stopped within a few seconds.
+
+      * One that has not started yet takes until the ${Analyser.displayName}
+        next looks, which can be half a minute.
 
     ''';
     }
@@ -259,28 +341,32 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     final active = _cancellable && _hovering;
     final colour = active ? theme.colorScheme.error : theme.disabledColor;
 
-    return MouseRegion(
-      cursor: _cancellable ? SystemMouseCursors.click : MouseCursor.defer,
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: IconButton(
-        onPressed: _cancellable ? _requestCancel : null,
-        icon: SizedBox(
-          width: 20,
-          height: 20,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CircularProgressIndicator(
-                strokeWidth: 2,
-                value: _phase == _Phase.sharing && _total > 0
-                    ? _completed / _total
-                    : null,
-                color: colour,
-              ),
-              if (active) Icon(Icons.close, size: 12, color: colour),
-            ],
-          ),
+    final value = analyseRingValue(
+      sharing: _phase == _Phase.sharing,
+      completed: _completed,
+      total: _total,
+    );
+
+    return IconButton(
+      onPressed: _cancellable ? _requestCancel : null,
+      icon: SizedBox(
+        width: 20,
+        height: 20,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CircularProgressIndicator(
+              strokeWidth: 2,
+              value: value,
+              color: colour,
+
+              // The track keeps the control a complete circle whatever the
+              // arc is doing, so there is always something to aim at.
+
+              backgroundColor: colour.withValues(alpha: 0.25),
+            ),
+            if (active) Icon(Icons.close, size: 12, color: colour),
+          ],
         ),
       ),
     );
@@ -319,7 +405,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (webId == null || webId.isEmpty) {
       _report(
         'Please log in to your Pod before running an analysis.',
-        isError: true,
+        tone: _Tone.failure,
       );
 
       return;
@@ -330,7 +416,10 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       files = await BPAnalyserShareService.listShareableFiles();
     } catch (e) {
       if (!mounted) return;
-      _report('Could not read your blood pressure folder: $e', isError: true);
+      _report(
+        'Could not read your blood pressure folder: $e',
+        tone: _Tone.failure,
+      );
 
       return;
     }
@@ -380,7 +469,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       setState(() => _phase = _Phase.idle);
       _report(
         shared.message ?? 'None of the readings could be shared.',
-        isError: true,
+        tone: _Tone.failure,
       );
 
       return;
@@ -410,7 +499,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     final result = outcome.result;
     if (result == null) {
       setState(() => _phase = _Phase.idle);
-      _report(_waitFailureMessage(outcome, shared.shared), isError: true);
+      _report(_waitFailureMessage(outcome, shared.shared), tone: _Tone.failure);
 
       return;
     }
@@ -494,15 +583,25 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     return confirmed ?? false;
   }
 
-  /// Shows a message, in the error colour when something went wrong.
+  /// Shows a message, coloured by what it is reporting.
+  ///
+  /// A failure stays up twice as long: it usually names something the user
+  /// has to go and do, and a message that has to be read is worth more time
+  /// than one that only confirms.
 
-  void _report(String message, {bool isError = false}) {
+  void _report(String message, {_Tone tone = _Tone.plain}) {
     final theme = Theme.of(context);
+    final failed = tone == _Tone.failure;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? theme.colorScheme.error : null,
-        duration: Duration(seconds: isError ? 8 : 4),
+        backgroundColor: switch (tone) {
+          _Tone.success => Colors.green,
+          _Tone.failure => theme.colorScheme.error,
+          _Tone.plain => null,
+        },
+        duration: Duration(seconds: failed ? 8 : 4),
       ),
     );
   }

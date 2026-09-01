@@ -37,7 +37,7 @@ import logging
 import sys
 from pathlib import Path
 
-from . import charts, discovery, logs
+from . import charts, control, discovery, logs
 from .config import Config, ConfigError, default_config_path, load
 from .keys import KeyStoreError
 from .service import AnalyserService
@@ -113,6 +113,10 @@ def _command_check(config: Config) -> int:
         for dataset in datasets:
             print(f'  - {dataset.slug}: {dataset.resource_count} file(s)')
 
+        cancels = control.CancelInbox(client, config)
+        print(f'Cancel container:   '
+              f'{cancels.container_url if cancels.enabled else "disabled"}')
+
         print(f'Charts:             '
               f'{"available" if charts.available() else "matplotlib not installed"}')
         store = ResultStore(config)
@@ -126,10 +130,12 @@ def _command_run_once(config: Config) -> int:
     service = AnalyserService(config)
 
     # A marker left behind by a process that was killed mid-cycle would
-    # otherwise stop this run before it began.
+    # otherwise stop this run before it began. The Pod holds its own markers,
+    # which need a connection to clear, so that is done inside the try.
 
     service.store.clear_cancel()
     try:
+        service.clear_pod_cancellations()
         outcome = service.run_cycle()
     finally:
         service.close()
@@ -180,6 +186,7 @@ def _command_cancel(config: Config) -> int:
     store = ResultStore(config)
     active = store.read_active_run()
     store.request_cancel('cli')
+
     if active:
         print(f'Cancellation requested; run {active.get("run_id")} '
               f'started at {active.get("started_at")} will stop at its next '
@@ -215,6 +222,8 @@ def _command_show_config(config: Config) -> int:
         'watch': {
             'poll_seconds': config.watch.poll_seconds,
             'full_rescan_seconds': config.watch.full_rescan_seconds,
+            'cancel_poll_seconds': config.watch.cancel_poll_seconds,
+            'cancel_max_age_seconds': config.watch.cancel_max_age_seconds,
         },
         'output': {
             'state_dir': str(config.output.state_dir),

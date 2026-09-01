@@ -141,6 +141,25 @@ watch:
   run_on_start: true
   error_backoff_seconds: 120
 
+  # Cancelling an analysis. The HealthPod app cannot reach the API below --
+  # it binds to this host's loopback interface -- so it asks by leaving a
+  # marker in the Analyser Pod's healthpod/shared/ container, which solidpod
+  # leaves publicly writable so that agents can deliver keys into it. See
+  # "How the cancellation reaches the analyser" in README.md.
+
+  # How often a running cycle looks for one. Each look is one request, and a
+  # cycle only looks between its steps, so this is a floor rather than a rate.
+
+  cancel_poll_seconds: 3
+
+  # How long a request stays honourable. That container is publicly writable,
+  # so a marker nobody collected must not stop an unrelated run hours later.
+  # Zero switches the Pod channel off entirely, leaving POST /api/cancel as
+  # the only way in -- and the app's cancel button then stops the app waiting
+  # without stopping the analyser.
+
+  cancel_max_age_seconds: 600
+
 # ---------------------------------------------------------------------------
 # Where results are written locally. Relative paths resolve against this file.
 # ---------------------------------------------------------------------------

@@ -58,40 +58,27 @@ class Analyser {
 
   static const String cohortAverageFileName = 'bp-cohort-average.json.enc.ttl';
 
-  /// Where the analyser's control API answers, without a trailing slash.
+  /// Folder inside the Analyser Pod that any app can write to.
   ///
-  /// The analysis itself travels through the Pod, so the app needs this only
-  /// to tell the analyser to stop: there is nothing in the Solid model that
-  /// withdraws work already in hand. The service binds to the loopback
-  /// address unless it is deliberately moved (`api.host` in its
-  /// `config.yaml`), so the default suits an analyser running alongside the
-  /// app; a deployment elsewhere overrides it at build time with
+  /// A Pod laid out by solidpod grants public read and write on `<app>/shared/`
+  /// so that other agents can deliver sealed keys into it without being
+  /// granted anything first. That makes it the one place this app can leave a
+  /// message for the analyser, which is how an analysis is cancelled: the
+  /// analyser's own HTTP interface binds to the server's loopback address, so
+  /// there is no route to it from here.
+
+  static const String sharedPathFragment = '/healthpod/shared/';
+
+  /// The Analyser Pod root, without a trailing slash.
+
+  static String get podRoot => webId.replaceAll('/profile/card#me', '');
+
+  /// Where the Pod identified by [slug] leaves a request to stop.
   ///
-  ///     flutter run --dart-define=HEALTHPOD_ANALYSER_API=https://host:8088
-  ///
-  /// Setting it to the empty string switches the call off, and cancelling
-  /// then only stops this app waiting — see [apiConfigured].
+  /// One file per requester, so two people cancelling at once do not overwrite
+  /// each other. [slug] is the WebID reduced to a file-safe label, the same
+  /// form solidpod uses.
 
-  static const String apiBaseUrl = String.fromEnvironment(
-    'HEALTHPOD_ANALYSER_API',
-    defaultValue: 'http://localhost:8088',
-  );
-
-  /// Token for the analyser's guarded endpoints, when it requires one.
-  ///
-  /// Matches `api.token` in the analyser's configuration. Empty by default,
-  /// which is right for a loopback API; a shared one should be given a token
-  /// through `--dart-define=HEALTHPOD_ANALYSER_API_TOKEN=...`.
-
-  static const String apiToken = String.fromEnvironment(
-    'HEALTHPOD_ANALYSER_API_TOKEN',
-  );
-
-  /// Whether an analyser API address is configured at all.
-
-  static bool get apiConfigured => apiBaseUrl.isNotEmpty;
-
-  /// Endpoint that asks the analyser to abandon the run in progress.
-
-  static String get cancelUrl => '$apiBaseUrl/api/cancel';
+  static String cancelUrl(String slug) =>
+      '$podRoot${sharedPathFragment}cancel-$slug.json';
 }

@@ -35,11 +35,17 @@ Authors: Tony Chen
 # net, on a slower full rescan so a change missed by an unreliable entity tag or
 # a share that arrives without one is still picked up.
 #
-# A cycle can be abandoned part way through: the front end asks for that with
-# `POST /api/cancel`, which leaves a marker file behind, and the cycle looks
-# for the marker at the points between steps where stopping is safe. Nothing
-# is killed mid-write, so an abandoned run leaves the stored results exactly
-# as the previous run left them.
+# A cycle can be abandoned part way through. There are two ways to ask:
+#
+#   - `POST /api/cancel`, which leaves a marker file in the state directory,
+#     for an operator or a front end that can reach the API;
+#   - a marker left in the Analyser Pod's `shared/` container, which is how
+#     the HealthPod app asks, because it has no route to an API bound to the
+#     server's loopback interface. See `control.py`.
+#
+# Either way the cycle looks between steps, at the points where stopping is
+# safe. Nothing is killed mid-write, so an abandoned run leaves the stored
+# results exactly as the previous run left them.
 
 from __future__ import annotations
 
@@ -51,7 +57,7 @@ from datetime import datetime
 from types import FrameType
 from typing import Any
 
-from . import bp_data, charts, discovery, statistics, store
+from . import bp_data, charts, control, discovery, statistics, store
 from .config import Config, ConfigError
 from .keys import KeyStoreError, PodKeys
 from .publisher import Publisher
@@ -94,7 +100,14 @@ class AnalyserService:
         self._store = ResultStore(config)
         self._client: SolidClient | None = None
         self._keys: PodKeys | None = None
+        self._inbox: control.CancelInbox | None = None
         self._stopping = False
+
+        # Who may cancel the cycle in hand, and when the Pod was last asked.
+        # Both last only as long as the cycle that set them.
+
+        self._cycle_web_ids: set[str] | None = None
+        self._last_inbox_poll = 0.0
 
     # -- Connection --------------------------------------------------------
 
@@ -114,6 +127,7 @@ class AnalyserService:
             keys.unlock()
             self._client = client
             self._keys = keys
+            self._inbox = control.CancelInbox(client, self._config)
             log.info('connected to %s as %s',
                      self._config.analyser.server_url,
                      self._config.analyser.web_id)
@@ -127,6 +141,7 @@ class AnalyserService:
             self._client.close()
         self._client = None
         self._keys = None
+        self._inbox = None
 
     @property
     def store(self) -> ResultStore:
@@ -136,17 +151,83 @@ class AnalyserService:
 
     # -- Cancellation ------------------------------------------------------
 
+    def clear_pod_cancellations(self) -> None:
+        """Discard cancellations waiting in the Pod without acting on them.
+
+        For a run started from the command line, where a marker left by an
+        earlier process would otherwise stop a run nobody asked to stop. The
+        watcher does not need this: it collects markers as it goes.
+        """
+
+        self.connect()
+        if self._inbox is not None:
+            self._inbox.clear()
+
+    def _contributors(self) -> set[str]:
+        """The WebIDs that have shared something with the Analyser.
+
+        Reads the shared-keys file, so it is worth calling only once there is
+        a cancellation to check against.
+        """
+
+        _, keys = self.connect()
+        return discovery.contributor_web_ids(
+            keys.shared_resources(), self._config)
+
+    def collect_pod_cancellation(self) -> control.CancelRequest | None:
+        """Take a cancellation waiting in the Pod, when nothing is running.
+
+        Costs one container listing per call, and works out who is allowed to
+        cancel only if that listing turns something up. Collecting while idle
+        is what stops a request going uncollected: left there, it would be
+        picked up by the next run instead, and stop an analysis nobody asked
+        to stop.
+        """
+
+        self.connect()
+        if self._inbox is None or not self._inbox.enabled:
+            return None
+        return self._inbox.poll(self._contributors)
+
     def _check_cancelled(self, stage: str) -> None:
         """Abandon the cycle if a cancellation has been asked for.
 
         Called between steps rather than during one: a half-written result or
         a half-granted permission would be worse than a run that finishes.
+
+        Looks at both channels. The local marker is a file, so it is read
+        every time; the Pod costs a request, so it is read no more often than
+        `watch.cancel_poll_seconds`.
         """
 
-        if not self._store.cancel_requested():
-            return
-        reason = self._store.consume_cancel() or 'unknown'
-        raise CycleCancelled(stage, reason)
+        if self._store.cancel_requested():
+            reason = self._store.consume_cancel() or 'unknown'
+            raise CycleCancelled(stage, reason)
+
+        request = self._poll_inbox()
+        if request is not None:
+            raise CycleCancelled(stage, request.reason)
+
+    def _poll_inbox(self) -> control.CancelRequest | None:
+        """Read the Pod's cancellation container, at most so often.
+
+        Stays shut until `_cycle_web_ids` is known. The container is publicly
+        writable, so the WebID on a request is the only thing distinguishing a
+        contributor from a passer-by, and there is nothing to check it against
+        before the shared list has been read.
+        """
+
+        if self._inbox is None or not self._inbox.enabled:
+            return None
+        if self._cycle_web_ids is None:
+            return None
+
+        now = time.monotonic()
+        if now - self._last_inbox_poll < self._config.watch.cancel_poll_seconds:
+            return None
+        self._last_inbox_poll = now
+
+        return self._inbox.poll(self._cycle_web_ids)
 
     # -- One cycle ---------------------------------------------------------
 
@@ -170,11 +251,18 @@ class AnalyserService:
         # during and, on a cold start, is where a cycle most often waits.
 
         self._store.mark_run_started(identifier)
+
+        # Cleared so the Pod channel stays shut until the shared list has
+        # been read; see `_poll_inbox`.
+
+        self._cycle_web_ids = None
+        self._last_inbox_poll = 0.0
         try:
             client, keys = self.connect()
             self._check_cancelled('connecting')
             return self._run_cycle(client, keys, started, identifier)
         finally:
+            self._cycle_web_ids = None
             self._store.mark_run_finished()
 
     def _run_cycle(
@@ -188,6 +276,14 @@ class AnalyserService:
 
         shared = keys.shared_resources()
         key_index = discovery.key_index(shared)
+
+        # From here a cancellation left in the Pod is honoured, but only from
+        # a Pod that has actually shared something: the container it is left
+        # in is publicly writable, so the name on the request is all there is
+        # to go on.
+
+        self._cycle_web_ids = discovery.contributor_web_ids(shared, self._config)
+
         datasets = discovery.discover(client, shared, self._config)
         self._check_cancelled('discovery')
 
@@ -449,11 +545,11 @@ class AnalyserService:
         A cycle is triggered by a change to the shared-keys file, by the
         periodic full rescan, or by a refresh request from the HTTP API.
 
-        A cancellation request from the API stops the cycle in hand. Arriving
-        while nothing is running, it instead withdraws whatever would have
-        started the next one — a pending refresh, or the share that has just
-        been noticed — because a user who cancels means "do not analyse",
-        not "analyse a moment later".
+        A cancellation stops the cycle in hand, whether it came through the
+        API or through the Analyser Pod. Arriving while nothing is running, it
+        instead withdraws whatever would have started the next one — a pending
+        refresh, or the share that has just been noticed — because a user who
+        cancels means "do not analyse", not "analyse a moment later".
 
         Transient failures — a server restart, an expired token, a Pod that
         revokes access mid-run — are logged and retried. A configuration
@@ -492,6 +588,15 @@ class AnalyserService:
             reason = None
             try:
                 cancelled = self._store.consume_cancel()
+                if cancelled is None:
+                    # The app's channel. Collected on every pass, running or
+                    # not, so a request cannot sit in the Pod waiting to stop
+                    # a later analysis that nobody asked to stop.
+
+                    request = self.collect_pod_cancellation()
+                    if request is not None:
+                        cancelled = request.reason
+
                 if cancelled:
                     # Nothing is running, so there is no cycle to stop. Drop
                     # the work that was queued instead, and take the current

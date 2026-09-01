@@ -77,6 +77,25 @@ def key_index(shared: list[SharedResource]) -> dict[str, bytes]:
     return {item.resource_url: item.key for item in shared}
 
 
+def contributor_web_ids(
+    shared: list[SharedResource], config: Config,
+) -> set[str]:
+    """The WebIDs of every Pod that has shared something with the Analyser.
+
+    Cheaper than `discover()`, which fetches container listings; this only
+    reads the URLs already in hand. Used to decide whether a cancellation left
+    in the Analyser Pod came from somebody with data in the run.
+    """
+
+    app = config.analyser.app_dir_name
+    web_ids = set()
+    for item in shared:
+        if item.resource_url.startswith(config.analyser.pod_root):
+            continue
+        web_ids.add(paths.web_id_of(paths.owner_pod_root(item.resource_url, app)))
+    return web_ids
+
+
 def discover(
     client: SolidClient, shared: list[SharedResource], config: Config,
 ) -> list[PodDataset]:

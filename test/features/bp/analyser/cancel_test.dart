@@ -102,42 +102,142 @@ void main() {
     });
   });
 
-  group('The analyser control API', () {
-    test('cancels at the path the analyser serves', () {
-      expect(Analyser.cancelUrl, endsWith('/api/cancel'));
-      expect(Analyser.cancelUrl, startsWith(Analyser.apiBaseUrl));
+  group('Where a cancellation is left', () {
+    const alice = 'https://solid.dev.empwr.au/alice/profile/card#me';
+
+    test('is the Analyser Pod folder solidpod leaves publicly writable', () {
+      // Nothing else in the Analyser Pod is reachable by an app that has not
+      // been granted anything, which is why this is the folder used.
+
+      final url = Analyser.cancelUrl(BPAnalyserResultService.podId(alice));
+
+      expect(url, startsWith(Analyser.podRoot));
+      expect(url, contains(Analyser.sharedPathFragment));
     });
 
-    test('has an address configured by default', () {
-      // Without one, cancelling could only ever stop the app waiting.
+    test('is named after the Pod asking, so two requests cannot collide', () {
+      const bob = 'https://solid.dev.empwr.au/bob/profile/card#me';
 
-      expect(Analyser.apiConfigured, isTrue);
-      expect(Analyser.apiBaseUrl, isNot(endsWith('/')));
+      final forAlice =
+          Analyser.cancelUrl(BPAnalyserResultService.podId(alice));
+      final forBob = Analyser.cancelUrl(BPAnalyserResultService.podId(bob));
+
+      expect(forAlice, endsWith('cancel-solid.dev.empwr.au-alice.json'));
+      expect(forAlice, isNot(forBob));
     });
 
-    test('carries no token unless one is given at build time', () {
-      expect(Analyser.apiToken, isEmpty);
+    test('is the exact address the analyser reads', () {
+      // The two sides build this independently, in different languages. The
+      // Python half is pinned to the same string by
+      // `analyser/bp_analyser/tests/test_control.py`, so a change to either
+      // that is not matched in the other fails here.
+
+      const me = 'https://solid.dev.empwr.au/intony/profile/card#me';
+
+      expect(
+        Analyser.cancelUrl(BPAnalyserResultService.podId(me)),
+        'https://solid.dev.empwr.au/Analyser/healthpod/shared/'
+        'cancel-solid.dev.empwr.au-intony.json',
+      );
+    });
+
+    test('sits beside the results the analyser publishes', () {
+      // Both are derived from the same WebID, so a mismatch here would mean
+      // the app cancelling under one name and collecting under another.
+
+      final resultBase =
+          BPAnalyserResultService.resultUrl(alice).split('/healthpod/').first;
+
+      expect(
+        Analyser.cancelUrl(BPAnalyserResultService.podId(alice)),
+        startsWith(resultBase),
+      );
+    });
+  });
+
+  group('The request the analyser reads', () {
+    const alice = 'https://solid.dev.empwr.au/alice/profile/card#me';
+    final at = DateTime.utc(2026, 8, 29, 4, 11, 52);
+
+    test('names the kind the analyser looks for', () {
+      // The analyser ignores anything in the folder that is not this.
+
+      expect(
+        BPAnalyserCancelService.request(alice, at)['kind'],
+        'cancel-request',
+      );
+    });
+
+    test('carries the WebID it came from', () {
+      // Checked against the Pods that have shared data, so a request from
+      // somebody who has contributed nothing is ignored.
+
+      expect(BPAnalyserCancelService.request(alice, at)['web_id'], alice);
+    });
+
+    test('is timestamped in UTC so it can go stale', () {
+      // The folder is publicly writable, so a request nobody collected must
+      // not stop an unrelated run hours later.
+
+      final stamp = BPAnalyserCancelService.request(alice, at)['requested_at']
+          as String;
+
+      expect(DateTime.parse(stamp).isUtc, isTrue);
+      expect(DateTime.parse(stamp), at);
+    });
+
+    test('states the schema the analyser expects', () {
+      expect(BPAnalyserCancelService.request(alice, at)['schema_version'], 1);
+    });
+
+    test('is timestamped in UTC even when the device is not', () {
+      final local = DateTime(2026, 8, 29, 14, 11, 52);
+      final stamp =
+          BPAnalyserCancelService.request(alice, local)['requested_at']
+              as String;
+
+      expect(DateTime.parse(stamp), local.toUtc());
     });
   });
 
   group('The outcome of a cancellation', () {
-    test('counts as delivered only when the analyser answered', () {
+    test('counts as stopped only when the analyser collected the request', () {
+      // What the user is asking is whether the server stopped, so leaving the
+      // request somewhere it can be found must not be reported as success.
+
+      expect(const AnalyserCancel(CancelOutcome.stopped).stopped, isTrue);
+    });
+
+    test('a request nobody collected is a failure, not a success', () {
+      // The usual reason is that the analyser is not running, in which case
+      // the analysis it was asked to stop is not running either — but this
+      // cannot tell that from an analyser that simply never heard.
+
       expect(
-        const AnalyserCancel(CancelOutcome.accepted).delivered,
-        isTrue,
-      );
-      expect(
-        const AnalyserCancel(CancelOutcome.unreachable).delivered,
-        isFalse,
-      );
-      expect(
-        const AnalyserCancel(CancelOutcome.notConfigured).delivered,
+        const AnalyserCancel(CancelOutcome.notCollected).stopped,
         isFalse,
       );
     });
 
-    test('says nothing was running unless told so', () {
-      expect(const AnalyserCancel(CancelOutcome.accepted).wasRunning, isFalse);
+    test('a request that could not be written is a failure', () {
+      expect(
+        const AnalyserCancel(CancelOutcome.undelivered).stopped,
+        isFalse,
+      );
+      expect(
+        const AnalyserCancel(CancelOutcome.notLoggedIn).stopped,
+        isFalse,
+      );
+    });
+
+    test('every outcome but one is a failure', () {
+      // A new outcome added later defaults to being reported as a failure,
+      // which is the safe direction: never claim the server stopped.
+
+      final succeeded =
+          CancelOutcome.values.where((o) => AnalyserCancel(o).stopped);
+
+      expect(succeeded, [CancelOutcome.stopped]);
     });
   });
 }
