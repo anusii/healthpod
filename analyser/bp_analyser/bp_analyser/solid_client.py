@@ -345,6 +345,15 @@ class SolidClient:
         )
         self._check(response, f'write {url}')
 
+    def delete(self, url: str) -> bool:
+        """Remove a resource. Returns False when it was not there."""
+
+        response = self.request('DELETE', url)
+        if response.status_code == 404:
+            return False
+        self._check(response, f'delete {url}')
+        return True
+
     def patch_sparql(self, url: str, query: str) -> None:
         """Apply a SPARQL update, as solidpod's `updateFileByQuery()` does."""
 

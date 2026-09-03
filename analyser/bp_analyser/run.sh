@@ -6,6 +6,7 @@
 #   ./run.sh run-once    one analysis cycle
 #   ./run.sh watch       run continuously (the mode systemd uses)
 #   ./run.sh serve       the read-only front-end API
+#   ./run.sh cancel      ask a running watcher to abandon the current cycle
 #   ./run.sh test        the offline test suite
 #
 # Everything runs from this directory, the project root: it holds the

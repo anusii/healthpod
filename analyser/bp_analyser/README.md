@@ -322,6 +322,7 @@ when a file holding secrets is readable by other accounts.
 ./run.sh run-once    # one analysis cycle, then exit
 ./run.sh watch       # run continuously (this is what systemd runs)
 ./run.sh serve       # the read-only front-end API
+./run.sh cancel      # ask a running watcher to abandon the current cycle
 ./run.sh show-config # the effective configuration, with secrets redacted
 ```
 
@@ -394,6 +395,14 @@ The watcher:
   to `0`, which switches the periodic run off. Set it to, say, `3600` if you
   want an hourly recompute regardless of activity;
 - runs when `POST /api/refresh` leaves a marker in the state directory;
+- abandons the cycle in hand when a cancellation arrives, at the next point
+  between two steps where stopping is safe. There are two ways to ask: `POST
+  /api/cancel` leaves a marker in the state directory, and the HealthPod app
+  leaves one in the Analyser Pod's `shared/` container, which is the only
+  route it has. Either arriving while nothing is running withdraws the work
+  that would have started the next cycle instead, so cancelling straight after
+  sharing does not merely postpone the run. The Pod container is read once per
+  poll, which is the second request a poll makes;
 - rides out transient errors: it logs, backs off for `error_backoff_seconds`,
   drops its access token and reconnects;
 - refuses to start on a configuration error — a missing credential is checked
@@ -437,6 +446,90 @@ covers the whole round trip:
 
 The button is disabled for the whole of that round trip and comes back to life
 when the chart appears, so a second press cannot start a competing run.
+
+While it runs the button is a progress ring. Pointing at the ring turns it
+into a cancel button; the ring is pressable without a hover as well, since a
+touch screen never reports one. Readings already shared stay shared —
+withdrawing them is a separate decision, made in the file browser, and undoing
+it silently would be a surprise.
+
+### How the cancellation reaches the analyser
+
+The app is on somebody's laptop and the analyser is a service on the server
+with no address of its own: `api.host` is the loopback interface unless
+somebody deliberately moves it. So the request goes the one way round that
+always works — through the Pod.
+
+A Pod laid out by solidpod grants **public read and write** on `<app>/shared/`
+so that any agent can deliver a sealed key there without being granted
+anything first. The app writes a small JSON file into the Analyser Pod's copy
+of it:
+
+    <analyser>/healthpod/shared/cancel-<pod-id>.json
+
+    {"schema_version": 1, "kind": "cancel-request",
+     "web_id": "https://solid.dev.empwr.au/alice/profile/card#me",
+     "requested_at": "2026-08-29T04:11:52.117Z"}
+
+One file per requester, named after the Pod asking, so two people cancelling
+at once do not overwrite each other. The analyser reads that container between
+the steps of its cycle and abandons the run; every marker it looks at is
+removed, so a request is acted on once. Nothing needs to be configured, on
+either side, for this to work.
+
+The two halves are independent. The app stops waiting at once; the analyser
+stops at its next checkpoint, which is typically within a second or two but is
+never instant. If the write fails — the Analyser Pod was not set up by
+solidpod, or its `shared/` folder has been locked down — the app says so and
+stops waiting anyway, leaving the run to finish unwatched.
+
+**Removing the marker is the acknowledgement.** The analyser deletes a request
+as it collects it, and it only collects one at a point where it is about to
+act, so the file disappearing is the analyser saying it has stopped. The app
+watches for that and colours its answer accordingly: green once the request is
+gone, red if it is still sitting there when the app gives up looking (forty
+seconds), which almost always means the analyser is not running.
+
+That makes the delete load-bearing. A change that stopped removing collected
+markers, or that removed them before deciding to act, would leave the app
+reporting success for analyses that carried on.
+
+How long the green takes depends on where the analyser was. Mid-cycle it looks
+between steps, every `watch.cancel_poll_seconds`, so the answer comes in a few
+seconds. Idle it looks once per `watch.poll_seconds` — thirty by default, and
+the app spins for that long before it can say anything. Lowering
+`poll_seconds` shortens the wait at the cost of more requests when nothing is
+happening.
+
+The watcher reads that container on every poll, not only while a cycle is
+running — one listing per poll, and it works out who is allowed to cancel only
+if the listing turns something up. That matters for the two cases either side
+of a run:
+
+- **cancelled before the analyser started**, which is the usual one, since the
+  watcher polls: the marker is collected while idle, the share that would have
+  triggered the run is taken as seen, and no cycle begins at all;
+- **cancelled after the analyser finished**: the marker is collected on the
+  next poll and discarded. Were it left there, the following run — someone
+  else's analysis — would find it and stop.
+
+**What this channel does not do.** The container being publicly writable is
+what makes it work, and is also its weakness: anyone who can reach the Pod can
+leave a marker. Two things narrow that, neither of which closes it:
+
+- a request naming a WebID that has shared nothing with the analyser is
+  ignored, so a stranger has to know a contributor's WebID to be a nuisance;
+- a request goes stale after `watch.cancel_max_age_seconds` (ten minutes by
+  default), so one left lying about cannot stop an unrelated run hours later.
+  This is a backstop rather than the main defence: markers are collected on
+  every poll, so one normally survives seconds, not minutes.
+
+The worst an attacker gets is a denial of service against the analysis, and
+only against runs happening while they are writing. No data is disclosed and
+nothing is destroyed. A deployment unwilling to accept even that sets
+`cancel_max_age_seconds: 0`, which switches the Pod channel off and leaves
+`POST /api/cancel` as the only way in — at which point the app's cancel button
+stops the app waiting but no longer stops the analyser.
 
 The app reads the result straight from its address rather than searching for
 it, because the analyser publishes to a predictable place:
@@ -609,13 +702,25 @@ only reads local files, so it can face a front end without any Pod access.
 | GET | `/api/pods/{pod_id}/chart.png` | That Pod's readings over time, with both sets of averages. |
 | GET | `/api/runs` | Stored run identifiers, newest first. |
 | GET | `/api/runs/{run_id}` | One stored run in full. |
+| GET | `/api/status` | Whether a cycle is running, and how the last one ended. |
 | POST | `/api/refresh` | Ask the watcher for a cycle. Guarded by `api.token`. |
+| POST | `/api/cancel` | Ask it to abandon the cycle in hand. Guarded by `api.token`. |
 
 ```bash
 curl -s http://127.0.0.1:8088/api/cohort | python3 -m json.tool
 curl -s -o chart.png http://127.0.0.1:8088/api/pods/solid.dev.empwr.au-alice/chart.png
 curl -s -X POST http://127.0.0.1:8088/api/refresh -H "Authorization: Bearer $TOKEN"
+curl -s -X POST http://127.0.0.1:8088/api/cancel -H "Authorization: Bearer $TOKEN"
 ```
+
+Neither POST route does any work itself: each writes a marker file into the
+state directory for the watching process to find, which is what lets the API
+run without credentials of its own. `accepted` therefore means the request was
+recorded, not that a cycle has stopped — `active` in the reply says whether one
+was running when it arrived, and `/api/status` says whether it still is.
+
+An operator with a shell but no API can leave the same marker with `./run.sh
+cancel`.
 
 Interactive documentation is at `/docs`, generated by FastAPI.
 
@@ -659,7 +764,19 @@ adding `/api/pods/{pod_id}/series`; nothing else changes.
   beside `/opt/solid/server` rather than under it), so `config.yaml`, `var/`
   and `.venv` are ordinary files rather than Pod resources — see
   [Why not inside the Pod's storage](#why-not-inside-the-pods-storage).
-- **The API is read-only and unauthenticated** apart from `POST /api/refresh`.
+- **The API is read-only and unauthenticated** apart from `POST /api/refresh`
+  and `POST /api/cancel`, which `api.token` guards when one is set. Neither
+  discloses anything; an unguarded `/api/cancel` on a reachable address is a
+  way to keep the analysis from ever finishing, which is reason enough to set
+  the token whenever the API is not on the loopback address.
+- **Cancellation through the Pod is deliberately weakly authenticated.** It
+  uses the one container solidpod leaves publicly writable, so anyone who can
+  reach the Analyser Pod can ask for a run to stop. Requests naming a
+  non-contributing WebID are ignored and requests go stale, which narrows it
+  without closing it; the exposure is a denial of service against the
+  analysis, not disclosure. `watch.cancel_max_age_seconds: 0` switches the
+  channel off — see
+  [How the cancellation reaches the analyser](#how-the-cancellation-reaches-the-analyser).
   Bind it to `127.0.0.1` and put it behind the same reverse proxy and TLS as
   the rest of the deployment; set `api.cors_origins` to the front end's origin
   rather than `*`.

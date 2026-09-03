@@ -35,8 +35,9 @@ import 'package:healthpod/features/bp/analyser/model.dart';
 /// How a wait for the analysis ended.
 ///
 /// Exactly one of these applies: a result arrived that was both new and
-/// complete; nothing arrived in time; something arrived that could not be
-/// decrypted; or what arrived covered only part of what was shared.
+/// complete; the user gave up on it; nothing arrived in time; something
+/// arrived that could not be decrypted; or what arrived covered only part of
+/// what was shared.
 
 class AnalyserWait {
   const AnalyserWait({
@@ -44,6 +45,7 @@ class AnalyserWait {
     this.document,
     this.staleKey = false,
     this.bestCoverage,
+    this.cancelled = false,
   });
 
   /// The analysis, when one arrived that passed every check.
@@ -64,6 +66,13 @@ class AnalyserWait {
   /// one. Null when nothing new arrived at all.
 
   final int? bestCoverage;
+
+  /// Whether the user stopped the wait rather than it running its course.
+  ///
+  /// Nothing to report when this is set: the user knows what they did, and
+  /// the analyser has been told separately.
+
+  final bool cancelled;
 
   /// Whether the wait produced a usable analysis.
 
@@ -94,6 +103,14 @@ class BPAnalyserResultService {
   /// How long to wait between attempts to read the result.
 
   static const Duration pollInterval = Duration(seconds: 3);
+
+  /// How finely the gap between attempts is sliced.
+  ///
+  /// The wait spends nearly all its time idling between reads, so it checks
+  /// for a cancellation on this shorter beat; otherwise pressing cancel could
+  /// leave the spinner turning for the rest of a three second sleep.
+
+  static const Duration cancelCheckInterval = Duration(milliseconds: 200);
 
   /// The label the analyser uses for a Pod, derived from its WebID.
   ///
@@ -154,6 +171,11 @@ class BPAnalyserResultService {
   /// result that saw fewer is set aside: a run triggered by another Pod's
   /// share can finish after this one started and before these readings were
   /// all granted, which makes it new but incomplete.
+  ///
+  /// [isCancelled] is consulted between reads and while idling between them,
+  /// so a user who gives up gets the interface back at once. Telling the
+  /// analyser to stop is a separate matter, and the caller's business: this
+  /// only stops waiting for it.
 
   static Future<AnalyserWait> waitForResult({
     required String webId,
@@ -162,6 +184,7 @@ class BPAnalyserResultService {
     Duration timeout = defaultTimeout,
     Duration interval = pollInterval,
     void Function(Duration elapsed)? onWaiting,
+    bool Function()? isCancelled,
   }) async {
     final url = resultUrl(webId);
     final startedAt = DateTime.now();
@@ -170,6 +193,10 @@ class BPAnalyserResultService {
     int? bestCoverage;
 
     while (DateTime.now().isBefore(deadline)) {
+      if (isCancelled?.call() ?? false) {
+        return const AnalyserWait(cancelled: true);
+      }
+
       final attempt = await _tryRead(url);
       final result = attempt.result;
       staleKey = attempt.staleKey;
@@ -183,10 +210,40 @@ class BPAnalyserResultService {
       }
 
       onWaiting?.call(DateTime.now().difference(startedAt));
-      await Future<void>.delayed(interval);
+
+      if (!await _idle(interval, isCancelled)) {
+        return const AnalyserWait(cancelled: true);
+      }
     }
 
     return AnalyserWait(staleKey: staleKey, bestCoverage: bestCoverage);
+  }
+
+  /// Waits [interval], watching for a cancellation as it goes.
+  ///
+  /// Returns false when the wait was cut short by one, true when it ran to
+  /// its end.
+
+  static Future<bool> _idle(
+    Duration interval,
+    bool Function()? isCancelled,
+  ) async {
+    if (isCancelled == null) {
+      await Future<void>.delayed(interval);
+
+      return true;
+    }
+
+    final until = DateTime.now().add(interval);
+    while (DateTime.now().isBefore(until)) {
+      if (isCancelled()) return false;
+      final left = until.difference(DateTime.now());
+      await Future<void>.delayed(
+        left < cancelCheckInterval ? left : cancelCheckInterval,
+      );
+    }
+
+    return !isCancelled();
   }
 
   /// Reads the result once, reporting why it could not be used.

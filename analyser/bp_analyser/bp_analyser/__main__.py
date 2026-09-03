@@ -26,6 +26,7 @@ Authors: Tony Chen
 # python3 -m bp_analyser --config config.yaml run-once   one analysis cycle
 # python3 -m bp_analyser --config config.yaml watch      run continuously
 # python3 -m bp_analyser --config config.yaml serve      the front-end API
+# python3 -m bp_analyser --config config.yaml cancel     stop the run in hand
 # python3 -m bp_analyser --config config.yaml show-config
 
 from __future__ import annotations
@@ -36,7 +37,7 @@ import logging
 import sys
 from pathlib import Path
 
-from . import charts, discovery, logs
+from . import charts, control, discovery, logs
 from .config import Config, ConfigError, default_config_path, load
 from .keys import KeyStoreError
 from .service import AnalyserService
@@ -63,6 +64,8 @@ def _parser() -> argparse.ArgumentParser:
     commands.add_parser('run-once', help='run one analysis cycle and exit')
     commands.add_parser('watch', help='run cycles continuously')
     commands.add_parser('serve', help='serve the read-only front-end API')
+    commands.add_parser(
+        'cancel', help='ask a running watcher to abandon the current cycle')
     commands.add_parser(
         'show-config', help='print the effective configuration')
     return parser
@@ -110,6 +113,10 @@ def _command_check(config: Config) -> int:
         for dataset in datasets:
             print(f'  - {dataset.slug}: {dataset.resource_count} file(s)')
 
+        cancels = control.CancelInbox(client, config)
+        print(f'Cancel container:   '
+              f'{cancels.container_url if cancels.enabled else "disabled"}')
+
         print(f'Charts:             '
               f'{"available" if charts.available() else "matplotlib not installed"}')
         store = ResultStore(config)
@@ -121,7 +128,14 @@ def _command_check(config: Config) -> int:
 
 def _command_run_once(config: Config) -> int:
     service = AnalyserService(config)
+
+    # A marker left behind by a process that was killed mid-cycle would
+    # otherwise stop this run before it began. The Pod holds its own markers,
+    # which need a connection to clear, so that is done inside the try.
+
+    service.store.clear_cancel()
     try:
+        service.clear_pod_cancellations()
         outcome = service.run_cycle()
     finally:
         service.close()
@@ -160,6 +174,29 @@ def _command_serve(config: Config) -> int:
     return 0
 
 
+def _command_cancel(config: Config) -> int:
+    """Leave a cancellation marker for a watcher in another process.
+
+    The same mechanism `POST /api/cancel` uses, for an operator who has a
+    shell on the machine but no API. Reports what was running when the marker
+    was written; whether that run then stops is the watcher's business, and it
+    happens at its next checkpoint.
+    """
+
+    store = ResultStore(config)
+    active = store.read_active_run()
+    store.request_cancel('cli')
+
+    if active:
+        print(f'Cancellation requested; run {active.get("run_id")} '
+              f'started at {active.get("started_at")} will stop at its next '
+              f'checkpoint.')
+    else:
+        print('Cancellation requested; nothing is running, so any pending '
+              'refresh will be withdrawn instead.')
+    return 0
+
+
 def _command_show_config(config: Config) -> int:
     redacted = {
         'analyser': {
@@ -185,6 +222,8 @@ def _command_show_config(config: Config) -> int:
         'watch': {
             'poll_seconds': config.watch.poll_seconds,
             'full_rescan_seconds': config.watch.full_rescan_seconds,
+            'cancel_poll_seconds': config.watch.cancel_poll_seconds,
+            'cancel_max_age_seconds': config.watch.cancel_max_age_seconds,
         },
         'output': {
             'state_dir': str(config.output.state_dir),
@@ -219,6 +258,7 @@ def main(argv: list[str] | None = None) -> int:
         'run-once': _command_run_once,
         'watch': _command_watch,
         'serve': _command_serve,
+        'cancel': _command_cancel,
         'show-config': _command_show_config,
     }
 

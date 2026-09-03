@@ -58,6 +58,30 @@ class Analyser {
 
   static const String cohortAverageFileName = 'bp-cohort-average.json.enc.ttl';
 
+  /// Folder inside the Analyser Pod that any app can write to.
+  ///
+  /// A Pod laid out by solidpod grants public read and write on `<app>/shared/`
+  /// so that other agents can deliver sealed keys into it without being
+  /// granted anything first. That makes it the one place this app can leave a
+  /// message for the analyser, which is how an analysis is cancelled: the
+  /// analyser's own HTTP interface binds to the server's loopback address, so
+  /// there is no route to it from here.
+
+  static const String sharedPathFragment = '/healthpod/shared/';
+
+  /// The Analyser Pod root, without a trailing slash.
+
+  static String get podRoot => webId.replaceAll('/profile/card#me', '');
+
+  /// Where the Pod identified by [slug] leaves a request to stop.
+  ///
+  /// One file per requester, so two people cancelling at once do not overwrite
+  /// each other. [slug] is the WebID reduced to a file-safe label, the same
+  /// form solidpod uses.
+
+  static String cancelUrl(String slug) =>
+      '$podRoot${sharedPathFragment}cancel-$slug.json';
+
   /// Width of the Analyser's text dialogues.
   ///
   /// A dialogue left to size itself stretches to the window, and prose that

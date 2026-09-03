@@ -35,9 +35,16 @@ Authors: Tony Chen
 #     GET  /api/runs                    identifiers of the stored runs
 #     GET  /api/runs/{run_id}           one stored run
 #     POST /api/refresh                 ask the watcher for a run (token guarded)
+#     POST /api/cancel                  ask it to abandon one (token guarded)
+#     GET  /api/status                  whether a run is in progress
 #
 # Adding a new view means adding a route here and a field to the results
 # document; nothing else in the analyser needs to change.
+#
+# Neither of the POST routes does any work itself: each leaves a marker file
+# in the state directory for the watching process to find. That is what lets
+# the API run without credentials of its own, and it is why a cancellation is
+# acted on at the watcher's next checkpoint rather than instantly.
 
 from __future__ import annotations
 
@@ -80,6 +87,19 @@ def create_app(config: Config) -> FastAPI:
                 detail='no analysis has been run yet')
         return document
 
+    def require_token(authorization: str) -> None:
+        """Reject a write request that does not carry `api.token`.
+
+        Does nothing when no token is configured, which is the default and is
+        safe only because the API binds to the loopback address unless it is
+        deliberately moved.
+        """
+
+        if not config.api.token:
+            return
+        if authorization != f'Bearer {config.api.token}':
+            raise HTTPException(status_code=401, detail='invalid token')
+
     def find_pod(document: dict[str, Any], pod_id: str) -> dict[str, Any]:
         for pod in document.get('pods', []):
             if pod.get('pod_id') == pod_id:
@@ -97,6 +117,8 @@ def create_app(config: Config) -> FastAPI:
             'time': utc_now().isoformat(),
             'analyser_web_id': config.analyser.web_id,
             'last_run': state.get('last_run'),
+            'last_cancelled': state.get('last_cancelled'),
+            'running': store.read_active_run(),
             'has_results': document is not None,
         }
 
@@ -183,12 +205,53 @@ def create_app(config: Config) -> FastAPI:
         never needs credentials of its own.
         """
 
-        if config.api.token:
-            expected = f'Bearer {config.api.token}'
-            if authorization != expected:
-                raise HTTPException(status_code=401, detail='invalid token')
-
+        require_token(authorization)
         store.request_refresh('api')
         return {'status': 'accepted', 'requested_at': utc_now().isoformat()}
+
+    @app.get('/api/status')
+    def status() -> dict[str, Any]:
+        """Whether a cycle is running, and what happened to the last one.
+
+        The front end reads this to decide whether a cancellation would land
+        on anything. `running` is the run marker the watcher writes, so it is
+        also left behind by a process killed mid-cycle; treat a long-standing
+        entry as the last run attempted rather than as one still going.
+        """
+
+        state = store.read_state()
+        return {
+            'time': utc_now().isoformat(),
+            'running': store.read_active_run(),
+            'cancel_pending': store.cancel_requested(),
+            'last_run': state.get('last_run'),
+            'last_cancelled': state.get('last_cancelled'),
+        }
+
+    @app.post('/api/cancel')
+    def cancel(authorization: str = Header(default='')) -> dict[str, Any]:
+        """Ask the watcher to abandon the run in progress.
+
+        Guarded by `api.token` in the same way as `/api/refresh`, and works
+        the same way: a marker file is left behind and the watcher acts on it
+        at its next checkpoint, which is between two steps of the cycle
+        rather than in the middle of one. A request that arrives while
+        nothing is running withdraws any pending refresh instead, so pressing
+        cancel just after pressing analyse does not simply defer the run.
+
+        Answering `accepted` means the request was recorded, not that a cycle
+        was stopped; `active` says whether one was in progress when it was.
+        """
+
+        require_token(authorization)
+        active = store.read_active_run()
+        store.request_cancel('api')
+        log.info('cancellation requested via the API (running: %s)',
+                 active.get('run_id') if active else 'nothing')
+        return {
+            'status': 'accepted',
+            'requested_at': utc_now().isoformat(),
+            'active': active,
+        }
 
     return app

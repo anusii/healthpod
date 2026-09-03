@@ -28,6 +28,8 @@ Authors: Tony Chen
 #
 #     var/state/state.json        what has been seen, when the last run happened
 #     var/state/refresh.trigger   touch this to ask the watcher for a run
+#     var/state/cancel.trigger    touch this to ask the watcher to abandon one
+#     var/state/active.json       the run in progress, absent when idle
 #     var/results/latest.json     the most recent run
 #     var/results/run-<id>.json   the run history, pruned to `output.keep_runs`
 #     var/charts/<pod-id>.png     per-Pod charts, cohort.png for the cohort
@@ -51,6 +53,8 @@ SCHEMA_VERSION = 1
 
 _STATE_FILE = 'state.json'
 _TRIGGER_FILE = 'refresh.trigger'
+_CANCEL_FILE = 'cancel.trigger'
+_ACTIVE_FILE = 'active.json'
 _LATEST_FILE = 'latest.json'
 
 
@@ -137,6 +141,98 @@ class ResultStore:
             reason = 'unknown'
         self.trigger_path.unlink(missing_ok=True)
         return reason
+
+    # -- Cancellation ------------------------------------------------------
+
+    # A cancellation is a marker file rather than a signal, for the same
+    # reason a refresh is: the API process holds no reference to the watcher
+    # and may not even share a machine with it. The watcher reads the marker
+    # at the safe points in a cycle and abandons the work in hand.
+
+    @property
+    def cancel_path(self) -> Path:
+        """The file the API touches to ask for the current run to stop."""
+
+        return self.state_dir / _CANCEL_FILE
+
+    def request_cancel(self, reason: str = 'api') -> None:
+        """Ask the watcher to abandon the run in hand."""
+
+        self.ensure_directories()
+        _write_json(
+            self.cancel_path,
+            {'requested_at': utc_now().isoformat(), 'reason': reason})
+
+    def cancel_requested(self) -> bool:
+        """Whether a cancellation is waiting to be acted on.
+
+        Only asks whether the marker is there; the cycle calls this often, and
+        the answer must not consume the request that a later check also needs.
+        """
+
+        return self.cancel_path.is_file()
+
+    def consume_cancel(self) -> str | None:
+        """Take a pending cancellation, if there is one."""
+
+        if not self.cancel_path.is_file():
+            return None
+        try:
+            with self.cancel_path.open('r', encoding='utf-8') as handle:
+                payload = json.load(handle)
+            reason = str(payload.get('reason', 'unknown'))
+        except (OSError, json.JSONDecodeError):
+            reason = 'unknown'
+        self.cancel_path.unlink(missing_ok=True)
+        return reason
+
+    def clear_cancel(self) -> None:
+        """Drop any pending cancellation without acting on it.
+
+        Called before a cycle begins, so a request that arrived while nothing
+        was running cannot reach forward and stop the next run instead.
+        """
+
+        self.cancel_path.unlink(missing_ok=True)
+
+    # -- The run in progress -----------------------------------------------
+
+    @property
+    def active_path(self) -> Path:
+        """Where the run in progress announces itself."""
+
+        return self.state_dir / _ACTIVE_FILE
+
+    def mark_run_started(self, identifier: str) -> None:
+        """Record that a cycle has begun, so the API can say so."""
+
+        self.ensure_directories()
+        _write_json(
+            self.active_path,
+            {'run_id': identifier, 'started_at': utc_now().isoformat()})
+
+    def mark_run_finished(self) -> None:
+        """Record that no cycle is in progress."""
+
+        self.active_path.unlink(missing_ok=True)
+
+    def read_active_run(self) -> dict[str, Any] | None:
+        """The run in progress, or None when the analyser is idle.
+
+        The marker is left behind if the process is killed mid-cycle, so a
+        caller that cares about liveness should treat a stale entry as a
+        report of the last run attempted rather than as proof of activity.
+        """
+
+        if not self.active_path.is_file():
+            return None
+        try:
+            with self.active_path.open('r', encoding='utf-8') as handle:
+                return json.load(handle)
+        except (OSError, json.JSONDecodeError) as exc:
+            log.warning('ignoring unreadable active-run file %s: %s',
+                        self.active_path, exc)
+            return None
 
     # -- Results -----------------------------------------------------------
 
