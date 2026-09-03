@@ -30,6 +30,7 @@ then please show some ❤️ and tap on the star at
 
 ## 1.0 Migrating to new more secure secret key handling
 
++ Support cancelation of an analysis [1.0.16 20260903 gjw]
 + Keep every ANALYSIS in the Pod, listed to view or delete [1.0.15 20260829 gjw]
 + Fix deleting data points on the DATA page [1.0.14 20260829 tonypioneer]
 + Add button to view previous ANALYSIS [1.0.13 20260829 gjw]
