@@ -31,7 +31,7 @@ import 'package:flutter/material.dart';
 ///
 /// This function is used by systolic, diastolic, and heart rate cells.
 /// It parses user input (including empty strings) to a `double` and passes
-/// it to [onValueChange]. You can further customize the behavior here if
+/// it to [onValueChange]. You can further customise the behaviour here if
 /// needed (e.g., validation).
 
 DataCell numericCell({

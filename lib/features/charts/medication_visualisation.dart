@@ -36,7 +36,7 @@ import 'package:healthpod/features/charts/utils/parse_date_safely.dart';
 import 'package:healthpod/features/medication/data.dart';
 import 'package:healthpod/features/visualise/stat_item.dart';
 
-/// A widget for visualizing medication data.
+/// A widget for visualising medication data.
 ///
 /// This widget provides:
 /// * Timeline of medications with start dates
@@ -263,7 +263,7 @@ class _MedicationVisualisationState extends State<MedicationVisualisation> {
         final responses = entry['responses'];
         if (responses == null) continue;
 
-        // Get frequency and normalize it for better grouping.
+        // Get frequency and normalise it for better grouping.
 
         String frequency =
             responses[MedicationSurveyConstants.fieldFrequency] as String? ??

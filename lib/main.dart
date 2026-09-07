@@ -46,7 +46,7 @@ void main() async {
   //   null;
   // };
 
-  // Ensure Flutter bindings are initialized for async operations
+  // Ensure Flutter bindings are initialised for async operations
 
   WidgetsFlutterBinding.ensureInitialized();
 

@@ -27,10 +27,40 @@ library;
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
 import 'package:healthpod/utils/is_text_file.dart';
+
+/// Renders decrypted content as the bytes to write for [fileName].
+///
+/// The counterpart to [saveDecryptedContent] for callers that hand the bytes
+/// to a save dialogue which does the writing itself. Formats as JSON where
+/// the content parses as JSON, and otherwise falls back to binary or text
+/// based on the file type, exactly as [saveDecryptedContent] does.
+
+Uint8List decryptedContentBytes(String decryptedContent, String fileName) {
+  try {
+    final jsonData = jsonDecode(decryptedContent);
+
+    return utf8.encode(const JsonEncoder.withIndent('  ').convert(jsonData));
+  } catch (jsonError) {
+    debugPrint('JSON parsing failed: $jsonError');
+
+    if (isTextFile(fileName)) return utf8.encode(decryptedContent);
+
+    // For binary files, try base64 decode.
+
+    try {
+      return base64Decode(decryptedContent);
+    } catch (base64Error) {
+      debugPrint('Base64 decode failed: $base64Error');
+
+      return utf8.encode(decryptedContent);
+    }
+  }
+}
 
 /// Saves decrypted content to a file, handling different file formats appropriately.
 ///

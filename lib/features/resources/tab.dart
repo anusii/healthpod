@@ -1,4 +1,4 @@
-/// A tab that displays organized health resources and information.
+/// A tab that displays organised health resources and information.
 ///
 /// Copyright (C) 2024-2025, Software Innovation Institute, ANU.
 ///

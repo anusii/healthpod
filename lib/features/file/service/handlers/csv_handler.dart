@@ -23,6 +23,8 @@
 
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import 'package:file_picker/file_picker.dart';
@@ -37,6 +39,7 @@ import 'package:healthpod/features/medication/exporter.dart';
 import 'package:healthpod/features/medication/importer.dart';
 import 'package:healthpod/features/vaccination/exporter.dart';
 import 'package:healthpod/features/vaccination/importer.dart';
+import 'package:healthpod/utils/health_data_exporter_base.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
 /// Handles CSV import and export operations for the file service.
@@ -58,13 +61,12 @@ class CsvHandler {
     Function(String importType)? onImportSuccess,
   }) async {
     try {
-      final result = await FilePicker.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['csv'],
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
+      if (file != null) {
         if (file.path != null) {
           if (!context.mounted) return;
 
@@ -231,12 +233,13 @@ class CsvHandler {
     String? fileContent;
     String filePath = file.path ?? 'web_file_${file.name}';
 
-    if (file.bytes != null &&
-        (file.path == null || file.path!.startsWith('blob:'))) {
-      // Web platform - use bytes (file.path might be blob URL or null).
+    if (file.path == null || file.path!.startsWith('blob:')) {
+      // Web platform - read the bytes (file.path might be blob URL or null).
 
-      fileContent = String.fromCharCodes(file.bytes!);
+      fileContent = String.fromCharCodes(await file.readAsBytes());
     }
+
+    if (!context.mounted) return false;
 
     // Show progress dialog.
 
@@ -337,56 +340,42 @@ class CsvHandler {
       final String fileName =
           '${feature.displayName.toLowerCase().replaceAll(' ', '_')}_data.csv';
 
-      final String? outputFile = await FilePicker.saveFile(
+      // Build the CSV before offering the save dialogue: file_picker writes
+      // the bytes itself now rather than handing back a path to write to.
+
+      final HealthDataExporterBase exporter = isVaccination
+          ? VaccinationExporter()
+          : isDiary
+              ? DiaryExporter()
+              : isMedication
+                  ? MedicationExporter()
+                  : BPExporter();
+
+      final String? csv = await exporter.buildCsv(currentPath ?? basePath);
+
+      if (!context.mounted) return;
+
+      if (csv == null) {
+        showAlert(context, 'Failed to export ${feature.displayName} data');
+
+        return;
+      }
+
+      final Uri? savedUri = await FilePicker.saveFile(
         dialogTitle: 'Save ${feature.displayName} data as CSV:',
         fileName: fileName,
+        bytes: utf8.encode(csv),
       );
 
-      if (outputFile != null) {
-        if (!context.mounted) return;
-
-        bool success;
-
-        if (isVaccination) {
-          success = await VaccinationExporter.exportCsv(
-            outputFile,
-            currentPath ?? basePath,
-            context,
-          );
-        } else if (isDiary) {
-          success = await DiaryExporter.exportCsv(
-            outputFile,
-            currentPath ?? basePath,
-            context,
-          );
-        } else if (isMedication) {
-          success = await MedicationExporter.exportCsv(
-            outputFile,
-            currentPath ?? basePath,
-            context,
-          );
-        } else {
-          success = await BPExporter.exportCsv(
-            outputFile,
-            currentPath ?? basePath,
-            context,
-          );
-        }
-
-        if (context.mounted) {
-          if (success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${feature.displayName} data exported successfully',
-                ),
-                backgroundColor: Theme.of(context).colorScheme.tertiary,
-              ),
-            );
-          } else {
-            showAlert(context, 'Failed to export ${feature.displayName} data');
-          }
-        }
+      if (savedUri != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${feature.displayName} data exported successfully',
+            ),
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {

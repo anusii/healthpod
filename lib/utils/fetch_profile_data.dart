@@ -45,7 +45,7 @@ import 'package:healthpod/constants/profile.dart';
 Future<Map<String, dynamic>> fetchProfileData(BuildContext context) async {
   try {
     // Get the directory URL for the profile folder using full path.
-    // Note: SolidPod path normalization doesn't work correctly for getDirUrl on web,
+    // Note: SolidPod path normalisation doesn't work correctly for getDirUrl on web,
     // so we need to use the full path for directory operations.
 
     final fullDirPath = '$basePath/profile';

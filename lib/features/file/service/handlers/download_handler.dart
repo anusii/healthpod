@@ -50,16 +50,8 @@ class FileDownloadHandler {
     if (remoteFileName == null || currentPath == null) return false;
 
     try {
-      // Let user choose where to save the file.
-
-      String? outputFile = await FilePicker.saveFile(
-        dialogTitle: 'Save file as:',
-        fileName: cleanFileName ?? remoteFileName.replaceAll('.enc.ttl', ''),
-      );
-
-      if (outputFile == null) {
-        return false;
-      }
+      final fileName =
+          cleanFileName ?? remoteFileName.replaceAll('.enc.ttl', '');
 
       final baseDir = basePath;
       final relativePath = currentPath == baseDir
@@ -89,7 +81,19 @@ class FileDownloadHandler {
         );
       }
 
-      await saveDecryptedContent(fileContent, outputFile);
+      // The Pod is read before the save dialogue is offered because
+      // file_picker writes the bytes itself now rather than handing back a
+      // path to write to.
+
+      final savedUri = await FilePicker.saveFile(
+        dialogTitle: 'Save file as:',
+        fileName: fileName,
+        bytes: decryptedContentBytes(fileContent, fileName),
+      );
+
+      if (savedUri == null) {
+        return false;
+      }
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

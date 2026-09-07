@@ -28,7 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:healthpod/constants/health_data_type.dart';
 import 'package:healthpod/features/survey/question.dart';
 
-/// A controller that manages the state and behavior of a health survey form.
+/// A controller that manages the state and behaviour of a health survey form.
 ///
 /// This class handles focus management, form submission, and response collection
 /// for a list of health survey questions.
@@ -58,7 +58,7 @@ class HealthSurveyFormController {
 
   final TextEditingController notesController = TextEditingController();
 
-  /// Constructor that initializes the form controller.
+  /// Constructor that initialises the form controller.
   ///
   /// Initialises focus nodes for each question.
 

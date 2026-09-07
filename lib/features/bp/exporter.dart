@@ -26,7 +26,6 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -81,16 +80,13 @@ class BPExporter extends HealthDataExporterBase {
     return BPExporter().exportToCsv(savePath, dirPath);
   }
 
-  /// Process BP JSON files to CSV export.
+  /// Process BP JSON files into CSV content.
   ///
   /// Reads all JSON files in the BP directory, extracts the blood pressure data,
   /// and combines them into a single CSV file sorted by timestamp.
 
   @override
-  Future<bool> exportToCsv(
-    String savePath,
-    String dirPath,
-  ) async {
+  Future<String?> buildCsv(String dirPath) async {
     try {
       // Get the directory URL for the bp folder.
 
@@ -188,17 +184,10 @@ class BPExporter extends HealthDataExporterBase {
 
       // Convert to CSV.
 
-      final csv = const ListToCsvConverter().convert(rows);
-
-      // Save CSV file.
-
-      final file = File(savePath);
-      await file.writeAsString(csv);
-
-      return true;
+      return const ListToCsvConverter().convert(rows);
     } catch (e) {
       debugPrint('Export error: $e');
-      return false;
+      return null;
     }
   }
 }

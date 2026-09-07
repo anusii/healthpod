@@ -23,7 +23,7 @@
 
 library;
 
-import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
@@ -48,13 +48,12 @@ class ProfileHandler {
     required Function? refreshCallback,
   }) async {
     try {
-      final result = await FilePicker.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['json'],
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
+      if (file != null) {
         if (file.path != null) {
           if (!context.mounted) return;
 
@@ -104,44 +103,47 @@ class ProfileHandler {
     required String? currentPath,
   }) async {
     try {
-      final String? outputFile = await FilePicker.saveFile(
-        dialogTitle: 'Save Profile data as JSON:',
-        fileName: 'profile_export.json',
+      // Read the profile before offering the save dialogue: file_picker
+      // writes the bytes itself now rather than handing back a path to write
+      // to.
+
+      final String? profile = await ProfileExporter.buildJson(
+        currentPath ?? 'profile',
+        context,
       );
 
-      if (outputFile != null) {
-        if (!context.mounted) return;
+      if (!context.mounted) return;
 
-        final success = await ProfileExporter.exportJson(
-          outputFile,
-          currentPath ?? 'profile',
-          context,
+      if (profile == null) {
+        showAlert(context, 'Failed to export profile data');
+
+        return;
+      }
+
+      // Pretty-print the JSON and finish with a newline, as the saved file
+      // used to be rewritten to do.
+
+      var text = profile;
+      try {
+        text = const JsonEncoder.withIndent('  ').convert(jsonDecode(profile));
+      } catch (_) {
+        // Not JSON, so export it exactly as it came back from the Pod.
+      }
+      if (!text.endsWith('\n')) text = '$text\n';
+
+      final Uri? savedUri = await FilePicker.saveFile(
+        dialogTitle: 'Save Profile data as JSON:',
+        fileName: 'profile_export.json',
+        bytes: utf8.encode(text),
+      );
+
+      if (savedUri != null && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Profile data exported successfully'),
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
+          ),
         );
-
-        // Add a newline character at the end of the file if export was successful.
-
-        if (success) {
-          final file = File(outputFile);
-          if (await file.exists()) {
-            final content = await file.readAsString();
-            if (!content.endsWith('\n')) {
-              await file.writeAsString('$content\n');
-            }
-          }
-        }
-
-        if (context.mounted) {
-          if (success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: const Text('Profile data exported successfully'),
-                backgroundColor: Theme.of(context).colorScheme.tertiary,
-              ),
-            );
-          } else {
-            showAlert(context, 'Failed to export profile data');
-          }
-        }
       }
     } catch (e) {
       if (context.mounted) {

@@ -94,7 +94,7 @@ class BPEditorState with ChangeNotifier {
 
   BPObservation? get currentEdit => _currentEdit;
 
-  /// Initializes text controllers for editing a blood pressure observation.
+  /// Initialises text controllers for editing a blood pressure observation.
   ///
   /// Sets up all text controllers with the observation's current values and
   /// configures them to update the observation when their values change.
@@ -126,7 +126,7 @@ class BPEditorState with ChangeNotifier {
   /// Enters edit mode for an existing observation.
   ///
   /// Sets up the state for editing the observation at the specified index,
-  /// initializes controllers with the observation's values.
+  /// initialises controllers with the observation's values.
   ///
   /// @param index The index of the observation to edit.
 

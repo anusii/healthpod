@@ -97,13 +97,10 @@ class UploadCallbackHandler {
   /// Handles file upload.
 
   Future<void> handleFileUpload() async {
-    final result = await FilePicker.pickFiles();
-    if (result != null && result.files.isNotEmpty) {
-      final file = result.files.first;
-      if (file.path != null && context.mounted) {
-        ref.read(fileServiceProvider.notifier).setUploadFile(file.path);
-        await ref.read(fileServiceProvider.notifier).handleUpload(context);
-      }
+    final file = await FilePicker.pickFile();
+    if (file?.path != null && context.mounted) {
+      ref.read(fileServiceProvider.notifier).setUploadFile(file!.path);
+      await ref.read(fileServiceProvider.notifier).handleUpload(context);
     }
   }
 

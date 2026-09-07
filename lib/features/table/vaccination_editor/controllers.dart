@@ -32,7 +32,7 @@ import 'package:healthpod/features/table/vaccination_editor/model.dart';
 /// Manages the TextEditingControllers for the Vaccination Editor.
 ///
 /// This class handles the lifecycle and state of all text controllers used
-/// in the vaccination editor, including initialization, updates, and disposal.
+/// in the vaccination editor, including initialisation, updates, and disposal.
 
 class VaccinationEditorControllers {
   /// Text editing controllers for various fields.
@@ -55,7 +55,7 @@ class VaccinationEditorControllers {
 
   VaccinationObservation? _currentState;
 
-  /// Initialize or update controllers with values from an observation.
+  /// Initialise or update controllers with values from an observation.
 
   void initialize(
     VaccinationObservation observation, {
