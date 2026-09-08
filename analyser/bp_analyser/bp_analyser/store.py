@@ -26,9 +26,7 @@ Authors: Tony Chen
 # operator can inspect exactly what the analyser computed, and so the HTTP API
 # can serve the latest figures without touching the Solid server. The layout is
 #
-#     var/state/state.json        what has been seen, when the last run happened
-#     var/state/refresh.trigger   touch this to ask the watcher for a run
-#     var/state/cancel.trigger    touch this to ask the watcher to abandon one
+#     var/state/state.json        when the last run happened, and for whom
 #     var/state/active.json       the run in progress, absent when idle
 #     var/results/latest.json     the most recent run
 #     var/results/run-<id>.json   the run history, pruned to `output.keep_runs`
@@ -51,9 +49,11 @@ log = logging.getLogger(__name__)
 
 SCHEMA_VERSION = 1
 
+# What `read_state` returns before the first run.
+
+_EMPTY_STATE: dict[str, Any] = {'last_run': None, 'last_cancelled': None}
+
 _STATE_FILE = 'state.json'
-_TRIGGER_FILE = 'refresh.trigger'
-_CANCEL_FILE = 'cancel.trigger'
 _ACTIVE_FILE = 'active.json'
 _LATEST_FILE = 'latest.json'
 
@@ -85,115 +85,32 @@ class ResultStore:
         for directory in (self.state_dir, self.results_dir, self.charts_dir):
             directory.mkdir(parents=True, exist_ok=True)
 
-    # -- Watch state -------------------------------------------------------
+    # -- Run state ---------------------------------------------------------
 
     @property
     def state_path(self) -> Path:
-        """Where the watcher's bookkeeping lives."""
+        """Where the analyser's bookkeeping lives."""
 
         return self.state_dir / _STATE_FILE
 
     def read_state(self) -> dict[str, Any]:
-        """The saved watch state, or an empty state on first run."""
+        """The saved run state, or an empty state on first run."""
 
         if not self.state_path.is_file():
-            return {'shared_key_etag': None, 'share_ids': [], 'last_run': None}
+            return dict(_EMPTY_STATE)
         try:
             with self.state_path.open('r', encoding='utf-8') as handle:
                 return json.load(handle)
         except (OSError, json.JSONDecodeError) as exc:
             log.warning('ignoring unreadable state file %s: %s',
                         self.state_path, exc)
-            return {'shared_key_etag': None, 'share_ids': [], 'last_run': None}
+            return dict(_EMPTY_STATE)
 
     def write_state(self, state: dict[str, Any]) -> None:
-        """Persist the watch state atomically."""
+        """Persist the run state atomically."""
 
         self.ensure_directories()
         _write_json(self.state_path, state)
-
-    # -- Refresh trigger ---------------------------------------------------
-
-    @property
-    def trigger_path(self) -> Path:
-        """The file the API touches to ask for an out-of-band run."""
-
-        return self.state_dir / _TRIGGER_FILE
-
-    def request_refresh(self, reason: str = 'api') -> None:
-        """Ask the watcher to run a cycle at its next poll."""
-
-        self.ensure_directories()
-        _write_json(
-            self.trigger_path,
-            {'requested_at': utc_now().isoformat(), 'reason': reason})
-
-    def consume_refresh(self) -> str | None:
-        """Take a pending refresh request, if there is one."""
-
-        if not self.trigger_path.is_file():
-            return None
-        try:
-            with self.trigger_path.open('r', encoding='utf-8') as handle:
-                payload = json.load(handle)
-            reason = str(payload.get('reason', 'unknown'))
-        except (OSError, json.JSONDecodeError):
-            reason = 'unknown'
-        self.trigger_path.unlink(missing_ok=True)
-        return reason
-
-    # -- Cancellation ------------------------------------------------------
-
-    # A cancellation is a marker file rather than a signal, for the same
-    # reason a refresh is: the API process holds no reference to the watcher
-    # and may not even share a machine with it. The watcher reads the marker
-    # at the safe points in a cycle and abandons the work in hand.
-
-    @property
-    def cancel_path(self) -> Path:
-        """The file the API touches to ask for the current run to stop."""
-
-        return self.state_dir / _CANCEL_FILE
-
-    def request_cancel(self, reason: str = 'api') -> None:
-        """Ask the watcher to abandon the run in hand."""
-
-        self.ensure_directories()
-        _write_json(
-            self.cancel_path,
-            {'requested_at': utc_now().isoformat(), 'reason': reason})
-
-    def cancel_requested(self) -> bool:
-        """Whether a cancellation is waiting to be acted on.
-
-        Only asks whether the marker is there; the cycle calls this often, and
-        the answer must not consume the request that a later check also needs.
-        """
-
-        return self.cancel_path.is_file()
-
-    def consume_cancel(self) -> str | None:
-        """Take a pending cancellation, if there is one."""
-
-        if not self.cancel_path.is_file():
-            return None
-        try:
-            with self.cancel_path.open('r', encoding='utf-8') as handle:
-                payload = json.load(handle)
-            reason = str(payload.get('reason', 'unknown'))
-        except (OSError, json.JSONDecodeError):
-            reason = 'unknown'
-        self.cancel_path.unlink(missing_ok=True)
-        return reason
-
-    def clear_cancel(self) -> None:
-        """Drop any pending cancellation without acting on it.
-
-        Called before a cycle begins, so a request that arrived while nothing
-        was running cannot reach forward and stop the next run instead.
-        """
-
-        self.cancel_path.unlink(missing_ok=True)
 
     # -- The run in progress -----------------------------------------------
 
@@ -203,13 +120,15 @@ class ResultStore:
 
         return self.state_dir / _ACTIVE_FILE
 
-    def mark_run_started(self, identifier: str) -> None:
-        """Record that a cycle has begun, so the API can say so."""
+    def mark_run_started(self, identifier: str, web_id: str = '') -> None:
+        """Record that a cycle has begun, and who asked for it."""
 
         self.ensure_directories()
-        _write_json(
-            self.active_path,
-            {'run_id': identifier, 'started_at': utc_now().isoformat()})
+        _write_json(self.active_path, {
+            'run_id': identifier,
+            'web_id': web_id,
+            'started_at': utc_now().isoformat(),
+        })
 
     def mark_run_finished(self) -> None:
         """Record that no cycle is in progress."""

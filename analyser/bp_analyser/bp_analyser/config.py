@@ -30,7 +30,7 @@ Authors: Tony Chen
 #     HEALTHPOD_ANALYSER_SECURITY_KEY   the Analyser Pod's security key
 #     HEALTHPOD_ANALYSER_CLIENT_ID      client credentials issued by the server
 #     HEALTHPOD_ANALYSER_CLIENT_SECRET
-#     HEALTHPOD_ANALYSER_API_TOKEN      token guarding the refresh endpoint
+#     HEALTHPOD_ANALYSER_GRPC_TOKEN     shared secret the gRPC callers present
 
 from __future__ import annotations
 
@@ -46,7 +46,7 @@ from . import pod_paths as paths
 ENV_SECURITY_KEY = 'HEALTHPOD_ANALYSER_SECURITY_KEY'
 ENV_CLIENT_ID = 'HEALTHPOD_ANALYSER_CLIENT_ID'
 ENV_CLIENT_SECRET = 'HEALTHPOD_ANALYSER_CLIENT_SECRET'
-ENV_API_TOKEN = 'HEALTHPOD_ANALYSER_API_TOKEN'
+ENV_GRPC_TOKEN = 'HEALTHPOD_ANALYSER_GRPC_TOKEN'
 
 
 class ConfigError(Exception):
@@ -143,31 +143,60 @@ class SharingConfig:
 
 
 @dataclass
-class WatchConfig:
-    """How the service watches for new shares."""
+class GrpcConfig:
+    """The gRPC interface an app calls to start an analysis.
 
-    poll_seconds: int = 30
+    This replaced a watcher that polled the Analyser Pod's sharing inbox. The
+    app already has to talk to the analyser to be told the analysis is done;
+    having it say so on the way in as well costs nothing and saves everybody
+    the wait for the next poll.
+    """
 
-    # Zero (or less) switches the periodic run off, so the analysis happens
-    # only when a Pod has shared something.
+    # The interface to listen on. Unlike the read-only HTTP API, this cannot
+    # sensibly default to the loopback address: the caller is an app on
+    # somebody's laptop, so the port has to be reachable from off the host.
+    # That is a deliberate exposure, and `token` and TLS are how it is paid
+    # for — see README.md, section "The gRPC interface".
 
-    full_rescan_seconds: int = 0
-    run_on_start: bool = True
-    error_backoff_seconds: int = 120
+    host: str = '0.0.0.0'
+    port: int = 50051
 
-    # A user cancels an analysis by leaving a marker in the Analyser Pod's
-    # `shared/` container, which is the one place an app can write to without
-    # being granted anything first. Reading it costs one request, so a cycle
-    # looks no more often than this.
+    # How many calls may be served at once. Analyses themselves are
+    # serialised, so this only needs to be enough that a Cancel or a Status
+    # is never queued behind a running analysis.
 
-    cancel_poll_seconds: float = 3.0
+    max_workers: int = 8
 
-    # How long a cancellation stays honourable. The container is publicly
-    # writable, so a marker nobody collected must not sit there waiting to
-    # stop an unrelated run hours later. Zero switches the Pod channel off,
-    # leaving only `POST /api/cancel`.
+    # How long one analysis may run before the server abandons it and answers.
+    # A caller waiting on the reply learns what happened either way.
 
-    cancel_max_age_seconds: int = 600
+    analysis_timeout_seconds: int = 300
+
+    # When set, every call must carry `authorization: Bearer <token>` in its
+    # metadata. Empty means the interface is open to anyone who can reach the
+    # port, which is only reasonable on a closed network.
+
+    token: str = ''
+
+    # Server-side TLS. Both must be set for it to be used; without them the
+    # port is plaintext, and a WebID is the only thing on the wire worth
+    # protecting — but that is enough to want it encrypted in a deployment
+    # facing anything but a private network.
+
+    tls_cert_file: Path | None = None
+    tls_key_file: Path | None = None
+
+    @property
+    def address(self) -> str:
+        """The address to bind to, as gRPC wants it."""
+
+        return f'{self.host}:{self.port}'
+
+    @property
+    def tls_enabled(self) -> bool:
+        """Whether the server has both halves of a certificate to serve."""
+
+        return self.tls_cert_file is not None and self.tls_key_file is not None
 
 
 @dataclass
@@ -183,16 +212,16 @@ class OutputConfig:
 
 @dataclass
 class ApiConfig:
-    """The read-only HTTP interface reserved for the front end."""
+    """The read-only HTTP interface reserved for the front end.
+
+    Read-only in full: an analysis is started over gRPC, so there is nothing
+    here to guard with a token and nothing here that writes.
+    """
 
     enabled: bool = False
     host: str = '127.0.0.1'
     port: int = 8088
     cors_origins: list[str] = field(default_factory=list)
-
-    # When set, `POST /api/refresh` requires `Authorization: Bearer <token>`.
-
-    token: str = ''
 
 
 @dataclass
@@ -211,7 +240,7 @@ class Config:
     data: DataConfig = field(default_factory=DataConfig)
     analysis: AnalysisConfig = field(default_factory=AnalysisConfig)
     sharing: SharingConfig = field(default_factory=SharingConfig)
-    watch: WatchConfig = field(default_factory=WatchConfig)
+    grpc: GrpcConfig = field(default_factory=GrpcConfig)
     output: OutputConfig = field(default_factory=OutputConfig)
     api: ApiConfig = field(default_factory=ApiConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
@@ -238,6 +267,15 @@ class Config:
             raise ConfigError(
                 'missing credentials: ' + ', '.join(missing)
                 + '. See README.md, section "Preparing the Analyser Pod".')
+
+
+def _optional_path(base: Path, value: Any) -> Path | None:
+    """A configured path, resolved as `_resolve` does, or None when unset."""
+
+    if not value:
+        return None
+    path = Path(str(value)).expanduser()
+    return path if path.is_absolute() else (base / path).resolve()
 
 
 def _resolve(base: Path, value: Any, default: Path) -> Path:
@@ -312,16 +350,27 @@ def load(path: str | Path) -> Config:
         encrypt_results=bool(sharing_raw.get('encrypt_results', True)),
     )
 
-    watch_raw = raw.get('watch') or {}
-    watch = WatchConfig(
-        poll_seconds=int(watch_raw.get('poll_seconds', 30)),
-        full_rescan_seconds=int(watch_raw.get('full_rescan_seconds') or 0),
-        run_on_start=bool(watch_raw.get('run_on_start', True)),
-        error_backoff_seconds=int(watch_raw.get('error_backoff_seconds', 120)),
-        cancel_poll_seconds=float(watch_raw.get('cancel_poll_seconds', 3.0)),
-        cancel_max_age_seconds=int(
-            watch_raw.get('cancel_max_age_seconds', 600)),
+    grpc_raw = raw.get('grpc') or {}
+    grpc = GrpcConfig(
+        host=str(grpc_raw.get('host', '0.0.0.0')),
+        port=int(grpc_raw.get('port', 50051)),
+        max_workers=max(2, int(grpc_raw.get('max_workers', 8))),
+        analysis_timeout_seconds=int(
+            grpc_raw.get('analysis_timeout_seconds', 300)),
+        token=(
+            os.environ.get(ENV_GRPC_TOKEN)
+            or str(grpc_raw.get('token', '') or '')),
+        tls_cert_file=_optional_path(base, grpc_raw.get('tls_cert_file')),
+        tls_key_file=_optional_path(base, grpc_raw.get('tls_key_file')),
     )
+
+    # Half a certificate is a misconfiguration rather than a choice: a
+    # deployment that meant to serve TLS and then quietly served plaintext is
+    # exactly the failure worth refusing to start on.
+
+    if bool(grpc.tls_cert_file) != bool(grpc.tls_key_file):
+        raise ConfigError(
+            'grpc.tls_cert_file and grpc.tls_key_file must be set together')
 
     output_raw = raw.get('output') or {}
     output = OutputConfig(
@@ -340,7 +389,6 @@ def load(path: str | Path) -> Config:
         host=str(api_raw.get('host', '127.0.0.1')),
         port=int(api_raw.get('port', 8088)),
         cors_origins=list(api_raw.get('cors_origins') or []),
-        token=os.environ.get(ENV_API_TOKEN) or str(api_raw.get('token', '') or ''),
     )
 
     logging_raw = raw.get('logging') or {}
@@ -355,7 +403,7 @@ def load(path: str | Path) -> Config:
         data=data,
         analysis=analysis,
         sharing=sharing,
-        watch=watch,
+        grpc=grpc,
         output=output,
         api=api,
         logging=logs,
@@ -380,7 +428,7 @@ def _permission_warnings(path: Path, config: Config) -> list[str]:
             ('analyser.credentials.client_id', config.analyser.client_id, ENV_CLIENT_ID),
             ('analyser.credentials.client_secret', config.analyser.client_secret,
              ENV_CLIENT_SECRET),
-            ('api.token', config.api.token, ENV_API_TOKEN),
+            ('grpc.token', config.grpc.token, ENV_GRPC_TOKEN),
         )
         if value and not os.environ.get(variable)
     ]

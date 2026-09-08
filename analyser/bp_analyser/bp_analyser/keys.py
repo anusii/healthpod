@@ -176,11 +176,6 @@ class PodKeys:
 
     # -- Keys shared with the Analyser -------------------------------------
 
-    def shared_key_etag(self) -> str | None:
-        """A cheap change marker for the shared-keys file."""
-
-        return self._client.etag(paths.shared_key_url(self._web_id, self._app))
-
     def shared_resources(self) -> list[SharedResource]:
         """Every resource another Pod has shared with the Analyser.
 

@@ -26,11 +26,21 @@ library;
 /// The Analyser Pod: a service Pod that averages the blood pressure data
 /// shared with it and shares the results back.
 ///
-/// The analyser itself is a Python service watching this Pod's sharing inbox;
-/// see `analyser/bp_analyser/README.md` in this repository. When a user shares
-/// readings with the WebID below, the service reads them, computes that user's
-/// average and the average across every contributing Pod, and shares both back
-/// to the user's own Pod.
+/// The analyser itself is a Python service beside the Solid server; see
+/// `analyser/bp_analyser/README.md` in this repository. Two addresses matter
+/// here, and they are separate on purpose:
+///
+///   * [webId] is the Pod. Readings are shared with it, and the results are
+///     published from it. This is the only part of the arrangement the Solid
+///     server knows about.
+///
+///   * [grpcHost] and [grpcPort] are the service. An analysis is asked for
+///     over gRPC, which is what makes it start at once instead of at the
+///     service's next poll of its own Pod, and what makes cancelling one
+///     immediate rather than a message left in a folder.
+///
+/// So sharing still goes through the Pod — that is how the analyser gets the
+/// keys to read anything — and only the asking goes direct.
 
 class Analyser {
   /// The WebID users share their data with.
@@ -58,29 +68,44 @@ class Analyser {
 
   static const String cohortAverageFileName = 'bp-cohort-average.json.enc.ttl';
 
-  /// Folder inside the Analyser Pod that any app can write to.
-  ///
-  /// A Pod laid out by solidpod grants public read and write on `<app>/shared/`
-  /// so that other agents can deliver sealed keys into it without being
-  /// granted anything first. That makes it the one place this app can leave a
-  /// message for the analyser, which is how an analysis is cancelled: the
-  /// analyser's own HTTP interface binds to the server's loopback address, so
-  /// there is no route to it from here.
-
-  static const String sharedPathFragment = '/healthpod/shared/';
-
   /// The Analyser Pod root, without a trailing slash.
 
   static String get podRoot => webId.replaceAll('/profile/card#me', '');
 
-  /// Where the Pod identified by [slug] leaves a request to stop.
+  /// Where the analyser service listens for an app to ask for an analysis.
   ///
-  /// One file per requester, so two people cancelling at once do not overwrite
-  /// each other. [slug] is the WebID reduced to a file-safe label, the same
-  /// form solidpod uses.
+  /// The same host as the Solid server in the deployment this is set for,
+  /// which is the usual arrangement rather than a requirement: the service
+  /// talks to the server over HTTPS like any other client, so it can sit
+  /// anywhere the app can reach.
 
-  static String cancelUrl(String slug) =>
-      '$podRoot${sharedPathFragment}cancel-$slug.json';
+  static const String grpcHost = 'solid.dev.empwr.au';
+
+  /// The port that service listens on. `grpc.port` in its configuration.
+
+  static const int grpcPort = 50051;
+
+  /// Whether that port is served over TLS.
+  ///
+  /// False for the proof of concept, matching an analyser configured without
+  /// `grpc.tls_cert_file`. A WebID is the only thing this app puts on the
+  /// wire, and that is enough to want encrypted on anything but a private
+  /// network — so a deployment that serves TLS sets this too, and the two must
+  /// agree or the channel will not open.
+
+  static const bool grpcSecure = false;
+
+  /// The shared secret the analyser requires, when it requires one.
+  ///
+  /// Matches `grpc.token` in its configuration; empty means the analyser is
+  /// accepting calls from anyone who can reach the port. A secret compiled
+  /// into an app is not a secret from whoever holds the app, so this keeps
+  /// passers-by out rather than a determined user: it is the port's front
+  /// door, not its lock. What it protects is modest — an analysis only ever
+  /// publishes to the Pod that shared the data, so the worst a stranger gets
+  /// is the analyser doing work nobody wanted.
+
+  static const String grpcToken = 'hunter2';
 
   /// Width of the Analyser's text dialogues.
   ///

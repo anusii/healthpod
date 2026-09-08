@@ -1,0 +1,214 @@
+// The interface between a HealthPod app and the blood pressure analyser.
+//
+/// Copyright (C) 2026, Software Innovation Institute, ANU.
+///
+/// Licensed under the GNU General Public License, Version 3 (the "License").
+///
+/// License: https://opensource.org/license/gpl-3-0.
+//
+// This program is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+// details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program.  If not, see <https://opensource.org/license/gpl-3-0>.
+//
+// Authors: Tony Chen
+
+// This file is the contract between the two halves of the analysis, and the
+// only place either half describes it. Both sets of bindings are generated
+// from it by `proto.sh` in the project root: Python beside this file, Dart
+// into `healthpod/lib/features/bp/analyser/grpc/`. Editing one of those by
+// hand puts the two languages out of step, which is exactly what generating
+// them from one source avoids.
+//
+// The app still shares its readings with the Analyser Pod, because that is
+// what gives the analyser the keys to read them. What it no longer does is
+// wait for the analyser to notice: it calls Analyse, naming itself, and the
+// analysis begins at once.
+
+syntax = "proto3";
+
+package healthpod.analyser.v1;
+
+// The analyser, as an app sees it.
+
+service Analyser {
+  // Analyse the caller's readings now, and answer when the result has been
+  // published back to the caller's Pod.
+  //
+  // Long-running by design: the reply says what happened, so the app needs no
+  // second call and no polling. A client that stops waiting should cancel the
+  // call and send Cancel, which are different things — see CancelRequest.
+  rpc Analyse(AnalyseRequest) returns (AnalyseReply);
+
+  // Abandon the analysis running for the caller.
+  //
+  // Answers immediately, whether or not there was anything to stop. The run
+  // itself stops at its next checkpoint, which is typically within a second.
+  rpc Cancel(CancelRequest) returns (CancelReply);
+
+  // Whether the analyser is up, and what it is doing.
+  //
+  // Cheap and unauthenticated: it reads no Pod and holds up no analysis, so
+  // an app can call it before offering to analyse at all.
+  rpc Status(StatusRequest) returns (StatusReply);
+}
+
+// -- Analyse -----------------------------------------------------------------
+
+message AnalyseRequest {
+  // The Pod asking, as its WebID. The analysis reads every Pod that has
+  // shared data — the cohort figures need them all — but the chart and the
+  // published result are this Pod's.
+  string web_id = 1;
+
+  // How many readings the caller granted access to just before calling.
+  //
+  // The analyser reports back how many it actually had in view, so an app can
+  // say `covered 9 of your 12 readings` when a grant has not yet propagated.
+  // Zero means the caller is not counting.
+  int32 shared_file_count = 2;
+
+  // When the app asked, as ISO 8601 in UTC. For the log only: the analyser
+  // times its own work.
+  string requested_at = 3;
+}
+
+// How an analysis ended. Exactly one applies.
+
+enum AnalyseStatus {
+  // Never sent. Present because proto3 requires a zero value, and reading it
+  // means the reply came from a version that knows something this one does
+  // not.
+  ANALYSE_STATUS_UNSPECIFIED = 0;
+
+  // The analysis ran and the result was published to the caller's Pod.
+  ANALYSE_STATUS_COMPLETED = 1;
+
+  // Abandoned part way through, because Cancel arrived.
+  ANALYSE_STATUS_CANCELLED = 2;
+
+  // Nothing to analyse: the caller has shared no readings the analyser can
+  // read. Not a failure — the usual cause is a share that has not been made.
+  ANALYSE_STATUS_NO_DATA = 3;
+
+  // The analyser tried and could not finish. `message` says why.
+  ANALYSE_STATUS_FAILED = 4;
+}
+
+message AnalyseReply {
+  AnalyseStatus status = 1;
+
+  // The run that produced this, matching the run identifiers in the
+  // analyser's own result store.
+  string run_id = 2;
+
+  // One line fit to show a user. Empty when there is nothing to add to
+  // `status`.
+  string message = 3;
+
+  // Where the result was published in the Analyser Pod. The app can work this
+  // address out for itself, and does; carrying it means a change to the
+  // layout does not have to be made in two languages at once.
+  string result_url = 4;
+
+  // When the analyser produced the result, as ISO 8601 in UTC. The app checks
+  // this against what was published before it called, so a result left by an
+  // earlier run is not mistaken for this one.
+  string generated_at = 5;
+
+  // How many Pods contributed to the cohort figures.
+  int32 pod_count = 6;
+
+  // How many of the caller's readings went into its own averages.
+  int32 observation_count = 7;
+
+  // How many of the caller's shared files the analyser read, and how many it
+  // found but could not. Their sum is what the analyser had in view, which is
+  // what `shared_file_count` is compared against.
+  int32 files_read = 8;
+  int32 files_skipped = 9;
+
+  // Whether the result reached the caller's Pod. False with a COMPLETED
+  // status means the analysis worked but the hand-over of the key did not, so
+  // the app can fetch the result but not read it — worth saying plainly
+  // rather than leaving as a decryption failure.
+  bool published = 10;
+}
+
+// -- Cancel ------------------------------------------------------------------
+
+// Cancelling has two halves, and this is only the second.
+//
+// A client that has stopped caring cancels its own Analyse call, which frees
+// the app at once. That does not stop the analyser: gRPC gives a server no
+// reliable notice of a cancelled unary call part way through the handler. So
+// the app sends this as well, on a fresh call, and the analyser abandons the
+// run at its next checkpoint.
+
+message CancelRequest {
+  // Whose analysis to stop. A run started by another Pod is not the caller's
+  // to abandon.
+  string web_id = 1;
+
+  // When the app asked, as ISO 8601 in UTC. For the log only.
+  string requested_at = 2;
+}
+
+enum CancelStatus {
+  // Never sent; see ANALYSE_STATUS_UNSPECIFIED.
+  CANCEL_STATUS_UNSPECIFIED = 0;
+
+  // A run for this Pod was in progress and has been told to stop.
+  CANCEL_STATUS_STOPPED = 1;
+
+  // Nothing was running for this Pod, so there was nothing to stop. The
+  // request is not held against a later run: an analysis nobody has asked for
+  // yet cannot have been cancelled.
+  CANCEL_STATUS_NOTHING_RUNNING = 2;
+
+  // The request was not acted on. `message` says why.
+  CANCEL_STATUS_REFUSED = 3;
+}
+
+message CancelReply {
+  CancelStatus status = 1;
+
+  // One line fit to show a user, when there is something to say.
+  string message = 2;
+
+  // The run that was told to stop, when there was one.
+  string run_id = 3;
+}
+
+// -- Status ------------------------------------------------------------------
+
+message StatusRequest {}
+
+message StatusReply {
+  // Whether the analyser can take an Analyse call. False while it is still
+  // starting up or cannot unlock its own Pod.
+  bool ready = 1;
+
+  // Which Analyser Pod this service acts as, so an app can check it is
+  // talking to the analyser it shared with.
+  string analyser_web_id = 2;
+
+  // How many analyses are in progress.
+  int32 active_runs = 3;
+
+  // The most recent run, and when it finished, as ISO 8601 in UTC. Empty when
+  // the analyser has not run since it started.
+  string last_run_id = 4;
+  string last_run_at = 5;
+
+  // Why the analyser is not ready, when it is not.
+  string message = 6;
+}
