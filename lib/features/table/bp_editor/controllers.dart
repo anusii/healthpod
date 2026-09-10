@@ -33,7 +33,7 @@ import 'package:healthpod/utils/parse_numeric_input.dart';
 /// Manages the TextEditingControllers for the Blood Pressure Editor.
 ///
 /// This class handles the lifecycle and state of all text controllers used
-/// in the blood pressure editor, including initialization, updates, and disposal.
+/// in the blood pressure editor, including initialisation, updates, and disposal.
 
 /// Blood pressure editor controller management.
 
@@ -56,7 +56,7 @@ class BPEditorControllers {
 
   BPObservation? _currentState;
 
-  /// Initialize or update controllers with values from an observation.
+  /// Initialise or update controllers with values from an observation.
 
   void initialize(
     BPObservation observation, {

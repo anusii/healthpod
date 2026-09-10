@@ -127,7 +127,7 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
     }
   }
 
-  /// Handles canceling the current edit.
+  /// Handles cancelling the current edit.
 
   void _handleCancelEdit() {
     setState(() {

@@ -40,8 +40,8 @@ import 'package:healthpod/utils/save_response_pod.dart';
 ///
 /// Parameters:
 /// - [context]: The BuildContext for showing progress indicators and error messages
-/// - [onProgress]: Optional callback to track initialization progress
-/// - [onComplete]: Optional callback triggered when initialization is complete
+/// - [onProgress]: Optional callback to track initialisation progress
+/// - [onComplete]: Optional callback triggered when initialisation is complete
 
 Future<void> initialiseProfileData({
   required BuildContext context,
@@ -122,7 +122,7 @@ Future<void> initialiseProfileData({
 
     onComplete.call();
   } catch (e) {
-    //debugPrint('❌ Error initializing profile data: $e');
+    //debugPrint('❌ Error initialising profile data: $e');
   } finally {
     onProgress.call(false);
   }

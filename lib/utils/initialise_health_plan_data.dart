@@ -32,12 +32,12 @@ import 'package:healthpod/utils/create_feature_folder.dart';
 /// Initialises health plan folder in POD without creating any default data.
 ///
 /// This function only creates the health_plan folder if it doesn't exist.
-/// Unlike other initialization functions, it doesn't create any default data file.
+/// Unlike other initialisation functions, it doesn't create any default data file.
 ///
 /// Parameters:
 /// - [context]: The BuildContext for showing progress indicators and error messages
-/// - [onProgress]: Optional callback to track initialization progress
-/// - [onComplete]: Optional callback triggered when initialization is complete
+/// - [onProgress]: Optional callback to track initialisation progress
+/// - [onComplete]: Optional callback triggered when initialisation is complete
 
 Future<void> initialiseHealthPlanData({
   required BuildContext context,
@@ -63,11 +63,11 @@ Future<void> initialiseHealthPlanData({
       return;
     }
 
-    // Health plan folder initialized successfully.
+    // Health plan folder initialised successfully.
 
     onComplete.call();
   } catch (e) {
-    debugPrint('❌ Error initializing health plan folder: $e');
+    debugPrint('❌ Error initialising health plan folder: $e');
   } finally {
     onProgress.call(false);
   }

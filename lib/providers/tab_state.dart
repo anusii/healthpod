@@ -51,7 +51,7 @@ class TabState {
     );
   }
 
-  /// Normalizes the index to ensure it's within valid range.
+  /// Normalises the index to ensure it's within valid range.
 
   static int _normalizeIndex(int index) {
     if (index < -1) return -1;

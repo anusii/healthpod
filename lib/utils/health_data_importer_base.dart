@@ -75,7 +75,7 @@ abstract class HealthDataImporterBase {
 
   /// Create a response map with default values for a new record.
   ///
-  /// This method should initialize a map with all the fields needed for the specific data type.
+  /// This method should initialise a map with all the fields needed for the specific data type.
 
   Map<String, dynamic> createDefaultResponseMap();
 
@@ -162,7 +162,7 @@ abstract class HealthDataImporterBase {
         throw Exception('CSV file is empty');
       }
 
-      // Extract and normalize the header row from the CSV.
+      // Extract and normalise the header row from the CSV.
 
       onProgress?.call('Validating CSV format...', 0.3);
 
@@ -331,11 +331,11 @@ abstract class HealthDataImporterBase {
             row.add('');
           }
 
-          // Initialize the responses map with default values.
+          // Initialise the responses map with default values.
 
           final Map<String, dynamic> responses = createDefaultResponseMap();
 
-          // Initialize timestamp and validation flag.
+          // Initialise timestamp and validation flag.
 
           String timestamp = '';
           bool hasRequiredFields = true;

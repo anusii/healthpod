@@ -66,13 +66,12 @@ abstract class HealthDataExporterBase {
 
   /// Export health data to a CSV file.
   ///
-  /// This method reads all health data files from the specified directory,
-  /// processes them, and exports them to a single CSV file.
+  /// This method builds the CSV content with [buildCsv] and writes it to
+  /// [savePath].
   ///
   /// Parameters:
   /// - [savePath]: Path where the CSV file will be saved
   /// - [dirPath]: Directory path where the health data files are stored
-  /// - [context]: Flutter build context for UI interactions
   ///
   /// Returns a boolean indicating whether the export was successful.
 
@@ -80,6 +79,24 @@ abstract class HealthDataExporterBase {
     String savePath,
     String dirPath,
   ) async {
+    final csv = await buildCsv(dirPath);
+    if (csv == null) return false;
+
+    await File(savePath).writeAsString(csv);
+
+    return true;
+  }
+
+  /// Build the CSV content for the health data stored under [dirPath].
+  ///
+  /// This method reads all health data files from the directory, processes
+  /// them, and renders them as a single CSV document. It does no file I/O of
+  /// its own so that callers can hand the content straight to a save dialog.
+  ///
+  /// Returns the CSV text, or null if the data could not be read. Failures
+  /// are logged rather than thrown.
+
+  Future<String?> buildCsv(String dirPath) async {
     try {
       // Get the directory URL for the health data folder.
 
@@ -100,7 +117,7 @@ abstract class HealthDataExporterBase {
         throw Exception('No $dataType data files found in directory');
       }
 
-      // Initialize list to store all health records.
+      // Initialise list to store all health records.
 
       List<Map<String, dynamic>> allRecords = [];
 
@@ -163,18 +180,12 @@ abstract class HealthDataExporterBase {
 
       // Convert rows to CSV format.
 
-      final csv = const ListToCsvConverter().convert(rows);
-
-      // Write the CSV content to the specified file.
-
-      await File(savePath).writeAsString(csv);
-
-      return true;
+      return const ListToCsvConverter().convert(rows);
     } catch (e) {
       // Log any errors during export process.
 
       debugPrint('Export error: $e');
-      return false;
+      return null;
     }
   }
 }

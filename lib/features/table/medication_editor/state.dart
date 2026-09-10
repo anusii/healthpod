@@ -124,7 +124,7 @@ class MedicationEditorState with ChangeNotifier {
   /// Enters edit mode for an existing observation.
   ///
   /// Sets up the state for editing the observation at the specified index,
-  /// initializes controllers with the observation's values.
+  /// initialises controllers with the observation's values.
   ///
   /// @param index The index of the observation to edit.
 

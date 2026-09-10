@@ -69,7 +69,7 @@ class HomeStateManager {
             // Progress updates can be handled by the calling widget
           },
           onComplete: () {
-            // Feature folders initialized
+            // Feature folders initialised
           },
         );
       }

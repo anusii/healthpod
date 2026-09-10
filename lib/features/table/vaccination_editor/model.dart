@@ -156,7 +156,7 @@ class VaccinationObservation {
     };
   }
 
-  /// Converts observation to the format expected by the visualization component.
+  /// Converts observation to the format expected by the visualisation component.
   ///
   /// This ensures consistent data format across the application.
 

@@ -109,7 +109,7 @@ Future<void> initialiseFeatureFolders({
       context: context,
       onProgress: onProgress,
       onComplete: () {
-        // Profile data initialized.
+        // Profile data initialised.
       },
     );
 
@@ -120,13 +120,13 @@ Future<void> initialiseFeatureFolders({
       context: context,
       onProgress: onProgress,
       onComplete: () {
-        // Health plan data initialized.
+        // Health plan data initialised.
       },
     );
 
     onComplete.call();
   } catch (e) {
-    debugPrint('Error initializing feature folders: $e');
+    debugPrint('Error initialising feature folders: $e');
   } finally {
     onProgress.call(false);
   }

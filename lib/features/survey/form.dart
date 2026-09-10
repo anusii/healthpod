@@ -51,7 +51,7 @@ class HealthSurveyForm extends StatefulWidget {
 
   final void Function(Map<String, dynamic> responses) onSubmit;
 
-  /// Customizable submit button text.
+  /// Customisable submit button text.
 
   final String submitButtonText;
 
@@ -203,7 +203,7 @@ class _HealthSurveyFormState extends State<HealthSurveyForm> {
     );
   }
 
-  /// Builds a row of questions to optimize layout based on screen width.
+  /// Builds a row of questions to optimise layout based on screen width.
 
   Widget _buildQuestionRow(int startIndex, int count) {
     final rowQuestions = widget.questions.skip(startIndex).take(count).toList();

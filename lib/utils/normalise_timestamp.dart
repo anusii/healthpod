@@ -34,7 +34,7 @@ library;
 /// - With 'Z': "2025-01-21T23:05:42Z"
 ///
 /// Parameters:
-/// - timestamp: The timestamp string to normalize
+/// - timestamp: The timestamp string to normalise
 /// - toIso: If true, ensures both 'T' separator and 'Z' suffix for full ISO format
 ///
 /// Returns normalised timestamp string.

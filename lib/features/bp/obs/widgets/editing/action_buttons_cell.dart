@@ -29,7 +29,7 @@ import 'package:flutter/material.dart';
 
 import 'package:healthpod/widgets/action_buttons.dart';
 
-/// Builds a [DataCell] containing action buttons for saving or canceling the edit.
+/// Builds a [DataCell] containing action buttons for saving or cancelling the edit.
 
 DataCell actionButtonsCell({
   required VoidCallback onSave,

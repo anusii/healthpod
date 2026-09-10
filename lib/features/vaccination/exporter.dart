@@ -25,7 +25,6 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -92,13 +91,10 @@ class VaccinationExporter extends HealthDataExporterBase {
     return VaccinationExporter().exportToCsv(savePath, dirPath);
   }
 
-  /// Process vaccination JSON files to CSV export.
+  /// Process vaccination JSON files into CSV content.
 
   @override
-  Future<bool> exportToCsv(
-    String savePath,
-    String dirPath,
-  ) async {
+  Future<String?> buildCsv(String dirPath) async {
     try {
       // Get the directory URL for the vaccination folder.
 
@@ -153,7 +149,7 @@ class VaccinationExporter extends HealthDataExporterBase {
             continue;
           }
 
-          // Normalize the timestamp to ISO format.
+          // Normalise the timestamp to ISO format.
 
           var timestamp = normaliseTimestamp(dateStr, toIso: true);
 
@@ -221,18 +217,12 @@ class VaccinationExporter extends HealthDataExporterBase {
 
       // Convert rows to CSV format.
 
-      final csv = const ListToCsvConverter().convert(rows);
-
-      // Write the CSV content to the specified file.
-
-      await File(savePath).writeAsString(csv);
-
-      return true;
+      return const ListToCsvConverter().convert(rows);
     } catch (e) {
       // Log any errors during export process.
 
       debugPrint('Export error: $e');
-      return false;
+      return null;
     }
   }
 }

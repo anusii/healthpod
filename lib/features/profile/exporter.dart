@@ -55,10 +55,33 @@ class ProfileExporter {
     String podPath,
     BuildContext context,
   ) async {
+    final content = await buildJson(podPath, context);
+    if (content == null) return false;
+
+    try {
+      await saveDecryptedContent(content, outputPath);
+    } catch (e) {
+      throw Exception('Failed to save decrypted content: $e');
+    }
+
+    return true;
+  }
+
+  /// Read the most recent profile record from [podPath] and return its
+  /// decrypted content.
+  ///
+  /// Does no file I/O of its own so that callers can hand the content
+  /// straight to a save dialogue. Returns null if the profile could not be
+  /// read, having already reported the reason to the user.
+
+  static Future<String?> buildJson(
+    String podPath,
+    BuildContext context,
+  ) async {
     try {
       // Get list of files from profile directory.
 
-      if (!context.mounted) return false;
+      if (!context.mounted) return null;
 
       // Get directory URL and resources in container.
 
@@ -96,7 +119,7 @@ class ProfileExporter {
       final mostRecentFile = files.first;
       final filePath = '$podPath/$mostRecentFile';
 
-      if (!context.mounted) return false;
+      if (!context.mounted) return null;
 
       // Prompt for security key if needed.
 
@@ -105,7 +128,7 @@ class ProfileExporter {
         const Text('Please enter your security key to export profile data'),
       );
 
-      if (!context.mounted) return false;
+      if (!context.mounted) return null;
 
       // Read the file content.
 
@@ -121,15 +144,7 @@ class ProfileExporter {
         );
       }
 
-      // Save the decrypted content to the specified output path.
-
-      try {
-        await saveDecryptedContent(fileContent, outputPath);
-      } catch (e) {
-        throw Exception('Failed to save decrypted content: $e');
-      }
-
-      return true;
+      return fileContent;
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -139,7 +154,7 @@ class ProfileExporter {
           ),
         );
       }
-      return false;
+      return null;
     }
   }
 }

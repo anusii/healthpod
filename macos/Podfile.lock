@@ -1,10 +1,4 @@
 PODS:
-  - AppAuth (2.0.0):
-    - AppAuth/Core (= 2.0.0)
-    - AppAuth/ExternalUserAgent (= 2.0.0)
-  - AppAuth/Core (2.0.0)
-  - AppAuth/ExternalUserAgent (2.0.0):
-    - AppAuth/Core
   - audioplayers_darwin (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -12,10 +6,8 @@ PODS:
     - FlutterMacOS
   - fast_rsa (0.6.0):
     - FlutterMacOS
-  - file_picker (0.0.1):
-    - FlutterMacOS
-  - flutter_appauth (0.0.1):
-    - AppAuth (= 2.0.0)
+  - file_picker_darwin (1.0.0):
+    - Flutter
     - FlutterMacOS
   - flutter_inappwebview_macos (0.0.1):
     - FlutterMacOS
@@ -24,7 +16,8 @@ PODS:
     - Flutter
     - FlutterMacOS
   - FlutterMacOS (1.0.0)
-  - oidc_macos (0.0.1):
+  - oidc_darwin (0.0.1):
+    - Flutter
     - FlutterMacOS
   - OrderedSet (6.0.3)
   - package_info_plus (0.0.1):
@@ -51,12 +44,11 @@ DEPENDENCIES:
   - audioplayers_darwin (from `Flutter/ephemeral/.symlinks/plugins/audioplayers_darwin/darwin`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
   - fast_rsa (from `Flutter/ephemeral/.symlinks/plugins/fast_rsa/macos`)
-  - file_picker (from `Flutter/ephemeral/.symlinks/plugins/file_picker/macos`)
-  - flutter_appauth (from `Flutter/ephemeral/.symlinks/plugins/flutter_appauth/macos`)
+  - file_picker_darwin (from `Flutter/ephemeral/.symlinks/plugins/file_picker_darwin/darwin`)
   - flutter_inappwebview_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_inappwebview_macos/macos`)
   - flutter_secure_storage_darwin (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_darwin/darwin`)
   - FlutterMacOS (from `Flutter/ephemeral`)
-  - oidc_macos (from `Flutter/ephemeral/.symlinks/plugins/oidc_macos/macos`)
+  - oidc_darwin (from `Flutter/ephemeral/.symlinks/plugins/oidc_darwin/darwin`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
   - printing (from `Flutter/ephemeral/.symlinks/plugins/printing/macos`)
   - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
@@ -69,7 +61,6 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - AppAuth
     - OrderedSet
 
 EXTERNAL SOURCES:
@@ -79,18 +70,16 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
   fast_rsa:
     :path: Flutter/ephemeral/.symlinks/plugins/fast_rsa/macos
-  file_picker:
-    :path: Flutter/ephemeral/.symlinks/plugins/file_picker/macos
-  flutter_appauth:
-    :path: Flutter/ephemeral/.symlinks/plugins/flutter_appauth/macos
+  file_picker_darwin:
+    :path: Flutter/ephemeral/.symlinks/plugins/file_picker_darwin/darwin
   flutter_inappwebview_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_inappwebview_macos/macos
   flutter_secure_storage_darwin:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_darwin/darwin
   FlutterMacOS:
     :path: Flutter/ephemeral
-  oidc_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/oidc_macos/macos
+  oidc_darwin:
+    :path: Flutter/ephemeral/.symlinks/plugins/oidc_darwin/darwin
   package_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
   printing:
@@ -111,19 +100,17 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/window_to_front/macos
 
 SPEC CHECKSUMS:
-  AppAuth: 1c1a8afa7e12f2ec3a294d9882dfa5ab7d3cb063
   audioplayers_darwin: f15e209a3e856d1a7edcf98dc029f484fead2242
   device_info_plus: 1b14eed9bf95428983aed283a8d51cce3d8c4215
   fast_rsa: 47a50bec1042c8c01726007dc0590a078418f997
-  file_picker: e716a70a9fe5fd9e09ebc922d7541464289443af
-  flutter_appauth: bc92007a251e52781d7aae70e210427d3628f533
+  file_picker_darwin: 27e043831d68462d54f1c40e724b1f53c9d1e8be
   flutter_inappwebview_macos: bdf207b8f4ebd58e86ae06cd96b147de99a67c9b
   flutter_secure_storage_darwin: 557817588b80e60213cbecb573c45c76b788018d
   FlutterMacOS: c232990155153907050900a2e175c7773903ba4e
-  oidc_macos: 972700560d342ffc6ac9306495c1d8fe53c7a9cb
+  oidc_darwin: a08ded0a9c9cce60967bb00fe37e7bf7fa65c9f5
   OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   package_info_plus: 12f1c5c2cfe8727ca46cbd0b26677728972d9a5b
-  printing: 1dd6a1fce2209ec240698e2439a4adbb9b427637
+  printing: 21cad72d1185754ed5cadc9e6639c1668d933c38
   screen_retriever_macos: 038d3f7b34a779b06f536842003e41e8ec1fb4b7
   share_plus: 1fa619de8392a4398bfaf176d441853922614e89
   shared_preferences_foundation: 5086985c1d43c5ba4d5e69a4e8083a389e2909e6

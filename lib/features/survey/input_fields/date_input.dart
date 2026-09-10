@@ -65,7 +65,7 @@ class _HealthSurveyDateInputState extends State<HealthSurveyDateInput> {
   void initState() {
     super.initState();
 
-    // Initialize selected date and time from existing response.
+    // Initialise selected date and time from existing response.
 
     final response = widget.controller.responses[widget.question.fieldName];
     if (response != null) {

@@ -49,13 +49,12 @@ class _PathologySurveyState extends ConsumerState<PathologySurvey> {
     try {
       // Pick a PDF file.
 
-      final result = await FilePicker.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['pdf'],
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
+      if (file != null) {
         if (file.path != null) {
           setState(() {
             _isUploading = true;
