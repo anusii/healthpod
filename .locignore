@@ -1,0 +1,9 @@
+# Files the lines-of-code check does not count.
+#
+# 20260908 tonypioneer The gRPC and protobuf bindings for the analyser's
+# interface are generated from analyser/bp_analyser/analyser.proto by proto.sh,
+# and are committed so that neither side of the contract needs a protobuf
+# compiler to build. Their length is protoc's business rather than ours, and
+# the same directory is excluded from analysis in analysis_options.yaml.
+
+lib/features/bp/analyser/grpc/

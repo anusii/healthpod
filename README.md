@@ -90,9 +90,12 @@ access to those readings and nothing else, no other participant ever sees your
 individual readings, and you can withdraw the access at any time from the file
 browser.
 
-The service behind it is a Python program that watches the Analyser Pod's
-sharing inbox; it lives in [`analyser/bp_analyser`](analyser/bp_analyser),
-which documents how to deploy and operate it.
+Pressing the button shares the readings and then asks the Analyser to work,
+over gRPC, and the answer comes back on the same call: the analysis begins the
+moment you ask for it rather than when the service next looks, and cancelling
+one stops it within a second or two. The service behind it is a Python program
+living in [`analyser/bp_analyser`](analyser/bp_analyser), which documents how
+to deploy and operate it.
 
 ## Milestones
 

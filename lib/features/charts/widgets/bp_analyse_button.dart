@@ -29,58 +29,14 @@ import 'package:markdown_tooltip/markdown_tooltip.dart';
 import 'package:solidpod/solidpod.dart' show getWebId;
 
 import 'package:healthpod/constants/analyser.dart';
-import 'package:healthpod/features/bp/analyser/cancel_service.dart';
+import 'package:healthpod/features/bp/analyser/analyser_client.dart';
 import 'package:healthpod/features/bp/analyser/result_dialog.dart';
 import 'package:healthpod/features/bp/analyser/result_service.dart';
 import 'package:healthpod/features/bp/analyser/saved_analysis_dialog.dart';
 import 'package:healthpod/features/bp/analyser/saved_analysis_service.dart';
 import 'package:healthpod/features/bp/analyser/share_service.dart';
 import 'package:healthpod/features/charts/widgets/bp_analyse_dialog.dart';
-
-/// What the analysis is doing at the moment, which decides what the button
-/// shows and what it says.
-
-enum _Phase {
-  /// Nothing in progress; the button is live.
-
-  idle,
-
-  /// Granting the Analyser access to each reading, one at a time.
-
-  sharing,
-
-  /// Waiting for the Analyser to return the result it has computed.
-
-  analysing,
-
-  /// Revoking the Analyser's access to each observation, one at a time.
-
-  revoking,
-
-  /// The user has asked to stop, and the Analyser is being told so.
-
-  cancelling,
-}
-
-/// How a message reads: as a plain note, or as an outcome worth colouring.
-///
-/// Only the two ends of a cancellation are coloured. Everything else the
-/// button says is a remark in passing, and a wall of coloured snack bars
-/// would leave the two that matter no louder than the rest.
-
-enum _Tone {
-  /// An aside. Takes the theme's own snack bar colour.
-
-  plain,
-
-  /// Something the user asked for has happened.
-
-  success,
-
-  /// Something the user asked for has not happened.
-
-  failure,
-}
+import 'package:healthpod/features/charts/widgets/bp_analyse_messages.dart';
 
 /// What a progress ring should show, or null for one that simply turns.
 ///
@@ -125,7 +81,7 @@ class BPAnalyseButton extends StatefulWidget {
 }
 
 class _BPAnalyseButtonState extends State<BPAnalyseButton> {
-  _Phase _phase = _Phase.idle;
+  AnalysePhase _phase = AnalysePhase.idle;
   int _completed = 0;
   int _total = 0;
 
@@ -151,13 +107,29 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
   Future<AnalyserCancel>? _cancelInFlight;
 
-  bool get _busy => _phase != _Phase.idle;
+  bool get _busy => _phase != AnalysePhase.idle;
 
   /// Whether the user can still stop what is happening. Once the request has
   /// gone to the Analyser there is nothing further to ask for.
 
   bool get _cancellable =>
-      _phase == _Phase.sharing || _phase == _Phase.analysing;
+      _phase == AnalysePhase.sharing || _phase == AnalysePhase.analysing;
+
+  /// The connection to the Analyser, open for the length of one round trip.
+  ///
+  /// Held here rather than inside the round trip because cancelling comes
+  /// from a separate gesture and needs the same connection: it sends a second
+  /// call on it while the first is still in flight.
+
+  BPAnalyserClient? _client;
+
+  /// The Pod running the analysis, for as long as one is running.
+  ///
+  /// A cancellation names the Pod whose analysis to stop, and it comes from a
+  /// gesture rather than from inside the round trip, so it cannot go and look
+  /// this up: the answer has to be waiting for it.
+
+  String? _webId;
 
   /// Whether the user has asked for the round trip to stop.
 
@@ -199,7 +171,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     // two disagreeing until the pointer wandered off and came back.
 
     setState(() {
-      _phase = _Phase.idle;
+      _phase = AnalysePhase.idle;
       _cancelRequested = false;
       _completed = 0;
       _total = 0;
@@ -215,7 +187,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (outcome.stopped) {
       _report(
         'The ${Analyser.displayName} has stopped the analysis.',
-        tone: _Tone.success,
+        tone: AnalyseTone.success,
       );
 
       return;
@@ -228,7 +200,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     _report(
       outcome.message ??
           'Could not confirm that the ${Analyser.displayName} stopped.',
-      tone: _Tone.failure,
+      tone: AnalyseTone.failure,
     );
   }
 
@@ -252,7 +224,14 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
         onEnter: (_) => _setHovering(true),
         onExit: (_) => _setHovering(false),
         child: MarkdownTooltip(
-          message: _busy ? _busyTooltip : _idleTooltip,
+          message: _busy
+              ? analyseBusyTooltip(
+                  phase: _phase,
+                  completed: _completed,
+                  total: _total,
+                  cancellable: _cancellable,
+                )
+              : analyseIdleTooltip,
           child: _busy ? _progress(theme) : _button(theme),
         ),
       ),
@@ -266,83 +245,6 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
   void _setHovering(bool hovering) {
     if (_hovering == hovering) return;
     setState(() => _hovering = hovering);
-  }
-
-  String get _idleTooltip => '''
-
-      **Analyse**
-
-      Send your blood pressure observations to the ${Analyser.displayName} Pod
-      and get back a chart of your observations marked with your own averages
-      and the averages across everyone who has contributed.
-
-      * The ${Analyser.displayName} is granted **read** access only, one
-        observation at a time, and never gains access to anything else in your
-        Pod.
-
-      * Observations you record afterwards are **not** included automatically —
-        analyse again to bring them in.
-
-      * Every analysis is kept in your own Pod. **Past Analyses**, in the
-        dialogue this opens, lists them and reopens or deletes any of them.
-
-      * You can revoke access at any time with **Revoke Permissions** in
-        the dialogue this opens, or from the file browser.
-
-    ''';
-
-  /// What the button says while it is busy.
-  ///
-  /// The phase describes the work; the note after it is added only while
-  /// there is something to call off, so revoking — which is not an analysis —
-  /// does not offer to cancel one.
-
-  String get _busyTooltip {
-    final work = switch (_phase) {
-      _Phase.cancelling => '''
-
-      **Stopping**
-
-      Waiting for the ${Analyser.displayName} to take the request and stop.
-
-      * An analysis already running is stopped within a few seconds.
-
-      * One that has not started yet takes until the ${Analyser.displayName}
-        next looks, which can be half a minute.
-
-    ''',
-      _Phase.sharing => '''
-
-      **Sharing your observations**
-
-      $_completed of $_total sent to the ${Analyser.displayName}.
-
-    ''',
-      _Phase.revoking => '''
-
-      **Revoking access**
-
-      $_completed of $_total observations checked.
-
-    ''',
-      _ => '''
-
-      **Analysing**
-
-      Waiting for the ${Analyser.displayName} to return your chart. This
-      usually takes under a minute.
-
-    ''',
-    };
-
-    if (!_cancellable) return work;
-
-    return '''$work
-      Press to **cancel**. The ${Analyser.displayName} is asked to stop, and
-      observations already shared stay shared — revoke them from the dialogue
-      or the file browser if you would rather they did not.
-
-    ''';
   }
 
   /// The button in its resting state.
@@ -372,7 +274,8 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     final colour = active ? theme.colorScheme.error : theme.disabledColor;
 
     final value = analyseRingValue(
-      stepped: _phase == _Phase.sharing || _phase == _Phase.revoking,
+      stepped:
+          _phase == AnalysePhase.sharing || _phase == AnalysePhase.revoking,
       completed: _completed,
       total: _total,
     );
@@ -404,27 +307,46 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
   /// Stops waiting, and asks the Analyser to stop working.
   ///
-  /// The two are separate: the app gives up at its next step, while the
-  /// Analyser is told over its own interface and acts on it at the next point
-  /// in its cycle where stopping is safe. The Analyser may also not be
-  /// reachable at all, which leaves it to finish a run whose result nobody is
-  /// now waiting for.
+  /// Three things happen, and they are separate on purpose:
+  ///
+  ///   * `_cancelRequested` stops the round trip at its next step, which is
+  ///     what frees the app during the sharing;
+  ///
+  ///   * `abandon()` drops the analysis call, which is what frees it during
+  ///     the analysis — a call that would otherwise sit there until the
+  ///     Analyser finished the work nobody now wants;
+  ///
+  ///   * `cancel()` tells the Analyser to stop, which is the half the user is
+  ///     actually asking about. It is a fresh call on the same connection,
+  ///     answered out of the Analyser's memory, so it comes back in
+  ///     milliseconds whether or not there was anything to stop.
   ///
   /// Only the asking happens here. The round trip is the one that knows when
-  /// it has actually stopped, so it awaits this and puts the button back —
-  /// see [_finishCancelled].
+  /// it has actually stopped, so it awaits the reply and puts the button back
+  /// — see [_finishCancelled].
 
   void _requestCancel() {
     if (!_cancellable) return;
 
+    final client = _client;
+    final webId = _webId;
+
     setState(() {
       _cancelRequested = true;
-      _phase = _Phase.cancelling;
-      _cancelInFlight = BPAnalyserCancelService.cancel();
+      _phase = AnalysePhase.cancelling;
+      _cancelInFlight =
+          client == null || webId == null ? null : client.cancel(webId: webId);
     });
+
+    // After the request rather than before it: dropping the analysis call
+    // first would let the round trip run on and close the connection this
+    // needs. Nothing is awaited between the two, so the order is the whole of
+    // the guarantee.
+
+    client?.abandon();
   }
 
-  /// The whole round trip: confirm, share, wait, show.
+  /// The whole round trip: confirm, check, share, analyse, show.
 
   Future<void> _runAnalysis() async {
     if (_busy) return;
@@ -435,7 +357,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (webId == null || webId.isEmpty) {
       _report(
         'Please log in to your Pod before running an analysis.',
-        tone: _Tone.failure,
+        tone: AnalyseTone.failure,
       );
 
       return;
@@ -448,7 +370,7 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       if (!mounted) return;
       _report(
         'Could not read your blood pressure folder: $e',
-        tone: _Tone.failure,
+        tone: AnalyseTone.failure,
       );
 
       return;
@@ -496,19 +418,84 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     // From here the button is a progress ring until the chart is on screen,
     // or until the user points at the ring and cancels.
 
+    final client = BPAnalyserClient.connect();
+
     setState(() {
-      _phase = _Phase.sharing;
+      _phase = AnalysePhase.checking;
       _cancelRequested = false;
       _completed = 0;
       _total = files.length;
+      _client = client;
+      _webId = webId;
     });
 
-    // Note what the analyser has already published for this Pod, so the
-    // result of this run can be told apart from it without relying on the
-    // two machines' clocks agreeing.
+    try {
+      await _analyse(webId: webId, client: client, observations: files.length);
+    } finally {
+      // The connection outlives nothing: closing it here covers the ordinary
+      // path, every early return above it, and a cancellation, which awaits
+      // its own reply on the way through `_finishCancelled` before arriving.
 
-    final previous = await BPAnalyserResultService.lastResultTime(webId);
+      await client.close();
+      if (mounted) {
+        setState(() {
+          _client = null;
+          _webId = null;
+        });
+      }
+    }
+  }
+
+  /// Check, share, analyse, show — the part that has the Analyser in hand.
+  ///
+  /// Split from [_runAnalysis] so that the connection is opened and closed in
+  /// one place, around everything that could use it, however this returns.
+
+  Future<void> _analyse({
+    required String webId,
+    required BPAnalyserClient client,
+    required int observations,
+  }) async {
+    // Before anything is shared, because sharing is the expensive and
+    // irreversible half of the round trip. This costs a few milliseconds when
+    // the Analyser is up, and saves granting a dozen permissions for an
+    // analysis that was never going to happen when it is not.
+
+    final status = await client.status();
     if (await _abandoned() || !mounted) return;
+
+    if (!status.available) {
+      setState(() => _phase = AnalysePhase.idle);
+      _report(
+        status.message ??
+            'The ${Analyser.displayName} is not ready, so no analysis was '
+                'started. Please try again in a moment.',
+        tone: AnalyseTone.failure,
+      );
+
+      return;
+    }
+
+    // Pointed at one Analyser and sharing with another is a
+    // misconfiguration that would otherwise show up as an analysis that
+    // never finds any data, which is a much harder thing to read.
+
+    if (status.analyserWebId.isNotEmpty &&
+        status.analyserWebId != Analyser.webId) {
+      setState(() => _phase = AnalysePhase.idle);
+      _report(
+        'This app shares with ${Analyser.webId}, but the service it called '
+        'acts for ${status.analyserWebId}.',
+        tone: AnalyseTone.failure,
+      );
+
+      return;
+    }
+
+    setState(() {
+      _phase = AnalysePhase.sharing;
+      _total = observations;
+    });
 
     final shared = await BPAnalyserShareService.shareAll(
       context,
@@ -525,10 +512,10 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (await _abandoned() || !mounted) return;
 
     if (shared.failure != null || shared.shared == 0) {
-      setState(() => _phase = _Phase.idle);
+      setState(() => _phase = AnalysePhase.idle);
       _report(
         shared.message ?? 'None of the observations could be shared.',
-        tone: _Tone.failure,
+        tone: AnalyseTone.failure,
       );
 
       return;
@@ -541,38 +528,71 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       );
     }
 
-    setState(() => _phase = _Phase.analysing);
+    setState(() => _phase = AnalysePhase.analysing);
 
-    final outcome = await BPAnalyserResultService.waitForResult(
+    // One call, and it answers when the analysis is done. Telling the
+    // Analyser how many readings went out lets it say how many it had in
+    // view, which is what [_analysisFailureMessage] reports on when the two
+    // do not agree.
+
+    final run = await client.analyse(
       webId: webId,
-      previous: previous,
-      // Only accept a result that had every shared reading in view. Another
-      // Pod's share can set a run going that finishes before these readings
-      // are all granted, and that result would be new but incomplete.
-      minimumSources: shared.shared,
+      sharedFileCount: shared.shared,
+    );
+
+    if (await _abandoned() || !mounted) return;
+
+    if (!run.succeeded) {
+      setState(() => _phase = AnalysePhase.idle);
+      _report(
+        analysisFailureMessage(run, shared.shared),
+        tone: AnalyseTone.failure,
+      );
+
+      return;
+    }
+
+    // The Analyser has published the result and said when it made it, so this
+    // is one read of a known address rather than a search for something new.
+
+    final fetch = await BPAnalyserResultService.readResult(
+      webId: webId,
+      expected: run.generatedAt,
       isCancelled: () => _cancelRequested,
     );
 
     if (await _abandoned() || !mounted) return;
 
-    final result = outcome.result;
+    final result = fetch.result;
     if (result == null) {
-      setState(() => _phase = _Phase.idle);
-      _report(_waitFailureMessage(outcome, shared.shared), tone: _Tone.failure);
+      setState(() => _phase = AnalysePhase.idle);
+      _report(fetchFailureMessage(fetch), tone: AnalyseTone.failure);
 
       return;
+    }
+
+    if (run.sourcesSeen < shared.shared) {
+      // The analysis is this run's — the timestamp matched — but it was
+      // reading while the last grants were still landing. Shown alongside the
+      // result rather than instead of it: the figures are sound as far as they
+      // go, and the user can bring the rest in by analysing again.
+
+      _report(
+        'That analysis covered ${run.sourcesSeen} of your ${shared.shared} '
+        'observations. Analyse again in a moment to include them all.',
+      );
     }
 
     // Keep it in the Pod, then hand the chart to the user. Saving is a
     // convenience: a failure there must not hide the result.
 
-    final document = outcome.document;
+    final document = fetch.document;
     final savedAt = document == null
         ? null
         : await BPAnalysisStore.save(document, result.generatedAt);
     if (await _abandoned() || !mounted) return;
 
-    setState(() => _phase = _Phase.idle);
+    setState(() => _phase = AnalysePhase.idle);
 
     await showAnalyserResultDialog(
       context,
@@ -581,32 +601,11 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     );
   }
 
-  /// Explains why the wait produced nothing, in terms the user can act on.
-
-  String _waitFailureMessage(AnalyserWait outcome, int shared) {
-    if (outcome.staleKey) {
-      return 'The ${Analyser.displayName} sent a result, but this app is '
-          'holding an out-of-date key for it. Restart the app and analyse '
-          'again.';
-    }
-
-    final covered = outcome.bestCoverage;
-    if (covered != null) {
-      return 'The ${Analyser.displayName} has answered, but that analysis '
-          'covered $covered of your $shared observations — it was already '
-          'running when you shared. Analyse again in a moment to include them '
-          'all.';
-    }
-
-    return 'Your observations were shared, but the ${Analyser.displayName} '
-        'has not sent a result back yet. Please try again in a moment.';
-  }
-
   /// Revokes the Analyser's access to every reading and says what happened.
 
   Future<void> _runRevoke() async {
     setState(() {
-      _phase = _Phase.revoking;
+      _phase = AnalysePhase.revoking;
       _completed = 0;
       _total = 0;
     });
@@ -623,12 +622,12 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
 
     if (!mounted) return;
 
-    setState(() => _phase = _Phase.idle);
+    setState(() => _phase = AnalysePhase.idle);
 
     if (result.failure != null) {
       _report(
         result.message ?? 'Access could not be revoked.',
-        tone: _Tone.failure,
+        tone: AnalyseTone.failure,
       );
 
       return;
@@ -656,30 +655,13 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
       'Revoked access to ${result.revoked} of ${result.shared} '
       'observations; the rest could not be changed. Please try again in a '
       'moment.',
-      tone: _Tone.failure,
+      tone: AnalyseTone.failure,
     );
   }
 
-  /// Shows a message, coloured by what it is reporting.
-  ///
-  /// A failure stays up twice as long: it usually names something the user
-  /// has to go and do, and a message that has to be read is worth more time
-  /// than one that only confirms.
+  /// Shows a message about the analysis. See [reportAnalyseMessage], which
+  /// is where the wording of every one of them lives as well.
 
-  void _report(String message, {_Tone tone = _Tone.plain}) {
-    final theme = Theme.of(context);
-    final failed = tone == _Tone.failure;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: switch (tone) {
-          _Tone.success => Colors.green,
-          _Tone.failure => theme.colorScheme.error,
-          _Tone.plain => null,
-        },
-        duration: Duration(seconds: failed ? 8 : 4),
-      ),
-    );
-  }
+  void _report(String message, {AnalyseTone tone = AnalyseTone.plain}) =>
+      reportAnalyseMessage(context, message, tone: tone);
 }
