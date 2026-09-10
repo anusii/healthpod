@@ -30,6 +30,8 @@ then please show some ❤️ and tap on the star at
 
 ## 1.0 Migrating to new more secure secret key handling
 
++ Move analyser to using grpc [1.0.18 20260910 tonypioneer]
++ Updated file picker [1.0.17 20260910 tonypioneer]
 + Support cancelation of an analysis [1.0.16 20260903 gjw]
 + Keep every ANALYSIS in the Pod, listed to view or delete [1.0.15 20260829 gjw]
 + Fix deleting data points on the DATA page [1.0.14 20260829 tonypioneer]
