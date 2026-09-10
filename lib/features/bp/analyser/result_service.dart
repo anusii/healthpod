@@ -1,4 +1,4 @@
-/// Collecting the analysis the Analyser Pod shares back.
+/// Collecting the analysis the Analyser Pod publishes.
 ///
 /// Copyright (C) 2026, Software Innovation Institute, ANU
 ///
@@ -32,23 +32,19 @@ import 'package:solidpod/solidpod.dart' show readExternalPod;
 import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/features/bp/analyser/model.dart';
 
-/// How a wait for the analysis ended.
+/// How a fetch of the published analysis ended.
 ///
-/// Exactly one of these applies: a result arrived that was both new and
-/// complete; the user gave up on it; nothing arrived in time; something
-/// arrived that could not be decrypted; or what arrived covered only part of
-/// what was shared.
+/// Exactly one of these applies: the result arrived; something arrived that
+/// could not be decrypted; or nothing readable arrived at all.
 
-class AnalyserWait {
-  const AnalyserWait({
+class AnalyserFetch {
+  const AnalyserFetch({
     this.result,
     this.document,
     this.staleKey = false,
-    this.bestCoverage,
-    this.cancelled = false,
   });
 
-  /// The analysis, when one arrived that passed every check.
+  /// The analysis, when one was read and parsed.
 
   final AnalyserResult? result;
 
@@ -58,23 +54,11 @@ class AnalyserWait {
   final Map<String, dynamic>? document;
 
   /// Whether the content could be fetched but not decrypted, which means the
-  /// key held here no longer matches and waiting will not help.
+  /// key held here no longer matches the one the analyser used.
 
   final bool staleKey;
 
-  /// The most readings any new-but-incomplete result covered, if there was
-  /// one. Null when nothing new arrived at all.
-
-  final int? bestCoverage;
-
-  /// Whether the user stopped the wait rather than it running its course.
-  ///
-  /// Nothing to report when this is set: the user knows what they did, and
-  /// the analyser has been told separately.
-
-  final bool cancelled;
-
-  /// Whether the wait produced a usable analysis.
+  /// Whether a usable analysis was read.
 
   bool get succeeded => result != null;
 }
@@ -90,27 +74,29 @@ class AnalyserWait {
 /// where `<pod-id>` is the WebID reduced to a file-safe label, the same form
 /// solidpod uses. Reading it goes through `readExternalPod()`, which finds the
 /// key the analyser left in this Pod's sharing inbox and decrypts the content.
+///
+/// This used to poll: the app had no way of knowing when the analyser had
+/// finished, so it read this address every three seconds for a minute and a
+/// half, comparing timestamps against a baseline it had taken before sharing,
+/// and gave up if nothing new appeared. The analyser now answers the call that
+/// started it, so by the time anything here runs the result is published and
+/// the answer already says when it was made. What is left is one read, and a
+/// couple of retries for the seconds a server can take to make a fresh write
+/// readable.
 
 class BPAnalyserResultService {
-  /// How long to keep waiting for a result before giving up.
+  /// How many times to read before giving up.
   ///
-  /// The analyser polls its sharing inbox every 30 seconds by default, and a
-  /// cycle takes a few seconds more, so a minute and a half leaves room for a
-  /// slow server without leaving the user staring at a spinner.
+  /// The result exists — the analyser said so — so a failure here is the
+  /// server not serving it yet rather than the analysis not being done. Three
+  /// attempts a second and a half apart covers that without turning a real
+  /// failure into a long wait.
 
-  static const Duration defaultTimeout = Duration(seconds: 90);
+  static const int defaultAttempts = 3;
 
-  /// How long to wait between attempts to read the result.
+  /// How long to wait between attempts.
 
-  static const Duration pollInterval = Duration(seconds: 3);
-
-  /// How finely the gap between attempts is sliced.
-  ///
-  /// The wait spends nearly all its time idling between reads, so it checks
-  /// for a cancellation on this shorter beat; otherwise pressing cancel could
-  /// leave the spinner turning for the rest of a three second sleep.
-
-  static const Duration cancelCheckInterval = Duration(milliseconds: 200);
+  static const Duration defaultRetryInterval = Duration(milliseconds: 1500);
 
   /// The label the analyser uses for a Pod, derived from its WebID.
   ///
@@ -137,144 +123,75 @@ class BPAnalyserResultService {
     // The Analyser Pod root, without a trailing slash: the results fragment
     // carries its own leading one.
 
-    final base = Analyser.webId.replaceAll('/profile/card#me', '');
-
-    return '$base${Analyser.resultsPathFragment}'
+    return '${Analyser.podRoot}${Analyser.resultsPathFragment}'
         '${podId(webId)}/${Analyser.podAverageFileName}';
   }
 
-  /// When the analyser last published a result for [webId], if it ever has.
+  /// Reads the analysis the analyser has just published for [webId].
   ///
-  /// Read before asking for a new analysis, so the wait that follows can tell
-  /// the new result from the one already there.
+  /// [expected] is the timestamp the analyser reported when it answered. A
+  /// document carrying a different one is the previous run's, still sitting at
+  /// the address because the new write has not become visible yet, so it is
+  /// set aside and the read tried again. Comparing against what the analyser
+  /// said, rather than against the current time, keeps this correct however
+  /// far apart this device's clock and the server's are — and they routinely
+  /// differ by seconds.
+  ///
+  /// Passing null for [expected] accepts whatever is published, which is what
+  /// the saved-analysis path wants: it is reading history, not a fresh run.
+  ///
+  /// [isCancelled] is consulted between attempts, so a user who gives up while
+  /// a retry is pending gets the interface back without waiting it out.
 
-  static Future<DateTime?> lastResultTime(String webId) async {
-    final attempt = await _tryRead(resultUrl(webId));
-
-    return attempt.result?.generatedAt;
-  }
-
-  /// Waits for a result the analyser has not published before, then returns it.
-  ///
-  /// [previous] is the timestamp from [lastResultTime], taken before the
-  /// readings were shared; a document still carrying it belongs to the earlier
-  /// run and is ignored. Comparing against that baseline rather than against
-  /// the current time keeps the check correct even when this device's clock
-  /// and the server's disagree, which they routinely do by a few seconds and
-  /// occasionally by much more.
-  ///
-  /// Waits for a result that is both new and complete, then returns it.
-  ///
-  /// [previous] is the timestamp from [lastResultTime], taken before the
-  /// readings were shared; a document still carrying it belongs to the
-  /// earlier run. [minimumSources] is how many readings were shared, and a
-  /// result that saw fewer is set aside: a run triggered by another Pod's
-  /// share can finish after this one started and before these readings were
-  /// all granted, which makes it new but incomplete.
-  ///
-  /// [isCancelled] is consulted between reads and while idling between them,
-  /// so a user who gives up gets the interface back at once. Telling the
-  /// analyser to stop is a separate matter, and the caller's business: this
-  /// only stops waiting for it.
-
-  static Future<AnalyserWait> waitForResult({
+  static Future<AnalyserFetch> readResult({
     required String webId,
-    DateTime? previous,
-    int minimumSources = 0,
-    Duration timeout = defaultTimeout,
-    Duration interval = pollInterval,
-    void Function(Duration elapsed)? onWaiting,
+    DateTime? expected,
+    int attempts = defaultAttempts,
+    Duration interval = defaultRetryInterval,
     bool Function()? isCancelled,
   }) async {
     final url = resultUrl(webId);
-    final startedAt = DateTime.now();
-    final deadline = startedAt.add(timeout);
     var staleKey = false;
-    int? bestCoverage;
 
-    while (DateTime.now().isBefore(deadline)) {
-      if (isCancelled?.call() ?? false) {
-        return const AnalyserWait(cancelled: true);
+    for (var attempt = 1; attempt <= attempts; attempt++) {
+      if (isCancelled?.call() ?? false) break;
+
+      final fetch = await _tryRead(url);
+      staleKey = fetch.staleKey;
+
+      final result = fetch.result;
+      if (result != null &&
+          (expected == null || result.generatedAt == expected)) {
+        return fetch;
       }
 
-      final attempt = await _tryRead(url);
-      final result = attempt.result;
-      staleKey = attempt.staleKey;
-
-      if (result != null && result.isFresherThan(previous)) {
-        if (result.sourcesSeen >= minimumSources) {
-          return AnalyserWait(result: result, document: attempt.document);
-        }
-
-        bestCoverage = result.sourcesSeen;
-      }
-
-      onWaiting?.call(DateTime.now().difference(startedAt));
-
-      if (!await _idle(interval, isCancelled)) {
-        return const AnalyserWait(cancelled: true);
-      }
+      if (attempt < attempts) await Future<void>.delayed(interval);
     }
 
-    return AnalyserWait(staleKey: staleKey, bestCoverage: bestCoverage);
-  }
-
-  /// Waits [interval], watching for a cancellation as it goes.
-  ///
-  /// Returns false when the wait was cut short by one, true when it ran to
-  /// its end.
-
-  static Future<bool> _idle(
-    Duration interval,
-    bool Function()? isCancelled,
-  ) async {
-    if (isCancelled == null) {
-      await Future<void>.delayed(interval);
-
-      return true;
-    }
-
-    final until = DateTime.now().add(interval);
-    while (DateTime.now().isBefore(until)) {
-      if (isCancelled()) return false;
-      final left = until.difference(DateTime.now());
-      await Future<void>.delayed(
-        left < cancelCheckInterval ? left : cancelCheckInterval,
-      );
-    }
-
-    return !isCancelled();
+    return AnalyserFetch(staleKey: staleKey);
   }
 
   /// Reads the result once, reporting why it could not be used.
 
-  static Future<
-      ({
-        AnalyserResult? result,
-        Map<String, dynamic>? document,
-        bool staleKey,
-      })> _tryRead(String url) async {
+  static Future<AnalyserFetch> _tryRead(String url) async {
     try {
       final content = await readExternalPod(url);
       final decoded = jsonDecode(content);
-      if (decoded is! Map<String, dynamic>) {
-        return (result: null, document: null, staleKey: false);
-      }
+      if (decoded is! Map<String, dynamic>) return const AnalyserFetch();
 
-      return (
+      return AnalyserFetch(
         result: AnalyserResult.fromJson(decoded),
         document: decoded,
-        staleKey: false,
       );
     } catch (e) {
-      // Not there yet, not shared yet, or not readable yet: all expected
-      // while waiting, and worth a line in the log but nothing more. A
+      // Not visible yet, or not readable yet: expected on the first attempt
+      // after a fresh write, and worth a line in the log but nothing more. A
       // decryption failure is different — it means the content was fetched
       // and opened with the wrong key — so it is reported to the caller.
 
-      debugPrint('Waiting for the analysis at $url: $e');
+      debugPrint('Reading the analysis at $url: $e');
 
-      return (result: null, document: null, staleKey: isDecryptionFailure(e));
+      return AnalyserFetch(staleKey: isDecryptionFailure(e));
     }
   }
 

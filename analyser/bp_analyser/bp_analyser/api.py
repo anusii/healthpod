@@ -34,24 +34,24 @@ Authors: Tony Chen
 #     GET  /api/pods/{pod_id}/chart.png that Pod's chart
 #     GET  /api/runs                    identifiers of the stored runs
 #     GET  /api/runs/{run_id}           one stored run
-#     POST /api/refresh                 ask the watcher for a run (token guarded)
-#     POST /api/cancel                  ask it to abandon one (token guarded)
 #     GET  /api/status                  whether a run is in progress
 #
 # Adding a new view means adding a route here and a field to the results
 # document; nothing else in the analyser needs to change.
 #
-# Neither of the POST routes does any work itself: each leaves a marker file
-# in the state directory for the watching process to find. That is what lets
-# the API run without credentials of its own, and it is why a cancellation is
-# acted on at the watcher's next checkpoint rather than instantly.
+# There is nothing here that writes. Starting an analysis and cancelling one
+# are gRPC calls, answered by the process doing the work — see
+# `grpc_server.py`. This once had `POST /api/refresh` and `POST /api/cancel`,
+# which left marker files for a watcher to find on its next poll; with the
+# watcher gone there is no watcher to find them, and the app has a faster and
+# better authenticated road to the same two requests.
 
 from __future__ import annotations
 
 import logging
 from typing import Any
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
@@ -75,7 +75,7 @@ def create_app(config: Config) -> FastAPI:
         app.add_middleware(
             CORSMiddleware,
             allow_origins=config.api.cors_origins,
-            allow_methods=['GET', 'POST'],
+            allow_methods=['GET'],
             allow_headers=['*'],
         )
 
@@ -86,19 +86,6 @@ def create_app(config: Config) -> FastAPI:
                 status_code=503,
                 detail='no analysis has been run yet')
         return document
-
-    def require_token(authorization: str) -> None:
-        """Reject a write request that does not carry `api.token`.
-
-        Does nothing when no token is configured, which is the default and is
-        safe only because the API binds to the loopback address unless it is
-        deliberately moved.
-        """
-
-        if not config.api.token:
-            return
-        if authorization != f'Bearer {config.api.token}':
-            raise HTTPException(status_code=401, detail='invalid token')
 
     def find_pod(document: dict[str, Any], pod_id: str) -> dict[str, Any]:
         for pod in document.get('pods', []):
@@ -196,62 +183,23 @@ def create_app(config: Config) -> FastAPI:
             raise HTTPException(status_code=404, detail=f'unknown run: {run_id}')
         return document
 
-    @app.post('/api/refresh')
-    def refresh(authorization: str = Header(default='')) -> dict[str, Any]:
-        """Ask the watcher to run a cycle at its next poll.
-
-        Guarded by `api.token` when one is configured. The request only leaves
-        a marker file behind; the watching process does the work, so the API
-        never needs credentials of its own.
-        """
-
-        require_token(authorization)
-        store.request_refresh('api')
-        return {'status': 'accepted', 'requested_at': utc_now().isoformat()}
-
     @app.get('/api/status')
     def status() -> dict[str, Any]:
         """Whether a cycle is running, and what happened to the last one.
 
-        The front end reads this to decide whether a cancellation would land
-        on anything. `running` is the run marker the watcher writes, so it is
-        also left behind by a process killed mid-cycle; treat a long-standing
-        entry as the last run attempted rather than as one still going.
+        `running` is the marker the analysing process writes, so it is also
+        left behind by a process killed mid-cycle; treat a long-standing entry
+        as the last run attempted rather than as one still going. An app that
+        wants a live answer asks the gRPC Status call, which is served from
+        the memory of the process that would be doing the work.
         """
 
         state = store.read_state()
         return {
             'time': utc_now().isoformat(),
             'running': store.read_active_run(),
-            'cancel_pending': store.cancel_requested(),
             'last_run': state.get('last_run'),
             'last_cancelled': state.get('last_cancelled'),
-        }
-
-    @app.post('/api/cancel')
-    def cancel(authorization: str = Header(default='')) -> dict[str, Any]:
-        """Ask the watcher to abandon the run in progress.
-
-        Guarded by `api.token` in the same way as `/api/refresh`, and works
-        the same way: a marker file is left behind and the watcher acts on it
-        at its next checkpoint, which is between two steps of the cycle
-        rather than in the middle of one. A request that arrives while
-        nothing is running withdraws any pending refresh instead, so pressing
-        cancel just after pressing analyse does not simply defer the run.
-
-        Answering `accepted` means the request was recorded, not that a cycle
-        was stopped; `active` says whether one was in progress when it was.
-        """
-
-        require_token(authorization)
-        active = store.read_active_run()
-        store.request_cancel('api')
-        log.info('cancellation requested via the API (running: %s)',
-                 active.get('run_id') if active else 'nothing')
-        return {
-            'status': 'accepted',
-            'requested_at': utc_now().isoformat(),
-            'active': active,
         }
 
     return app

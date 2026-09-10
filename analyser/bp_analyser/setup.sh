@@ -21,8 +21,28 @@ python="${PYTHON:-python3}"
 chmod +x run.sh setup.sh 2>/dev/null || \
   echo "Note: could not set the execute bit; invoke the scripts as 'bash run.sh'."
 
-echo "==> Creating the virtual environment in $here/.venv"
-"$python" -m venv .venv
+# A `.venv` that came with the copy belongs to whoever built it, not to this
+# host: its interpreter is a symlink to a path that does not exist here, and
+# its site-packages hold binary wheels for another platform. `python3 -m venv`
+# will not heal that — it skips creating `bin/python3` when something is
+# already linked there, then fails trying to run it — so a venv whose
+# interpreter does not work is removed rather than reused.
+#
+# Testing it by running it also catches the cases worth catching that have
+# nothing to do with copying: a venv built against a Python that has since
+# been upgraded out from under it, or one left half-written by a killed run.
+
+if [ -e .venv ] && ! ./.venv/bin/python -c '' 2>/dev/null; then
+  echo "==> Discarding an unusable .venv (built elsewhere, or broken)"
+  rm -rf .venv
+fi
+
+if [ -d .venv ]; then
+  echo "==> Reusing the virtual environment in $here/.venv"
+else
+  echo "==> Creating the virtual environment in $here/.venv"
+  "$python" -m venv .venv
+fi
 
 echo "==> Installing dependencies"
 ./.venv/bin/pip install --upgrade pip >/dev/null
@@ -35,6 +55,13 @@ echo "==> Installing dependencies"
 echo "==> Creating the runtime directories"
 mkdir -p var/state var/results var/charts
 
+# Bytecode compiled by another interpreter, or on another platform, is ignored
+# rather than trusted — but it is dead weight in a deployment, and clearing it
+# makes `find . -name '*.pyc'` a useful question again.
+
+find . -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null || true
+find . -name '.DS_Store' -delete 2>/dev/null || true
+
 if [ ! -f config.yaml ]; then
   echo "==> Creating config.yaml from the example"
   cp config.example.yaml config.yaml
@@ -46,3 +73,7 @@ fi
 echo
 echo "Done. Verify the set-up with:"
 echo "    ./run.sh check"
+echo
+echo "Changing bp_analyser/analyser.proto, the contract with the app, needs"
+echo "one more package that nothing at run time uses:"
+echo "    ./.venv/bin/pip install grpcio-tools   # then ./proto.sh"

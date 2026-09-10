@@ -2,12 +2,14 @@
 #
 # Run the HealthPod blood pressure analyser from its virtual environment.
 #
-#   ./run.sh check       verify credentials, keys and what has been shared
-#   ./run.sh run-once    one analysis cycle
-#   ./run.sh watch       run continuously (the mode systemd uses)
-#   ./run.sh serve       the read-only front-end API
-#   ./run.sh cancel      ask a running watcher to abandon the current cycle
-#   ./run.sh test        the offline test suite
+#   ./run.sh check          verify credentials, keys and what has been shared
+#   ./run.sh grpc           serve the interface the app calls (systemd's mode)
+#   ./run.sh serve          the read-only front-end API
+#   ./run.sh run-once       one analysis cycle for every contributing Pod
+#   ./run.sh analyse WEBID  ask a running server for an analysis, as the app does
+#   ./run.sh cancel WEBID   ask it to abandon the analysis for that Pod
+#   ./run.sh status         ask a running server what it is doing
+#   ./run.sh test           the offline test suite
 #
 # Everything runs from this directory, the project root: it holds the
 # `bp_analyser` package, the configuration, the tests and the virtual

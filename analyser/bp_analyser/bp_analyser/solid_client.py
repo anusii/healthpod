@@ -314,16 +314,6 @@ class SolidClient:
 
         return 200 <= response.status_code < 300
 
-    def etag(self, url: str) -> str | None:
-        """The entity tag of a resource, used to spot changes cheaply."""
-
-        response = self.request('HEAD', url)
-        if response.status_code == 404:
-            return None
-        if not 200 <= response.status_code < 300:
-            return None
-        return response.headers.get('etag') or response.headers.get('last-modified')
-
     def list_container(self, url: str) -> list[str]:
         """The URLs of the resources directly inside a container."""
 

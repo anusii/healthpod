@@ -138,8 +138,8 @@ class ChartCacheDirectoryTests(unittest.TestCase):
         self.assertNotIn('MPLCONFIGDIR', os.environ)
 
 
-class WatchDefaultTests(unittest.TestCase):
-    """The analysis runs on a share, not on a timer."""
+class GrpcConfigTests(unittest.TestCase):
+    """The interface the app calls, which is now the whole of the trigger."""
 
     def _load(self, body: str) -> object:
         with tempfile.TemporaryDirectory() as directory:
@@ -147,22 +147,84 @@ class WatchDefaultTests(unittest.TestCase):
             path.write_text(body)
             return config_module.load(path)
 
-    def test_polling_is_half_a_minute_by_default(self) -> None:
-        self.assertEqual(self._load(WITHOUT_SECRETS).watch.poll_seconds, 30)
+    def test_it_listens_on_every_interface_by_default(self) -> None:
+        # The caller is an app on somebody's laptop, so unlike the read-only
+        # HTTP API this cannot default to the loopback address.
 
-    def test_the_periodic_rescan_is_off_by_default(self) -> None:
+        loaded = self._load(WITHOUT_SECRETS)
+        self.assertEqual(loaded.grpc.host, '0.0.0.0')
+        self.assertEqual(loaded.grpc.port, 50051)
+        self.assertEqual(loaded.grpc.address, '0.0.0.0:50051')
+
+    def test_the_address_can_be_narrowed(self) -> None:
+        loaded = self._load(
+            WITHOUT_SECRETS + '\ngrpc:\n  host: 127.0.0.1\n  port: 50100\n')
+        self.assertEqual(loaded.grpc.address, '127.0.0.1:50100')
+
+    def test_there_is_no_shared_secret_by_default(self) -> None:
+        self.assertEqual(self._load(WITHOUT_SECRETS).grpc.token, '')
+
+    def test_the_environment_beats_the_file_for_the_secret(self) -> None:
+        # Same rule as the other secrets: the systemd unit keeps them out of
+        # the deployment directory.
+
+        body = WITHOUT_SECRETS + "\ngrpc:\n  token: from-the-file\n"
+        os.environ[config_module.ENV_GRPC_TOKEN] = 'from-the-environment'
+        try:
+            self.assertEqual(
+                self._load(body).grpc.token, 'from-the-environment')
+        finally:
+            del os.environ[config_module.ENV_GRPC_TOKEN]
+
+    def test_a_secret_in_the_file_is_warned_about_when_readable(self) -> None:
+        # The gRPC token replaced the API token in this check, and losing it
+        # would mean a world-readable config.yaml passing without comment.
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'config.yaml'
+            path.write_text(WITHOUT_SECRETS + "\ngrpc:\n  token: hunter2\n")
+            path.chmod(0o644)
+            loaded = config_module.load(path)
+        self.assertTrue(
+            any('grpc.token' in warning for warning in loaded.warnings))
+
+    def test_there_is_no_tls_by_default(self) -> None:
+        loaded = self._load(WITHOUT_SECRETS)
+        self.assertFalse(loaded.grpc.tls_enabled)
+
+    def test_both_halves_of_a_certificate_are_needed(self) -> None:
+        # A deployment that meant to serve TLS and quietly served plaintext is
+        # the failure worth refusing to start on.
+
+        with self.assertRaises(config_module.ConfigError):
+            self._load(WITHOUT_SECRETS + '\ngrpc:\n  tls_cert_file: a.pem\n')
+
+    def test_certificate_paths_resolve_against_the_file(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'config.yaml'
+            path.write_text(
+                WITHOUT_SECRETS
+                + '\ngrpc:\n  tls_cert_file: tls/cert.pem\n'
+                  '  tls_key_file: tls/key.pem\n')
+            loaded = config_module.load(path)
+        self.assertTrue(loaded.grpc.tls_enabled)
         self.assertEqual(
-            self._load(WITHOUT_SECRETS).watch.full_rescan_seconds, 0)
+            loaded.grpc.tls_cert_file,
+            Path(directory).resolve() / 'tls/cert.pem')
 
-    def test_a_blank_rescan_interval_means_off(self) -> None:
-        loaded = self._load(
-            WITHOUT_SECRETS + '\nwatch:\n  full_rescan_seconds:\n')
-        self.assertEqual(loaded.watch.full_rescan_seconds, 0)
+    def test_the_analysis_has_a_deadline(self) -> None:
+        # Without one a cycle stuck on an unresponsive server would hold the
+        # analysis lock against everybody else.
 
-    def test_a_rescan_interval_can_still_be_asked_for(self) -> None:
-        loaded = self._load(
-            WITHOUT_SECRETS + '\nwatch:\n  full_rescan_seconds: 900\n')
-        self.assertEqual(loaded.watch.full_rescan_seconds, 900)
+        self.assertEqual(
+            self._load(WITHOUT_SECRETS).grpc.analysis_timeout_seconds, 300)
+
+    def test_the_worker_pool_never_drops_below_two(self) -> None:
+        # One worker would queue a Cancel behind the analysis it is meant to
+        # stop, which is the one thing this pool exists to prevent.
+
+        loaded = self._load(WITHOUT_SECRETS + '\ngrpc:\n  max_workers: 1\n')
+        self.assertEqual(loaded.grpc.max_workers, 2)
 
 
 class LoadingTests(unittest.TestCase):

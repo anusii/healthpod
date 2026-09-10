@@ -1,4 +1,9 @@
-# Continuous blood pressure analysis for Pods shared with the Analyser Pod.
+# Blood pressure analysis on demand, for Pods shared with the Analyser Pod.
+#
+# The service waits for a HealthPod app to call Analyse over gRPC and does
+# nothing until one does. It used to poll the Analyser Pod's sharing inbox
+# instead; if this unit is replacing that one, note that the port below now
+# has to be reachable from wherever the app runs.
 #
 # The deployment root holds one folder per analyser, and this analyser's
 # project root is `bp_analyser` inside it:
@@ -24,9 +29,12 @@
 #
 # Watch it work:
 #   journalctl -u healthpod-analyser -f
+#
+# Ask it what it is doing, from the host:
+#   sudo -u healthpod /opt/solid/analyser/bp_analyser/run.sh status
 
 [Unit]
-Description=HealthPod blood pressure analyser (watcher)
+Description=HealthPod blood pressure analyser (gRPC)
 Documentation=file:/opt/solid/analyser/bp_analyser/README.md
 After=network-online.target
 Wants=network-online.target
@@ -53,7 +61,7 @@ EnvironmentFile=-/etc/healthpod-analyser.env
 # the User= above is changed.
 ExecStartPre=+/usr/bin/install -d -o healthpod -g healthpod /opt/solid/analyser/bp_analyser/var
 ExecStart=/opt/solid/analyser/bp_analyser/.venv/bin/python -m bp_analyser \
-    --config /opt/solid/analyser/bp_analyser/config.yaml watch
+    --config /opt/solid/analyser/bp_analyser/config.yaml grpc
 
 # Restart on any exit, including a crash, and keep trying.
 Restart=always
@@ -63,13 +71,18 @@ RestartSec=15s
 # config.yaml. Restarting cannot fix it, so stop and let the operator look.
 RestartPreventExitStatus=2
 
-# The watcher finishes its current cycle when asked to stop.
+# The server refuses new calls at once and gives the analysis in hand its
+# grace period to reach a checkpoint. A cycle checks between steps, so nothing
+# is cut off part way through a write.
 KillSignal=SIGTERM
 TimeoutStopSec=120
 
 # Hardening: the service only needs to read its own directory and write to
 # var/ inside it. That directory must exist before the service starts —
 # setup.sh creates it — because systemd builds the mount namespace first.
+#
+# It does listen, though, which the read-only API next door does not: the
+# gRPC port is the app's way in, so nothing here may restrict binding it.
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict

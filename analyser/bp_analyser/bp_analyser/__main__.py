@@ -22,12 +22,19 @@ this program.  If not, see https://opensource.org/license/gpl-3-0.
 Authors: Tony Chen
 """
 
-# python3 -m bp_analyser --config config.yaml check      verify the set-up
-# python3 -m bp_analyser --config config.yaml run-once   one analysis cycle
-# python3 -m bp_analyser --config config.yaml watch      run continuously
-# python3 -m bp_analyser --config config.yaml serve      the front-end API
-# python3 -m bp_analyser --config config.yaml cancel     stop the run in hand
+# python3 -m bp_analyser --config config.yaml check       verify the set-up
+# python3 -m bp_analyser --config config.yaml run-once    one analysis cycle
+# python3 -m bp_analyser --config config.yaml grpc        serve the app
+# python3 -m bp_analyser --config config.yaml serve       the front-end API
+# python3 -m bp_analyser --config config.yaml analyse WEBID   as the app does
+# python3 -m bp_analyser --config config.yaml cancel WEBID    stop that run
+# python3 -m bp_analyser --config config.yaml status      ask a running server
 # python3 -m bp_analyser --config config.yaml show-config
+#
+# `grpc` is the mode systemd runs: the analyser waits for an app to ask for an
+# analysis and does nothing until one does. `analyse`, `cancel` and `status`
+# are clients of that server rather than of the Pod, so they answer only while
+# it is running — which is the point of them.
 
 from __future__ import annotations
 
@@ -37,8 +44,12 @@ import logging
 import sys
 from pathlib import Path
 
-from . import charts, control, discovery, logs
+import grpc
+
+from . import analyser_pb2 as pb
+from . import charts, discovery, grpc_client, logs
 from .config import Config, ConfigError, default_config_path, load
+from .grpc_server import serve as serve_grpc
 from .keys import KeyStoreError
 from .service import AnalyserService
 from .solid_client import SolidError
@@ -61,11 +72,28 @@ def _parser() -> argparse.ArgumentParser:
     commands = parser.add_subparsers(dest='command', required=True)
     commands.add_parser(
         'check', help='verify credentials, keys and what has been shared')
-    commands.add_parser('run-once', help='run one analysis cycle and exit')
-    commands.add_parser('watch', help='run cycles continuously')
-    commands.add_parser('serve', help='serve the read-only front-end API')
     commands.add_parser(
-        'cancel', help='ask a running watcher to abandon the current cycle')
+        'run-once',
+        help='run one analysis cycle for every contributing Pod and exit')
+    commands.add_parser(
+        'grpc', help='serve the gRPC interface the app calls')
+    commands.add_parser('serve', help='serve the read-only front-end API')
+
+    analyse = commands.add_parser(
+        'analyse',
+        help='ask a running gRPC server for an analysis, as the app does')
+    analyse.add_argument('web_id', help="the calling Pod's WebID")
+    analyse.add_argument(
+        '--timeout', type=float, default=None,
+        help='seconds to wait for the analysis '
+             '(default: grpc.analysis_timeout_seconds)')
+
+    cancel = commands.add_parser(
+        'cancel', help='ask it to abandon the analysis running for a Pod')
+    cancel.add_argument('web_id', help="the Pod whose analysis to stop")
+
+    commands.add_parser(
+        'status', help='ask a running gRPC server what it is doing')
     commands.add_parser(
         'show-config', help='print the effective configuration')
     return parser
@@ -113,9 +141,9 @@ def _command_check(config: Config) -> int:
         for dataset in datasets:
             print(f'  - {dataset.slug}: {dataset.resource_count} file(s)')
 
-        cancels = control.CancelInbox(client, config)
-        print(f'Cancel container:   '
-              f'{cancels.container_url if cancels.enabled else "disabled"}')
+        print(f'gRPC interface:     {config.grpc.address}'
+              f'{" (TLS)" if config.grpc.tls_enabled else ""}'
+              f'{", token required" if config.grpc.token else ""}')
 
         print(f'Charts:             '
               f'{"available" if charts.available() else "matplotlib not installed"}')
@@ -127,15 +155,16 @@ def _command_check(config: Config) -> int:
 
 
 def _command_run_once(config: Config) -> int:
+    """One cycle for every contributing Pod, with nobody waiting on it.
+
+    Kept for an operator who wants a recompute without an app: no caller means
+    no focus Pod, so every contributor gets a chart and a result, which is
+    what the analyser used to do on every cycle. Nothing can cancel this one —
+    a cancellation is a call to a running gRPC server, and this is not one.
+    """
+
     service = AnalyserService(config)
-
-    # A marker left behind by a process that was killed mid-cycle would
-    # otherwise stop this run before it began. The Pod holds its own markers,
-    # which need a connection to clear, so that is done inside the try.
-
-    service.store.clear_cancel()
     try:
-        service.clear_pod_cancellations()
         outcome = service.run_cycle()
     finally:
         service.close()
@@ -147,10 +176,10 @@ def _command_run_once(config: Config) -> int:
     return 0
 
 
-def _command_watch(config: Config) -> int:
-    service = AnalyserService(config)
-    service.watch()
-    return 0
+def _command_grpc(config: Config) -> int:
+    """Serve the interface the app calls, and analyse when it asks."""
+
+    return serve_grpc(config)
 
 
 def _command_serve(config: Config) -> int:
@@ -174,26 +203,90 @@ def _command_serve(config: Config) -> int:
     return 0
 
 
-def _command_cancel(config: Config) -> int:
-    """Leave a cancellation marker for a watcher in another process.
+def _command_analyse(config: Config, web_id: str, timeout: float | None) -> int:
+    """Make the call the app makes, and print what came back.
 
-    The same mechanism `POST /api/cancel` uses, for an operator who has a
-    shell on the machine but no API. Reports what was running when the marker
-    was written; whether that run then stops is the watcher's business, and it
-    happens at its next checkpoint.
+    The most useful thing in the box when somebody reports that an analysis is
+    slow or empty: it exercises the whole path — the gRPC call, the Pod reads,
+    the chart, the publication — as the app does, and prints the reply the app
+    would have acted on.
     """
 
-    store = ResultStore(config)
-    active = store.read_active_run()
-    store.request_cancel('cli')
+    address = grpc_client.target(config)
+    wait = timeout or float(config.grpc.analysis_timeout_seconds)
 
-    if active:
-        print(f'Cancellation requested; run {active.get("run_id")} '
-              f'started at {active.get("started_at")} will stop at its next '
-              f'checkpoint.')
+    try:
+        with grpc_client.channel(config) as stub:
+            reply = stub.analyse(web_id, timeout=wait)
+    except grpc.RpcError as error:
+        print(grpc_client.unreachable(error, address), file=sys.stderr)
+        return 4
+
+    print(f'Status:             {pb.AnalyseStatus.Name(reply.status)}')
+    if reply.run_id:
+        print(f'Run:                {reply.run_id}')
+    if reply.generated_at:
+        print(f'Generated at:       {reply.generated_at}')
+    if reply.status == pb.ANALYSE_STATUS_COMPLETED:
+        print(f'Observations:       {reply.observation_count}')
+        print(f'Files read:         {reply.files_read} '
+              f'({reply.files_skipped} skipped)')
+        print(f'Contributing Pods:  {reply.pod_count}')
+        print(f'Published:          '
+              f'{"yes" if reply.published else "no"}')
+        print(f'Result:             {reply.result_url or "(not published)"}')
+    if reply.message:
+        print(f'Message:            {reply.message}')
+
+    return 0 if reply.status == pb.ANALYSE_STATUS_COMPLETED else 1
+
+
+def _command_cancel(config: Config, web_id: str) -> int:
+    """Ask a running server to abandon the analysis for one Pod.
+
+    The same call the app's cancel button makes. It is answered out of memory,
+    so the reply says whether there was anything to stop; the run itself ends
+    at its next checkpoint, typically within a second.
+    """
+
+    address = grpc_client.target(config)
+
+    try:
+        with grpc_client.channel(config) as stub:
+            reply = stub.cancel(web_id)
+    except grpc.RpcError as error:
+        print(grpc_client.unreachable(error, address), file=sys.stderr)
+        return 4
+
+    if reply.status == pb.CANCEL_STATUS_STOPPED:
+        print(f'Run {reply.run_id} has been told to stop; it will do so at '
+              f'its next checkpoint.')
     else:
-        print('Cancellation requested; nothing is running, so any pending '
-              'refresh will be withdrawn instead.')
+        print(reply.message
+              or f'Nothing was running for {web_id}.')
+    return 0
+
+
+def _command_status(config: Config) -> int:
+    """Ask a running server what it is doing."""
+
+    address = grpc_client.target(config)
+
+    try:
+        with grpc_client.channel(config) as stub:
+            reply = stub.status()
+    except grpc.RpcError as error:
+        print(grpc_client.unreachable(error, address), file=sys.stderr)
+        return 4
+
+    print(f'Analyser:           {reply.analyser_web_id}')
+    print(f'Address:            {address}')
+    print(f'Ready:              {"yes" if reply.ready else "no"}')
+    if reply.message:
+        print(f'Why not:            {reply.message}')
+    print(f'Analyses in hand:   {reply.active_runs}')
+    print(f'Last run:           {reply.last_run_id or "(none yet)"}'
+          f'{" at " + reply.last_run_at if reply.last_run_at else ""}')
     return 0
 
 
@@ -219,11 +312,18 @@ def _command_show_config(config: Config) -> int:
             'share_cohort_average': config.sharing.share_cohort_average,
             'encrypt_results': config.sharing.encrypt_results,
         },
-        'watch': {
-            'poll_seconds': config.watch.poll_seconds,
-            'full_rescan_seconds': config.watch.full_rescan_seconds,
-            'cancel_poll_seconds': config.watch.cancel_poll_seconds,
-            'cancel_max_age_seconds': config.watch.cancel_max_age_seconds,
+        'grpc': {
+            'host': config.grpc.host,
+            'port': config.grpc.port,
+            'max_workers': config.grpc.max_workers,
+            'analysis_timeout_seconds': config.grpc.analysis_timeout_seconds,
+            'token': '(set)' if config.grpc.token else '(none)',
+            'tls_cert_file': (
+                str(config.grpc.tls_cert_file)
+                if config.grpc.tls_cert_file else None),
+            'tls_key_file': (
+                str(config.grpc.tls_key_file)
+                if config.grpc.tls_key_file else None),
         },
         'output': {
             'state_dir': str(config.output.state_dir),
@@ -235,7 +335,6 @@ def _command_show_config(config: Config) -> int:
             'enabled': config.api.enabled,
             'host': config.api.host,
             'port': config.api.port,
-            'token': '(set)' if config.api.token else '(none)',
         },
     }
     print(json.dumps(redacted, indent=2))
@@ -253,17 +352,27 @@ def main(argv: list[str] | None = None) -> int:
         print(f'Configuration error: {exc}', file=sys.stderr)
         return 2
 
-    handlers = {
-        'check': _command_check,
-        'run-once': _command_run_once,
-        'watch': _command_watch,
-        'serve': _command_serve,
-        'cancel': _command_cancel,
-        'show-config': _command_show_config,
-    }
+    def dispatch() -> int:
+        match args.command:
+            case 'check':
+                return _command_check(config)
+            case 'run-once':
+                return _command_run_once(config)
+            case 'grpc':
+                return _command_grpc(config)
+            case 'serve':
+                return _command_serve(config)
+            case 'analyse':
+                return _command_analyse(config, args.web_id, args.timeout)
+            case 'cancel':
+                return _command_cancel(config, args.web_id)
+            case 'status':
+                return _command_status(config)
+            case _:
+                return _command_show_config(config)
 
     try:
-        return handlers[args.command](config)
+        return dispatch()
     except ConfigError as exc:
         print(f'Configuration error: {exc}', file=sys.stderr)
         return 2

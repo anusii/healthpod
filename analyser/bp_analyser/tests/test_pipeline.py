@@ -32,22 +32,34 @@ Authors: Tony Chen
 # The test then runs a full cycle and checks both halves of the contract: that
 # the analyser reads and averages what was shared, and that what it publishes
 # back can be opened by the recipient with their own private key.
+#
+# The same harness drives the gRPC handlers, which are the only way an app can
+# start an analysis. They are called directly rather than over a channel: the
+# handlers ask a context whether the call is alive and, for a call that is
+# wrong, abort it, and a stand-in for those two is cheaper and clearer than a
+# socket on a port the test would have to find.
 
 from __future__ import annotations
 
 import base64
 import json
 import tempfile
+import threading
 import unittest
 from pathlib import Path
+
+import grpc
 
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
+from bp_analyser import analyser_pb2 as pb
 from bp_analyser import charts, crypto, pod_paths as paths, turtle
 from bp_analyser.config import AnalyserConfig, Config, ConfigError
+from bp_analyser.grpc_server import AnalyserServicer
+from bp_analyser.grpc_server import serve as serve_grpc
 from bp_analyser.keys import PodKeys
-from bp_analyser.service import AnalyserService
+from bp_analyser.service import AnalyserService, CycleCancelled
 
 SERVER = 'https://server'
 ANALYSER_WEB_ID = f'{SERVER}/Analyser/profile/card#me'
@@ -128,10 +140,6 @@ class FakeSolidClient:
         if url.endswith('/'):
             return any(key.startswith(url) for key in self.resources)
         return url in self.resources
-
-    def etag(self, url: str) -> str | None:
-        content = self.resources.get(url)
-        return None if content is None else str(hash(content))
 
     def list_container(self, url: str) -> list[str]:
         if not url.endswith('/'):
@@ -762,21 +770,339 @@ class CoverageTests(PipelineHarness):
                 'files_read'], 2)
 
 
-class WatchGuardTests(unittest.TestCase):
-    """The watcher must not loop on a problem that retrying cannot fix."""
+class FocusTests(PipelineHarness):
+    """A cycle asked for by one Pod works for that Pod alone.
 
-    def test_watch_refuses_to_start_without_credentials(self) -> None:
+    This is what makes the round trip quick enough to sit and wait for. Every
+    contributor is still read — the cohort figure is the average of their
+    averages, so there is no way round that — but one chart is drawn and one
+    Pod is written to instead of one of each per contributor.
+    """
+
+    def test_only_the_caller_receives_a_result(self) -> None:
+        document = self.service.run_cycle(
+            focus_web_id=self.alice.web_id).document
+
+        published = {
+            entry['pod_id'] for entry in document['sharing']['published']
+            if entry['kind'] == 'pod-average'
+        }
+        self.assertEqual(published, {'server-alice'})
+
+    def test_the_cohort_still_counts_every_contributor(self) -> None:
+        document = self.service.run_cycle(
+            focus_web_id=self.alice.web_id).document
+
+        self.assertEqual(document['cohort']['pod_count'], 2)
+        self.assertAlmostEqual(
+            document['cohort']['average_of_averages']['systolic'], 135.0)
+
+    def test_the_caller_can_open_what_it_receives(self) -> None:
+        document = self.service.run_cycle(
+            focus_web_id=self.alice.web_id).document
+
+        entry = next(
+            item for item in document['sharing']['published']
+            if item['pod_id'] == 'server-alice')
+        payload = self._open_as_recipient(self.alice, entry['resource_url'])
+
+        self.assertEqual(payload['kind'], 'pod-average')
+        self.assertAlmostEqual(payload['average']['systolic'], 125.0)
+        self.assertAlmostEqual(
+            payload['cohort']['average_of_averages']['systolic'], 135.0)
+
+    def test_the_cohort_document_goes_to_the_caller_only(self) -> None:
+        document = self.service.run_cycle(
+            focus_web_id=self.alice.web_id).document
+
+        cohort = next(
+            item for item in document['sharing']['published']
+            if item['kind'] == 'cohort-average')
+        self.assertEqual(cohort['recipients'], [self.alice.web_id])
+
+    def test_only_the_caller_s_chart_is_drawn(self) -> None:
+        if not charts.available():
+            self.skipTest('matplotlib is not installed')
+
+        self.config.output.render_charts = True
+        document = self.service.run_cycle(
+            focus_web_id=self.alice.web_id).document
+
+        self.assertEqual(
+            list(document['charts']['pods']), ['server-alice'])
+
+    def test_the_outcome_reports_the_caller_s_own_figures(self) -> None:
+        outcome = self.service.run_cycle(focus_web_id=self.alice.web_id)
+
+        self.assertEqual(outcome.focus_observation_count, 2)
+        self.assertEqual(outcome.focus_files_read, 2)
+        self.assertEqual(outcome.focus_files_skipped, 0)
+        self.assertTrue(outcome.published)
+        self.assertTrue(outcome.result_url.endswith(
+            'server-alice/bp-average.json.enc.ttl'))
+
+    def test_the_document_names_who_asked(self) -> None:
+        outcome = self.service.run_cycle(focus_web_id=self.alice.web_id)
+        self.assertEqual(outcome.document['requested_by'], self.alice.web_id)
+
+    def test_a_caller_who_shared_nothing_gets_no_result(self) -> None:
+        # Not a failure: the usual cause is a share that has not been made,
+        # and the reply says so rather than reporting a broken analyser.
+
+        stranger = f'{SERVER}/carol/profile/card#me'
+        outcome = self.service.run_cycle(focus_web_id=stranger)
+
+        self.assertIsNone(outcome.focus)
+        self.assertFalse(outcome.published)
+        self.assertEqual(outcome.document['sharing']['published'], [])
+        self.assertTrue(any(
+            stranger in warning for warning in outcome.document['warnings']))
+
+    def test_no_caller_means_everybody_as_before(self) -> None:
+        # `run-once` on the command line has no caller, and must still do what
+        # a cycle used to do.
+
+        document = self.service.run_cycle().document
+
+        published = {
+            entry['pod_id'] for entry in document['sharing']['published']
+            if entry['kind'] == 'pod-average'
+        }
+        self.assertEqual(published, {'server-alice', 'server-bob'})
+        self.assertIsNone(document['requested_by'])
+
+
+class CancellationTests(PipelineHarness):
+    """A cycle abandons itself at the next checkpoint, not mid-write."""
+
+    def test_a_cancellation_stops_the_cycle(self) -> None:
+        with self.assertRaises(CycleCancelled) as raised:
+            self.service.run_cycle(
+                focus_web_id=self.alice.web_id,
+                cancelled=lambda: 'requested by the test')
+
+        self.assertEqual(raised.exception.reason, 'requested by the test')
+
+    def test_a_cancelled_cycle_publishes_nothing(self) -> None:
+        # The stored results stay as the previous run left them, and no Pod
+        # receives half an analysis.
+
+        self.service.run_cycle()
+        before = self.service.store.read_latest()['run_id']
+
+        with self.assertRaises(CycleCancelled):
+            self.service.run_cycle(cancelled=lambda: 'stop')
+
+        self.assertEqual(self.service.store.read_latest()['run_id'], before)
+
+    def test_a_cancellation_that_says_nothing_does_nothing(self) -> None:
+        # The hook returns a reason or None; None must not read as a request.
+
+        outcome = self.service.run_cycle(
+            focus_web_id=self.alice.web_id, cancelled=lambda: None)
+        self.assertTrue(outcome.published)
+
+    def test_the_run_marker_is_cleared_either_way(self) -> None:
+        with self.assertRaises(CycleCancelled):
+            self.service.run_cycle(cancelled=lambda: 'stop')
+
+        self.assertIsNone(self.service.store.read_active_run())
+
+
+class _FakeContext:
+    """Just the two things a handler asks of a gRPC context.
+
+    Exercising the servicer through a real channel would mean a socket and a
+    port; the handlers only ever ask whether the call is still alive and, for
+    a call that is wrong, abort it.
+    """
+
+    def __init__(self, active: bool = True) -> None:
+        self._active = active
+        self.aborted: tuple | None = None
+
+    def is_active(self) -> bool:
+        return self._active
+
+    def abort(self, code, details):  # noqa: ANN001 - the gRPC signature.
+        self.aborted = (code, details)
+        raise _Aborted(details)
+
+
+class _Aborted(Exception):
+    """What `_FakeContext.abort` raises, as gRPC's own abort does."""
+
+
+class ServicerTests(PipelineHarness):
+    """The handlers, driven directly rather than over a channel."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.servicer = AnalyserServicer(self.config, service=self.service)
+
+    def test_analyse_runs_for_the_caller_and_reports_the_result(self) -> None:
+        reply = self.servicer.Analyse(
+            pb.AnalyseRequest(web_id=self.alice.web_id, shared_file_count=2),
+            _FakeContext())
+
+        self.assertEqual(reply.status, pb.ANALYSE_STATUS_COMPLETED)
+        self.assertEqual(reply.observation_count, 2)
+        self.assertEqual(reply.files_read, 2)
+        self.assertEqual(reply.pod_count, 2)
+        self.assertTrue(reply.published)
+        self.assertTrue(reply.result_url)
+        self.assertTrue(reply.generated_at)
+
+    def test_the_reply_names_the_run_the_store_recorded(self) -> None:
+        # An operator matching a complaint to a log line needs these to be
+        # the same identifier, which they are only because the servicer mints
+        # it and hands it to the cycle.
+
+        reply = self.servicer.Analyse(
+            pb.AnalyseRequest(web_id=self.alice.web_id), _FakeContext())
+
+        self.assertEqual(
+            reply.run_id, self.service.store.read_latest()['run_id'])
+
+    def test_a_caller_who_shared_nothing_is_told_so(self) -> None:
+        reply = self.servicer.Analyse(
+            pb.AnalyseRequest(web_id=f'{SERVER}/carol/profile/card#me'),
+            _FakeContext())
+
+        self.assertEqual(reply.status, pb.ANALYSE_STATUS_NO_DATA)
+        self.assertFalse(reply.published)
+        self.assertIn('none of your', reply.message)
+
+    def test_a_call_naming_no_pod_is_rejected(self) -> None:
+        # The one class of failure that is an error rather than a reply: the
+        # app has nothing to show a user for it.
+
+        context = _FakeContext()
+        with self.assertRaises(_Aborted):
+            self.servicer.Analyse(pb.AnalyseRequest(), context)
+
+        self.assertEqual(context.aborted[0], grpc.StatusCode.INVALID_ARGUMENT)
+
+    def test_a_caller_that_walked_away_stops_the_cycle(self) -> None:
+        # Best effort rather than a mechanism — gRPC promises a server no
+        # notice of a cancelled unary call — but free when it happens.
+
+        reply = self.servicer.Analyse(
+            pb.AnalyseRequest(web_id=self.alice.web_id),
+            _FakeContext(active=False))
+
+        self.assertEqual(reply.status, pb.ANALYSE_STATUS_CANCELLED)
+
+    def test_cancel_with_nothing_running_says_so(self) -> None:
+        # And is not remembered: a request that reached forward would stop a
+        # run nobody had asked to stop, which is the fault the marker files in
+        # the Pod had.
+
+        reply = self.servicer.Cancel(
+            pb.CancelRequest(web_id=self.alice.web_id), _FakeContext())
+
+        self.assertEqual(reply.status, pb.CANCEL_STATUS_NOTHING_RUNNING)
+
+        after = self.servicer.Analyse(
+            pb.AnalyseRequest(web_id=self.alice.web_id), _FakeContext())
+        self.assertEqual(after.status, pb.ANALYSE_STATUS_COMPLETED)
+
+    def test_cancel_stops_the_analysis_it_names(self) -> None:
+        """The whole point of the change, tested end to end.
+
+        A Cancel arrives on one thread while the cycle is inside a step on
+        another, and the cycle stops at its next checkpoint. The cycle is held
+        inside its first read until the Cancel has been answered, so this
+        tests the mechanism rather than the scheduler.
+        """
+
+        inside = threading.Event()
+        released = threading.Event()
+        original = self.client.get_text
+
+        def held(url: str, **kwargs):
+            # Only the readings, and only once: the cycle reads keys and
+            # containers first, and holding those would stop it before it had
+            # anything to abandon.
+
+            if 'blood_pressure' in url and not inside.is_set():
+                inside.set()
+                released.wait(timeout=10)
+            return original(url, **kwargs)
+
+        self.client.get_text = held
+
+        replies: list = []
+        worker = threading.Thread(
+            target=lambda: replies.append(self.servicer.Analyse(
+                pb.AnalyseRequest(web_id=self.alice.web_id),
+                _FakeContext())))
+        worker.start()
+        try:
+            self.assertTrue(inside.wait(timeout=10), 'the cycle never started')
+
+            reply = self.servicer.Cancel(
+                pb.CancelRequest(web_id=self.alice.web_id), _FakeContext())
+            self.assertEqual(reply.status, pb.CANCEL_STATUS_STOPPED)
+        finally:
+            released.set()
+            worker.join(timeout=30)
+
+        self.assertEqual(replies[0].status, pb.ANALYSE_STATUS_CANCELLED)
+
+        # And nothing was published: an abandoned run leaves the stored
+        # results exactly as the previous run left them.
+
+        self.assertIsNone(self.service.store.read_latest())
+
+    def test_a_cancellation_only_touches_the_pod_it_names(self) -> None:
+        self.servicer._runs.begin(self.alice.web_id)
+
+        reply = self.servicer.Cancel(
+            pb.CancelRequest(web_id=self.bob.web_id), _FakeContext())
+
+        self.assertEqual(reply.status, pb.CANCEL_STATUS_NOTHING_RUNNING)
+
+    def test_a_cancel_naming_no_pod_is_rejected(self) -> None:
+        context = _FakeContext()
+        with self.assertRaises(_Aborted):
+            self.servicer.Cancel(pb.CancelRequest(), context)
+
+        self.assertEqual(context.aborted[0], grpc.StatusCode.INVALID_ARGUMENT)
+
+    def test_status_reports_the_last_run(self) -> None:
+        self.servicer.Analyse(
+            pb.AnalyseRequest(web_id=self.alice.web_id), _FakeContext())
+
+        reply = self.servicer.Status(pb.StatusRequest(), _FakeContext())
+
+        self.assertTrue(reply.ready)
+        self.assertEqual(reply.analyser_web_id, ANALYSER_WEB_ID)
+        self.assertEqual(reply.active_runs, 0)
+        self.assertEqual(
+            reply.last_run_id, self.service.store.read_latest()['run_id'])
+
+    def test_status_before_anything_has_run_is_honest(self) -> None:
+        reply = self.servicer.Status(pb.StatusRequest(), _FakeContext())
+
+        self.assertFalse(reply.ready)
+        self.assertEqual(reply.last_run_id, '')
+        self.assertTrue(reply.message)
+
+
+class GrpcGuardTests(unittest.TestCase):
+    """The server must not accept calls it cannot serve."""
+
+    def test_serving_refuses_to_start_without_credentials(self) -> None:
         config = Config(analyser=AnalyserConfig(web_id=ANALYSER_WEB_ID))
-        service = AnalyserService(config)
         with self.assertRaises(ConfigError):
-            service.watch()
+            serve_grpc(config)
 
-    def test_watch_reports_every_missing_secret_at_once(self) -> None:
+    def test_it_reports_every_missing_secret_at_once(self) -> None:
         config = Config(analyser=AnalyserConfig(
             web_id=ANALYSER_WEB_ID, client_id='id', client_secret='secret'))
-        service = AnalyserService(config)
         with self.assertRaises(ConfigError) as raised:
-            service.watch()
+            serve_grpc(config)
         message = str(raised.exception)
         self.assertIn('security_key', message)
         self.assertNotIn('client_id', message)
