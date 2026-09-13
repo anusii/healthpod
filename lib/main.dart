@@ -62,7 +62,12 @@ void main() async {
 
     await windowManager.ensureInitialized();
 
-    const windowOptions = WindowOptions(
+    // 20260913 gjw Open at the size the window was last left at, which the
+    // user sets, and turns off remembering, under Settings in the profile
+    // menu. The size is read here rather than through SolidWindowSize.show
+    // because this app has its own work to do once the window is ready.
+
+    final windowOptions = WindowOptions(
       // Set various desktop window options here.
 
       // Setting [alwaysOnTop] here will ensure the app starts on top of other
@@ -73,6 +78,8 @@ void main() async {
 
       // The [title] is used for the window manager's window title.
       title: 'HealthPod - Private Solid Pod for Health Data',
+
+      size: await SolidWindowSize.saved(),
     );
 
     // Once the window manager is ready we reconfigure it a little.
@@ -82,6 +89,10 @@ void main() async {
       await windowManager.focus();
       await windowManager.setAlwaysOnTop(false);
     });
+
+    // Keep the remembered size up to date as the window is resized.
+
+    SolidWindowSize.watch();
   }
 
   // The runApp() function takes the given Widget and makes it the root of the

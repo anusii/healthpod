@@ -23,8 +23,11 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-	manifestPlaceholders.putAll(mapOf(
-            "appAuthRedirectScheme" to "com.togaware.healthpod"
+        // oidcRedirectScheme is required by oidc_android, which declares no
+        // default for it, so the manifest merger fails without it.
+        manifestPlaceholders.putAll(mapOf(
+            "appAuthRedirectScheme" to "com.togaware.healthpod",
+            "oidcRedirectScheme" to "com.togaware.healthpod"
         ))
     }
 

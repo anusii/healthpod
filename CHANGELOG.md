@@ -30,6 +30,8 @@ then please show some ❤️ and tap on the star at
 
 ## 1.0 Migrating to new more secure secret key handling
 
++ Update to solidpod 1.0.22 and solidui 1.0.41 [1.0.20 20260914 gjw]
++ Remember the window size between sessions [1.0.19 20260913 gjw]
 + Move analyser to using grpc [1.0.18 20260910 tonypioneer]
 + Updated file picker [1.0.17 20260910 tonypioneer]
 + Support cancelation of an analysis [1.0.16 20260903 gjw]
