@@ -58,8 +58,7 @@ class BPEditorService {
     final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
 
-    final files =
-        resources.files.where((f) => f.endsWith('.enc.ttl')).toList();
+    final files = resources.files.where((f) => f.endsWith('.enc.ttl')).toList();
 
     if (files.isEmpty) return [];
 
