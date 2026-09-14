@@ -42,6 +42,7 @@ import 'package:healthpod/features/bp/obs/model.dart';
 import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
+import 'package:healthpod/utils/map_with_concurrency.dart';
 
 /// Handles loading/saving/deleting BP observations from the Pod.
 
@@ -57,37 +58,52 @@ class BPEditorService {
     final dirUrl = await getDirUrl(podDirPath);
     final resources = await getResourcesInContainer(dirUrl);
 
+    final files =
+        resources.files.where((f) => f.endsWith('.enc.ttl')).toList();
+
+    if (files.isEmpty) return [];
+
+    if (!context.mounted) return [];
+
+    // Prompt for the security key once for the whole load. It used to be
+    // asked for inside the loop, once per file, which repeated the same
+    // check hundreds of times for no benefit.
+
+    await getKeyFromUserIfRequired(
+      context,
+      const Text('Please enter your security key to access your health data'),
+    );
+
+    if (!context.mounted) return [];
+
+    // Read the files with several requests in flight. Each reading is its own
+    // file on the POD, and the reads are independent, so waiting for one
+    // round trip before starting the next made load time grow directly with
+    // the server's latency.
+
+    final contents = await mapWithConcurrency<String, String?>(
+      files,
+      (file) async {
+        try {
+          // Use relative path for file operations to match writePod behaviour.
+
+          return await readPod('$feature/$file');
+        } catch (e) {
+          // File might not exist anymore (deleted, moved, or corrupted).
+
+          debugPrint('Error reading file $file: $e');
+          return null;
+        }
+      },
+    );
+
     final List<BPObservation> loadedObservations = [];
 
-    for (final file in resources.files) {
-      if (!file.endsWith('.enc.ttl')) continue;
+    for (var i = 0; i < files.length; i++) {
+      final content = contents[i];
 
-      if (!context.mounted) continue;
-
-      // Use relative path for file operations to match writePod behaviour.
-
-      final filePath = '$feature/$file';
-
-      // Prompt for security key if needed.
-
-      await getKeyFromUserIfRequired(
-        context,
-        const Text('Please enter your security key to access your health data'),
-      );
-
-      if (!context.mounted) continue;
-
-      String content;
-      try {
-        content = await readPod(filePath);
-      } catch (e) {
-        // File might not exist anymore (deleted, moved, or corrupted).
-
-        debugPrint('Error reading file $file: $e');
-        continue;
-      }
-
-      if (content == SolidFunctionCallStatus.fail.toString() ||
+      if (content == null ||
+          content == SolidFunctionCallStatus.fail.toString() ||
           content == SolidFunctionCallStatus.notLoggedIn.toString()) {
         continue;
       }
@@ -95,15 +111,14 @@ class BPEditorService {
       try {
         // Check if returns RDF instead of JSON.
 
-        if (content.toString().startsWith('@prefix') ||
-            content.toString().contains('<http')) {
+        if (content.startsWith('@prefix') || content.contains('<http')) {
           continue;
         }
 
-        final data = json.decode(content.toString());
+        final data = json.decode(content);
         loadedObservations.add(BPObservation.fromJson(data));
       } catch (e) {
-        debugPrint('Error parsing file $file: $e');
+        debugPrint('Error parsing file ${files[i]}: $e');
       }
     }
 

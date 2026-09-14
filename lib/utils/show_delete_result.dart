@@ -36,6 +36,11 @@ void showDeleteSuccess(BuildContext context, String message) =>
 /// Reports a delete that did not happen, [message] saying why.
 
 void showDeleteFailure(BuildContext context, String message) =>
+    showFailure(context, message);
+
+/// Reports an operation that failed, [message] saying why.
+
+void showFailure(BuildContext context, String message) =>
     _showResult(context, message, Colors.red);
 
 /// Shows [message] in a snackbar coloured by the outcome.

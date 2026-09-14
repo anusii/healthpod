@@ -34,7 +34,7 @@ dependencies:
   path_provider: ^2.1.5
   protobuf: ^6.0.0
   shared_preferences: ^2.5.2
-  solidpod: ^1.0.22
+  solidpod: ^1.0.23
   solidui: ^1.0.41
   syncfusion_flutter_pdfviewer: ^33.2.13+1
   table_calendar: ^3.0.9
@@ -59,8 +59,18 @@ dev_dependencies:
       url: https://github.com/anusii/solid_test
       ref: main
   test: ^1.25.15
+  webdriver: ^3.2.0
 
-  webdriver: any
+dependency_overrides:
+  solidpod:
+    git:
+      url: https://github.com/anusii/solidpod.git
+      ref: tony/553_upload_performance
+  solid_auth:
+    git:
+      url: https://github.com/anusii/solid_auth.git
+      ref: tony/553_upload_performance
+
 flutter:
   assets:
     - assets/audio/
