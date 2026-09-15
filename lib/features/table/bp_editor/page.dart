@@ -123,14 +123,39 @@ class _BPEditorPageState extends State<BPEditorPage> {
   }
 
   /// Handles saving an observation.
+  ///
+  /// The saved reading is applied to the in-memory list rather than reloading
+  /// everything from the POD: a reload is one request per stored reading, so
+  /// saving a single reading used to cost a full re-download of the user's
+  /// entire blood pressure history.
 
   Future<void> _handleSave(int index) async {
     if (!mounted) return;
 
-    await editorState.saveObservation(context, editorService, index);
-    if (mounted) {
+    final BPObservation? saved;
+    try {
+      saved = await editorState.saveObservation(context, editorService, index);
+    } catch (e) {
+      if (!mounted) return;
+
+      showFailure(context, 'Error saving reading: $e');
+
+      // The POD may or may not have the change; resync to be sure.
+
       _loadData();
+      return;
     }
+
+    // Validation rejected the entry — stay in edit mode.
+
+    if (saved == null || !mounted) return;
+
+    setState(() {
+      editorState.observations[index] = saved!;
+      editorState.observations.sort(
+        (a, b) => b.timestamp.compareTo(a.timestamp),
+      );
+    });
   }
 
   /// Handles deleting an observation.
@@ -156,14 +181,20 @@ class _BPEditorPageState extends State<BPEditorPage> {
         context,
         'Blood pressure reading deleted successfully.',
       );
+
+      // Drop it locally instead of re-reading every remaining reading.
+
+      setState(() {
+        editorState.observations.remove(obs);
+      });
     } catch (e) {
       if (!mounted) return;
 
       showDeleteFailure(context, 'Error deleting reading: $e');
-    } finally {
-      // Always reload data to reflect current state.
 
-      if (mounted) _loadData();
+      // The delete may have partly succeeded; resync with the POD.
+
+      _loadData();
     }
   }
 

@@ -174,9 +174,9 @@ class BPEditorState with ChangeNotifier {
   /// @param context The build context for showing feedback.
   /// @param editorService The service for saving observations.
   /// @param index The index of the observation being saved.
-  /// @returns A Future that completes when the save operation is done.
+  /// @returns The saved observation, or null when validation rejected it.
 
-  Future<void> saveObservation(
+  Future<BPObservation?> saveObservation(
     BuildContext context,
     dynamic editorService,
     int index,
@@ -192,7 +192,7 @@ class BPEditorState with ChangeNotifier {
           backgroundColor: Colors.red,
         ),
       );
-      return;
+      return null;
     }
 
     final obs = currentEdit ?? observations[index];
@@ -204,7 +204,7 @@ class BPEditorState with ChangeNotifier {
       oldObservation: !isNewObservation ? observations[index] : null,
     );
 
-    if (!context.mounted) return;
+    if (!context.mounted) return obs;
 
     // Show success message.
 
@@ -221,6 +221,8 @@ class BPEditorState with ChangeNotifier {
     isNewObservation = false;
     currentEdit = null;
     controllers.dispose();
+
+    return obs;
   }
 
   /// Deletes an observation from storage.
