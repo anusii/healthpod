@@ -436,7 +436,7 @@ class _BPLineChartState extends State<BPLineChart> {
                 ? DateFormat('HH:mm').format(date)
                 : '${date.day} ${getMonthAbbrev(date.month)}${showYear ? " '${(date.year % 100).toString().padLeft(2, '0')}" : ""}',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface,
+              color: sameDay ? Colors.grey[500] : theme.colorScheme.onSurface,
               fontWeight: FontWeight.w500,
             ),
           ),
