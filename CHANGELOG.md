@@ -30,7 +30,7 @@ then please show some ❤️ and tap on the star at
 
 ## 1.0 Migrating to new more secure secret key handling
 
-+ Update to solidui 1.1 [1.0.21 20260924 gjw]
++ Update to solidui 1.1.3 [1.0.21 20260924 gjw]
 + Update to solidpod 1.0.22 and solidui 1.0.41 [1.0.20 20260914 gjw]
 + Remember the window size between sessions [1.0.19 20260913 gjw]
 + Move analyser to using grpc [1.0.18 20260910 tonypioneer]
