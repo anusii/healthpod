@@ -57,6 +57,11 @@ class BPEditorState with ChangeNotifier {
 
   bool isNewObservation = false;
 
+  /// Number of saved observations, excluding an unsaved new row being added.
+
+  int get savedObservationCount =>
+      observations.length - (isNewObservation ? 1 : 0);
+
   /// Controller manager for handling text input fields.
   /// Manages the lifecycle of all text controllers used in the editor.
 

@@ -35,6 +35,7 @@ import 'package:healthpod/features/table/vaccination_editor/service.dart';
 import 'package:healthpod/features/table/vaccination_editor/state.dart';
 import 'package:healthpod/utils/show_delete_result.dart';
 import 'package:healthpod/widgets/action_buttons.dart';
+import 'package:healthpod/widgets/data_page_header.dart';
 
 /// The main editor page for vaccination observations.
 
@@ -149,52 +150,20 @@ class _VaccinationEditorPageState extends State<VaccinationEditorPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Vaccination Records'),
+        centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.surface,
         automaticallyImplyLeading: false,
         actions: [
+          if (!isLoading && error == null)
+            RecordCountBadge(
+              count: editorState.savedObservationCount,
+              singular: 'record',
+              plural: 'records',
+            ),
           if (!isLoading)
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Builder(
-                builder: (context) {
-                  final screenWidth = MediaQuery.of(context).size.width;
-                  final isNarrowScreen = screenWidth < 600;
-
-                  return ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: isNarrowScreen
-                          ? const EdgeInsets.all(12)
-                          : const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 16,
-                            ),
-                      backgroundColor: Theme.of(
-                        context,
-                      ).colorScheme.primaryContainer,
-                      foregroundColor: Theme.of(
-                        context,
-                      ).colorScheme.onPrimaryContainer,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          isNarrowScreen ? 12 : 8,
-                        ),
-                      ),
-                      minimumSize: isNarrowScreen ? const Size(46, 46) : null,
-                    ),
-                    onPressed: _addNewObservation,
-                    child: isNarrowScreen
-                        ? const Icon(Icons.add_circle)
-                        : const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.add_circle),
-                              SizedBox(width: 8),
-                              Text('Add New Vaccination'),
-                            ],
-                          ),
-                  );
-                },
-              ),
+            AddRecordButton(
+              label: 'Add New Vaccination',
+              onPressed: _addNewObservation,
             ),
         ],
       ),

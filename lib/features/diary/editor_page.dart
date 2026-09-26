@@ -26,25 +26,30 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import 'package:healthpod/dialogs/confirm_delete.dart';
 import 'package:healthpod/features/diary/models/appointment.dart';
 import 'package:healthpod/features/diary/service.dart';
+import 'package:healthpod/utils/open_add_tab.dart';
 import 'package:healthpod/utils/show_delete_result.dart';
 import 'package:healthpod/widgets/action_buttons.dart';
+import 'package:healthpod/widgets/data_page_header.dart';
 
 /// A page that displays and manages appointments in a data table format.
-/// Allows users to view, edit, and delete appointments.
+/// Allows users to view, edit, and delete appointments. New appointments are
+/// entered from the **Add** tab, which the heading's button opens.
 
-class AppointmentEditorPage extends StatefulWidget {
+class AppointmentEditorPage extends ConsumerStatefulWidget {
   const AppointmentEditorPage({super.key});
 
   @override
-  State<AppointmentEditorPage> createState() => _AppointmentEditorPageState();
+  ConsumerState<AppointmentEditorPage> createState() =>
+      _AppointmentEditorPageState();
 }
 
-class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
+class _AppointmentEditorPageState extends ConsumerState<AppointmentEditorPage> {
   /// List of all appointments loaded from storage.
 
   List<Appointment> _appointments = [];
@@ -194,6 +199,25 @@ class _AppointmentEditorPageState extends State<AppointmentEditorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Appointments'),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        automaticallyImplyLeading: false,
+        actions: [
+          if (!_isLoading)
+            RecordCountBadge(
+              count: _appointments.length,
+              singular: 'appointment',
+              plural: 'appointments',
+            ),
+          if (!_isLoading)
+            AddRecordButton(
+              label: 'Add New Appointment',
+              onPressed: () => openAddTab(ref, 'Appointments'),
+            ),
+        ],
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(

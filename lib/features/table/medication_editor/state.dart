@@ -57,6 +57,11 @@ class MedicationEditorState with ChangeNotifier {
 
   bool isNewObservation = false;
 
+  /// Number of saved medications, excluding an unsaved new row being added.
+
+  int get savedObservationCount =>
+      observations.length - (isNewObservation ? 1 : 0);
+
   /// The original observation being edited (before changes).
   /// Used for finding the original record to delete when saving edits.
 

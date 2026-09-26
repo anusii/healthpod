@@ -25,28 +25,32 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:markdown_tooltip/markdown_tooltip.dart';
 
 import 'package:healthpod/dialogs/confirm_delete.dart';
 import 'package:healthpod/features/health_profile/model.dart';
 import 'package:healthpod/features/health_profile/service.dart';
 import 'package:healthpod/features/health_profile/widgets/history_table.dart';
+import 'package:healthpod/utils/open_add_tab.dart';
 import 'package:healthpod/utils/show_delete_result.dart';
+import 'package:healthpod/widgets/data_page_header.dart';
 
 /// Every set of measurements recorded, most recent first.
 ///
-/// New measurements are entered from the **Add** tab. Here they can be
-/// reviewed and a mistaken entry removed.
+/// New measurements are entered from the **Add** tab, which the heading's
+/// button opens. Here they can be reviewed and a mistaken entry removed.
 
-class HealthProfileHistoryPage extends StatefulWidget {
+class HealthProfileHistoryPage extends ConsumerStatefulWidget {
   const HealthProfileHistoryPage({super.key});
 
   @override
-  State<HealthProfileHistoryPage> createState() =>
+  ConsumerState<HealthProfileHistoryPage> createState() =>
       _HealthProfileHistoryPageState();
 }
 
-class _HealthProfileHistoryPageState extends State<HealthProfileHistoryPage> {
+class _HealthProfileHistoryPageState
+    extends ConsumerState<HealthProfileHistoryPage> {
   List<HealthProfileEntry> _entries = [];
   bool _isLoading = true;
   String? _error;
@@ -124,6 +128,7 @@ class _HealthProfileHistoryPageState extends State<HealthProfileHistoryPage> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Theme.of(context).colorScheme.surface,
+        centerTitle: true,
         title: const MarkdownTooltip(
           message: '''
 
@@ -141,6 +146,17 @@ class _HealthProfileHistoryPageState extends State<HealthProfileHistoryPage> {
           ),
         ),
         actions: [
+          if (!_isLoading && _error == null)
+            RecordCountBadge(
+              count: _entries.length,
+              singular: 'record',
+              plural: 'records',
+            ),
+          if (!_isLoading)
+            AddRecordButton(
+              label: 'Add New Health Profile',
+              onPressed: () => openAddTab(ref, 'Health Profile'),
+            ),
           MarkdownTooltip(
             message: '''
 
