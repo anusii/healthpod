@@ -28,6 +28,11 @@ We make this project available for free so if you appreciate the app
 then please show some ❤️ and tap on the star at
 [GitHub](https://github.com/anusii/healthpod) to support our work.
 
+## 1.1
+
++ solidui 1.2.0 solidpod 1.1.0 solid_auth 1.1.0 [1.1.1 20260930 gjw]
++ Grey times in date plots + count observations [1.1.0 20260930 tony]
+
 ## 1.0 Migrating to new more secure secret key handling
 
 + Update to solidui 1.1.3 [1.0.21 20260924 gjw]
