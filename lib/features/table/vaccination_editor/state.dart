@@ -57,6 +57,11 @@ class VaccinationEditorState with ChangeNotifier {
 
   bool isNewObservation = false;
 
+  /// Number of saved vaccinations, excluding an unsaved new row being added.
+
+  int get savedObservationCount =>
+      observations.length - (isNewObservation ? 1 : 0);
+
   /// Controller manager for text editing.
 
   final controllers = VaccinationEditorControllers();

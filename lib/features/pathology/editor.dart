@@ -32,6 +32,7 @@ import 'package:healthpod/features/pathology/model.dart';
 import 'package:healthpod/features/pathology/service.dart';
 import 'package:healthpod/features/pathology/widgets/report_card.dart';
 import 'package:healthpod/utils/show_delete_result.dart';
+import 'package:healthpod/widgets/data_page_header.dart';
 
 /// Editor page for pathology reports.
 
@@ -123,8 +124,17 @@ class _PathologyEditorPageState extends State<PathologyEditorPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Pathology Reports'),
+        centerTitle: true,
         backgroundColor: Theme.of(context).colorScheme.surface,
         automaticallyImplyLeading: false,
+        actions: [
+          if (!_isLoading && _error == null)
+            RecordCountBadge(
+              count: _reports.length,
+              singular: 'report',
+              plural: 'reports',
+            ),
+        ],
       ),
       body: _buildBody(),
     );

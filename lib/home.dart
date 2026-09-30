@@ -223,6 +223,18 @@ class HealthPodHomeState extends ConsumerState<HealthPodHome> {
       }
     });
 
+    // Follow sidebar page switches requested from within a page, such as the
+    // Data page's "Add New ..." buttons opening the Add page. Menu taps set the
+    // same index, so they match here and are ignored.
+    ref.listen<int>(menuIndexProvider, (previous, next) {
+      if (next == _selectedMenuIndex) return;
+      setSelectedMenuIndex(next);
+      _hasUserSelectedFeatureTab = true;
+      SharedPreferences.getInstance().then(
+        (prefs) => prefs.setInt(_soliduiMenuIndexKey, next),
+      );
+    });
+
     return SolidScaffold(
       menu: _buildHealthPodMenu(),
       selectedIndex: _selectedMenuIndex,
