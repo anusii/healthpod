@@ -38,6 +38,7 @@ import 'package:healthpod/utils/format_timestamp_for_display.dart';
 import 'package:healthpod/utils/health_importer/dialogs/health_importer_dialogs.dart';
 import 'package:healthpod/utils/health_importer/managers/health_importer_file_manager.dart';
 import 'package:healthpod/utils/is_valid_timestamp.dart';
+import 'package:healthpod/utils/map_with_concurrency.dart';
 import 'package:healthpod/utils/normalise_timestamp.dart';
 import 'package:healthpod/utils/round_timestamp_to_second.dart';
 import 'package:healthpod/utils/show_alert.dart';
@@ -309,14 +310,11 @@ abstract class HealthDataImporterBase {
       final totalRows = fields.length - 1;
       onProgress?.call('Processing $totalRows records...', 0.4);
 
-      for (var i = 1; i < fields.length; i++) {
-        // Update progress for each row.
+      // Records parsed from the CSV, ready to be written to the POD.
 
-        final currentProgress = 0.4 + (0.5 * (i - 1) / totalRows);
-        onProgress?.call(
-          'Processing record $i of $totalRows...',
-          currentProgress,
-        );
+      final pending = <({String savePath, String jsonString})>[];
+
+      for (var i = 1; i < fields.length; i++) {
         try {
           // Convert row data to a list of strings, handling null values.
 
@@ -417,16 +415,52 @@ abstract class HealthDataImporterBase {
                 : '$cleanDirPath/$outputFileName';
           }
 
-          // Check if context is still valid before proceeding.
+          pending.add((savePath: savePath, jsonString: json.encode(jsonData)));
+        } catch (rowError) {
+          allSuccess = false;
+        }
+      }
 
-          if (!context.mounted) return false;
+      // Check if context is still valid before touching the POD.
 
-          // Write the encrypted data to the pod.
+      if (!context.mounted) return false;
 
+      // Register an encryption key for every file up front, in one request.
+      //
+      // writePod() gives each encrypted file its own key and keeps them all in
+      // a single file on the POD that it rewrites in full whenever a key is
+      // added. Left to itself it would therefore re-upload that key file once
+      // per record, and the file carries an entry for every encrypted file the
+      // POD already holds — so an import cost O(n^2) in key traffic and got
+      // slower the more history the user had. Doing it in one go also makes
+      // the writes below independent of each other, and so safe to overlap.
+
+      if (pending.isNotEmpty) {
+        onProgress?.call('Preparing $totalRows records...', 0.4);
+
+        try {
+          await prepareEncryptionKeys(
+            pending.map((r) => r.savePath).toList(),
+          );
+        } catch (keyError) {
+          // Not fatal: writePod() falls back to registering each key itself.
+
+          debugPrint('[CSV Import] Key pre-registration failed: $keyError');
+        }
+      }
+
+      // Write the records, keeping several requests in flight so the import
+      // is not one network round trip per record.
+
+      var completed = 0;
+
+      await mapWithConcurrency<({String savePath, String jsonString}), void>(
+        pending,
+        (record) async {
           try {
             await writePod(
-              savePath,
-              json.encode(jsonData),
+              record.savePath,
+              record.jsonString,
               encrypted: true,
               overwrite: true,
             );
@@ -437,10 +471,14 @@ abstract class HealthDataImporterBase {
             debugPrint('❌ [CSV Import] Stack trace: $writeStackTrace');
             allSuccess = false;
           }
-        } catch (rowError) {
-          allSuccess = false;
-        }
-      }
+
+          completed++;
+          onProgress?.call(
+            'Saved record $completed of ${pending.length}...',
+            0.4 + (0.5 * completed / pending.length),
+          );
+        },
+      );
 
       // Log the completion status.
 

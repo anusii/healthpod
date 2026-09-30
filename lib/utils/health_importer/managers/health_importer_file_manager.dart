@@ -28,6 +28,7 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
+import 'package:healthpod/utils/map_with_concurrency.dart';
 import 'package:healthpod/utils/resolve_pod_file_url.dart';
 
 /// Utility class for managing health data importer files.
@@ -199,9 +200,18 @@ class HealthImporterFileManager {
     try {
       final String dataPath = '$basePath/$dataType';
 
-      // Attempt to delete each file.
+      if (!context.mounted) return;
 
-      for (final fileName in filesToDelete) {
+      // Delete the files with several requests in flight.
+      //
+      // Each deletion is several requests of its own (revoking any shared
+      // permissions, removing the resource, dropping its encryption key) and
+      // the files are independent of each other, so running them one after
+      // another made re-importing a month of readings wait for a full round
+      // trip per request. Overlapping them lets one file's permission work
+      // happen while another's resource is still being removed.
+
+      await mapWithConcurrency<String, void>(filesToDelete, (fileName) async {
         try {
           // Construct the full path.
 
@@ -213,16 +223,14 @@ class HealthImporterFileManager {
           final fileUrl = await resolvePodFileUrl(fullPath);
 
           try {
-            if (context.mounted) {
-              await deleteFile(fileUrl: fileUrl);
-            }
+            await deleteFile(fileUrl: fileUrl);
           } catch (deleteError) {
             throw Exception('Failed to delete file $fullPath: $deleteError');
           }
         } catch (e) {
           throw Exception('Error processing file $fileName: $e');
         }
-      }
+      });
     } catch (e) {
       throw Exception('Failed to delete existing files: $e');
     }

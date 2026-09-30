@@ -33,6 +33,8 @@ import 'package:flutter/material.dart';
 import 'package:csv/csv.dart';
 import 'package:solidpod/solidpod.dart';
 
+import 'package:healthpod/utils/map_with_concurrency.dart';
+
 /// Abstract base class for health data exporters.
 ///
 /// This class provides common functionality for exporting health data to CSV files,
@@ -117,31 +119,53 @@ abstract class HealthDataExporterBase {
         throw Exception('No $dataType data files found in directory');
       }
 
+      // Read the files with several requests in flight.
+      //
+      // Every record is a separate resource on the POD, and the reads do not
+      // depend on one another, so reading them one at a time made an export
+      // cost one full network round trip per record. Results come back in the
+      // order of [files] regardless of which reply arrives first.
+
+      final contents = await mapWithConcurrency<String, String?>(
+        files,
+        (fileName) async {
+          try {
+            // Read and decrypt the file contents.
+
+            return await readPod(
+              '$dirPath/$fileName',
+              pathType: PathType.relativeToPod,
+            );
+          } catch (e) {
+            // Log the error and carry on with the other files.
+
+            debugPrint('Error reading file $fileName: $e');
+            return null;
+          }
+        },
+      );
+
       // Initialise list to store all health records.
 
       List<Map<String, dynamic>> allRecords = [];
 
       // Process each file one by one.
 
-      for (var fileName in files) {
+      for (var i = 0; i < files.length; i++) {
+        final content = contents[i];
+
+        // Skip file if read operation failed.
+
+        if (content == null ||
+            content == SolidFunctionCallStatus.fail.toString() ||
+            content == SolidFunctionCallStatus.notLoggedIn.toString()) {
+          continue;
+        }
+
         try {
-          // Read and decrypt the file contents.
-
-          final content = await readPod(
-            '$dirPath/$fileName',
-            pathType: PathType.relativeToPod,
-          );
-
-          // Skip file if read operation failed.
-
-          if (content == SolidFunctionCallStatus.fail.toString() ||
-              content == SolidFunctionCallStatus.notLoggedIn.toString()) {
-            continue;
-          }
-
           // Parse the JSON content from the file.
 
-          final jsonData = json.decode(content.toString());
+          final jsonData = json.decode(content);
 
           // Process the record using the implementation-specific method.
 
@@ -153,7 +177,7 @@ abstract class HealthDataExporterBase {
         } catch (e) {
           // Log error and continue with next file if current file fails.
 
-          debugPrint('Error processing file $fileName: $e');
+          debugPrint('Error processing file ${files[i]}: $e');
           continue;
         }
       }
