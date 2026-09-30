@@ -30,8 +30,9 @@ then please show some ❤️ and tap on the star at
 
 ## 1.1
 
++ Grey times in date plots [1.1.2 20260930 gjw]
 + solidui 1.2.0 solidpod 1.1.0 solid_auth 1.1.0 [1.1.1 20260930 gjw]
-+ Grey times in date plots + count observations [1.1.0 20260930 tony]
++ Count observations [1.1.0 20260930 tony]
 
 ## 1.0 Migrating to new more secure secret key handling
 
