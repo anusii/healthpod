@@ -30,6 +30,7 @@ then please show some ❤️ and tap on the star at
 
 ## 1.1
 
++ Bump solidui 1.4.3 [1.1.3 20261005 gjw]
 + Grey times in date plots [1.1.2 20260930 gjw]
 + solidui 1.2.0 solidpod 1.1.0 solid_auth 1.1.0 [1.1.1 20260930 gjw]
 + Count observations [1.1.0 20260930 tony]
