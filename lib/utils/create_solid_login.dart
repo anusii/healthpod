@@ -1,6 +1,6 @@
 /// Create Solid Login Widget.
 //
-// Time-stamp: <Tuesday 2026-06-30 07:53:04 +1000 Graham Williams>
+// Time-stamp: <Sunday 2026-10-11 05:33:11 +1100 Graham Williams>
 //
 /// Copyright (C) 2025, Software Innovation Institute, ANU
 ///
@@ -40,7 +40,6 @@ import 'package:healthpod/home.dart';
 
 Widget createSolidLogin(BuildContext context) {
   return SolidLogin(
-    required: false,
     appDirectory: 'healthpod',
     title: 'Health Pod\nManage and Query Health Docs',
     image: const AssetImage('assets/images/app_image.jpg'),
