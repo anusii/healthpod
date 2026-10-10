@@ -18,7 +18,7 @@ ignore:
 
   - media_kit_libs_video
 
-  # Reserved for the integration tests, which are yet to be written.
+  # Reserved for the integration tests which may not always be written.
 
   - integration_test
   - window_manager
