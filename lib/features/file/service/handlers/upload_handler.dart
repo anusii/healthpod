@@ -29,10 +29,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import 'package:path/path.dart' as path;
-import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/constants/paths.dart';
 import 'package:healthpod/utils/is_text_file.dart' as utils;
+import 'package:healthpod/utils/observation_folder_key.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
 /// Handles file upload operations for the file service.
@@ -87,13 +87,10 @@ class FileUploadHandler {
         );
       }
 
-      // Upload file with encryption.
+      // Upload file with encryption. An upload into an observation folder
+      // inherits the folder's key and ACL like any other observation.
 
-      await writePod(
-        uploadPath,
-        fileContent,
-        encrypted: true,
-      );
+      await writeHealthRecord(uploadPath, fileContent);
 
       // Show success message.
 

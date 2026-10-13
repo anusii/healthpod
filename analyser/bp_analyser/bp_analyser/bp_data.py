@@ -212,15 +212,21 @@ def decrypt_document(
         return text
 
     inherit_from = turtle.single(record.get(paths.APPS_TERMS + 'inheritKeyFrom'))
-    key = keys.get(file_url)
-    if key is None and inherit_from:
+    key = None
+    if inherit_from:
         # The file was encrypted with its folder's key, so the folder is what
         # the owner shared. Its URL is the Pod root plus the recorded path.
+        # The document names its key, so that key wins over one shared for
+        # the file itself: HealthPod moves older readings, which had keys of
+        # their own, onto the folder's key, and a stale copy of the old key
+        # would decrypt the new content to noise rather than fail.
         pod_root = paths.owner_pod_root(file_url, config.analyser.app_dir_name)
         inherited_url = pod_root + inherit_from.lstrip('/')
         if not inherited_url.endswith('/'):
             inherited_url += '/'
         key = keys.get(inherited_url)
+    if key is None:
+        key = keys.get(file_url)
     if key is None:
         # A folder share where the files carry their own keys: try the folder.
         folder_url = file_url.rsplit('/', 1)[0] + '/'

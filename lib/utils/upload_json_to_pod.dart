@@ -32,11 +32,13 @@ import 'package:flutter/material.dart';
 import 'package:solidpod/solidpod.dart';
 
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
+import 'package:healthpod/utils/observation_folder_key.dart';
 
 /// Uploads JSON data directly to POD.
 ///
 /// Useful for saving structured data like survey responses.
-/// This version works on both web and non-web platforms by using writePod directly.
+/// This version works on both web and non-web platforms by using writePod
+/// directly, through [writeHealthRecord].
 
 Future<SolidFunctionCallStatus> uploadJsonToPod({
   required Map<String, dynamic> data,
@@ -75,14 +77,10 @@ Future<SolidFunctionCallStatus> uploadJsonToPod({
       return SolidFunctionCallStatus.fail;
     }
 
-    // Use writePod directly with encryption - this works on all platforms.
+    // Encrypted on every platform; inside an observation folder the file
+    // inherits the folder's key and ACL.
 
-    await writePod(
-      filePath,
-      jsonString,
-      encrypted: true,
-      overwrite: true,
-    );
+    await writeHealthRecord(filePath, jsonString, overwrite: true);
 
     onSuccess?.call();
 

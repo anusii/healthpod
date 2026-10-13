@@ -119,10 +119,12 @@ class BPAnalyseDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Grant access to your $observationCount observation$plural. '
-              'These will be shared with the ${Analyser.displayName} pod and '
-              'used in aggregate to develop a population average that is '
-              'shared with you and other users.',
+              'Grant access to your blood pressure folder and the '
+              '$observationCount observation$plural in it. These will be '
+              'shared with the ${Analyser.displayName} pod and used in '
+              'aggregate to develop a population average that is shared with '
+              'you and other users. Observations you add later are shared '
+              'too, until you revoke access.',
             ),
             const SizedBox(height: 12),
             const Text(
