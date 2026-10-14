@@ -40,18 +40,34 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "healthpod");
+    gtk_header_bar_set_title(header_bar, "HealthPod");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "healthpod");
+    gtk_window_set_title(window, "HealthPod");
   }
 
   gtk_window_set_default_size(window, 1280, 720);
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
-  fl_dart_project_set_dart_entrypoint_arguments(project, self->dart_entrypoint_arguments);
+  fl_dart_project_set_dart_entrypoint_arguments(
+      project, self->dart_entrypoint_arguments);
+
+  // 20260922 gjw Flutter 3.47 defaults Linux to the Impeller OpenGLES-SDF
+  // renderer, which draws stroked curves with no antialiasing on Mesa/Intel
+  // GPUs -- the busy spinner stair-steps and its stroke renders thinner than
+  // requested. Skia draws it correctly, so fall back to Skia until Impeller is
+  // fixed upstream. Remove once Impeller renders arcs smoothly -- Skia is
+  // slated for removal from the engine.
+  //
+  // This must be set through the embedder API rather than the
+  // FLUTTER_ENGINE_SWITCHES environment variable: the engine only reads those
+  // switches in debug and profile builds, so an env-based override works under
+  // `flutter run` but is silently ignored in the release build that gets
+  // packaged into the deb.
+
+  fl_dart_project_set_enable_impeller(project, FALSE);
 
   FlView* view = fl_view_new(project);
   gtk_widget_show(GTK_WIDGET(view));
@@ -63,16 +79,18 @@ static void my_application_activate(GApplication* application) {
 }
 
 // Implements GApplication::local_command_line.
-static gboolean my_application_local_command_line(GApplication* application, gchar*** arguments, int* exit_status) {
+static gboolean my_application_local_command_line(GApplication* application,
+                                                  gchar*** arguments,
+                                                  int* exit_status) {
   MyApplication* self = MY_APPLICATION(application);
   // Strip out the first argument as it is the binary name.
   self->dart_entrypoint_arguments = g_strdupv(*arguments + 1);
 
   g_autoptr(GError) error = nullptr;
   if (!g_application_register(application, nullptr, &error)) {
-     g_warning("Failed to register: %s", error->message);
-     *exit_status = 1;
-     return TRUE;
+    g_warning("Failed to register: %s", error->message);
+    *exit_status = 1;
+    return TRUE;
   }
 
   g_application_activate(application);
@@ -83,7 +101,7 @@ static gboolean my_application_local_command_line(GApplication* application, gch
 
 // Implements GApplication::startup.
 static void my_application_startup(GApplication* application) {
-  //MyApplication* self = MY_APPLICATION(object);
+  // MyApplication* self = MY_APPLICATION(object);
 
   // Perform any actions required at application startup.
 
@@ -92,7 +110,7 @@ static void my_application_startup(GApplication* application) {
 
 // Implements GApplication::shutdown.
 static void my_application_shutdown(GApplication* application) {
-  //MyApplication* self = MY_APPLICATION(object);
+  // MyApplication* self = MY_APPLICATION(object);
 
   // Perform any actions required at application shutdown.
 
@@ -108,7 +126,8 @@ static void my_application_dispose(GObject* object) {
 
 static void my_application_class_init(MyApplicationClass* klass) {
   G_APPLICATION_CLASS(klass)->activate = my_application_activate;
-  G_APPLICATION_CLASS(klass)->local_command_line = my_application_local_command_line;
+  G_APPLICATION_CLASS(klass)->local_command_line =
+      my_application_local_command_line;
   G_APPLICATION_CLASS(klass)->startup = my_application_startup;
   G_APPLICATION_CLASS(klass)->shutdown = my_application_shutdown;
   G_OBJECT_CLASS(klass)->dispose = my_application_dispose;
@@ -117,8 +136,13 @@ static void my_application_class_init(MyApplicationClass* klass) {
 static void my_application_init(MyApplication* self) {}
 
 MyApplication* my_application_new() {
+  // Set the program name to the application ID, which helps various systems
+  // like GTK and desktop environments map this running application to its
+  // corresponding .desktop file. This ensures better integration by allowing
+  // the application to be recognized beyond its binary name.
+  g_set_prgname(APPLICATION_ID);
+
   return MY_APPLICATION(g_object_new(my_application_get_type(),
-                                     "application-id", APPLICATION_ID,
-                                     "flags", G_APPLICATION_NON_UNIQUE,
-                                     nullptr));
+                                     "application-id", APPLICATION_ID, "flags",
+                                     G_APPLICATION_NON_UNIQUE, nullptr));
 }

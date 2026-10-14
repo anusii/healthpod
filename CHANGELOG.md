@@ -30,6 +30,9 @@ then please show some ❤️ and tap on the star at
 
 ## 1.1
 
++ Update the secret key status earlier [1.1.7 20261014 gjw]
++ Share folder rather than files for analysis [1.1.6 20261014 gjw]
++ Streamlined login [1.1.5 20261014 gjw]
 + Update solidui 1.5.3 for snapstore [1.1.4 20261011 gjw]
 + Bump solidui 1.4.3 [1.1.3 20261005 gjw]
 + Grey times in date plots [1.1.2 20260930 gjw]
