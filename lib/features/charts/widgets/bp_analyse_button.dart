@@ -456,10 +456,11 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     required BPAnalyserClient client,
     required int observations,
   }) async {
-    // Before anything is shared, because sharing is the expensive and
-    // irreversible half of the round trip. This costs a few milliseconds when
-    // the Analyser is up, and saves granting a dozen permissions for an
-    // analysis that was never going to happen when it is not.
+    // Before anything is shared, because sharing is the irreversible half of
+    // the round trip, and the expensive half too when older readings have to
+    // be moved onto the folder's key. This costs a few milliseconds when the
+    // Analyser is up, and saves sharing the folder for an analysis that was
+    // never going to happen when it is not.
 
     final status = await client.status();
     if (await _abandoned() || !mounted) return;

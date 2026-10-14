@@ -30,12 +30,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:solidpod/solidpod.dart'
-    show
-        SolidFunctionCallStatus,
-        getResourcesInContainer,
-        getDirUrl,
-        readPod,
-        writePod;
+    show SolidFunctionCallStatus, getResourcesInContainer, getDirUrl, readPod;
 import 'package:solidui/solidui.dart' show getKeyFromUserIfRequired;
 
 import 'package:healthpod/features/bp/obs/model.dart';
@@ -43,6 +38,7 @@ import 'package:healthpod/utils/delete_pod_file_with_fallback.dart';
 import 'package:healthpod/utils/format_timestamp_for_filename.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
 import 'package:healthpod/utils/map_with_concurrency.dart';
+import 'package:healthpod/utils/observation_folder_key.dart';
 
 /// Handles loading/saving/deleting BP observations from the Pod.
 
@@ -168,11 +164,10 @@ class BPEditorService {
 
       if (!context.mounted) return;
 
-      await writePod(
-        '$feature/$newFilename',
-        jsonData,
-        encrypted: true,
-      );
+      // Observations inherit the folder's key and ACL, so sharing the folder
+      // shares this one as well.
+
+      await writeHealthRecord('$feature/$newFilename', jsonData);
     } catch (e) {
       debugPrint('Error saving observation: $e');
       throw Exception('Failed to save blood pressure observation: $e');

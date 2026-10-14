@@ -43,6 +43,7 @@ import 'package:solidui/solidui.dart' show getKeyFromUserIfRequired;
 
 import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
+import 'package:healthpod/utils/observation_folder_key.dart';
 
 /// Why a share or revoke attempt could not even begin.
 
@@ -81,7 +82,7 @@ class AnalyserShareResult {
     this.cancelled = false,
   });
 
-  /// How many readings were shared successfully.
+  /// How many readings the Analyser can now read through the shared folder.
 
   final int shared;
 
@@ -97,15 +98,17 @@ class AnalyserShareResult {
 
   final String? message;
 
-  /// Readings that could not be shared, if any.
+  /// Older readings that could not be moved onto the folder's key, and so
+  /// are not visible to the Analyser, if any.
 
   final List<String> failedFiles;
 
   /// Whether the user stopped the sharing part way through.
   ///
-  /// The readings already granted stay granted: withdrawing them is a
-  /// separate decision, made in the file browser, and undoing it silently
-  /// would be a surprise. [shared] says how many went out.
+  /// The folder stays shared, and with it every reading already on the
+  /// folder's key: withdrawing that is a separate decision, made with Revoke
+  /// Permissions or in the file browser, and undoing it silently would be a
+  /// surprise. [shared] says how many readings the Analyser can read.
 
   final bool cancelled;
 
@@ -131,11 +134,11 @@ class AnalyserRevokeResult {
     this.failedFiles = const [],
   });
 
-  /// How many readings had the Analyser's access revoked successfully.
+  /// How many readings the Analyser can no longer read.
 
   final int revoked;
 
-  /// How many readings the Analyser held access to when the run began.
+  /// How many readings the Analyser could read when the run began.
 
   final int shared;
 
@@ -147,7 +150,8 @@ class AnalyserRevokeResult {
 
   final String? message;
 
-  /// Readings whose access could not be revoked, if any.
+  /// Resources whose access could not be revoked, if any: the folder, or an
+  /// older reading shared on its own.
 
   final List<String> failedFiles;
 
@@ -167,19 +171,22 @@ class AnalyserRevokeResult {
 
 /// Grants the Analyser Pod read access to the user's blood pressure readings.
 ///
-/// HealthPod encrypts each reading with its own key, so sharing the folder
-/// alone would hand over a key that unlocks nothing. Each reading is therefore
-/// granted individually, which is also what the sharing dialogue does when a
-/// user selects several files by hand.
+/// Readings are encrypted with the key of the blood pressure folder and have
+/// no ACL of their own, so the Pod server applies the folder's ACL to them.
+/// Sharing is therefore two edits however many readings there are: the
+/// folder's ACL, and the folder's key in the Analyser's `shared-keys.ttl`.
+/// Readings recorded afterwards are shared as well, for as long as the folder
+/// is.
 ///
-/// Readings recorded after this runs are not shared automatically: they are
-/// new resources with new keys, and the user has to share again. That is a
-/// property of the Solid sharing model rather than a limitation here, and the
-/// interface says so before asking the user to confirm.
+/// Readings written before this arrangement carry their own key and ACL, and
+/// the folder's share does not reach them. [shareAll] moves each onto the
+/// folder's key the first time it meets it; after that the reading behaves
+/// like any other.
 ///
-/// [revokeAll] is the counterpart: it revokes the Analyser's access to
-/// every reading it still holds, reading each reading's ACL to find out what
-/// was actually granted rather than assuming a previous share succeeded.
+/// [revokeAll] is the counterpart: it revokes the Analyser's access to the
+/// folder, and to any older reading that was shared on its own, reading each
+/// ACL to find out what was actually granted rather than assuming a previous
+/// share succeeded.
 
 class BPAnalyserShareService {
   /// The feature folder holding the readings, under `healthpod/data`.
@@ -220,16 +227,26 @@ class BPAnalyserShareService {
     ];
   }
 
-  /// Shares every reading with the Analyser Pod.
+  /// The readings among [files] that still carry a key of their own.
   ///
-  /// [onProgress] is called after each reading with the number completed and
-  /// the total, so the caller can show progress on a long run.
+  /// Answered from the individual keys solidpod already holds in memory, so
+  /// it costs no request per reading.
+
+  static Future<List<String>> _ownKeyFiles(List<String> files) async => [
+        for (final file in files)
+          if (await hasOwnObservationKey(feature, file)) file,
+      ];
+
+  /// Shares every reading with the Analyser Pod by sharing their folder.
   ///
-  /// [isCancelled] is consulted before each grant, so a user who changes
-  /// their mind part way through a long folder is not made to wait for the
-  /// end of it. A grant already under way is left to finish: it writes an
-  /// access rule on the server, and abandoning it half done would be worse
-  /// than letting one more reading through.
+  /// [onProgress] is called with the number of readings the Analyser can read
+  /// and the total: once after the folder is shared, then after each older
+  /// reading is moved onto the folder's key.
+  ///
+  /// [isCancelled] is consulted before the folder is shared and before each
+  /// older reading is moved. A move already under way is left to finish: it
+  /// rewrites the reading on the server, and abandoning it half done would be
+  /// worse than letting one more reading through.
 
   static Future<AnalyserShareResult> shareAll(
     BuildContext context, {
@@ -257,8 +274,9 @@ class BPAnalyserShareService {
         );
       }
 
-      // Granting access re-encrypts the resource key for the recipient, which
-      // needs the security key. Prompt for it once, before the loop.
+      // Granting access re-encrypts the folder's key for the recipient, and
+      // moving older readings decrypts and re-encrypts them; both need the
+      // security key. Prompt for it once, up front.
 
       if (!context.mounted) {
         return const AnalyserShareResult(shared: 0, total: 0);
@@ -270,46 +288,30 @@ class BPAnalyserShareService {
         ),
       );
 
-      var shared = 0;
-      final failed = <String>[];
-      var analyserNotInitialised = false;
-      var cancelled = false;
-
-      for (final file in files) {
-        if (isCancelled?.call() ?? false) {
-          cancelled = true;
-          break;
-        }
-
-        final status = await grantPermission(
-          fileName: '$feature/$file',
-          permissionList: permissions,
-          recipientType: RecipientType.individual,
-          recipientWebIdList: [Analyser.webId],
-          ownerWebId: ownerWebId,
-          granterWebId: ownerWebId,
+      if (isCancelled?.call() ?? false) {
+        return AnalyserShareResult(
+          shared: 0,
+          total: files.length,
+          cancelled: true,
         );
-
-        switch (status) {
-          case SolidFunctionCallStatus.success:
-            shared++;
-          case SolidFunctionCallStatus.notInitialised:
-            // The recipient Pod lacks the key structure; every other reading
-            // would fail the same way, so stop here rather than grinding
-            // through the whole folder.
-
-            analyserNotInitialised = true;
-          default:
-            failed.add(file);
-            debugPrint('Could not share $file with the Analyser: $status');
-        }
-
-        if (analyserNotInitialised) break;
-
-        onProgress?.call(shared + failed.length, files.length);
       }
 
-      if (analyserNotInitialised) {
+      // The folder needs its key before it is shared: granting access to a
+      // folder without one hands the Analyser nothing to decrypt with.
+
+      await ensureObservationFolderKey(feature);
+
+      final status = await grantPermission(
+        fileName: feature,
+        isFile: false,
+        permissionList: permissions,
+        recipientType: RecipientType.individual,
+        recipientWebIdList: [Analyser.webId],
+        ownerWebId: ownerWebId,
+        granterWebId: ownerWebId,
+      );
+
+      if (status == SolidFunctionCallStatus.notInitialised) {
         // solidpod reports a Pod it could not look at as uninitialised, so
         // ask whether the Pod is answering at all before telling the user
         // that nobody has set it up.
@@ -317,7 +319,7 @@ class BPAnalyserShareService {
         final reachable = await _analyserIsReachable();
 
         return AnalyserShareResult(
-          shared: shared,
+          shared: 0,
           total: files.length,
           failure: reachable
               ? ShareFailure.analyserNotInitialised
@@ -329,6 +331,50 @@ class BPAnalyserShareService {
                   '${Analyser.webId} — its server did not return a profile. '
                   'It may be down; please try again shortly.',
         );
+      }
+
+      if (status != SolidFunctionCallStatus.success) {
+        debugPrint('Could not share $feature with the Analyser: $status');
+        return AnalyserShareResult(
+          shared: 0,
+          total: files.length,
+          failure: ShareFailure.error,
+          message: 'Could not share your blood pressure folder with the '
+              '${Analyser.displayName}. Please try again in a moment.',
+        );
+      }
+
+      // Every reading already on the folder's key is shared now. The rest
+      // were written with keys of their own and are moved one at a time.
+
+      final ownKeyFiles = await _ownKeyFiles(files);
+      var shared = files.length - ownKeyFiles.length;
+      final failed = <String>[];
+      var cancelled = false;
+
+      onProgress?.call(shared, files.length);
+
+      for (final file in ownKeyFiles) {
+        if (isCancelled?.call() ?? false) {
+          cancelled = true;
+          break;
+        }
+
+        try {
+          await adoptObservationFolderKey(
+            feature: feature,
+            file: file,
+            ownerWebId: ownerWebId,
+          );
+          shared++;
+        } catch (e) {
+          // One stubborn reading must not stop the rest coming over.
+
+          failed.add(file);
+          debugPrint('Could not move $file onto the folder key: $e');
+        }
+
+        onProgress?.call(shared + failed.length, files.length);
       }
 
       return AnalyserShareResult(
@@ -364,42 +410,76 @@ class BPAnalyserShareService {
     }
   }
 
-  /// The permissions the Analyser currently holds over [filePath], or null
-  /// when it holds none.
+  /// The permissions the Analyser holds in [permissions], or null when it
+  /// holds none.
+
+  static List<dynamic>? _analyserEntry(Map<dynamic, dynamic> permissions) {
+    final entry = permissions[Analyser.webId];
+    if (entry == null) return null;
+
+    final granted = (entry as Map)[permStr] as List?;
+    return (granted == null || granted.isEmpty) ? null : granted;
+  }
+
+  /// The permissions the Analyser currently holds over the reading at
+  /// [filePath], or null when it holds none.
   ///
   /// A reading that has never been shared has no ACL file of its own, and
   /// reading its permissions throws. That is not an error worth surfacing:
   /// there is simply nothing to revoke, so it is reported the same way as
   /// an ACL that names no Analyser.
 
-  static Future<List<dynamic>?> _analyserPermissions(String filePath) async {
+  static Future<List<dynamic>?> _analyserFilePermissions(
+    String filePath,
+  ) async {
     try {
-      final permissions = await readPermission(
-        fileName: filePath,
-        isFile: true,
+      return _analyserEntry(
+        await readPermission(fileName: filePath, isFile: true),
       );
-
-      final entry = permissions[Analyser.webId];
-      if (entry == null) return null;
-
-      final granted = (entry as Map)[permStr] as List?;
-      return (granted == null || granted.isEmpty) ? null : granted;
     } catch (e) {
       debugPrint('Could not read the permissions on $filePath: $e');
       return null;
     }
   }
 
-  /// Whether the Analyser currently holds access to any of [files].
+  /// The permissions the Analyser currently holds over the blood pressure
+  /// folder, or null when it holds none.
+  ///
+  /// The ACL is named by its own URL: asked for a folder, readPermission()
+  /// appends `/.acl` to a URL that already ends in a slash and reads a
+  /// resource that does not exist.
+
+  static Future<List<dynamic>?> _analyserFolderPermissions() async {
+    try {
+      final dirUrl = await getDirUrl(getFeaturePath(feature));
+      return _analyserEntry(
+        await readPermission(
+          fileName: '$dirUrl.acl',
+          isFile: false,
+          isFileUrl: true,
+        ),
+      );
+    } catch (e) {
+      debugPrint('Could not read the permissions on $feature: $e');
+      return null;
+    }
+  }
+
+  /// Whether the Analyser currently holds access to the folder or to any of
+  /// [files].
   ///
   /// Used to decide whether there is anything for Revoke Permissions to do.
-  /// The scan stops at the first shared observation, so a Pod that has been
-  /// analysed costs a single ACL read; only a Pod with nothing shared pays
-  /// for a look at the whole folder.
+  /// The folder is asked first, and on a Pod that has shared it that single
+  /// ACL read is the answer. Only readings with keys of their own can have
+  /// been shared on their own, so those are the only ACLs read after that.
 
   static Future<bool> isAnyShared(List<String> files) async {
-    for (final file in files) {
-      if (await _analyserPermissions('$feature/$file') != null) return true;
+    if (await _analyserFolderPermissions() != null) return true;
+
+    for (final file in await _ownKeyFiles(files)) {
+      if (await _analyserFilePermissions('$feature/$file') != null) {
+        return true;
+      }
     }
 
     return false;
@@ -407,18 +487,17 @@ class BPAnalyserShareService {
 
   /// Revokes the Analyser Pod's access to every blood pressure reading.
   ///
-  /// Each reading is revoked individually, mirroring [shareAll]: the shares
-  /// were granted one resource at a time, so they have to come back the same
-  /// way. Revoking also removes the Analyser's copy of each reading's key
-  /// from its Pod, so the readings it was shown are no longer readable there.
+  /// The folder's share is revoked first, which takes back every reading on
+  /// the folder's key and removes the Analyser's copy of that key. Older
+  /// readings shared on their own, before they were moved onto the folder's
+  /// key, are then revoked one by one.
   ///
   /// Results the Analyser has already shared back are left alone: they belong
   /// to the Analyser's Pod, not the user's, and hold no individual readings.
   ///
-  /// [onProgress] is called after each reading is examined with the number
-  /// examined and the total, so the caller can show progress on a long run.
-  /// Progress counts every reading in the folder, not just the shared ones,
-  /// because whether a reading is shared is only known once its ACL is read.
+  /// [onProgress] is called with the number of readings examined and the
+  /// total: once after the folder, covering every reading on its key, then
+  /// after each older reading.
 
   static Future<AnalyserRevokeResult> revokeAll({
     void Function(int examined, int total)? onProgress,
@@ -435,18 +514,52 @@ class BPAnalyserShareService {
       }
 
       final files = await listShareableFiles();
-      if (files.isEmpty) {
-        return const AnalyserRevokeResult(revoked: 0, shared: 0);
-      }
+      final ownKeyFiles = await _ownKeyFiles(files);
+      final folderFiles = files.length - ownKeyFiles.length;
 
-      var examined = 0;
       var shared = 0;
       var revoked = 0;
       final failed = <String>[];
 
-      for (final file in files) {
+      final folderGranted = await _analyserFolderPermissions();
+      if (folderGranted != null) {
+        shared += folderFiles;
+
+        final status = await revokePermission(
+          fileName: feature,
+          isFile: false,
+          permissionList: folderGranted,
+          recipientIndOrGroupWebId: Analyser.webId,
+          ownerWebId: ownerWebId,
+          granterWebId: ownerWebId,
+          recipientType: RecipientType.individual,
+        );
+
+        if (status != SolidFunctionCallStatus.success) {
+          // Every reading on the folder's key stays readable, so this is
+          // a failure rather than a partial success.
+
+          debugPrint(
+            'Could not revoke the Analyser\'s access to $feature: $status',
+          );
+          return AnalyserRevokeResult(
+            revoked: 0,
+            shared: shared,
+            failure: ShareFailure.error,
+            message: 'Could not revoke the ${Analyser.displayName}\'s access '
+                'to your blood pressure folder. Please try again in a moment.',
+          );
+        }
+
+        revoked += folderFiles;
+      }
+
+      var examined = folderFiles;
+      onProgress?.call(examined, files.length);
+
+      for (final file in ownKeyFiles) {
         final filePath = '$feature/$file';
-        final granted = await _analyserPermissions(filePath);
+        final granted = await _analyserFilePermissions(filePath);
 
         if (granted != null) {
           shared++;

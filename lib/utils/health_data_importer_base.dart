@@ -40,6 +40,7 @@ import 'package:healthpod/utils/health_importer/managers/health_importer_file_ma
 import 'package:healthpod/utils/is_valid_timestamp.dart';
 import 'package:healthpod/utils/map_with_concurrency.dart';
 import 'package:healthpod/utils/normalise_timestamp.dart';
+import 'package:healthpod/utils/observation_folder_key.dart';
 import 'package:healthpod/utils/round_timestamp_to_second.dart';
 import 'package:healthpod/utils/show_alert.dart';
 
@@ -435,17 +436,37 @@ abstract class HealthDataImporterBase {
       // slower the more history the user had. Doing it in one go also makes
       // the writes below independent of each other, and so safe to overlap.
 
+      //
+      // Records in an observation folder have no key of their own: they all
+      // use the folder's key, which has to exist before the writes below
+      // overlap, or each would create a different one.
+
       if (pending.isNotEmpty) {
         onProgress?.call('Preparing $totalRows records...', 0.4);
 
-        try {
-          await prepareEncryptionKeys(
-            pending.map((r) => r.savePath).toList(),
-          );
-        } catch (keyError) {
-          // Not fatal: writePod() falls back to registering each key itself.
+        final ownKeyPaths = <String>[];
+        final keyFolders = <String>{};
+        for (final record in pending) {
+          final folder = observationKeyFolder(record.savePath);
+          if (folder == null) {
+            ownKeyPaths.add(record.savePath);
+          } else {
+            keyFolders.add(folder);
+          }
+        }
 
-          debugPrint('[CSV Import] Key pre-registration failed: $keyError');
+        for (final folder in keyFolders) {
+          await ensureObservationFolderKey(folder);
+        }
+
+        if (ownKeyPaths.isNotEmpty) {
+          try {
+            await prepareEncryptionKeys(ownKeyPaths);
+          } catch (keyError) {
+            // Not fatal: writePod() falls back to registering each key itself.
+
+            debugPrint('[CSV Import] Key pre-registration failed: $keyError');
+          }
         }
       }
 
@@ -458,10 +479,9 @@ abstract class HealthDataImporterBase {
         pending,
         (record) async {
           try {
-            await writePod(
+            await writeHealthRecord(
               record.savePath,
               record.jsonString,
-              encrypted: true,
               overwrite: true,
             );
             successfulSaves++;

@@ -50,12 +50,13 @@ enum AnalysePhase {
   /// Asking the Analyser whether it is up, before anything is shared.
   ///
   /// Milliseconds on a working deployment, and the reason it happens before
-  /// the sharing rather than after: granting a dozen permissions and then
-  /// finding nothing is listening is the worst way round to learn it.
+  /// the sharing rather than after: sharing the folder and then finding
+  /// nothing is listening is the worst way round to learn it.
 
   checking,
 
-  /// Granting the Analyser access to each reading, one at a time.
+  /// Granting the Analyser access to the blood pressure folder, then moving
+  /// any older reading that still has a key of its own onto the folder's.
 
   sharing,
 
@@ -63,7 +64,8 @@ enum AnalysePhase {
 
   analysing,
 
-  /// Revoking the Analyser's access to each observation, one at a time.
+  /// Revoking the Analyser's access to the folder, then to any older reading
+  /// that was shared on its own.
 
   revoking,
 
@@ -102,12 +104,12 @@ String get analyseIdleTooltip => '''
       and get back a chart of your observations marked with your own averages
       and the averages across everyone who has contributed.
 
-      * The ${Analyser.displayName} is granted **read** access only, one
-        observation at a time, and never gains access to anything else in your
+      * The ${Analyser.displayName} is granted **read** access only, to your
+        blood pressure folder, and never gains access to anything else in your
         Pod.
 
-      * Observations you record afterwards are **not** included automatically —
-        analyse again to bring them in.
+      * Observations you record afterwards are included automatically for as
+        long as that access stands — revoke it to stop.
 
       * Every analysis is kept in your own Pod. **Past Analyses**, in the
         dialogue this opens, lists them and reopens or deletes any of them.
@@ -151,7 +153,7 @@ String analyseBusyTooltip({
 
       **Sharing your observations**
 
-      $completed of $total sent to the ${Analyser.displayName}.
+      $completed of $total readable by the ${Analyser.displayName}.
 
     ''',
     AnalysePhase.revoking => '''
