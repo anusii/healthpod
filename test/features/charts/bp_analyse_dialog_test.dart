@@ -69,13 +69,13 @@ void main() {
     testWidgets('counts the observations, pluralised', (tester) async {
       await _pump(tester);
       expect(
-        find.textContaining('Grant access to your 12 observations.'),
+        find.textContaining('the 12 observations in it.'),
         findsOneWidget,
       );
 
       await _pump(tester, observationCount: 1);
       expect(
-        find.textContaining('Grant access to your 1 observation.'),
+        find.textContaining('the 1 observation in it.'),
         findsOneWidget,
       );
     });

@@ -76,12 +76,15 @@ class BPChartDataManager {
   /// Safely converts various numeric formats to double.
   ///
   /// Handles integers, doubles, and string representations of numbers.
-  /// Returns 0.0 if the value cannot be parsed.
+  /// Returns 0.0 if the value cannot be parsed, including a string that is
+  /// not a number, which used to throw and take the whole tooltip with it.
 
   static double parseNumericValue(dynamic value) {
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    if (value is String) return double.parse(value);
+    if (value is num) return value.toDouble();
+    if (value is String) {
+      final parsed = double.tryParse(value.trim());
+      if (parsed != null) return parsed;
+    }
     debugPrint('Warning: Invalid numeric value: $value');
     return 0.0;
   }

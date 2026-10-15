@@ -39,7 +39,12 @@ import 'package:healthpod/widgets/data_page_header.dart';
 /// The main editor page for blood pressure observations.
 
 class BPEditorPage extends StatefulWidget {
-  const BPEditorPage({super.key});
+  const BPEditorPage({super.key, this.service});
+
+  /// The service reading and writing the Pod. Left out in the app, which uses
+  /// [BPEditorService]; tests pass one that needs no Pod.
+
+  final BPEditorService? service;
 
   @override
   State<BPEditorPage> createState() => _BPEditorPageState();
@@ -56,7 +61,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
     // Initialise state and service.
 
     editorState = BPEditorState();
-    editorService = BPEditorService();
+    editorService = widget.service ?? BPEditorService();
 
     // Load initial data.
 
@@ -83,6 +88,11 @@ class _BPEditorPageState extends State<BPEditorPage> {
       if (!mounted) return;
 
       setState(() {
+        // A fresh list invalidates any row being edited or added: its index
+        // may now point at a different reading, and an unsaved new row is
+        // gone, so it must no longer be subtracted from the count.
+
+        editorState.resetEditing();
         editorState.observations = observations;
         editorState.observations.sort(
           (a, b) => b.timestamp.compareTo(a.timestamp),
@@ -203,9 +213,7 @@ class _BPEditorPageState extends State<BPEditorPage> {
 
   void _handleTimestampChanged(DateTime newTimestamp) {
     setState(() {
-      editorState.currentEdit = editorState.currentEdit?.copyWith(
-        timestamp: newTimestamp,
-      );
+      editorState.updateTimestamp(newTimestamp);
     });
   }
 

@@ -154,6 +154,16 @@ class BPEditorControllers {
     notesController?.addListener(_notesListener!);
   }
 
+  /// Records a new timestamp for the observation being edited.
+  ///
+  /// The timestamp is chosen with a picker rather than typed, so no listener
+  /// sees it. Without this the next keystroke would rebuild the observation
+  /// from the state held here and quietly put the old timestamp back.
+
+  void updateTimestamp(DateTime timestamp) {
+    _currentState = _currentState?.copyWith(timestamp: timestamp);
+  }
+
   /// Remove all listeners from controllers.
 
   void _removeListeners() {

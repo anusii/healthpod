@@ -25,8 +25,11 @@
 
 library;
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart' show debugPrint;
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:solidpod/solidpod.dart'
     show
         KeyManager,
@@ -36,6 +39,7 @@ import 'package:solidpod/solidpod.dart'
         getDirUrl,
         getFileUrl,
         getRecipientType,
+        getResource,
         permStr,
         readPermission,
         readPod,
@@ -131,6 +135,11 @@ Future<bool> hasOwnObservationKey(String feature, String file) async =>
 /// 3. Delete its own ACL, so the folder's ACL applies to it.
 /// 4. Drop its own key, which no longer decrypts anything.
 ///
+/// The same applies to an observation encrypted with some other inherited
+/// key, except that it is read before anything is revoked: only a file with
+/// a key of its own can have been decrypted in place by a public share, and
+/// one whose key turns out to be missing is then left exactly as it was.
+///
 /// The folder must already have a key; see [ensureObservationFolderKey].
 /// Throws when the observation cannot be read or rewritten.
 
@@ -141,8 +150,9 @@ Future<void> adoptObservationFolderKey({
 }) async {
   final filePath = '$feature/$file';
   final podPath = getFeaturePath(feature, file);
+  final hasOwnKey = await hasOwnObservationKey(feature, file);
 
-  await _revokeAllRecipients(filePath, ownerWebId);
+  if (hasOwnKey) await _revokeAllRecipients(filePath, ownerWebId);
 
   final content = await readPod(filePath);
 
@@ -154,9 +164,34 @@ Future<void> adoptObservationFolderKey({
     throw Exception('Could not read $filePath: $content');
   }
 
+  if (!hasOwnKey) await _revokeAllRecipients(filePath, ownerWebId);
+
   await writeHealthRecord(filePath, content, overwrite: true);
 
-  final fileUrl = await getFileUrl(podPath);
+  await _deleteOwnAcl(feature, file);
+
+  if (hasOwnKey) await KeyManager.removeIndividualKey(resourcePath: podPath);
+}
+
+/// Hands a plaintext observation over to its folder's ACL.
+///
+/// Its content needs no key, so nothing is rewritten: every recipient's
+/// access is revoked and its own ACL, if it has one, is deleted, after which
+/// whoever the folder is shared with can read it.
+
+Future<void> releaseObservationAcl({
+  required String feature,
+  required String file,
+  required String ownerWebId,
+}) async {
+  await _revokeAllRecipients('$feature/$file', ownerWebId);
+  await _deleteOwnAcl(feature, file);
+}
+
+/// Deletes the ACL of [file] in [feature], if it has one.
+
+Future<void> _deleteOwnAcl(String feature, String file) async {
+  final fileUrl = await getFileUrl(getFeaturePath(feature, file));
   try {
     // isKey asks deleteFile() for the bare delete: an ACL has no key or
     // shares of its own to clear away first.
@@ -165,10 +200,148 @@ Future<void> adoptObservationFolderKey({
   } catch (e) {
     // An observation that never had an ACL has nothing to delete.
 
-    debugPrint('No ACL to delete for $filePath: $e');
+    debugPrint('No ACL to delete for $feature/$file: $e');
+  }
+}
+
+/// How an observation without a key of its own is stored on the server.
+
+enum ObservationStorage {
+  /// Encrypted with its own folder's key: sharing the folder shares it.
+
+  folderKey,
+
+  /// Not encrypted at all. Readable through the folder's ACL, unless it has
+  /// an ACL of its own.
+
+  plaintext,
+
+  /// Encrypted with the key of some other folder, which the document names.
+
+  otherFolderKey,
+
+  /// Encrypted, but naming no folder's key while having no key of its own
+  /// either: the key it was encrypted with has been lost.
+
+  keyLost,
+}
+
+/// The `inheritKeyFrom` value of a solidpod-encrypted document, prefixed or
+/// written out in full by the server.
+
+final RegExp _inheritKeyPattern = RegExp(r'inheritKeyFrom>?\s+"([^"]*)"');
+
+/// The `encData` predicate every solidpod-encrypted document carries.
+
+final RegExp _encDataPattern = RegExp(r'encData>?\s+"');
+
+/// Classifies the stored content of an observation that has no key of its
+/// own, along with the folder, relative to the Pod root and ending in a
+/// slash, whose key it names.
+///
+/// A file without a key of its own is not necessarily on its folder's key: it
+/// may be plaintext, or encrypted with a key that has since been lost. Only
+/// the document itself says which, so this reads it as stored, without
+/// decrypting anything. Pure so that it can be tested without a Pod.
+
+({ObservationStorage storage, String? keyFolder}) classifyObservationContent(
+  String content,
+  String feature,
+) {
+  if (!_encDataPattern.hasMatch(content)) {
+    return (storage: ObservationStorage.plaintext, keyFolder: null);
   }
 
-  await KeyManager.removeIndividualKey(resourcePath: podPath);
+  final match = _inheritKeyPattern.firstMatch(content);
+  if (match == null) {
+    return (storage: ObservationStorage.keyLost, keyFolder: null);
+  }
+
+  var named = match.group(1)!.trim();
+  if (named.startsWith('/')) named = named.substring(1);
+  if (!named.endsWith('/')) named = '$named/';
+
+  return (
+    storage: named == '${getFeaturePath(feature)}/'
+        ? ObservationStorage.folderKey
+        : ObservationStorage.otherFolderKey,
+    keyFolder: named,
+  );
+}
+
+/// Reads [file] in [feature] as stored and classifies it; see
+/// [classifyObservationContent]. A file naming some other folder whose key
+/// this Pod does not hold is reported as [ObservationStorage.keyLost], since
+/// nothing here can decrypt it. Throws when the file cannot be fetched.
+
+Future<ObservationStorage> inspectObservation(
+  String feature,
+  String file,
+) async {
+  final fileUrl = await getFileUrl(getFeaturePath(feature, file));
+  final content = utf8.decode(await getResource(fileUrl));
+  final (:storage, :keyFolder) = classifyObservationContent(content, feature);
+
+  if (storage == ObservationStorage.otherFolderKey &&
+      !await KeyManager.hasIndividualKey(await getDirUrl(keyFolder!))) {
+    return ObservationStorage.keyLost;
+  }
+
+  return storage;
+}
+
+/// Remembers, on this device, which observations have been confirmed to be on
+/// their folder's key, so each is read once rather than on every share.
+///
+/// The app only ever rewrites an observation under its folder's key, so a
+/// confirmed file stays confirmed. A file changed by some other tool could
+/// fall out of step; it would then show up as unreadable in the analysis
+/// rather than as a reading that failed to share.
+
+class ConfirmedObservations {
+  ConfirmedObservations._(this._prefsKey, this._files);
+
+  final String _prefsKey;
+  final Set<String> _files;
+
+  /// Loads the record for [feature] in the Pod of [webId].
+
+  static Future<ConfirmedObservations> load(
+    String webId,
+    String feature,
+  ) async {
+    final prefsKey = 'healthpod.confirmedFolderKey.$webId.$feature';
+    var files = <String>{};
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      files = (prefs.getStringList(prefsKey) ?? const <String>[]).toSet();
+    } catch (e) {
+      debugPrint('Could not load the confirmed observations: $e');
+    }
+
+    return ConfirmedObservations._(prefsKey, files);
+  }
+
+  /// Whether [file] has been confirmed.
+
+  bool contains(String file) => _files.contains(file);
+
+  /// Marks [file] as confirmed.
+
+  void add(String file) => _files.add(file);
+
+  /// Saves the record, keeping only files still in [present] so that it does
+  /// not grow with readings that have since been deleted.
+
+  Future<void> save(Iterable<String> present) async {
+    _files.retainAll(present.toSet());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_prefsKey, _files.toList()..sort());
+    } catch (e) {
+      debugPrint('Could not save the confirmed observations: $e');
+    }
+  }
 }
 
 /// Revokes the access of everyone but [ownerWebId] to the file at
