@@ -30,6 +30,7 @@ then please show some ❤️ and tap on the star at
 
 ## 1.1
 
++ Smap update for libx11 [1.1.8 20261016 gjw]
 + Update the secret key status earlier [1.1.7 20261014 gjw]
 + Share folder rather than files for analysis [1.1.6 20261014 gjw]
 + Streamlined login [1.1.5 20261014 gjw]
