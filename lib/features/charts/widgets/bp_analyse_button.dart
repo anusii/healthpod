@@ -515,14 +515,22 @@ class _BPAnalyseButtonState extends State<BPAnalyseButton> {
     if (shared.failure != null || shared.shared == 0) {
       setState(() => _phase = AnalysePhase.idle);
       _report(
-        shared.message ?? 'None of the observations could be shared.',
+        shared.message ??
+            (shared.lostKeyFiles.isNotEmpty
+                ? lostKeyMessage(shared.lostKeyFiles.length)
+                : 'None of the observations could be shared.'),
         tone: AnalyseTone.failure,
       );
 
       return;
     }
 
-    if (shared.isPartial) {
+    if (shared.lostKeyFiles.isNotEmpty) {
+      _report(
+        '${lostKeyMessage(shared.lostKeyFiles.length)} The analysis covers '
+        'the ${shared.shared} that were shared.',
+      );
+    } else if (shared.isPartial) {
       _report(
         'Shared ${shared.shared} of ${shared.total} observations; the '
         'analysis covers the ones that were shared.',

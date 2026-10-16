@@ -182,6 +182,16 @@ String analyseBusyTooltip({
     ''';
 }
 
+/// Explains that [count] observations are encrypted with a key the Pod no
+/// longer holds. They cannot be decrypted by anyone, the user included, so
+/// they are left out of the analysis rather than shared.
+
+String lostKeyMessage(int count) => count == 1
+    ? '1 observation could not be shared because its encryption key has been '
+        'lost.'
+    : '$count observations could not be shared because their encryption keys '
+        'have been lost.';
+
 /// Explains an analysis that produced nothing, in terms the user can act on.
 
 String analysisFailureMessage(AnalyserRun run, int shared) {

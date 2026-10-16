@@ -136,10 +136,36 @@ class BPEditorState with ChangeNotifier {
   /// @param index The index of the observation to edit.
 
   void enterEditMode(int index) {
+    // A new reading still being added is abandoned, as Cancel would do.
+    // Left in place it would sit in the list as a blank 0/0 row that was
+    // never saved, and be counted as one.
+
+    if (isNewObservation && editingIndex != null) {
+      observations.removeAt(editingIndex!);
+      if (index > editingIndex!) index--;
+    }
+
     editingIndex = index;
     isNewObservation = false;
     currentEdit = observations[index];
     initialiseControllers(currentEdit!);
+  }
+
+  /// Changes the timestamp of the observation being edited.
+
+  void updateTimestamp(DateTime timestamp) {
+    controllers.updateTimestamp(timestamp);
+    currentEdit = currentEdit?.copyWith(timestamp: timestamp);
+  }
+
+  /// Leaves edit mode without touching the list, for when the list itself
+  /// has just been replaced by a fresh load from the Pod.
+
+  void resetEditing() {
+    controllers.dispose();
+    editingIndex = null;
+    isNewObservation = false;
+    _currentEdit = null;
   }
 
   /// Updates the current edit observation and notifies listeners.
@@ -157,6 +183,15 @@ class BPEditorState with ChangeNotifier {
   /// and initialises it for editing.
 
   void addNewObservation() {
+    // Only one new reading at a time: a second press would push the first,
+    // still blank, down the list as a 0/0 row.
+
+    if (isNewObservation) return;
+
+    // An edit in progress is abandoned, as Cancel would do.
+
+    if (editingIndex != null) cancelEdit();
+
     final newObservation = BPObservation(
       timestamp: DateTime.now(),
       systolic: 0,
@@ -200,7 +235,18 @@ class BPEditorState with ChangeNotifier {
       return null;
     }
 
-    final obs = currentEdit ?? observations[index];
+    // Build what is saved from the fields on screen, which are also what was
+    // just validated. The listeners that keep [currentEdit] in step are a
+    // convenience for display; trusting them here allowed a reading to be
+    // validated against one set of values and saved with another.
+
+    final values = controllers.getCurrentValues();
+    final obs = (currentEdit ?? observations[index]).copyWith(
+      systolic: values['systolic'],
+      diastolic: values['diastolic'],
+      heartRate: values['heartRate'],
+      notes: controllers.notesController?.text,
+    );
 
     await editorService.saveObservationToPod(
       context: context,

@@ -43,6 +43,7 @@ import 'package:solidui/solidui.dart' show getKeyFromUserIfRequired;
 
 import 'package:healthpod/constants/analyser.dart';
 import 'package:healthpod/utils/get_feature_path.dart';
+import 'package:healthpod/utils/map_with_concurrency.dart';
 import 'package:healthpod/utils/observation_folder_key.dart';
 
 /// Why a share or revoke attempt could not even begin.
@@ -79,6 +80,7 @@ class AnalyserShareResult {
     this.failure,
     this.message,
     this.failedFiles = const [],
+    this.lostKeyFiles = const [],
     this.cancelled = false,
   });
 
@@ -102,6 +104,11 @@ class AnalyserShareResult {
   /// are not visible to the Analyser, if any.
 
   final List<String> failedFiles;
+
+  /// Readings encrypted with a key that is no longer in the Pod. Nobody can
+  /// decrypt them, the owner included, so they cannot be shared.
+
+  final List<String> lostKeyFiles;
 
   /// Whether the user stopped the sharing part way through.
   ///
@@ -182,6 +189,12 @@ class AnalyserRevokeResult {
 /// the folder's share does not reach them. [shareAll] moves each onto the
 /// folder's key the first time it meets it; after that the reading behaves
 /// like any other.
+///
+/// A reading without a key of its own is read once, as stored, before it is
+/// counted as shared. A plaintext reading is handed over to the folder's ACL,
+/// one on another folder's key is moved onto this folder's, and one whose key
+/// has been lost is reported in [AnalyserShareResult.lostKeyFiles], since
+/// nobody can decrypt it.
 ///
 /// [revokeAll] is the counterpart: it revokes the Analyser's access to the
 /// folder, and to any older reading that was shared on its own, reading each
@@ -344,43 +357,116 @@ class BPAnalyserShareService {
         );
       }
 
-      // Every reading already on the folder's key is shared now. The rest
-      // were written with keys of their own and are moved one at a time.
+      // Every reading on the folder's key is shared now. Readings with keys
+      // of their own are moved onto it. A reading without a key of its own is
+      // read once, as stored, to make sure it really is on the folder's key:
+      // it may instead be plaintext under an ACL of its own, which hides it
+      // from the folder's share, or encrypted with a key that has been lost.
+      // What has been confirmed is remembered, so the reads are paid once.
 
+      final confirmed = await ConfirmedObservations.load(ownerWebId, feature);
       final ownKeyFiles = await _ownKeyFiles(files);
-      var shared = files.length - ownKeyFiles.length;
+      final ownKey = ownKeyFiles.toSet();
+      final unchecked = [
+        for (final file in files)
+          if (!ownKey.contains(file) && !confirmed.contains(file)) file,
+      ];
+
+      var shared = files.length - ownKey.length - unchecked.length;
       final failed = <String>[];
+      final lost = <String>[];
       var cancelled = false;
 
-      onProgress?.call(shared, files.length);
-
-      for (final file in ownKeyFiles) {
-        if (isCancelled?.call() ?? false) {
-          cancelled = true;
-          break;
-        }
-
-        try {
-          await adoptObservationFolderKey(
-            feature: feature,
-            file: file,
-            ownerWebId: ownerWebId,
+      void report() => onProgress?.call(
+            shared + failed.length + lost.length,
+            files.length,
           );
-          shared++;
-        } catch (e) {
-          // One stubborn reading must not stop the rest coming over.
 
-          failed.add(file);
-          debugPrint('Could not move $file onto the folder key: $e');
+      report();
+
+      final storage = await mapWithConcurrency<String, ObservationStorage?>(
+        unchecked,
+        (file) async {
+          try {
+            return await inspectObservation(feature, file);
+          } catch (e) {
+            debugPrint('Could not inspect $file: $e');
+            return null;
+          }
+        },
+      );
+
+      final toRelease = <String>[];
+      final toAdopt = [...ownKeyFiles];
+
+      for (var i = 0; i < unchecked.length; i++) {
+        final file = unchecked[i];
+        switch (storage[i]) {
+          case null:
+            failed.add(file);
+          case ObservationStorage.folderKey:
+            shared++;
+            confirmed.add(file);
+          case ObservationStorage.plaintext:
+            toRelease.add(file);
+          case ObservationStorage.otherFolderKey:
+            toAdopt.add(file);
+          case ObservationStorage.keyLost:
+            lost.add(file);
         }
-
-        onProgress?.call(shared + failed.length, files.length);
       }
+
+      report();
+
+      Future<void> convert(
+        List<String> batch,
+        Future<void> Function(String file) action,
+      ) async {
+        for (final file in batch) {
+          if (cancelled || (isCancelled?.call() ?? false)) {
+            cancelled = true;
+            return;
+          }
+
+          try {
+            await action(file);
+            shared++;
+            confirmed.add(file);
+          } catch (e) {
+            // One stubborn reading must not stop the rest coming over.
+
+            failed.add(file);
+            debugPrint('Could not bring $file under the folder share: $e');
+          }
+
+          report();
+        }
+      }
+
+      await convert(
+        toRelease,
+        (file) => releaseObservationAcl(
+          feature: feature,
+          file: file,
+          ownerWebId: ownerWebId,
+        ),
+      );
+      await convert(
+        toAdopt,
+        (file) => adoptObservationFolderKey(
+          feature: feature,
+          file: file,
+          ownerWebId: ownerWebId,
+        ),
+      );
+
+      await confirmed.save(files);
 
       return AnalyserShareResult(
         shared: shared,
         total: files.length,
         failedFiles: failed,
+        lostKeyFiles: lost,
         cancelled: cancelled,
       );
     } catch (e) {

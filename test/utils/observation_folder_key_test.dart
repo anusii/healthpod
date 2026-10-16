@@ -64,4 +64,67 @@ void main() {
       );
     });
   });
+
+  group('classifyObservationContent', () {
+    const prefix =
+        '@prefix solidTerms: <https://solidcommunity.au/predicates/terms#> .\n';
+    const url =
+        '<https://pod.example/u/healthpod/data/blood_pressure/a.json.enc.ttl>';
+
+    String encrypted({String? inheritFrom}) => '$prefix$url\n'
+        '    solidTerms:iv "aXY=";\n'
+        '${inheritFrom == null ? '' : '    solidTerms:inheritKeyFrom "$inheritFrom";\n'}'
+        '    solidTerms:encData "ZGF0YQ==".\n';
+
+    test('a reading on its folder key is recognised', () {
+      final result = classifyObservationContent(
+        encrypted(inheritFrom: 'healthpod/data/blood_pressure/'),
+        'blood_pressure',
+      );
+      expect(result.storage, ObservationStorage.folderKey);
+    });
+
+    test('the folder path is compared without its slashes mattering', () {
+      final result = classifyObservationContent(
+        encrypted(inheritFrom: '/healthpod/data/blood_pressure'),
+        'blood_pressure',
+      );
+      expect(result.storage, ObservationStorage.folderKey);
+    });
+
+    test('a full predicate URI written out by the server is understood', () {
+      final content = '$url\n'
+          '  <https://solidcommunity.au/predicates/terms#inheritKeyFrom> '
+          '"healthpod/data/blood_pressure/";\n'
+          '  <https://solidcommunity.au/predicates/terms#encData> "ZGF0YQ==".';
+      expect(
+        classifyObservationContent(content, 'blood_pressure').storage,
+        ObservationStorage.folderKey,
+      );
+    });
+
+    test('plaintext JSON is recognised', () {
+      expect(
+        classifyObservationContent('{"timestamp": "x"}', 'blood_pressure')
+            .storage,
+        ObservationStorage.plaintext,
+      );
+    });
+
+    test('another folder key is reported with the folder it names', () {
+      final result = classifyObservationContent(
+        encrypted(inheritFrom: 'healthpod/data/old_bp/'),
+        'blood_pressure',
+      );
+      expect(result.storage, ObservationStorage.otherFolderKey);
+      expect(result.keyFolder, 'healthpod/data/old_bp/');
+    });
+
+    test('encrypted content naming no key has lost it', () {
+      expect(
+        classifyObservationContent(encrypted(), 'blood_pressure').storage,
+        ObservationStorage.keyLost,
+      );
+    });
+  });
 }
