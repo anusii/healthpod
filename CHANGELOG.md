@@ -30,6 +30,7 @@ then please show some ❤️ and tap on the star at
 
 ## 1.1
 
++ Fix individual key issue [1.1.9 20261016 tony]
 + Smap update for libx11 [1.1.8 20261016 gjw]
 + Update the secret key status earlier [1.1.7 20261014 gjw]
 + Share folder rather than files for analysis [1.1.6 20261014 gjw]
